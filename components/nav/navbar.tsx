@@ -5,8 +5,10 @@ export default function Navbar() {
         <div className="flex flex-col h-full w-[30vh] p-5 pt-[5vh] bg-gradient-to-b from-pink-200 via-purple-300 to-purple-400 shadow-[4px_4px_8px_0_rgba(161,0,255,0.2)]">
             <img src="/accentureLogo.png"/>
             
-            <NavLink/>
-            <LogoutBtn/>
+            <div className="flex flex-col h-full justify-between">
+                <NavLink/>
+                <LogoutBtn/>
+            </div>
         </div>
     )
 }
