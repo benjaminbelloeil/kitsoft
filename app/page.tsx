@@ -1,103 +1,154 @@
-import Image from "next/image";
+"use client";
+
+import { motion } from "framer-motion";
+import LoginForm from "@/components/auth/login-form";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  // Card container animation variants for staggered children
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.1
+      }
+    }
+  };
+  
+  // Individual card variants
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.98 },
+    show: { 
+      opacity: 1, 
+      scale: 1,
+      transition: { 
+        duration: 0.15, 
+        ease: [0.25, 0.1, 0.25, 1.0]  // Improved easing curve
+      }
+    }
+  };
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  return (
+    <div className="h-screen flex bg-white overflow-hidden">
+      {/* Left side - Login Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md"
+        >
+          <LoginForm />
+        </motion.div>
+      </div>
+      
+      {/* Right side - Purple card with updated content for project management */}
+      <div className="hidden md:block w-1/2 h-full accenture-gradient">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="h-full flex flex-col justify-center p-8 lg:p-12 text-white"
+        >
+          <motion.h2 
+            initial={{ y: -15, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
+            className="text-3xl lg:text-4xl font-bold mb-6 text-center"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Manage Your Accenture Projects
+          </motion.h2>
+          
+          <motion.p 
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="text-lg mb-10 text-center max-w-lg mx-auto"
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            Your centralized platform for tracking assignments, managing tasks, and monitoring performance metrics for all your Accenture projects.
+          </motion.p>
+          
+          {/* Cards container with staggered animation - updated for project management features */}
+          <motion.div 
+            className="grid grid-cols-2 gap-5"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+          >
+            {/* Project Management */}
+            <motion.div 
+              className="bg-white/10 backdrop-blur-sm p-5 lg:p-6 shadow-lg border border-white/20"
+              variants={cardVariants}
+              whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.15)", transition: { duration: 0.15 } }}
+            >
+              <div className="rounded-full bg-white/30 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 lg:h-6 lg:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-lg lg:text-xl mb-2">Project Tracking</h3>
+              <p className="text-white/80 text-sm">Monitor all your assigned projects and their key milestones in one centralized dashboard</p>
+            </motion.div>
+            
+            {/* Task Management */}
+            <motion.div 
+              className="bg-white/10 backdrop-blur-sm p-5 lg:p-6 shadow-lg border border-white/20"
+              variants={cardVariants}
+              whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.15)", transition: { duration: 0.15 } }}
+            >
+              <div className="rounded-full bg-white/30 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 lg:h-6 lg:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-lg lg:text-xl mb-2">Task Management</h3>
+              <p className="text-white/80 text-sm">Organize priorities, track progress and update task statuses with intuitive tools</p>
+            </motion.div>
+            
+            {/* Feedback System */}
+            <motion.div 
+              className="bg-white/10 backdrop-blur-sm p-5 lg:p-6 shadow-lg border border-white/20"
+              variants={cardVariants}
+              whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.15)", transition: { duration: 0.15 } }}
+            >
+              <div className="rounded-full bg-white/30 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 lg:h-6 lg:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-lg lg:text-xl mb-2">Feedback Channel</h3>
+              <p className="text-white/80 text-sm">Receive real-time feedback from managers and collaborate effectively with team members</p>
+            </motion.div>
+            
+            {/* Work Allocation */}
+            <motion.div 
+              className="bg-white/10 backdrop-blur-sm p-5 lg:p-6 shadow-lg border border-white/20"
+              variants={cardVariants}
+              whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.15)", transition: { duration: 0.15 } }}
+            >
+              <div className="rounded-full bg-white/30 w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 lg:h-6 lg:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-lg lg:text-xl mb-2">Workload Analytics</h3>
+              <p className="text-white/80 text-sm">Monitor resource allocation with percentage-based metrics and optimize your productivity</p>
+            </motion.div>
+          </motion.div>
+          
+          <motion.div 
+            className="mt-8 bg-white/5 p-5 border border-white/10 text-center"
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
+          >
+            <p className="text-lg font-medium">Greater than expectations</p>
+            <p className="text-sm mt-2">Empowering Accenture employees to deliver exceptional outcomes through better collaboration and resource management</p>
+          </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
