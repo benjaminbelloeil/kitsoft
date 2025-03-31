@@ -150,8 +150,8 @@ export default function ProfilePage() {
                 }}
               />
             </div>
-            <button className="absolute bottom-1 right-1 bg-[#A100FF] p-2 rounded-full text-white hover:bg-[#8500D4] fast-transition shadow-md">
-              <FiEdit2 size={14} />
+            <button className="absolute bottom-1 right-1 bg-[#A100FF20] p-2 rounded-full text-[#A100FF] hover:bg-[#A100FF30] fast-transition shadow-sm">
+              <FiEdit2 size={14} className="text-[#A100FF]" />
             </button>
           </div>
           
