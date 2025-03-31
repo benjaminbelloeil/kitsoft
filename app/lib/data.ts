@@ -19,9 +19,9 @@ const navLinks: NavItem[] = [
         href: "/dashboard",
         hasDropdown: true,
         dropdownItems: [
-            { name: "Overview", href: "/dashboard" },
-            { name: "Analytics", href: "/dashboard/analytics" },
-            { name: "Reports", href: "/dashboard/reports" }
+            { name: "Resumen", href: "/dashboard" },
+            { name: "Cargabilidad", href: "/dashboard/cargabilidad" },
+            { name: "Retroalimentación", href: "/dashboard/retroalimentacion" }
         ]
     },
     {
@@ -30,8 +30,8 @@ const navLinks: NavItem[] = [
         href: "/dashboard/proyectos",
         hasDropdown: true,
         dropdownItems: [
-            { name: "Active", href: "/dashboard/proyectos" },
-            { name: "Archived", href: "/dashboard/proyectos/archived" }
+            { name: "Activos", href: "/dashboard/proyectos" },
+            { name: "Archivados", href: "/dashboard/proyectos/archivados" }
         ]
     },
     {
