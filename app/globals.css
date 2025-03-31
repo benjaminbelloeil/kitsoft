@@ -9,7 +9,7 @@
   --accenture-gray: #F2F2F2;
 }
 
-@theme inline {
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -28,6 +28,43 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+}
+
+/* Ensure all text renders as true black regardless of theme */
+p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
+  color: #000000;
+}
+
+/* Keep links in their proper styling with hover states */
+a {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Override dark mode for text color */
+@media (prefers-color-scheme: dark) {
+  p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
+    color: #000000 !important;
+  }
+}
+
+/* Smooth page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms, transform 300ms;
 }
 
 .accenture-gradient {
@@ -53,4 +90,66 @@ body {
 .focus-accenture:focus {
   border-color: var(--accenture-purple);
   box-shadow: 0 0 0 2px rgba(161, 0, 255, 0.2);
+}
+
+/* Add smooth hover transitions to all interactive elements */
+a, button {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Animation for dropdown menus - optimized for speed and smoothness */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+  will-change: transform, opacity, max-height;
+}
+
+/* Add specific transition utilities for UI responsiveness */
+.fast-transition {
+  transition: all 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, background, color;
+}
+
+/* Custom scrollbar for navigation - improved */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(161, 0, 255, 0.15);
+  border-radius: 20px;
+}
+
+/* Active navigation styles */
+.nav-active-item {
+  position: relative;
+}
+
+.nav-active-item::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 3px;
+  background-color: var(--accenture-purple);
+  border-radius: 0 3px 3px 0;
 }
