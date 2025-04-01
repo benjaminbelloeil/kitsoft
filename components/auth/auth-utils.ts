@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { useNavigation } from '@/context/navigation-context';
 
 // Hook for handling login form state and submission
 export function useLoginForm() {
@@ -12,6 +13,7 @@ export function useLoginForm() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+  const { startNavigation } = useNavigation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,15 +34,20 @@ export function useLoginForm() {
       
       if (authError) {
         setError(authError.message);
+        setIsLoading(false);
       } else {
-        // Redirect after successful login
-        router.push('/dashboard');
-        router.refresh();
+        // Only start navigation animation after successful authentication
+        startNavigation();
+        
+        // Redirect after a slight delay to ensure the animation shows
+        setTimeout(() => {
+          router.push('/dashboard');
+          router.refresh();
+        }, 300);
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
       console.error(err);
-    } finally {
       setIsLoading(false);
     }
   };
