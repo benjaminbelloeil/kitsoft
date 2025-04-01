@@ -32,21 +32,21 @@ export default function NavLink() {
     const getIcon = (iconName: string) => {
         switch(iconName) {
             case "dashboard":
-                return <FiHome className="size-6 shrink-0" />;
+                return <FiHome className="size-5 shrink-0" />;
             case "projects":
-                return <FiFolder className="size-6 shrink-0" />;
+                return <FiFolder className="size-5 shrink-0" />;
             case "calendar":
-                return <FiCalendar className="size-6 shrink-0" />;
+                return <FiCalendar className="size-5 shrink-0" />;
             case "profile":
-                return <FiUser className="size-6 shrink-0" />;
+                return <FiUser className="size-5 shrink-0" />;
             case "settings":
-                return <FiSettings className="size-6 shrink-0" />;
+                return <FiSettings className="size-5 shrink-0" />;
             case "reports":
-                return <FiFileText className="size-6 shrink-0" />;
+                return <FiFileText className="size-5 shrink-0" />;
             case "analytics":
-                return <FiBarChart2 className="size-6 shrink-0" />;
+                return <FiBarChart2 className="size-5 shrink-0" />;
             default:
-                return <FiList className="size-6 shrink-0" />;
+                return <FiList className="size-5 shrink-0" />;
         }
     };
 
@@ -77,49 +77,54 @@ export default function NavLink() {
     }, [pathname]); // Add pathname as dependency since active state depends on it
 
     return (
-        <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto pr-3">
-            <nav role="navigation">
-                <ul className="space-y-2">
+        <div className="custom-scrollbar flex-1 overflow-y-auto pt-2 nav-container">
+            <nav role="navigation" className="px-4 nav-tabs">
+                <ul className="space-y-1.5">
                     {navLinks.map((link) => (
-                        <li key={link.name}>
+                        <li key={link.name} className="overflow-hidden">
                             {link.hasDropdown ? (
-                                <div>
+                                <div className="w-full">
                                     <button
                                         aria-expanded={openDropdowns[link.name] || false}
                                         onClick={() => toggleDropdown(link.name)}
                                         className={clsx(
-                                            "rounded-lg px-3.5 font-medium fast-transition flex w-full items-center gap-3 py-3",
+                                            "nav-tab-btn rounded-lg px-4 font-medium flex w-full items-center gap-2.5 py-2.5 relative outline-none",
                                             {
                                                 "bg-[#A100FF20] text-[#A100FF] font-medium": isActiveLink(link),
-                                                "text-gray-700 hover:bg-gray-100 hover:text-[#A100FF]": !isActiveLink(link)
+                                                "text-gray-700 hover:bg-gray-50 hover:text-[#A100FF]": !isActiveLink(link)
                                             }
                                         )}
+                                        style={{ border: 'none', outline: 'none' }}
                                     >
                                         {getIcon(link.icon)}
-                                        <span>{link.name}</span>
+                                        <span className="text-sm">{link.name}</span>
                                         <FiChevronDown 
                                             className={clsx(
-                                                "ml-auto fast-transition",
+                                                "ml-auto transition-transform",
                                                 {"rotate-0": !openDropdowns[link.name], "rotate-180": openDropdowns[link.name]}
                                             )}
-                                            size={16} 
+                                            size={14} 
                                         />
                                     </button>
                                     
                                     {openDropdowns[link.name] && link.dropdownItems && (
-                                        <div className="mt-1 ml-6 pl-3 border-l border-gray-200 space-y-1 animate-fadeIn">
+                                        <div className="mt-1 ml-6 pl-2.5 border-l border-gray-200 space-y-1 animate-fadeIn">
                                             {link.dropdownItems.map((item) => (
                                                 <Link
                                                     key={item.name}
                                                     href={item.href}
                                                     className={clsx(
-                                                        "rounded-md py-2 px-4 text-sm block fast-transition",
+                                                        "nav-tab-link rounded-md py-1.5 px-4 text-xs flex items-center w-full outline-none",
                                                         {
                                                             "text-[#A100FF] font-medium bg-[#A100FF10]": pathname === item.href,
                                                             "text-gray-600 hover:text-[#A100FF] hover:bg-gray-50": pathname !== item.href
                                                         }
                                                     )}
+                                                    style={{ border: 'none', outline: 'none' }}
                                                 >
+                                                    {pathname === item.href && (
+                                                        <span className="mr-1.5 w-1 h-1 rounded-full bg-[#A100FF]"></span>
+                                                    )}
                                                     {item.name}
                                                 </Link>
                                             ))}
@@ -130,15 +135,16 @@ export default function NavLink() {
                                 <Link
                                     href={link.href}
                                     className={clsx(
-                                        "rounded-lg px-3.5 font-medium fast-transition relative flex items-center gap-3 py-3",
+                                        "nav-tab-link rounded-lg px-4 font-medium flex items-center gap-2.5 py-2.5 w-full relative outline-none",
                                         {
                                             "bg-[#A100FF20] text-[#A100FF] font-medium": pathname === link.href,
-                                            "text-gray-700 hover:bg-gray-100 hover:text-[#A100FF]": pathname !== link.href
+                                            "text-gray-700 hover:bg-gray-50 hover:text-[#A100FF]": pathname !== link.href
                                         }
                                     )}
+                                    style={{ border: 'none', outline: 'none' }}
                                 >
                                     {getIcon(link.icon)}
-                                    <span>{link.name}</span>
+                                    <span className="text-sm">{link.name}</span>
                                 </Link>
                             )}
                         </li>

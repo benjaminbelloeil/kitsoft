@@ -54,7 +54,7 @@ a, button {
   color: currentColor;
 }
 
-/* Override browser default focus for all inputs */
+/* Override browser default focus for specific elements */
 input:focus, 
 textarea:focus, 
 select:focus,
@@ -62,6 +62,14 @@ button:focus {
   outline: none !important;
   border-color: var(--accenture-purple) !important;
   box-shadow: 0 0 0 1px var(--accenture-purple) !important;
+}
+
+/* Remove focus styles for navigation tabs */
+.nav-tabs button:focus,
+.nav-tabs a:focus {
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Override autofill styles for Chrome */
@@ -73,6 +81,37 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #000000 !important;
   transition: background-color 5000s ease-in-out 0s;
   border-color: var(--accenture-purple) !important;
+}
+
+/* Add these specific rules to target nav tabs and prevent borders/focus effects */
+
+/* Specifically target navigation elements */
+.nav-container .nav-tabs button,
+.nav-container .nav-tabs a,
+.nav-tab-btn,
+.nav-tab-link {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.nav-container .nav-tabs button:focus,
+.nav-container .nav-tabs a:focus,
+.nav-tab-btn:focus,
+.nav-tab-link:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Fix for specific issue with selected tabs */
+.nav-tabs button[aria-expanded="true"],
+.nav-tabs button[aria-expanded="true"]:focus,
+.nav-tabs a[aria-current="page"],
+.nav-tabs a[aria-current="page"]:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* ===================================
@@ -257,6 +296,30 @@ form button * {
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 300ms, transform 300ms;
+}
+
+/* Override any browser-specific focus styles */
+input:focus, 
+textarea:focus, 
+select:focus {
+  outline: none !important;
+  border-color: var(--accenture-purple) !important;
+  box-shadow: 0 0 0 1px var(--accenture-purple) !important;
+}
+
+button:focus, 
+a:focus {
+  outline: none !important;
+}
+
+/* Navigation-specific focus overrides */
+nav button:focus,
+nav a:focus,
+.nav-tabs button:focus,
+.nav-tabs a:focus,
+nav [role="tab"]:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* ===================================
