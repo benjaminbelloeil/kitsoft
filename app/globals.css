@@ -43,6 +43,38 @@ a, button {
   transition: all 0.3s ease-in-out;
 }
 
+/* Remove default focus styles and blue outlines */
+*:focus {
+  outline: none !important;
+}
+
+/* Remove default blue selection color */
+::selection {
+  background-color: rgba(161, 0, 255, 0.2);
+  color: currentColor;
+}
+
+/* Override browser default focus for all inputs */
+input:focus, 
+textarea:focus, 
+select:focus,
+button:focus {
+  outline: none !important;
+  border-color: var(--accenture-purple) !important;
+  box-shadow: 0 0 0 1px var(--accenture-purple) !important;
+}
+
+/* Override autofill styles for Chrome */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #000000 !important;
+  transition: background-color 5000s ease-in-out 0s;
+  border-color: var(--accenture-purple) !important;
+}
+
 /* ===================================
    4. TYPOGRAPHY
    =================================== */
@@ -150,8 +182,9 @@ button.bg-purple-800 * {
 }
 
 .focus-accenture:focus {
-  border-color: var(--accenture-purple);
-  box-shadow: 0 0 0 2px rgba(161, 0, 255, 0.2);
+  outline: none !important;
+  border-color: var(--accenture-purple) !important;
+  box-shadow: 0 0 0 2px rgba(161, 0, 255, 0.2) !important;
 }
 
 /* ===================================

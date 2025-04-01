@@ -63,7 +63,7 @@ export default function LoginForm() {
         >
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <div className="relative">
-            <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors ${focusedField === 'email' ? 'text-accenture' : 'text-gray-400'}`}>
+            <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors ${focusedField === 'email' ? 'text-[#A100FF]' : 'text-gray-400'}`}>
               <Mail className="h-5 w-5" />
             </div>
             <input
@@ -75,8 +75,9 @@ export default function LoginForm() {
               required
               onFocus={() => setFocusedField('email')}
               onBlur={() => setFocusedField(null)}
-              className="pl-10 w-full px-4 py-3.5 border border-gray-200 rounded-lg focus-accenture transition-all shadow-sm text-black hover:border-gray-300 focus:shadow-md"
+              className="focus-accenture pl-10 w-full px-4 py-3.5 border border-gray-200 rounded-lg transition-all shadow-sm text-black hover:border-gray-300 focus:shadow-md focus:outline-none"
               placeholder="your@email.com"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             />
           </div>
         </motion.div>
@@ -90,7 +91,7 @@ export default function LoginForm() {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <motion.a 
               href="#" 
-              className="text-sm font-medium text-accenture hover:text-accenture-dark"
+              className="text-sm font-medium text-[#A100FF] hover:text-[#8c00d9]"
               whileHover={{ scale: 1.05, x: 2 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -98,7 +99,7 @@ export default function LoginForm() {
             </motion.a>
           </div>
           <div className="relative">
-            <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors ${focusedField === 'password' ? 'text-accenture' : 'text-gray-400'}`}>
+            <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors ${focusedField === 'password' ? 'text-[#A100FF]' : 'text-gray-400'}`}>
               <Lock className="h-5 w-5" />
             </div>
             <input
@@ -110,8 +111,9 @@ export default function LoginForm() {
               required
               onFocus={() => setFocusedField('password')}
               onBlur={() => setFocusedField(null)}
-              className="pl-10 w-full px-4 py-3.5 border border-gray-200 rounded-lg focus-accenture transition-all shadow-sm text-black hover:border-gray-300 focus:shadow-md"
+              className="focus-accenture pl-10 w-full px-4 py-3.5 border border-gray-200 rounded-lg transition-all shadow-sm text-black hover:border-gray-300 focus:shadow-md focus:outline-none"
               placeholder="••••••••"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             />
           </div>
         </motion.div>
@@ -125,7 +127,7 @@ export default function LoginForm() {
             id="remember_me"
             name="remember_me"
             type="checkbox"
-            className="h-4 w-4 text-accenture focus:ring-accenture border-gray-300 rounded"
+            className="h-4 w-4 text-[#A100FF] focus:ring-[#A100FF] border-gray-300 rounded focus:ring-offset-0 focus:outline-none"
           />
           <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-700">
             Remember me
@@ -160,7 +162,7 @@ export default function LoginForm() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <p>Need access? <a href="#" className="text-accenture hover:underline font-medium">Request access</a></p>
+          <p>Need access? <a href="#" className="text-[#A100FF] hover:underline font-medium">Request access</a></p>
         </motion.div>
       </motion.form>
     </div>
