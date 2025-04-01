@@ -1,34 +1,7 @@
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { getSession } from "@/app/lib/auth";
-
 export default function Home() {
-  const router = useRouter();
 
-  useEffect(() => {
-    // Check if user is authenticated and redirect accordingly
-    const checkAuth = async () => {
-      try {
-        const { data } = await getSession();
-        
-        if (data?.session) {
-          // If authenticated, redirect to dashboard
-          router.push('/dashboard');
-        } else {
-          // If not authenticated, redirect to login
-          router.push('/login');
-        }
-      } catch (error) {
-        console.error('Error checking auth status:', error);
-        // On error, redirect to login as fallback
-        router.push('/login');
-      }
-    };
-    
-    checkAuth();
-  }, [router]);
 
   // Show a loading state while checking auth
   return (
