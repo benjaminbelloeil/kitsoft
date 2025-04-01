@@ -1,15 +1,21 @@
+/* ===================================
+   1. IMPORTS & FRAMEWORK
+   =================================== */
 @import "tailwindcss";
 
+/* ===================================
+   2. VARIABLES & THEME SETTINGS
+   =================================== */
 :root {
+  /* Light theme colors */
   --background: #ffffff;
   --foreground: #171717;
   --accenture-purple: #A100FF;
   --accenture-purple-dark: #8500D4;
   --accenture-black: #000000;
   --accenture-gray: #F2F2F2;
-}
-
-:root {
+  
+  /* System variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -24,79 +30,105 @@
   }
 }
 
+/* ===================================
+   3. BASE STYLES
+   =================================== */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans, Arial, Helvetica, sans-serif);
 }
 
-/* Ensure all text renders as true black regardless of theme */
+a, button {
+  transition: all 0.3s ease-in-out;
+}
+
+/* ===================================
+   4. TYPOGRAPHY
+   =================================== */
+/* Base text color */
 p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
   color: #000000;
 }
 
-/* Exception for elements with text-white class */
-.text-white, 
-.login-card p, 
-.login-card h1, 
-.login-card h2, 
-.login-card h3, 
-.login-card h4, 
-.login-card h5, 
-.login-card h6,
-.login-button,
-.login-button span,
-.login-button-text {
-  color: #ffffff !important;
-}
-
-/* Keep links in their proper styling with hover states */
+/* Link styling */
 a {
   transition: all 0.3s ease-in-out;
 }
 
-/* Override dark mode for text color */
-@media (prefers-color-scheme: dark) {
-  p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
-    color: #000000 !important;
-  }
-  
-  /* Ensure white text in dark mode */
-  .text-white, 
-  .login-card p, 
-  .login-card h1, 
-  .login-card h2, 
-  .login-card h3, 
-  .login-card h4, 
-  .login-card h5, 
-  .login-card h6,
-  .login-button,
-  .login-button span,
-  .login-button-text {
-    color: #ffffff !important;
-  }
+/* ===================================
+   5. COMPONENT STYLES
+   =================================== */
+/* --- BUTTONS --- */
+/* Common button styling */
+.login-button,
+.sign-in-button,
+button[type="submit"],
+form button {
+  color: #ffffff !important;
 }
 
-/* Smooth page transitions */
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
-}
-.page-transition-exit {
-  opacity: 1;
-  transform: translateY(0);
-}
-.page-transition-exit-active {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 300ms, transform 300ms;
+.login-button *,
+.sign-in-button *,
+button[type="submit"] *,
+form button * {
+  color: #ffffff !important;
 }
 
+/* Accenture-specific button styles */
+button.bg-accenture,
+button.accenture-gradient,
+button.bg-accenture-dark,
+button.bg-purple-600,
+button.bg-purple-700,
+button.bg-purple-800 {
+  color: #ffffff !important;
+}
+
+button.bg-accenture *,
+button.accenture-gradient *,
+button.bg-accenture-dark *,
+button.bg-purple-600 *,
+button.bg-purple-700 *,
+button.bg-purple-800 * {
+  color: #ffffff !important;
+}
+
+/* --- NAVIGATION --- */
+/* Active navigation styles */
+.nav-active-item {
+  position: relative;
+}
+
+.nav-active-item::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 3px;
+  background-color: var(--accenture-purple);
+  border-radius: 0 3px 3px 0;
+}
+
+/* Custom scrollbar for navigation */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(161, 0, 255, 0.15);
+  border-radius: 20px;
+}
+
+/* ===================================
+   6. BRAND & COLOR UTILITIES
+   =================================== */
 .accenture-gradient {
   background: linear-gradient(135deg, var(--accenture-purple) 0%, #7B00E0 100%);
 }
@@ -122,12 +154,39 @@ a {
   box-shadow: 0 0 0 2px rgba(161, 0, 255, 0.2);
 }
 
-/* Add smooth hover transitions to all interactive elements */
-a, button {
-  transition: all 0.3s ease-in-out;
+/* ===================================
+   7. UTILITIES & HELPERS
+   =================================== */
+/* Text color overrides */
+.text-white, 
+.login-card p, 
+.login-card h1, 
+.login-card h2, 
+.login-card h3, 
+.login-card h4, 
+.login-card h5, 
+.login-card h6,
+.login-button,
+.login-button span,
+.login-button-text,
+button[type="submit"],
+button.login-button,
+button.sign-in-button,
+.sign-in-button,
+.sign-in-button span,
+.sign-in-button *,
+form button,
+form button span,
+form button * {
+  color: #ffffff !important;
 }
 
-/* Animation for dropdown menus - optimized for speed and smoothness */
+/* Animation utilities */
+.fast-transition {
+  transition: all 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, background, color;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -147,52 +206,56 @@ a, button {
   will-change: transform, opacity, max-height;
 }
 
-/* Add specific transition utilities for UI responsiveness */
-.fast-transition {
-  transition: all 0.1s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, opacity, background, color;
+/* Page transition effects */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms, transform 300ms;
 }
 
-/* Custom scrollbar for navigation - improved */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(161, 0, 255, 0.15);
-  border-radius: 20px;
-}
-
-/* Active navigation styles */
-.nav-active-item {
-  position: relative;
-}
-
-.nav-active-item::before {
-  content: '';
-  position: absolute;
-  left: -10px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 60%;
-  width: 3px;
-  background-color: var(--accenture-purple);
-  border-radius: 0 3px 3px 0;
-}
-
-/* Special button styling for login page */
-.login-button {
-  color: #ffffff !important;
-}
-
-.login-button-text {
-  color: #ffffff !important;
-}
-
-.login-button * {
-  color: #ffffff !important;
+/* ===================================
+   8. MEDIA QUERIES & DARK MODE
+   =================================== */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode text colors */
+  p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
+    color: #000000 !important;
+  }
+  
+  /* Dark mode exceptions for white text */
+  .text-white, 
+  .login-card p, 
+  .login-card h1, 
+  .login-card h2, 
+  .login-card h3, 
+  .login-card h4, 
+  .login-card h5, 
+  .login-card h6,
+  .login-button,
+  .login-button span,
+  .login-button-text,
+  button[type="submit"],
+  button.login-button,
+  button.sign-in-button,
+  .sign-in-button,
+  .sign-in-button span,
+  .sign-in-button *,
+  form button,
+  form button span,
+  form button * {
+    color: #ffffff !important;
+  }
 }
