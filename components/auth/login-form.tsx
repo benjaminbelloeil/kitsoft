@@ -6,25 +6,22 @@ import {
   Mail, 
   Lock, 
   ArrowRight,
-  CheckCircle
+  AlertCircle
 } from "lucide-react";
+import { useLoginForm } from "@/components/auth/auth-utils";
 
 export default function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccessful, setIsSuccessful] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const { 
+    email, 
+    setEmail, 
+    password, 
+    setPassword, 
+    isLoading, 
+    error, 
+    handleSubmit 
+  } = useLoginForm();
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setIsSuccessful(true);
-    // Reset success message after delay
-    setTimeout(() => setIsSuccessful(false), 3000);
-  };
-
   return (
     <div className="w-full max-w-md">
       <motion.div 
@@ -48,14 +45,14 @@ export default function LoginForm() {
         onSubmit={handleSubmit}
         className="space-y-6"
       >
-        {isSuccessful && (
+        {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-lg bg-green-50 text-green-700 flex items-center gap-2 shadow-sm"
+            className="p-4 rounded-lg bg-red-50 text-red-700 flex items-center gap-2 shadow-sm"
           >
-            <CheckCircle size={18} />
-            <span>Login successful! Redirecting...</span>
+            <AlertCircle size={18} />
+            <span>{error}</span>
           </motion.div>
         )}
         
@@ -73,6 +70,8 @@ export default function LoginForm() {
               id="email"
               name="email"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               onFocus={() => setFocusedField('email')}
               onBlur={() => setFocusedField(null)}
@@ -106,6 +105,8 @@ export default function LoginForm() {
               id="password"
               name="password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               onFocus={() => setFocusedField('password')}
               onBlur={() => setFocusedField(null)}

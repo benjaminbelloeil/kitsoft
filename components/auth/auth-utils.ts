@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, signOut, getSession } from '@/app/lib/auth';
+import { createClient } from '@/utils/supabase/client';
 
 // Hook for handling login form state and submission
 export function useLoginForm() {
@@ -11,23 +11,34 @@ export function useLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
     
     try {
-      const { data, error } = await signIn(email, password);
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      if (error) {
-        setError(error.message);
+      if (authError) {
+        setError(authError.message);
       } else {
         // Redirect after successful login
         router.push('/dashboard');
+        router.refresh();
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -49,34 +60,64 @@ export function useLoginForm() {
 export function useAuthCheck() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const supabase = createClient();
 
-  const checkAuth = async () => {
-    const { data } = await getSession();
-    const session = data.session;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        setIsLoading(true);
+        const { data } = await supabase.auth.getSession();
+        const session = data.session;
+        
+        if (session) {
+          setIsAuthenticated(true);
+          setUser(session.user);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        setIsAuthenticated(false);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    if (session) {
-      setIsAuthenticated(true);
-      setUser(session.user);
-    } else {
-      setIsAuthenticated(false);
-      setUser(null);
-    }
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setIsAuthenticated(!!session);
+        setUser(session?.user || null);
+        setIsLoading(false);
+      }
+    );
+
+    checkAuth();
     
-    return !!session;
-  };
+    // Clean up subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth, router]);
 
   const handleSignOut = async () => {
-    await signOut();
-    setIsAuthenticated(false);
-    setUser(null);
-    router.push('/login');
+    try {
+      await supabase.auth.signOut();
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   return {
     isAuthenticated,
+    isLoading,
     user,
-    checkAuth,
     handleSignOut,
   };
 }
