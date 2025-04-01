@@ -35,6 +35,21 @@ p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
   color: #000000;
 }
 
+/* Exception for elements with text-white class */
+.text-white, 
+.login-card p, 
+.login-card h1, 
+.login-card h2, 
+.login-card h3, 
+.login-card h4, 
+.login-card h5, 
+.login-card h6,
+.login-button,
+.login-button span,
+.login-button-text {
+  color: #ffffff !important;
+}
+
 /* Keep links in their proper styling with hover states */
 a {
   transition: all 0.3s ease-in-out;
@@ -44,6 +59,21 @@ a {
 @media (prefers-color-scheme: dark) {
   p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
     color: #000000 !important;
+  }
+  
+  /* Ensure white text in dark mode */
+  .text-white, 
+  .login-card p, 
+  .login-card h1, 
+  .login-card h2, 
+  .login-card h3, 
+  .login-card h4, 
+  .login-card h5, 
+  .login-card h6,
+  .login-button,
+  .login-button span,
+  .login-button-text {
+    color: #ffffff !important;
   }
 }
 
@@ -152,4 +182,17 @@ a, button {
   width: 3px;
   background-color: var(--accenture-purple);
   border-radius: 0 3px 3px 0;
+}
+
+/* Special button styling for login page */
+.login-button {
+  color: #ffffff !important;
+}
+
+.login-button-text {
+  color: #ffffff !important;
+}
+
+.login-button * {
+  color: #ffffff !important;
 }

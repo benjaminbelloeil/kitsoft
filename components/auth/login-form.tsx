@@ -1,28 +1,53 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
   Mail, 
   Lock, 
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  AlertCircle
 } from "lucide-react";
+import { signIn } from "@/app/lib/auth";
 
 export default function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const router = useRouter();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setIsSuccessful(true);
-    // Reset success message after delay
-    setTimeout(() => setIsSuccessful(false), 3000);
+    setError(null);
+    
+    try {
+      const result = await signIn(email, password);
+      
+      if (result.error) {
+        setError(result.error.message || "Invalid email or password");
+      } else if (result.data?.session) {
+        setIsSuccessful(true);
+        // Redirect after successful login with a slight delay
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1500);
+      } else {
+        // Handle edge case where neither error nor session is present
+        setError("Unable to sign in. Please try again.");
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred. Please try again.";
+      setError(errorMessage);
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,6 +84,17 @@ export default function LoginForm() {
           </motion.div>
         )}
         
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-lg bg-red-50 text-red-700 flex items-center gap-2 shadow-sm"
+          >
+            <AlertCircle size={18} />
+            <span>{error}</span>
+          </motion.div>
+        )}
+        
         <motion.div 
           className="space-y-2 text-left"
           whileHover={{ scale: 1.01 }}
@@ -74,6 +110,8 @@ export default function LoginForm() {
               name="email"
               type="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               onFocus={() => setFocusedField('email')}
               onBlur={() => setFocusedField(null)}
               className="pl-10 w-full px-4 py-3.5 border border-gray-200 rounded-lg focus-accenture transition-all shadow-sm text-black hover:border-gray-300 focus:shadow-md"
@@ -107,6 +145,8 @@ export default function LoginForm() {
               name="password"
               type="password"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               onFocus={() => setFocusedField('password')}
               onBlur={() => setFocusedField(null)}
               className="pl-10 w-full px-4 py-3.5 border border-gray-200 rounded-lg focus-accenture transition-all shadow-sm text-black hover:border-gray-300 focus:shadow-md"
@@ -133,7 +173,7 @@ export default function LoginForm() {
         
         <motion.button
           type="submit"
-          className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-lg shadow-md text-white bg-accenture hover:bg-accenture-dark focus:outline-none transition-all relative overflow-hidden group"
+          className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-lg shadow-md bg-accenture hover:bg-accenture-dark focus:outline-none transition-all relative overflow-hidden group login-button"
           whileHover={{ 
             scale: 1.02, 
             boxShadow: "0 10px 15px -3px rgba(161, 0, 255, 0.2), 0 4px 6px -2px rgba(161, 0, 255, 0.1)" 
@@ -146,7 +186,7 @@ export default function LoginForm() {
           {isLoading ? (
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-b-transparent border-white"></div>
           ) : (
-            <span className="flex items-center font-medium">
+            <span className="flex items-center font-medium login-button-text">
               Sign in
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </span>
