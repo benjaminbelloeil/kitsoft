@@ -49,10 +49,10 @@ export default function LoginForm() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-lg bg-red-50 text-red-700 flex items-center gap-2 shadow-sm"
+            className="p-4 rounded-lg bg-red-100 text-red-900 flex items-center gap-2 shadow-sm border border-red-400"
           >
-            <AlertCircle size={18} />
-            <span>{error}</span>
+            <AlertCircle size={18} className="text-red-600" />
+            <span className="font-medium">{error}</span>
           </motion.div>
         )}
         
