@@ -15,6 +15,7 @@ import {
     FiFileText,
     FiList
 } from "react-icons/fi";
+import NavBadge from "@/components/nav/NavBadge";
 
 export default function NavLink() {
     const pathname = usePathname();
@@ -98,13 +99,17 @@ export default function NavLink() {
                                     >
                                         {getIcon(link.icon)}
                                         <span className="text-sm">{link.name}</span>
-                                        <FiChevronDown 
-                                            className={clsx(
-                                                "ml-auto transition-transform",
-                                                {"rotate-0": !openDropdowns[link.name], "rotate-180": openDropdowns[link.name]}
-                                            )}
-                                            size={14} 
-                                        />
+                                        
+                                        <div className="ml-auto flex items-center">
+                                            <NavBadge navItemName={link.name} />
+                                            <FiChevronDown 
+                                                className={clsx(
+                                                    "ml-1 transition-transform",
+                                                    {"rotate-0": !openDropdowns[link.name], "rotate-180": openDropdowns[link.name]}
+                                                )}
+                                                size={14} 
+                                            />
+                                        </div>
                                     </button>
                                     
                                     {openDropdowns[link.name] && link.dropdownItems && (
@@ -145,6 +150,9 @@ export default function NavLink() {
                                 >
                                     {getIcon(link.icon)}
                                     <span className="text-sm">{link.name}</span>
+                                    <div className="ml-auto">
+                                        <NavBadge navItemName={link.name} />
+                                    </div>
                                 </Link>
                             )}
                         </li>

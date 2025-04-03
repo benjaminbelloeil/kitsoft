@@ -120,26 +120,27 @@ export default function MiniCalendar({
           return (
             <button 
               key={i}
-              className={`text-center p-1 rounded-full text-xs relative transition-all
+              className={`text-center p-1 rounded-full text-xs relative transition-all h-7 w-7 flex items-center justify-center
                 ${!day.isCurrentMonth ? 'text-gray-400' : 'text-gray-800'}
-                ${isSelected ? 'bg-[#A100FF] text-white font-semibold' : ''}
-                ${isToday && !isSelected ? 'border-[#A100FF] border font-medium' : ''}
+                ${isSelected ? 'bg-[#A100FF]' : isToday ? 'border-[#A100FF] border' : ''}
                 hover:bg-[#A100FF20] fast-transition`}
               onClick={() => setSelectedDate(day.date)}
             >
-              {day.date.getDate()}
+              <span className={`${isSelected ? 'text-white font-semibold' : isToday ? 'font-medium' : ''}`}>
+                {day.date.getDate()}
+              </span>
               
-              {/* Show dots for each unique project color */}
+              {/* Show dots for each unique project color inside the circle */}
               {uniqueColors.length > 0 && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-0.5">
+                <div className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-0.5 ${isSelected ? 'opacity-80' : ''}`}>
                   {uniqueColors.slice(0, 3).map((color, idx) => (
                     <span 
                       key={idx} 
-                      className={`inline-block w-1 h-1 rounded-full bg-${color === 'accenture' ? '[#A100FF]' : `${color}-500`}`}
+                      className={`inline-block w-1 h-1 rounded-full ${isSelected ? 'bg-white' : color === 'accenture' ? 'bg-[#A100FF]' : `bg-${color}-500`}`}
                     ></span>
                   ))}
                   {uniqueColors.length > 3 && (
-                    <span className="inline-block w-1 h-1 rounded-full bg-gray-400"></span>
+                    <span className={`inline-block w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-gray-400'}`}></span>
                   )}
                 </div>
               )}

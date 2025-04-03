@@ -8,6 +8,7 @@ interface MainCalendarProps {
   selectedDate: Date;
   selectDate: (date: Date) => void;
   selectEvent: (event: any, position: { x: number, y: number, width: number }) => void;
+  showDayEvents: (date: Date, position: { x: number, y: number, width: number }) => void;
   prevMonth: () => void;
   nextMonth: () => void;
   animationClass: string;
@@ -20,6 +21,7 @@ export default function MainCalendar({
   selectedDate,
   selectDate,
   selectEvent,
+  showDayEvents,
   prevMonth,
   nextMonth,
   animationClass,
@@ -75,6 +77,127 @@ export default function MainCalendar({
     
     return [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
   }, [currentDate]);
+
+  // Function to render multi-project indicators with borders instead of filled backgrounds
+  const renderProjectIndicator = (projectColors: Record<string, number>) => {
+    const uniqueColors = Object.keys(projectColors);
+    const totalProjects = uniqueColors.length;
+    
+    if (totalProjects === 0) return null;
+    
+    if (totalProjects === 1) {
+      // Single project - show a simple badge with count
+      const color = uniqueColors[0];
+      const count = projectColors[color];
+      return (
+        <span 
+          className={`inline-flex items-center justify-center ${colorClasses[color].text} text-[9px] sm:text-xs w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 ${colorClasses[color].border} bg-white`}
+          title={`${count} events`}
+        >
+          {count}
+        </span>
+      );
+    } else {
+      // Multiple projects - show a split border circle
+      return (
+        <div className="relative w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full bg-white">
+          <div className="absolute inset-0 flex flex-wrap">
+            {/* Split the border based on number of projects */}
+            {uniqueColors.map((color, index) => {
+              const segmentStyle: React.CSSProperties = {};
+              const borderWidth = "2px";
+              
+              if (totalProjects === 2) {
+                // Two projects - split in half horizontally
+                segmentStyle.width = '100%';
+                segmentStyle.height = '50%';
+                if (index === 0) {
+                  segmentStyle.borderTopLeftRadius = '9999px';
+                  segmentStyle.borderTopRightRadius = '9999px';
+                  segmentStyle.borderTop = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderLeft = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderRight = borderWidth + ' solid ' + getBorderColor(color);
+                } else {
+                  segmentStyle.borderBottomLeftRadius = '9999px';
+                  segmentStyle.borderBottomRightRadius = '9999px';
+                  segmentStyle.borderBottom = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderLeft = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderRight = borderWidth + ' solid ' + getBorderColor(color);
+                }
+              } else if (totalProjects === 3) {
+                // Three projects - one top half, two bottom quarters
+                if (index === 0) {
+                  segmentStyle.width = '100%';
+                  segmentStyle.height = '50%';
+                  segmentStyle.borderTopLeftRadius = '9999px';
+                  segmentStyle.borderTopRightRadius = '9999px';
+                  segmentStyle.borderTop = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderLeft = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderRight = borderWidth + ' solid ' + getBorderColor(color);
+                } else {
+                  segmentStyle.width = '50%';
+                  segmentStyle.height = '50%';
+                  if (index === 1) {
+                    segmentStyle.borderBottomLeftRadius = '9999px';
+                    segmentStyle.borderBottom = borderWidth + ' solid ' + getBorderColor(color);
+                    segmentStyle.borderLeft = borderWidth + ' solid ' + getBorderColor(color);
+                  } else {
+                    segmentStyle.borderBottomRightRadius = '9999px';
+                    segmentStyle.borderBottom = borderWidth + ' solid ' + getBorderColor(color);
+                    segmentStyle.borderRight = borderWidth + ' solid ' + getBorderColor(color);
+                  }
+                }
+              } else {
+                // Four or more projects - split in quarters
+                segmentStyle.width = '50%';
+                segmentStyle.height = '50%';
+                if (index === 0) {
+                  segmentStyle.borderTopLeftRadius = '9999px';
+                  segmentStyle.borderTop = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderLeft = borderWidth + ' solid ' + getBorderColor(color);
+                } else if (index === 1) {
+                  segmentStyle.borderTopRightRadius = '9999px';
+                  segmentStyle.borderTop = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderRight = borderWidth + ' solid ' + getBorderColor(color);
+                } else if (index === 2) {
+                  segmentStyle.borderBottomLeftRadius = '9999px';
+                  segmentStyle.borderBottom = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderLeft = borderWidth + ' solid ' + getBorderColor(color);
+                } else if (index === 3) {
+                  segmentStyle.borderBottomRightRadius = '9999px';
+                  segmentStyle.borderBottom = borderWidth + ' solid ' + getBorderColor(color);
+                  segmentStyle.borderRight = borderWidth + ' solid ' + getBorderColor(color);
+                }
+              }
+              
+              return (
+                <div 
+                  key={index}
+                  style={segmentStyle}
+                  className="bg-white"
+                />
+              );
+            })}
+          </div>
+          {/* Total event count */}
+          <span className="relative z-10 text-[9px] sm:text-xs font-semibold text-gray-800">
+            {Object.values(projectColors).reduce((sum, count) => sum + count, 0)}
+          </span>
+        </div>
+      );
+    }
+  };
+
+  // Get border color for a project type
+  const getBorderColor = (color: string) => {
+    switch(color) {
+      case 'emerald': return '#10B981';
+      case 'blue': return '#3B82F6';
+      case 'purple': return '#8B5CF6';
+      case 'accenture': return '#A100FF';
+      default: return '#9CA3AF';
+    }
+  };
 
   return (
     <div className="flex-1 bg-white rounded-xl shadow-lg p-3 sm:p-4 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 overflow-hidden" ref={calendarRef}>
@@ -142,10 +265,25 @@ export default function MainCalendar({
             return acc;
           }, {});
           
+          // Handle day click to show event list - modified to only show for 3+ events
+          const handleDayClick = (e: React.MouseEvent) => {
+            if (events.length > 2) {
+              e.stopPropagation(); // Prevent the default date selection
+              const rect = e.currentTarget.getBoundingClientRect();
+              showDayEvents(day.date, {
+                x: rect.left,
+                y: rect.bottom,
+                width: rect.width
+              });
+            } else {
+              selectDate(day.date);
+            }
+          };
+          
           return (
             <div 
               key={i}
-              onClick={() => selectDate(day.date)}
+              onClick={handleDayClick}
               className={`min-h-[60px] sm:min-h-[80px] md:min-h-[100px] border rounded-md p-0.5 sm:p-1 transition-all cursor-pointer
                 ${!day.isCurrentMonth ? 'bg-gray-50 text-gray-400' : 'hover:bg-[#A100FF05]'}
                 ${isSelected ? 'border-[#A100FF] shadow-sm' : 'border-transparent hover:border-[#A100FF40]'}
@@ -159,16 +297,8 @@ export default function MainCalendar({
                   {day.date.getDate()}
                 </div>
                 {events.length > 0 && (
-                  <div className="flex gap-0.5">
-                    {Object.entries(projectColors).map(([color, count], index) => (
-                      <span 
-                        key={index} 
-                        className={`inline-flex items-center justify-center ${colorClasses[color].text} text-[9px] sm:text-xs w-4 h-4 sm:w-5 sm:h-5 rounded-full border ${colorClasses[color].border}`}
-                        title={`${count} events`}
-                      >
-                        {count}
-                      </span>
-                    ))}
+                  <div className="flex justify-center">
+                    {renderProjectIndicator(projectColors)}
                   </div>
                 )}
               </div>

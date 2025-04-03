@@ -1,4 +1,4 @@
-import { FiFilter, FiPlus } from "react-icons/fi";
+import { FiFilter } from "react-icons/fi";
 import { colorClasses } from "@/app/lib/data";
 
 interface ProjectFilterProps {
@@ -44,10 +44,7 @@ export default function ProjectFilter({
           </div>
         ))}
         
-        <button className="mt-2 w-full px-3 py-1.5 border border-dashed border-gray-300 rounded-md text-xs text-gray-600 hover:border-[#A100FF] hover:text-[#A100FF] fast-transition flex items-center justify-center gap-1">
-          <FiPlus size={14} />
-          <span>Añadir proyecto</span>
-        </button>
+        {/* Removed "Añadir proyecto" button as requested */}
       </div>
     </div>
   );
