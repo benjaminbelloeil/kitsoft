@@ -1,0 +1,206 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import { useState, useMemo } from "react";
+import { calendarEvents, userData, colorClasses } from "@/app/lib/data";
+import MiniCalendar from "@/components/calendar/MiniCalendar";
+import ProjectFilter from "@/components/calendar/ProjectFilter";
+import MainCalendar from "@/components/calendar/MainCalendar";
+import EventPreview from "@/components/calendar/EventPreview";
+
+export default function CalendarPage() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [eventPosition, setEventPosition] = useState<{ x: number, y: number, width: number } | null>(null);
+  const [miniCalendarDate, setMiniCalendarDate] = useState(new Date());
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [animationClass, setAnimationClass] = useState("");
+
+  // Filter events based on selected filters
+  const filteredEvents = useMemo(() => {
+    if (activeFilters.length === 0) return calendarEvents;
+    return calendarEvents.filter(event => 
+      activeFilters.includes(event.projectId)
+    );
+  }, [activeFilters]);
+
+  // Get events for the selected date
+  const eventsForSelectedDate = useMemo(() => {
+    return filteredEvents.filter(event => 
+      event.start.getDate() === selectedDate.getDate() && 
+      event.start.getMonth() === selectedDate.getMonth() &&
+      event.start.getFullYear() === selectedDate.getFullYear()
+    );
+  }, [filteredEvents, selectedDate]);
+
+  // Handle month navigation
+  const prevMonth = () => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    setCurrentDate(newDate);
+    setAnimationClass("animate-slideRight");
+    setTimeout(() => setAnimationClass(""), 300);
+  };
+
+  const nextMonth = () => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + 1);
+    setCurrentDate(newDate);
+    setAnimationClass("animate-slideLeft");
+    setTimeout(() => setAnimationClass(""), 300);
+  };
+
+  // Handle date selection
+  const selectDate = (date: Date) => {
+    setSelectedDate(new Date(date));
+    // Close event preview when selecting a new date
+    setSelectedEvent(null);
+  };
+
+  // Handle event selection with position
+  const selectEvent = (event: any, position: { x: number, y: number, width: number }) => {
+    setSelectedEvent(event);
+    setEventPosition(position);
+  };
+
+  // Close event preview
+  const closeEventPreview = () => {
+    setSelectedEvent(null);
+    setEventPosition(null);
+  };
+
+  // Toggle filter
+  const toggleFilter = (projectId: string) => {
+    if (activeFilters.includes(projectId)) {
+      setActiveFilters(activeFilters.filter(id => id !== projectId));
+    } else {
+      setActiveFilters([...activeFilters, projectId]);
+    }
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setActiveFilters([]);
+  };
+
+  // Get events for a specific date
+  const getEventsForDate = (date: Date) => {
+    return filteredEvents.filter(event => 
+      event.start.getDate() === date.getDate() && 
+      event.start.getMonth() === date.getMonth() &&
+      event.start.getFullYear() === date.getFullYear()
+    );
+  };
+
+  // Find project by ID
+  const findProject = (projectId: string) => {
+    return userData.projects.find(p => p.id === projectId);
+  };
+
+  // Format time from Date object - 24h format
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  return (
+    <div className="h-full flex flex-col relative">
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">Calendario de Proyectos</h1>
+
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
+        {/* Left sidebar */}
+        <div className="w-full lg:w-64 flex-shrink-0 space-y-4">
+          <div className="flex flex-row lg:flex-col gap-4">
+            {/* Mini calendar */}
+            <div className="flex-1 lg:flex-none">
+              <MiniCalendar 
+                miniCalendarDate={miniCalendarDate}
+                selectedDate={selectedDate}
+                setMiniCalendarDate={setMiniCalendarDate}
+                setSelectedDate={selectDate}
+                getEventsForDate={getEventsForDate}
+              />
+            </div>
+
+            {/* Filters */}
+            <div className="flex-1 lg:flex-none">
+              <ProjectFilter 
+                projects={userData.projects}
+                activeFilters={activeFilters}
+                toggleFilter={toggleFilter}
+                resetFilters={resetFilters}
+              />
+            </div>
+          </div>
+          
+          {/* Small screen events for selected date */}
+          <div className="lg:hidden bg-white rounded-xl shadow-lg p-4 border border-gray-100">
+            <h2 className="font-bold mb-3 text-gray-800 border-b pb-2">
+              {selectedDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </h2>
+            
+            {eventsForSelectedDate.length > 0 ? (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {eventsForSelectedDate.map((event, i) => (
+                  <div 
+                    key={i}
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      selectEvent(event, {
+                        x: rect.left,
+                        y: rect.bottom,
+                        width: rect.width
+                      });
+                    }}
+                    className={`p-3 rounded-md border-l-4 ${colorClasses[event.color].border} shadow-sm hover:shadow-md fast-transition cursor-pointer bg-white`}
+                  >
+                    <h3 className="font-medium">{event.title}</h3>
+                    <div className="flex flex-wrap gap-2 mt-1 text-sm text-gray-500">
+                      <div className="flex items-center">
+                        {event.allDay ? 'Todo el día' : `${formatTime(event.start)} - ${formatTime(event.end)}`}
+                      </div>
+                      {event.location && (
+                        <div className="flex items-center">
+                          • {event.location}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 bg-white rounded-lg">
+                No hay eventos para esta fecha
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main content area with calendar */}
+        <div className="flex-1 relative">
+          {/* Main calendar - always uses full width */}
+          <MainCalendar
+            currentDate={currentDate}
+            selectedDate={selectedDate}
+            selectDate={selectDate}
+            selectEvent={selectEvent}
+            prevMonth={prevMonth}
+            nextMonth={nextMonth}
+            animationClass={animationClass}
+            getEventsForDate={getEventsForDate}
+            formatTime={formatTime}
+          />
+        </div>
+      </div>
+      
+      {/* Event preview popup - positioned relatively based on clicked event */}
+      <EventPreview
+        event={selectedEvent}
+        position={eventPosition}
+        closePreview={closeEventPreview}
+        formatTime={formatTime}
+        findProject={findProject}
+      />
+    </div>
+  );
+}
