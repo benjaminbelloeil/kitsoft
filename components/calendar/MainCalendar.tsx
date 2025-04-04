@@ -338,11 +338,6 @@ export default function MainCalendar({
                       </div>
                     );
                   })}
-                  {events.length > 2 && (
-                    <div className="text-[10px] sm:text-xs text-gray-500 pl-0.5 sm:pl-1">
-                      + {events.length - 2} más
-                    </div>
-                  )}
                 </div>
               </div>
             );
