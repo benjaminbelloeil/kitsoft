@@ -1,38 +1,8 @@
 "use client";
 import { useState } from "react";
 import { FiEdit2, FiDownload, FiPlus, FiTrash2, FiFileText, FiCheckCircle } from "react-icons/fi";
-import Image from "next/image"; // Add this import
-
-// Dummy data for demonstration
-const userData = {
-  name: "Carlos Rodríguez",
-  title: "Senior Software Engineer",
-  location: "Madrid, España",
-  email: "carlos.rodriguez@accenture.com",
-  phone: "+34 612 345 678",
-  bio: "Ingeniero de software con más de 7 años de experiencia en desarrollo fullstack. Especializado en React, Node.js y arquitecturas cloud.",
-  avatar: "/profile-placeholder.jpg",
-  projects: [
-    { name: "Project Nova", cargabilidad: 70, color: "emerald" },
-    { name: "Accenture Cloud First", cargabilidad: 20, color: "blue" },
-    { name: "Digital Transformation", cargabilidad: 10, color: "purple" }
-  ],
-  skills: ["JavaScript", "React", "TypeScript", "Node.js", "AWS", "Azure", "Docker", "CI/CD", "Agile"],
-  experience: [
-    {
-      company: "Accenture",
-      position: "Senior Software Engineer",
-      period: "2020 - Presente",
-      description: "Desarrollo de soluciones cloud-native para clientes del sector financiero."
-    },
-    {
-      company: "Telefónica",
-      position: "Developer",
-      period: "2017 - 2020",
-      description: "Implementación de aplicaciones web y móviles para servicios de telecomunicaciones."
-    }
-  ]
-};
+import Image from "next/image"; 
+import { userData } from "@/app/lib/data"; // Import userData from data.ts
 
 export default function ProfilePage() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -141,16 +111,19 @@ export default function ProfilePage() {
         <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
           <div className="relative">
             <div className="p-2 bg-gradient-to-r from-[#A100FF20] to-[#8500D420] rounded-full">
-              <div className="w-32 h-32 relative rounded-full border-4 border-white shadow overflow-hidden">
+              <div className="w-40 h-40 relative rounded-full border-4 border-white shadow overflow-hidden">
                 <Image 
                   src={userData.avatar}
                   alt={userData.name}
                   fill
-                  sizes="128px"
-                  className="object-cover"
+                  sizes="160px"
+                  className="object-cover scale-140" // Added scale-110 to make image appear larger
+                  style={{
+                    objectPosition: "center" // Center the image for better framing
+                  }}
                   onError={(e) => {
                     // Fallback for missing image
-                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/128";
+                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/160";
                   }}
                 />
               </div>
