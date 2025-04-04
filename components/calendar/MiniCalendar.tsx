@@ -117,7 +117,7 @@ export default function MiniCalendar({
         </div>
       </div>
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, i) => (
+        {[ 'D', 'L', 'M', 'M', 'J', 'V', 'S'].map((day, i) => (
           <div key={i} className="text-center text-xs text-gray-500 font-medium">
             {day}
           </div>
