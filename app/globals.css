@@ -434,3 +434,8 @@ nav [role="tab"]:focus {
     color: #ffffff !important;
   }
 }
+
+.fixed.inset-0.z-50.bg-black.bg-opacity-60.flex.items-center.justify-center {
+  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.4);
+}
