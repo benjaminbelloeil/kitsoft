@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { FiChevronLeft, FiChevronRight, FiCalendar } from "react-icons/fi";
@@ -61,10 +62,21 @@ export default function MiniCalendar({
       });
     }
     
-    // Next month days
-    const remainingCells = 42 - days.length;
+    // Calculate total days needed for this month's display
+    // Fixed calculation for determining if we need 5 or 6 rows
+    const totalDaysBeforeNextMonth = days.length;
+    const rowsNeeded = Math.ceil(totalDaysBeforeNextMonth / 7);
+    const totalDaysNeeded = rowsNeeded * 7;
+    
+    // Ensure we never exceed 5 rows when possible
+    const targetRows = rowsNeeded > 5 ? 6 : 5;
+    const targetDays = targetRows * 7;
+    
+    // Next month days - only add what's necessary
     const nextMonth = month === 11 ? 0 : month + 1;
     const nextMonthYear = month === 11 ? year + 1 : year;
+    
+    const remainingCells = targetDays - totalDaysBeforeNextMonth;
     
     for (let i = 1; i <= remainingCells; i++) {
       days.push({
@@ -75,6 +87,13 @@ export default function MiniCalendar({
     
     return days;
   }, [miniCalendarDate]);
+
+  // Function to go to today - updates both dates
+  const goToToday = () => {
+    const today = new Date();
+    setSelectedDate(today);
+    setMiniCalendarDate(today);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300">
@@ -149,7 +168,7 @@ export default function MiniCalendar({
         })}
       </div>
       <button 
-        onClick={() => setSelectedDate(new Date())}
+        onClick={goToToday}
         className="mt-2 sm:mt-3 w-full px-3 py-1 sm:py-1.5 bg-[#A100FF20] text-[#A100FF] rounded-md text-xs font-medium hover:bg-[#A100FF30] fast-transition flex items-center justify-center gap-1"
       >
         <FiCalendar size={14} />

@@ -2,7 +2,6 @@
 /* eslint-disable @next/next/no-img-element */
 import NavLink from "@/components/nav/navlink"
 import LogoutBtn from "@/components/nav/logout-btn"
-import NavBadge from "@/components/nav/NavBadge"
 
 export default function Navbar() {
     return (
@@ -17,8 +16,6 @@ export default function Navbar() {
                 </div>
                 
                 <NavLink />
-                
-                <NavBadge navItemName="Calendario" />
                 
                 <div className="mt-auto mb-4 px-4">
                     <LogoutBtn />
