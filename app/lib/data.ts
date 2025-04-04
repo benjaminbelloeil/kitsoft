@@ -1,3 +1,4 @@
+// app/lib/data.ts
 // Define types for navigation items
 export interface DropdownItem {
   name: string;
@@ -10,6 +11,29 @@ export interface NavItem {
   href: string;
   hasDropdown: boolean;
   dropdownItems?: DropdownItem[];
+}
+
+// Definición de tipos para los proyectos y tareas
+export interface Task {
+  id: string;
+  name: string;
+  completed: boolean;
+  dueDate: string;
+  assignedTo?: string;
+  description?: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  client: string;
+  description: string;
+  cargabilidad: number;
+  color: string;
+  status: 'active' | 'archived';
+  startDate: string;
+  endDate: string;
+  tasks: Task[];
 }
 
 const navLinks: NavItem[] = [
@@ -50,8 +74,238 @@ const navLinks: NavItem[] = [
 
 export {navLinks}
 
-// Shared data for user profile and calendar events
+// Datos detallados de proyectos
+export const projectsData: Project[] = [
+  {
+    id: "p1",
+    name: "Project Nova",
+    client: "Telefónica",
+    description: "Desarrollo de plataforma digital para servicios de telecomunicaciones avanzados.",
+    cargabilidad: 70,
+    color: "emerald",
+    status: 'active',
+    startDate: '2023-12-01',
+    endDate: '2024-07-31',
+    tasks: [
+      { 
+        id: 't1', 
+        name: 'Diseño de arquitectura', 
+        completed: true, 
+        dueDate: '2023-12-15',
+        description: 'Definición de la arquitectura tecnológica del proyecto.'
+      },
+      { 
+        id: 't2', 
+        name: 'Desarrollo frontend', 
+        completed: true, 
+        dueDate: '2024-02-20',
+        assignedTo: 'carlos.rodriguez@accenture.com',
+        description: 'Implementación de la interfaz de usuario.'
+      },
+      { 
+        id: 't3', 
+        name: 'Integración APIs', 
+        completed: false, 
+        dueDate: '2024-05-30',
+        assignedTo: 'juan@accenture.com',
+        description: 'Desarrollo de las APIs necesarias.'
+      },
+      { 
+        id: 't4', 
+        name: 'Testing y QA', 
+        completed: false, 
+        dueDate: '2024-06-30',
+        assignedTo: 'ana@accenture.com',
+        description: 'Realizar pruebas unitarias, de integración y end-to-end.'
+      }
+    ]
+  },
+  {
+    id: "p2",
+    name: "Accenture Cloud First",
+    client: "Accenture Internal",
+    description: "Migración de infraestructura a la nube y optimización de recursos.",
+    cargabilidad: 20,
+    color: "blue",
+    status: 'active',
+    startDate: '2024-01-01',
+    endDate: '2024-12-31',
+    tasks: [
+      { 
+        id: 't1', 
+        name: 'Auditoría de sistemas actuales', 
+        completed: true, 
+        dueDate: '2024-01-20',
+        assignedTo: 'lucia@accenture.com',
+        description: 'Evaluación completa de la infraestructura actual.'
+      },
+      { 
+        id: 't2', 
+        name: 'Planificación de migración', 
+        completed: true, 
+        dueDate: '2024-02-28',
+        assignedTo: 'carlos.rodriguez@accenture.com',
+        description: 'Desarrollo del plan de migración.'
+      },
+      { 
+        id: 't3', 
+        name: 'Implementación fase 1', 
+        completed: false, 
+        dueDate: '2024-07-15',
+        assignedTo: 'pablo@accenture.com',
+        description: 'Migración de los primeros sistemas no críticos.'
+      },
+      { 
+        id: 't4', 
+        name: 'Capacitación del personal', 
+        completed: false, 
+        dueDate: '2024-10-30',
+        description: 'Preparación y ejecución de sesiones de formación.'
+      }
+    ]
+  },
+  {
+    id: "p3",
+    name: "Digital Transformation",
+    client: "BBVA",
+    description: "Transformación digital de procesos internos y experiencia de cliente.",
+    cargabilidad: 10,
+    color: "purple",
+    status: 'active',
+    startDate: '2024-03-15',
+    endDate: '2024-09-15',
+    tasks: [
+      { 
+        id: 't1', 
+        name: 'Análisis de procesos', 
+        completed: true, 
+        dueDate: '2024-03-30',
+        assignedTo: 'elena@accenture.com',
+        description: 'Documentación y análisis de los procesos actuales.'
+      },
+      { 
+        id: 't2', 
+        name: 'Diseño de nuevos flujos', 
+        completed: false, 
+        dueDate: '2024-05-15',
+        assignedTo: 'carlos.rodriguez@accenture.com',
+        description: 'Diseño de los nuevos flujos de trabajo digitalizados.'
+      },
+      { 
+        id: 't3', 
+        name: 'Desarrollo e implementación', 
+        completed: false, 
+        dueDate: '2024-07-30',
+        assignedTo: 'miguel@accenture.com',
+        description: 'Desarrollo de las soluciones tecnológicas necesarias.'
+      },
+      { 
+        id: 't4', 
+        name: 'Evaluación y ajustes', 
+        completed: false, 
+        dueDate: '2024-08-30',
+        description: 'Evaluación del impacto de los cambios implementados.'
+      }
+    ]
+  },
+  {
+    id: "p4",
+    name: "Smart City Initiative",
+    client: "Ayuntamiento de Madrid",
+    description: "Plataforma de gestión para ciudad inteligente con monitoreo en tiempo real.",
+    cargabilidad: 0,
+    color: "accenture",
+    status: 'archived',
+    startDate: '2023-04-01',
+    endDate: '2024-01-30',
+    tasks: [
+      { 
+        id: 't1', 
+        name: 'Análisis de requisitos', 
+        completed: true, 
+        dueDate: '2023-05-10',
+        assignedTo: 'sofia@accenture.com',
+        description: 'Definición de los requisitos técnicos y funcionales.'
+      },
+      { 
+        id: 't2', 
+        name: 'Desarrollo de plataforma', 
+        completed: true, 
+        dueDate: '2023-09-20',
+        assignedTo: 'carlos.rodriguez@accenture.com',
+        description: 'Implementación de la plataforma de gestión centralizada.'
+      },
+      { 
+        id: 't3', 
+        name: 'Implementación de sensores', 
+        completed: true, 
+        dueDate: '2023-11-15',
+        assignedTo: 'david@accenture.com',
+        description: 'Instalación y configuración de la red de sensores IoT.'
+      },
+      { 
+        id: 't4', 
+        name: 'Entrega final', 
+        completed: true, 
+        dueDate: '2024-01-30',
+        description: 'Finalización del proyecto y entrega de documentación.'
+      }
+    ]
+  },
+  {
+    id: "p5",
+    name: "E-commerce Replatform",
+    client: "El Corte Inglés",
+    description: "Migración y modernización de plataforma de comercio electrónico.",
+    cargabilidad: 0,
+    color: "emerald",
+    status: 'archived',
+    startDate: '2023-03-01',
+    endDate: '2024-02-01',
+    tasks: [
+      { 
+        id: 't1', 
+        name: 'Auditoría técnica', 
+        completed: true, 
+        dueDate: '2023-04-15',
+        assignedTo: 'javier@accenture.com',
+        description: 'Evaluación de la plataforma actual.'
+      },
+      { 
+        id: 't2', 
+        name: 'Diseño de arquitectura', 
+        completed: true, 
+        dueDate: '2023-06-20',
+        assignedTo: 'carlos.rodriguez@accenture.com',
+        description: 'Diseño de la nueva arquitectura tecnológica.'
+      },
+      { 
+        id: 't3', 
+        name: 'Desarrollo e integración', 
+        completed: true, 
+        dueDate: '2023-10-30',
+        assignedTo: 'laura@accenture.com',
+        description: 'Implementación de la nueva plataforma.'
+      },
+      { 
+        id: 't4', 
+        name: 'Migración de datos', 
+        completed: true, 
+        dueDate: '2023-12-15',
+        description: 'Transferencia de datos históricos y actuales.'
+      },
+      { 
+        id: 't5', 
+        name: 'Lanzamiento', 
+        completed: true, 
+        dueDate: '2024-02-01',
+        description: 'Puesta en producción de la nueva plataforma.'
+      }
+    ]
+  }
+];
 
+// Shared data for user profile and calendar events
 export const userData = {
   name: "Carlos Rodríguez",
   title: "Senior Software Engineer",
@@ -187,6 +441,23 @@ export function getDaysInMonth(month: number, year: number) {
 
 export function getFirstDayOfMonth(month: number, year: number) {
   return new Date(year, month, 1).getDay();
+}
+
+// Funciones auxiliares para proyectos
+export function getProjectsByStatus(status: 'active' | 'archived'): Project[] {
+  return projectsData.filter(project => project.status === status);
+}
+
+export function getProjectById(id: string): Project | undefined {
+  return projectsData.find(project => project.id === id);
+}
+
+export function calculateProjectProgress(projectId: string): number {
+  const project = getProjectById(projectId);
+  if (!project || project.tasks.length === 0) return 0;
+  
+  const completedTasks = project.tasks.filter(task => task.completed).length;
+  return Math.round((completedTasks / project.tasks.length) * 100);
 }
 
 export const colorClasses: Record<string, { bg: string, light: string, border: string, text: string }> = {
