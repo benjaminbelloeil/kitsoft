@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { FiEdit2, FiDownload, FiPlus, FiTrash2, FiFileText, FiCheckCircle } from "react-icons/fi";
+import Image from "next/image"; // Add this import
 
 // Dummy data for demonstration
 const userData = {
@@ -140,15 +141,19 @@ export default function ProfilePage() {
         <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
           <div className="relative">
             <div className="p-2 bg-gradient-to-r from-[#A100FF20] to-[#8500D420] rounded-full">
-              <img 
-                src={userData.avatar}
-                alt={userData.name}
-                className="w-32 h-32 object-cover rounded-full border-4 border-white shadow"
-                onError={(e) => {
-                  // Fallback for missing image
-                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/128";
-                }}
-              />
+              <div className="w-32 h-32 relative rounded-full border-4 border-white shadow overflow-hidden">
+                <Image 
+                  src={userData.avatar}
+                  alt={userData.name}
+                  fill
+                  sizes="128px"
+                  className="object-cover"
+                  onError={(e) => {
+                    // Fallback for missing image
+                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/128";
+                  }}
+                />
+              </div>
             </div>
             <button className="absolute bottom-1 right-1 bg-[#A100FF20] p-2 rounded-full text-[#A100FF] hover:bg-[#A100FF30] fast-transition shadow-sm">
               <FiEdit2 size={14} className="text-[#A100FF]" />
