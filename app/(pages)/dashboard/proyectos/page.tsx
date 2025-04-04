@@ -158,7 +158,7 @@ export default function ProjectsPage() {
                 >
                   <div className="p-4 flex items-center">
                     <div className="flex-shrink-0 mr-4">
-                      <div className={`w-1 h-full absolute left-0 top-0 ${projectColorClasses.bg} rounded-l-lg`}></div>
+                      {/* Eliminado el div que creaba la línea morada */}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
@@ -201,14 +201,16 @@ export default function ProjectsPage() {
 
       {/* Modal de detalle de proyecto - SIMPLIFICADO Y FORZADO A SER SCROLLABLE */}
       {selectedProject && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center"
+             style={{ backdropFilter: 'blur(1px)' }}>
           <div 
             ref={modalRef}
             className="bg-white rounded-lg shadow-lg" 
             style={{
               width: '600px',
-              height: '700px',
-              overflowY: 'scroll'
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
             }}
           >
             <div className="p-6 border-b bg-white sticky top-0">
