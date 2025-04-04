@@ -196,6 +196,17 @@ export default function CalendarPage() {
     );
   }, [filteredEvents, dayEventsDate]);
 
+  // New function to handle "go to today"
+  const goToToday = () => {
+    const today = new Date();
+    setSelectedDate(today);
+    setCurrentDate(today);
+    setMiniCalendarDate(today);
+    // Using an existing animation class for consistency
+    setAnimationClass("animate-slideLeft");
+    setTimeout(() => setAnimationClass(""), 300);
+  };
+
   return (
     <div className="h-full flex flex-col relative">
       <div className="flex justify-between items-center mb-4">
@@ -207,7 +218,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-auto pb-6"> {/* Added more padding at bottom */}
         {/* Left sidebar */}
         <div className="w-full lg:w-64 flex-shrink-0 space-y-4">
           <div className="flex flex-row lg:flex-col gap-4">
@@ -277,7 +288,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Main content area with calendar */}
-        <div className="flex-1 relative">
+        <div className="flex-1 flex flex-col min-h-[650px]"> {/* Changed to flex and increased min-height */}
           {/* Main calendar - always uses full width */}
           <MainCalendar
             currentDate={currentDate}
@@ -290,6 +301,7 @@ export default function CalendarPage() {
             getEventsForDate={getEventsForDate}
             formatTime={formatTime}
             showDayEvents={showDayEvents}
+            goToToday={goToToday}
           />
         </div>
       </div>
