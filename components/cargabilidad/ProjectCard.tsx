@@ -33,10 +33,10 @@ export const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
       </div>
 
       <div className="flex gap-3 mt-4 text-gray-500 text-sm">
-        <button className="hover:text-indigo-600 cursor-pointer p-2 hover:bg-indigo-50 rounded-full transition-colors" onClick={onEdit}>
+        <button title='Editar' className="hover:text-indigo-600 cursor-pointer p-2 hover:bg-indigo-50 rounded-full transition-colors" onClick={onEdit}>
           <FiEdit2 size={16} title="Editar" />
         </button>
-        <button className="hover:text-red-600 cursor-pointer p-2 hover:bg-red-50 rounded-full transition-colors" onClick={onDelete}>
+        <button title='Eliminar' className="hover:text-red-600 cursor-pointer p-2 hover:bg-red-50 rounded-full transition-colors" onClick={onDelete}>
           <FiTrash2 size={16} title="Eliminar" />
         </button>
       </div>

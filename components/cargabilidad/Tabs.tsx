@@ -1,8 +1,10 @@
 'use client';
 
+type TabOptions = 'projects' | 'dashboard';
+
 interface Props {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: TabOptions;
+  setActiveTab: (tab: TabOptions) => void;
 }
 
 export const Tabs = ({ activeTab, setActiveTab }: Props) => {
