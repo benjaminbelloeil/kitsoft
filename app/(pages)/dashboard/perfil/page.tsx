@@ -4,12 +4,12 @@ import { useState } from "react";
 import { userData } from "@/app/lib/data"; // Import userData from data.ts
 
 // Import profile components
-import ProfileHeader from "@/app/components/profile/ProfileHeader";
-import CargabilidadSection from "@/app/components/profile/CargabilidadSection";
-import ResumeUpload from "@/app/components/profile/ResumeUpload";
-import CertificatesSection from "@/app/components/profile/CertificatesSection";
-import SkillsSection from "@/app/components/profile/SkillsSection";
-import ExperienceSection from "@/app/components/profile/ExperienceSection";
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import CargabilidadSection from "@/components/profile/CargabilidadSection";
+import ResumeUpload from "@/components/profile/ResumeUpload";
+import CertificatesSection from "@/components/profile/CertificatesSection";
+import SkillsSection from "@/components/profile/SkillsSection";
+import ExperienceSection from "@/components/profile/ExperienceSection";
 
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState(userData);
