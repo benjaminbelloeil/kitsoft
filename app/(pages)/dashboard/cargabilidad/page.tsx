@@ -1,159 +1,86 @@
-"use client";
 
-import { useState } from "react";
+'use client';
 
-// Sample cargabilidad data
-const cargabilidadData = [
-  {
-    project: "Project Nova",
-    allocation: 70,
-    color: "emerald",
-    startDate: "12/01/2023",
-    endDate: "31/07/2024",
-    client: "Telefónica"
-  },
-  {
-    project: "Accenture Cloud First",
-    allocation: 20,
-    color: "blue",
-    startDate: "01/01/2024",
-    endDate: "31/12/2024",
-    client: "Accenture Internal"
-  },
-  {
-    project: "Digital Transformation",
-    allocation: 10,
-    color: "purple",
-    startDate: "15/03/2024",
-    endDate: "15/09/2024",
-    client: "BBVA"
-  }
-];
+import { useState } from 'react';
+import { CircularProgress } from '@/components/cargabilidad/CircularProgress';
+import { LinearProgress } from '@/components/cargabilidad/LinearProgress';
+import { WeeklyLoadChart } from '@/components/cargabilidad/WeeklyLoadChart';
+import { ProjectCard } from '@/components/cargabilidad/ProjectCard';
+import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
+import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
+import { Tabs } from '@/components/cargabilidad/Tabs';
 
-export default function CargabilidadPage() {
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+interface Project {
+  name: string;
+  load: number;
+  deadline?: string;
+  hoursPerWeek: number;
+}
 
-  const months = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-  ];
+const PersonalLoadPage = () => {
+  const [projects, setProjects] = useState<Project[]>([
+    { name: 'Expediente Alfa', load: 65, deadline: '2025-05-15', hoursPerWeek: 18 },
+    { name: 'Delta Zero', load: 35, deadline: '2025-06-30', hoursPerWeek: 10 },
+    { name: 'Omega UX', load: 80, deadline: '2025-04-30', hoursPerWeek: 22 },
+  ]);
 
-  // Calculate total allocation
-  const totalAllocation = cargabilidadData.reduce((sum, item) => sum + item.allocation, 0);
+  const [activeTab, setActiveTab] = useState<'projects' | 'dashboard'>('projects');
+
+  const employee = {
+    name: "Carlos Rodríguez",
+    role: "Desarrollador Full Stack",
+    totalHoursPerWeek: 40
+  };
+
+  const totalUsedHours = projects.reduce((sum, p) => sum + p.hoursPerWeek, 0);
+  const availableHours = employee.totalHoursPerWeek - totalUsedHours;
+  const totalLoad = Math.min(100, (totalUsedHours / employee.totalHoursPerWeek) * 100);
+  const weeklyLoad = [45, 60, 78, 65, 70, 30, 20];
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      <header className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
-        <h1 className="text-2xl font-bold text-gray-800">Gestión de Cargabilidad</h1>
-        <p className="text-gray-600 mt-2">Visualiza y gestiona tu cargabilidad en proyectos actuales</p>
-      </header>
+    <main className="min-h-screen p-4 sm:p-6 md:p-10">
+      <div className="max-w-6xl mx-auto">
+        <EmployeeSummary
+          name={employee.name}
+          role={employee.role}
+          totalLoad={totalLoad}
+          totalUsedHours={totalUsedHours}
+          availableHours={availableHours}
+          totalHoursPerWeek={employee.totalHoursPerWeek}
+        />
 
-      {/* Period selector */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800">Periodo</h2>
-          <div className="flex gap-4">
-            <select 
-              className="bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#A100FF]"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-            >
-              {months.map((month, index) => (
-                <option key={month} value={index}>{month}</option>
-              ))}
-            </select>
-            <select 
-              className="bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#A100FF]"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            >
-              {[2023, 2024, 2025].map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+        <div className="bg-white rounded-xl shadow-md mb-6">
+          <div className="p-6">
+            {activeTab === 'projects' ? (
+              <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {projects.map((project, index) => (
+                    <ProjectCard
+                      key={index}
+                      project={project}
+                      onEdit={() => {}}
+                      onDelete={() =>
+                        setProjects(projects.filter((_, i) => i !== index))
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <DashboardTab
+                projects={projects}
+                weeklyLoad={weeklyLoad}
+                availableHours={availableHours}
+                totalHoursPerWeek={employee.totalHoursPerWeek}
+              />
+            )}
           </div>
         </div>
       </div>
-
-      {/* Allocation summary */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-        <h2 className="text-xl font-bold mb-6 pb-3 border-b border-gray-100">Resumen de Cargabilidad</h2>
-        <div className="relative h-[30px] bg-gray-100 rounded-full overflow-hidden mb-4">
-          {cargabilidadData.map((item, index) => {
-            // Calculate the width and position
-            const width = `${item.allocation}%`;
-            const position = index === 0 ? '0' : 
-                            cargabilidadData.slice(0, index).reduce((sum, i) => sum + i.allocation, 0) + '%';
-            
-            // Map color to actual class
-            const colorClass = {
-              emerald: "bg-emerald-500",
-              blue: "bg-blue-500",
-              purple: "bg-purple-500"
-            }[item.color] || "bg-gray-500";
-            
-            return (
-              <div 
-                key={index}
-                className={`absolute h-full ${colorClass}`}
-                style={{ width, left: position }}
-              ></div>
-            );
-          })}
-        </div>
-        
-        <div className="flex justify-between">
-          <div>
-            <p className="text-gray-600">Cargabilidad total</p>
-            <p className="text-2xl font-bold">{totalAllocation}%</p>
-          </div>
-          <div className="text-right">
-            <p className="text-gray-600">Disponibilidad</p>
-            <p className="text-2xl font-bold">{100 - totalAllocation}%</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Detailed allocation */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h2 className="text-xl font-bold mb-6 pb-3 border-b border-gray-100">Proyectos</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proyecto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha inicio</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha fin</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargabilidad</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {cargabilidadData.map((item, index) => (
-                <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.project}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.client}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.startDate}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.endDate}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="mr-2">
-                        <div className={`h-4 w-4 rounded-full ${
-                          item.color === 'emerald' ? 'bg-emerald-500' :
-                          item.color === 'blue' ? 'bg-blue-500' :
-                          'bg-purple-500'
-                        }`}></div>
-                      </div>
-                      <span className="font-medium">{item.allocation}%</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    </main>
   );
-}
+};
+
+export default PersonalLoadPage;
