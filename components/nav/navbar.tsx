@@ -7,7 +7,7 @@ export default function Navbar() {
     return (
         <div className="flex flex-col h-full w-[320px] bg-white border-r border-gray-100 shadow-sm">
             <div className="flex h-full flex-col py-4">
-                <div className="pl-8 mb-4">
+                <div className="flex justify-center py-3 mb-4 w-full ">
                     <img 
                         src="/accentureLogo.png" 
                         alt="Accenture Logo" 
