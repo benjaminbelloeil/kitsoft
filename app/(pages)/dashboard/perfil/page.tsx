@@ -4,6 +4,7 @@ import { userData } from "@/app/lib/data"; // Import userData from data.ts
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { Project } from '@/interfaces/project';
 import { Experience } from '@/interfaces/experience';
+import { Skill } from '@/interfaces/skill';
 
 // Import profile components
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -12,6 +13,15 @@ import ResumeUpload from "@/components/profile/ResumeUpload";
 import CertificatesSection from "@/components/profile/CertificatesSection";
 import SkillsSection from "@/components/profile/SkillsSection";
 import ExperienceSection from "@/components/profile/ExperienceSection";
+
+// Transform string skills to Skill objects if needed
+const transformSkills = (skillStrings: string[]): Skill[] => {
+  return skillStrings.map(skill => ({
+    Nombre: skill,
+    Nivel: 3, // Default level
+    Categoria: 'General' // Default category
+  }));
+};
 
 // Adapt the imported userData to match the new schema
 // This would be replaced by actual database fetching in production
@@ -36,11 +46,13 @@ const adaptedUserData: UserProfile = {
     Tipo: "Principal"
   },
   correo: {
+    ID_Correo: "email-id",
+    ID_Usuario: "some-uuid",
     Correo: userData.email,
     Tipo: "Principal"
   },
   projects: userData.projects as Project[],
-  skills: userData.skills,
+  skills: Array.isArray(userData.skills) ? transformSkills(userData.skills) : [],
   experience: userData.experience as Experience[]
 };
 
@@ -66,7 +78,7 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {/* Cargabilidad section */}
         <div className="md:col-span-2">
-          <CargabilidadSection projects={userProfile.projects} />
+          <CargabilidadSection projects={userProfile.projects || []} />
         </div>
 
         {/* Resume and Certificate column */}
@@ -75,15 +87,15 @@ export default function ProfilePage() {
           <ResumeUpload />
           
           {/* Certificate section */}
-          <CertificatesSection />
+          <CertificatesSection initialCertificates={userProfile.certificates} />
         </div>
       </div>
 
       {/* Skills section */}
-      <SkillsSection initialSkills={userProfile.skills} />
+      <SkillsSection initialSkills={userProfile.skills ? userProfile.skills.map(skill => skill.Nombre) : []} />
 
       {/* Experience section */}
-      <ExperienceSection initialExperiences={userProfile.experience} />
+      <ExperienceSection initialExperiences={userProfile.experience || []} />
     </div>
   );
 }
