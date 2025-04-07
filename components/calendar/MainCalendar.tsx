@@ -234,7 +234,7 @@ export default function MainCalendar({
 
       {/* Calendar grid - visible on medium screens and up */}
       <div className="hidden sm:grid sm:grid-cols-7 gap-1 mb-1 flex-shrink-0">
-        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day, i) => (
+        {['Dom','Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day, i) => (
           <div key={i} className="text-center py-2 font-medium text-gray-600 border-b border-gray-100">
             {day}
           </div>
@@ -243,7 +243,7 @@ export default function MainCalendar({
       
       {/* Calendar grid - visible on small screens */}
       <div className="grid grid-cols-7 sm:hidden gap-1 mb-1 flex-shrink-0">
-        {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, i) => (
+        {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((day, i) => (
           <div key={i} className="text-center py-1 font-medium text-xs text-gray-600 border-b border-gray-100">
             {day}
           </div>
@@ -338,11 +338,6 @@ export default function MainCalendar({
                       </div>
                     );
                   })}
-                  {events.length > 2 && (
-                    <div className="text-[10px] sm:text-xs text-gray-500 pl-0.5 sm:pl-1">
-                      + {events.length - 2} más
-                    </div>
-                  )}
                 </div>
               </div>
             );

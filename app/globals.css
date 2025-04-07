@@ -253,6 +253,24 @@ form button * {
   color: #ffffff !important;
 }
 
+/* Add these rules for our profile page buttons */
+button.bg-\[#A100FF\],
+button.bg-\[#A100FF\] *,
+button.bg-red-600,
+button.bg-red-600 * {
+  color: #ffffff !important;
+}
+
+button.bg-\[#A100FF\] svg,
+button.bg-red-600 svg {
+  color: #ffffff !important;
+}
+
+button.bg-\[#A100FF\] span,
+button.bg-red-600 span {
+  color: #ffffff !important;
+}
+
 /* Animation utilities */
 .fast-transition {
   transition: all 0.1s cubic-bezier(0.16, 1, 0.3, 1);
@@ -433,4 +451,9 @@ nav [role="tab"]:focus {
   form button * {
     color: #ffffff !important;
   }
+}
+
+.fixed.inset-0.z-50.bg-black.bg-opacity-60.flex.items-center.justify-center {
+  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.4);
 }
