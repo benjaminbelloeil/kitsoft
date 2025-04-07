@@ -11,8 +11,39 @@ import CertificatesSection from "@/components/profile/CertificatesSection";
 import SkillsSection from "@/components/profile/SkillsSection";
 import ExperienceSection from "@/components/profile/ExperienceSection";
 
+// Adapt the imported userData to match the new schema
+// This would be replaced by actual database fetching in production
+const adaptedUserData = {
+  ID_Usuario: "some-uuid",
+  Nombre: userData.name.split(' ')[0] || "",
+  Apellido: userData.name.split(' ').slice(1).join(' ') || "",
+  Titulo: userData.title,
+  Bio: userData.bio,
+  URL_Avatar: userData.avatar,
+  direccion: {
+    CP: "12345",
+    Pais: userData.location.split(', ')[2] || "México",
+    Estado: userData.location.split(', ')[1] || "CDMX",
+    Ciudad: userData.location.split(', ')[0] || "Ciudad de México",
+    Tipo: "Principal"
+  },
+  telefono: {
+    Codigo_Pais: "+52",
+    Codigo_Estado: "55",
+    Numero: userData.phone.replace(/\D/g, '') || "12345678",
+    Tipo: "Principal"
+  },
+  correo: {
+    Correo: userData.email,
+    Tipo: "Principal"
+  },
+  projects: userData.projects,
+  skills: userData.skills,
+  experience: userData.experience
+};
+
 export default function ProfilePage() {
-  const [userProfile, setUserProfile] = useState(userData);
+  const [userProfile, setUserProfile] = useState(adaptedUserData);
 
   const handleProfileUpdate = (updatedData: any) => {
     setUserProfile({

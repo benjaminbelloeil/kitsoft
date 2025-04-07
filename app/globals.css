@@ -457,3 +457,33 @@ nav [role="tab"]:focus {
   backdrop-filter: blur(4px);
   background-color: rgba(0, 0, 0, 0.4);
 }
+
+/* React Select Custom Styles */
+.select-control-uniform {
+  height: 42px;
+  min-height: 42px;
+}
+
+.select-value-container {
+  height: 42px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+}
+
+.select-indicators {
+  height: 42px;
+}
+
+.select-option {
+  padding: 8px 12px;
+}
+
+.select-option-flag {
+  display: flex;
+  align-items: center;
+}
+
+.country-flag {
+  margin-right: 8px;
+}
