@@ -1,14 +1,5 @@
 import React from "react";
-
-interface Project {
-  name: string;
-  cargabilidad: number;
-  color: string;
-}
-
-interface CargabilidadSectionProps {
-  projects: Project[];
-}
+import { CargabilidadSectionProps } from '@/interfaces/project';
 
 // Progress circle component for cargabilidad
 const ProgressCircle = ({ percentage, color }: { percentage: number, color: string }) => {

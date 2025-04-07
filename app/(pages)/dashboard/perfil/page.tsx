@@ -1,7 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { userData } from "@/app/lib/data"; // Import userData from data.ts
+import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
+import { Project } from '@/interfaces/project';
+import { Experience } from '@/interfaces/experience';
 
 // Import profile components
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -13,7 +15,7 @@ import ExperienceSection from "@/components/profile/ExperienceSection";
 
 // Adapt the imported userData to match the new schema
 // This would be replaced by actual database fetching in production
-const adaptedUserData = {
+const adaptedUserData: UserProfile = {
   ID_Usuario: "some-uuid",
   Nombre: userData.name.split(' ')[0] || "",
   Apellido: userData.name.split(' ').slice(1).join(' ') || "",
@@ -37,15 +39,15 @@ const adaptedUserData = {
     Correo: userData.email,
     Tipo: "Principal"
   },
-  projects: userData.projects,
+  projects: userData.projects as Project[],
   skills: userData.skills,
-  experience: userData.experience
+  experience: userData.experience as Experience[]
 };
 
 export default function ProfilePage() {
-  const [userProfile, setUserProfile] = useState(adaptedUserData);
+  const [userProfile, setUserProfile] = useState<UserProfile>(adaptedUserData);
 
-  const handleProfileUpdate = (updatedData: any) => {
+  const handleProfileUpdate = (updatedData: UserProfileUpdate) => {
     setUserProfile({
       ...userProfile,
       ...updatedData

@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { FiPlus, FiX, FiCheck } from "react-icons/fi";
-
-interface SkillsSectionProps {
-  initialSkills: string[];
-}
+import { SkillsSectionProps } from '@/interfaces/skill';
 
 export default function SkillsSection({ initialSkills }: SkillsSectionProps) {
   const [skills, setSkills] = useState<string[]>(initialSkills);

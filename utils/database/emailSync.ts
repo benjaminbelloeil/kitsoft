@@ -1,11 +1,5 @@
 import { createClient } from '@/utils/supabase/client';
-
-export interface Correo {
-  ID_Correo: string;
-  Correo: string;
-  ID_Usuario: string;
-  Tipo: string;
-}
+import { Correo } from '@/interfaces/contact';
 
 /**
  * Get all emails for a specific user

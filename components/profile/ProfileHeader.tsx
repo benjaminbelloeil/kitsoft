@@ -9,60 +9,13 @@ import ReactCountryFlag from "react-country-flag";
 import { Country, State, City } from "country-state-city";
 import * as countryCodes from "country-codes-list";
 import { customSelectStyles } from './selectStyles';
-
-// Interfaces for dropdown options
-interface CountryOption {
-  value: string;
-  label: string;
-  code: string;
-}
-
-interface StateOption {
-  value: string;
-  label: string;
-  countryCode: string;
-  stateCode: string;
-}
-
-interface CityOption {
-  value: string;
-  label: string;
-}
-
-interface PhoneCodeOption {
-  value: string;
-  label: string;
-  code: string;
-
-}
+import { CountryOption, StateOption, CityOption } from '@/interfaces/address';
+import { PhoneCodeOption } from '@/interfaces/contact';
+import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 
 interface ProfileHeaderProps {
-  userData: {
-    ID_Usuario?: string;
-    Nombre: string;
-    Apellido: string;
-    Titulo: string;
-    Bio: string;
-    URL_Avatar: string;
-    direccion?: {
-      CP: string;
-      Pais: string;
-      Estado: string;
-      Ciudad: string;
-      Tipo: string;
-    };
-    telefono?: {
-      Codigo_Pais: string;
-      Codigo_Estado: string;
-      Numero: string;
-      Tipo: string;
-    };
-    correo?: {
-      Correo: string;
-      Tipo: string;
-    };
-  };
-  onProfileUpdate: (updatedData: any) => void;
+  userData: UserProfile;
+  onProfileUpdate: (updatedData: UserProfileUpdate) => void;
 }
 
 export default function ProfileHeader({ userData, onProfileUpdate }: ProfileHeaderProps) {
@@ -397,7 +350,7 @@ export default function ProfileHeader({ userData, onProfileUpdate }: ProfileHead
                 className="object-cover scale-140"
                 style={{ objectPosition: "center" }}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/160";
+                  (e.target as HTMLImageElement).src = "placeholder.png";
                 }}
               />
             </div>

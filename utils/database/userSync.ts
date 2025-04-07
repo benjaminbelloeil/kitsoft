@@ -1,18 +1,6 @@
 import { createClient } from '@/utils/supabase/client';
 import { createClient as createServerClient } from '@/utils/supabase/server';
-
-// Types for the usuario table matching the actual database schema
-export interface Usuario {
-  ID_Usuario: string;
-  Nombre?: string | null;
-  Apellido?: string | null;
-  Titulo?: string | null;
-  Bio?: string | null;
-  URL_Avatar?: string | null;
-  URL_Curriculum?: string | null;
-  Fecha_Inicio_Empleo?: string | null;
-  ID_PeopleLead?: string | null;
-}
+import { Usuario } from '@/interfaces/user';
 
 /**
  * This function can be used to get a user's profile from the usuario table
