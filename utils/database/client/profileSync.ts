@@ -3,22 +3,20 @@ import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 
 /**
  * Saves complete user profile data to the database
- * This handles the usuario, direccion, telefono, and correo tables
- * @param profileData - Complete user profile data to save
- * @returns Success status and any error messages
+ * Using lowercase table names to avoid case sensitivity issues
  */
 export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{success: boolean, error?: string}> {
   const supabase = createClient();
   
   try {
-    console.log("Starting profile save with data:", profileData);
+    console.log("Starting profile save...");
     
     // Basic validation
     if (!profileData.ID_Usuario) {
       return { success: false, error: 'ID de usuario no proporcionado' };
     }
     
-    // Keep it simple - use lowercase table names and direct SQL if needed
+    // Prepare user data with lowercase field names
     const userData = {
       id_usuario: profileData.ID_Usuario,
       nombre: profileData.Nombre || '',
@@ -27,41 +25,19 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
       bio: profileData.Bio || '',
       url_avatar: profileData.URL_Avatar || 'placeholder-avatar.png'
     };
-
-    console.log("Using direct SQL to save user data");
     
-    // Use direct SQL for user data to avoid issues with REST API
-    const { error: sqlError } = await supabase.rpc('save_user_profile', {
-      p_id_usuario: userData.id_usuario,
-      p_nombre: userData.nombre,
-      p_apellido: userData.apellido,
-      p_titulo: userData.titulo,
-      p_bio: userData.bio,
-      p_url_avatar: userData.url_avatar
-    });
+    // Insert or update the user record
+    const { error: userError } = await supabase
+      .from('usuarios')
+      .upsert(userData);
     
-    if (sqlError) {
-      console.error("SQL error:", sqlError);
-      
-      // Try direct insert as fallback
-      console.log("Trying direct insert as fallback...");
-      const { error: insertError } = await supabase
-        .from('usuarios')
-        .upsert(userData);
-        
-      if (insertError) {
-        console.error("Insert error:", insertError);
-        return { 
-          success: false, 
-          error: `Error guardando usuario: ${insertError.message || 'Error desconocido'}`
-        };
-      }
+    if (userError) {
+      console.error('Error saving user:', userError);
+      return { success: false, error: `Error al guardar usuario: ${userError.message || 'Error desconocido'}` };
     }
     
-    console.log("User data saved successfully");
-    
-    // Save address if provided
-    if (profileData.direccion) {
+    // Process address if provided
+    if (profileData.direccion && profileData.direccion.Pais) {
       const direccionData = {
         id_direccion: profileData.direccion.ID_Direccion || crypto.randomUUID(),
         cp: profileData.direccion.CP || '',
@@ -72,20 +48,17 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
         tipo: ''
       };
       
-      console.log("Saving direccion:", direccionData);
-      
-      const { error } = await supabase
+      const { error: addressError } = await supabase
         .from('direcciones')
         .upsert(direccionData);
-        
-      if (error) {
-        console.error("Error saving direccion:", error);
-        // Continue with other operations
+      
+      if (addressError) {
+        console.error('Error saving address:', addressError);
       }
     }
     
-    // Save phone if provided
-    if (profileData.telefono) {
+    // Process phone if provided
+    if (profileData.telefono && profileData.telefono.Numero) {
       const telefonoData = {
         id_telefono: profileData.telefono.ID_Telefono || crypto.randomUUID(),
         codigo_pais: profileData.telefono.Codigo_Pais || '',
@@ -95,68 +68,60 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
         tipo: ''
       };
       
-      console.log("Saving telefono:", telefonoData);
-      
-      const { error } = await supabase
+      const { error: phoneError } = await supabase
         .from('telefonos')
         .upsert(telefonoData);
-        
-      if (error) {
-        console.error("Error saving telefono:", error);
-        // Continue with other operations
+      
+      if (phoneError) {
+        console.error('Error saving phone:', phoneError);
       }
     }
     
-    // Save email if provided
+    // Process email if provided (only for new users)
     if (profileData.correo?.Correo) {
-      // Check if email exists for this user
-      const { data: existingEmail, error: checkError } = await supabase
+      // Check if email already exists
+      const { data: existingEmail } = await supabase
         .from('correos')
         .select('id_correo')
         .eq('id_usuario', profileData.ID_Usuario)
         .maybeSingle();
       
-      if (!existingEmail && !checkError) {
+      // Only insert if doesn't exist
+      if (!existingEmail) {
         const correoData = {
-          id_correo: profileData.correo.ID_Correo || crypto.randomUUID(),
+          id_correo: crypto.randomUUID(),
           correo: profileData.correo.Correo,
           id_usuario: profileData.ID_Usuario,
           tipo: profileData.correo.Tipo || ''
         };
         
-        console.log("Saving correo:", correoData);
-        
-        const { error } = await supabase
+        const { error: emailError } = await supabase
           .from('correos')
-          .upsert(correoData);
-          
-        if (error) {
-          console.error("Error saving correo:", error);
-          // Continue with other operations
+          .insert(correoData);
+        
+        if (emailError) {
+          console.error('Error saving email:', emailError);
         }
       }
     }
     
     return { success: true };
   } catch (error: any) {
-    console.error("Unexpected error in saveUserProfile:", error);
-    return { 
-      success: false, 
-      error: `Error inesperado: ${error?.message || error?.toString() || 'Error desconocido'}`
-    };
+    console.error('Error in saveUserProfile:', error);
+    return { success: false, error: `Error inesperado: ${error?.message || 'Error desconocido'}` };
   }
 }
 
 /**
  * Fetches the complete user profile including related data
- * @param userId - The user's ID
- * @returns Complete user profile data or null if not found
  */
 export async function getUserCompleteProfile(userId: string): Promise<UserProfile | null> {
   const supabase = createClient();
   
   try {
-    // Use lowercase table names consistently
+    console.log(`Fetching profile for user ID: ${userId}`);
+    
+    // Get the main user data with error handling
     const { data: userData, error: userError } = await supabase
       .from('usuarios')
       .select('*')
@@ -164,74 +129,99 @@ export async function getUserCompleteProfile(userId: string): Promise<UserProfil
       .single();
     
     if (userError) {
-      console.error('Error fetching user:', userError);
+      console.error(`Error fetching user: ${userError.message}`, userError);
+      // Try direct debugging
+      const { data: checkUser } = await supabase
+        .from('usuarios')
+        .select('*');
+      console.log(`All users in database:`, checkUser);
       return null;
     }
     
-    // Now get related data with lowercase table names
-    const [dirResponse, telResponse, emailResponse] = await Promise.all([
-      // Get direccion
+    console.log(`Found user data:`, userData);
+    
+    // Get related data
+    const [addressData, phoneData, emailData] = await Promise.all([
+      // Get address with better error handling
       supabase
         .from('direcciones')
         .select('*')
         .eq('id_usuario', userId)
-        .maybeSingle(),
+        .maybeSingle()
+        .then(res => {
+          if (res.error) console.error(`Error fetching address: ${res.error.message}`);
+          console.log(`Address data:`, res.data);
+          return res;
+        }),
       
-      // Get telefono
+      // Get phone with better error handling
       supabase
         .from('telefonos')
         .select('*')
         .eq('id_usuario', userId)
-        .maybeSingle(),
+        .maybeSingle()
+        .then(res => {
+          if (res.error) console.error(`Error fetching phone: ${res.error.message}`);
+          console.log(`Phone data:`, res.data);
+          return res;
+        }),
       
-      // Get correo
+      // Get email with better error handling
       supabase
         .from('correos')
         .select('*')
         .eq('id_usuario', userId)
         .maybeSingle()
+        .then(res => {
+          if (res.error) console.error(`Error fetching email: ${res.error.message}`);
+          console.log(`Email data:`, res.data);
+          return res;
+        })
     ]);
     
-    // Map lowercase data to uppercase interface
+    // Map the data to our interface - ensure defaults for all fields
     const profileData: UserProfile = {
       ID_Usuario: userData.id_usuario,
       Nombre: userData.nombre || '',
       Apellido: userData.apellido || '',
       Titulo: userData.titulo || '',
       Bio: userData.bio || '',
-      URL_Avatar: userData.url_avatar || '/.png',
-      URL_Curriculum: userData.url_curriculum,
-      Fecha_Inicio_Empleo: userData.fecha_inicio_empleo,
-      ID_PeopleLead: userData.id_peoplelead,
+      URL_Avatar: userData.url_avatar || 'placeholder-avatar.png',
+      URL_Curriculum: userData.url_curriculum || null,
+      Fecha_Inicio_Empleo: userData.fecha_inicio_empleo || null,
+      ID_PeopleLead: userData.id_peoplelead || null,
       
-      // Map related data
-      direccion: dirResponse.data ? {
-        ID_Direccion: dirResponse.data.id_direccion,
-        CP: dirResponse.data.cp || '',
-        Pais: dirResponse.data.pais || '',
-        Estado: dirResponse.data.estado || '',
-        Ciudad: dirResponse.data.ciudad || '',
-        ID_Usuario: dirResponse.data.id_usuario,
-        Tipo: dirResponse.data.tipo || ''
+      // Map address with careful null checks
+      direccion: addressData.data ? {
+        ID_Direccion: addressData.data.id_direccion,
+        CP: addressData.data.cp || '',
+        Pais: addressData.data.pais || '',
+        Estado: addressData.data.estado || '',
+        Ciudad: addressData.data.ciudad || '',
+        ID_Usuario: addressData.data.id_usuario,
+        Tipo: addressData.data.tipo || ''
       } : undefined,
       
-      telefono: telResponse.data ? {
-        ID_Telefono: telResponse.data.id_telefono,
-        Codigo_Pais: telResponse.data.codigo_pais || '',
-        Codigo_Estado: telResponse.data.codigo_estado || '',
-        Numero: telResponse.data.numero || '',
-        ID_Usuario: telResponse.data.id_usuario,
-        Tipo: telResponse.data.tipo || ''
+      // Map phone with careful null checks
+      telefono: phoneData.data ? {
+        ID_Telefono: phoneData.data.id_telefono,
+        Codigo_Pais: phoneData.data.codigo_pais || '',
+        Codigo_Estado: phoneData.data.codigo_estado || '',
+        Numero: phoneData.data.numero || '',
+        ID_Usuario: phoneData.data.id_usuario,
+        Tipo: phoneData.data.tipo || ''
       } : undefined,
       
-      correo: emailResponse.data ? {
-        ID_Correo: emailResponse.data.id_correo,
-        Correo: emailResponse.data.correo || '',
-        ID_Usuario: emailResponse.data.id_usuario,
-        Tipo: emailResponse.data.tipo || ''
+      // Map email with careful null checks
+      correo: emailData.data ? {
+        ID_Correo: emailData.data.id_correo,
+        Correo: emailData.data.correo || '',
+        ID_Usuario: emailData.data.id_usuario,
+        Tipo: emailData.data.tipo || ''
       } : undefined
     };
     
+    console.log(`Returning profile data:`, profileData);
     return profileData;
   } catch (error) {
     console.error('Unexpected error in getUserCompleteProfile:', error);

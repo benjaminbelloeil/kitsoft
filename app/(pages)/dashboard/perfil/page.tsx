@@ -69,6 +69,8 @@ export default function ProfilePage() {
           return;
         }
         
+        console.log("Current authenticated user:", user.id);
+        
         // Update the empty profile with the correct user ID
         setUserProfile(prev => ({
           ...prev,
@@ -76,18 +78,25 @@ export default function ProfilePage() {
         }));
         
         // Try to fetch complete profile
+        console.log("Fetching profile data for user:", user.id);
         const profileData = await getUserCompleteProfile(user.id);
+        console.log("Profile data received:", profileData);
         
         if (profileData) {
           // If profile exists, use it but keep the projects/skills/experience
-          setUserProfile(prev => ({
-            ...profileData,
-            projects: prev.projects,
-            skills: prev.skills,
-            experience: prev.experience
-          }));
+          setUserProfile(prev => {
+            console.log("Updating user profile with:", profileData);
+            return {
+              ...profileData,
+              // Ensure these properties exist
+              projects: prev.projects || [],
+              skills: prev.skills || [],
+              experience: prev.experience || []
+            };
+          });
           setIsNewUser(false);
         } else {
+          console.log("No profile data found, user is new");
           // It's a new user, keep the empty profile but with the correct ID
           setIsNewUser(true);
         }
