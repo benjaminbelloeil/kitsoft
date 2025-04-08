@@ -104,3 +104,25 @@ export async function syncUserAuthDetails(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Get the authenticated user's email from Supabase Auth
+ * @returns The user's email or null if not authenticated
+ */
+export async function getAuthUserEmail(): Promise<string | null> {
+  const supabase = createClient();
+  
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    
+    if (error || !data.user) {
+      console.error('Error fetching auth user:', error);
+      return null;
+    }
+    
+    return data.user.email || null;
+  } catch (err) {
+    console.error('Error in getAuthUserEmail:', err);
+    return null;
+  }
+}

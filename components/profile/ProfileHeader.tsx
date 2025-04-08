@@ -12,6 +12,7 @@ import { customSelectStyles } from './selectStyles';
 import { CountryOption, StateOption, CityOption } from '@/interfaces/address';
 import { PhoneCodeOption } from '@/interfaces/contact';
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
+import { getAuthUserEmail } from '@/utils/database/client/userSync';
 
 interface ProfileHeaderProps {
   userData: UserProfile;
@@ -23,6 +24,7 @@ export default function ProfileHeader({ userData, onProfileUpdate }: ProfileHead
   const [formData, setFormData] = useState({ ...userData });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [authEmail, setAuthEmail] = useState<string | null>(null);
   
   // State for dropdown options
   const [countries, setCountries] = useState<CountryOption[]>([]);
@@ -143,6 +145,30 @@ export default function ProfileHeader({ userData, onProfileUpdate }: ProfileHead
     setCities(cityData);
     setIsLoading(prev => ({...prev, cities: false}));
   };
+  
+  // Fetch the authenticated user's email
+  useEffect(() => {
+    async function fetchAuthEmail() {
+      const email = await getAuthUserEmail();
+      setAuthEmail(email);
+      
+      // Update the form data with the auth email if correo doesn't exist
+      if (email && (!formData.correo || !formData.correo.Correo)) {
+        setFormData(prev => ({
+          ...prev,
+          correo: {
+            // Ensure all required fields have default values
+            ID_Correo: prev.correo?.ID_Correo || '',
+            ID_Usuario: prev.correo?.ID_Usuario || '',
+            Tipo: prev.correo?.Tipo || '',
+            Correo: email
+          }
+        }));
+      }
+    }
+    
+    fetchAuthEmail();
+  }, []);
   
   // Handler for country selection
   const handleCountryChange = (selectedOption: CountryOption | null) => {
@@ -417,13 +443,13 @@ export default function ProfileHeader({ userData, onProfileUpdate }: ProfileHead
                   <input
                     type="email"
                     name="correo.Correo"
-                    value={formData.correo?.Correo || ''}
+                    value={authEmail || formData.correo?.Correo || ''}
                     disabled
                     className="w-full p-2 border border-gray-300 rounded bg-gray-100 cursor-not-allowed focus:outline-none"
                     style={{ height: '42px' }}
-                    title="El correo no se puede cambiar"
+                    title="El email no se puede cambiar"
                   />
-                  <p className="text-xs text-gray-500 mt-1"></p>
+                  <p className="text-xs text-gray-500 mt-1">Email asociado a tu cuenta</p>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
@@ -615,7 +641,9 @@ export default function ProfileHeader({ userData, onProfileUpdate }: ProfileHead
               </div>
               
               <div className="mt-4 space-y-1">
-                <p className="text-gray-600"><strong>Email:</strong> {userData.correo?.Correo || 'No email provided'}</p>
+                <p className="text-gray-600">
+                  <strong>Email:</strong> {authEmail || userData.correo?.Correo || 'No email provided'}
+                </p>
                 <p className="text-gray-600">
                   <strong>Teléfono:</strong> 
                   {userData.telefono ? 
