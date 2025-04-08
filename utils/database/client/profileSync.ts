@@ -55,7 +55,7 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
         }
         
         console.log('User created using function:', fnData);
-      } catch (fnCatchError) {
+      } catch (fnCatchError: any) {
         console.error('Exception using save_user_profile function:', fnCatchError);
         return { success: false, error: `Error al guardar usuario: ${userError.message || 'Error desconocido'}` };
       }
@@ -67,7 +67,6 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
     if (profileData.direccion && profileData.direccion.Pais) {
       const direccionData = {
         id_direccion: profileData.direccion.ID_Direccion || crypto.randomUUID(),
-        cp: profileData.direccion.CP || '',
         pais: profileData.direccion.Pais || '',
         estado: profileData.direccion.Estado || '',
         ciudad: profileData.direccion.Ciudad || '',
@@ -75,13 +74,31 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
         tipo: ''
       };
       
+      console.log("Saving address data:", direccionData);
+      
+      // First try to get existing address
+      const { data: existingAddress } = await supabase
+        .from('direccion')
+        .select('id_direccion')
+        .eq('id_usuario', profileData.ID_Usuario)
+        .maybeSingle();
+      
+      // If already exists, update with existing ID
+      if (existingAddress?.id_direccion) {
+        direccionData.id_direccion = existingAddress.id_direccion;
+      }
+      
       const { error: addressError } = await supabase
-        .from('direcciones')
+        .from('direccion')
         .upsert(direccionData);
       
       if (addressError) {
         console.error('Error saving address:', addressError);
+      } else {
+        console.log('Address saved successfully');
       }
+    } else {
+      console.log('No address data provided or incomplete');
     }
     
     // Process phone if provided
@@ -95,13 +112,29 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
         tipo: ''
       };
       
+      // First try to get existing phone
+      const { data: existingPhone } = await supabase
+        .from('telefono')
+        .select('id_telefono')
+        .eq('id_usuario', profileData.ID_Usuario)
+        .maybeSingle();
+        
+      // If already exists, update with existing ID
+      if (existingPhone?.id_telefono) {
+        telefonoData.id_telefono = existingPhone.id_telefono;
+      }
+      
       const { error: phoneError } = await supabase
-        .from('telefonos')
+        .from('telefono')
         .upsert(telefonoData);
       
       if (phoneError) {
         console.error('Error saving phone:', phoneError);
+      } else {
+        console.log('Phone saved successfully');
       }
+    } else {
+      console.log('No phone data provided or incomplete');
     }
     
     // Process email if provided (only for new users)
@@ -167,44 +200,64 @@ export async function getUserCompleteProfile(userId: string): Promise<UserProfil
     
     console.log(`Found user data:`, userData);
     
-    // Get related data
-    const [addressData, phoneData, emailData] = await Promise.all([
-      // Get address with better error handling
-      supabase
-        .from('direcciones')
+    // Get related data - switched to the singular table names
+    const addressData: { data: any | null, error: any | null } = { data: null, error: null };
+    const phoneData: { data: any | null, error: any | null } = { data: null, error: null };
+    const emailData: { data: any | null, error: any | null } = { data: null, error: null };
+    
+    try {
+      // Get address 
+      const addressResult = await supabase
+        .from('direccion')
         .select('*')
         .eq('id_usuario', userId)
-        .maybeSingle()
-        .then(res => {
-          if (res.error) console.error(`Error fetching address: ${res.error.message}`);
-          console.log(`Address data:`, res.data);
-          return res;
-        }),
-      
-      // Get phone with better error handling
-      supabase
-        .from('telefonos')
+        .maybeSingle();
+        
+      if (addressResult.error) {
+        console.error(`Error fetching address: ${addressResult.error.message}`);
+      } else {
+        addressData.data = addressResult.data;
+      }
+      console.log(`Address data:`, addressData.data);
+    } catch (err) {
+      console.error('Error fetching address:', err);
+    }
+    
+    try {
+      // Get phone
+      const phoneResult = await supabase
+        .from('telefono')
         .select('*')
         .eq('id_usuario', userId)
-        .maybeSingle()
-        .then(res => {
-          if (res.error) console.error(`Error fetching phone: ${res.error.message}`);
-          console.log(`Phone data:`, res.data);
-          return res;
-        }),
-      
-      // Get email with better error handling
-      supabase
+        .maybeSingle();
+        
+      if (phoneResult.error) {
+        console.error(`Error fetching phone: ${phoneResult.error.message}`);
+      } else {
+        phoneData.data = phoneResult.data;
+      }
+      console.log(`Phone data:`, phoneData.data);
+    } catch (err) {
+      console.error('Error fetching phone:', err);
+    }
+    
+    try {
+      // Get email
+      const emailResult = await supabase
         .from('correos')
         .select('*')
         .eq('id_usuario', userId)
-        .maybeSingle()
-        .then(res => {
-          if (res.error) console.error(`Error fetching email: ${res.error.message}`);
-          console.log(`Email data:`, res.data);
-          return res;
-        })
-    ]);
+        .maybeSingle();
+        
+      if (emailResult.error) {
+        console.error(`Error fetching email: ${emailResult.error.message}`);
+      } else {
+        emailData.data = emailResult.data;
+      }
+      console.log(`Email data:`, emailData.data);
+    } catch (err) {
+      console.error('Error fetching email:', err);
+    }
     
     // Map the data to our interface - ensure defaults for all fields
     const profileData: UserProfile = {
@@ -221,7 +274,6 @@ export async function getUserCompleteProfile(userId: string): Promise<UserProfil
       // Map address with careful null checks
       direccion: addressData.data ? {
         ID_Direccion: addressData.data.id_direccion,
-        CP: addressData.data.cp || '',
         Pais: addressData.data.pais || '',
         Estado: addressData.data.estado || '',
         Ciudad: addressData.data.ciudad || '',

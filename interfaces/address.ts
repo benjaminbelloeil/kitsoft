@@ -1,6 +1,5 @@
 export interface Direccion {
   ID_Direccion?: string;
-  CP: string;
   Pais: string;
   Estado: string;
   Ciudad: string;

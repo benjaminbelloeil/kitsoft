@@ -2,14 +2,14 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { FiEdit2, FiSave, FiX } from "react-icons/fi";
 import Select from 'react-select';
 import ReactCountryFlag from "react-country-flag";
 import { Country, State, City } from "country-state-city";
 import * as countryCodes from "country-codes-list";
 import { customSelectStyles } from './selectStyles';
-import { CountryOption, StateOption, CityOption } from '@/interfaces/address';
+import { CountryOption, StateOption, CityOption, Direccion } from '@/interfaces/address';
 import { PhoneCodeOption } from '@/interfaces/contact';
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { getAuthUserEmail } from '@/utils/database/client/userSync';
@@ -37,7 +37,6 @@ export default function ProfileHeader({
     URL_Avatar: 'placeholder-avatar.png', // Ensure proper URL format with leading slash
     direccion: {
       ID_Direccion: crypto.randomUUID(),
-      CP: '',
       Pais: '',
       Estado: '',
       Ciudad: '',
@@ -86,7 +85,7 @@ export default function ProfileHeader({
     cities: false
   });
   
-  // Load countries, states and cities from country-state-city package
+  // Load initial countries and related data
   useEffect(() => {
     // Load all countries
     const countryData = Country.getAllCountries().map(country => ({
@@ -101,13 +100,10 @@ export default function ProfileHeader({
       const foundCountry = countryData.find(country => country.value === formData.direccion?.Pais);
       if (foundCountry) {
         setSelectedCountry(foundCountry.code);
-        
-        // Load states for this country
-        loadStatesForCountry(foundCountry.code);
       }
     }
     
-    // Load phone codes from country-codes-list
+    // Load all phone codes
     try {
       const myCountryCodesObject = countryCodes.customList(
         "countryCode",
@@ -116,10 +112,9 @@ export default function ProfileHeader({
       
       // Transform the data into the format we need for the dropdown
       const phoneCodeOptions = Object.entries(myCountryCodesObject).map(([code, label]) => {
-        const callingCode = label.split(': ')[1]; // Extract "+XX" part
         return {
-          value: callingCode,
-          label: callingCode,
+          value: `+${label.split('+')[1]}`,
+          label: `+${label.split('+')[1]}`,
           code: code
         };
       });
@@ -137,13 +132,8 @@ export default function ProfileHeader({
       setPhoneCodes(fallbackPhoneCodes);
     }
     
-    setIsLoading({
-      countries: false,
-      phoneCodes: false,
-      states: false,
-      cities: false
-    });
-  }, []);
+    setIsLoading(prev => ({...prev, countries: false, phoneCodes: false}));
+  }, [formData.direccion?.Pais]);
   
   // Fetch the authenticated user's email
   useEffect(() => {
@@ -169,8 +159,23 @@ export default function ProfileHeader({
     fetchAuthEmail();
   }, []);
   
-  // Load states for selected country
-  const loadStatesForCountry = (countryCode: string) => {
+  // Load cities for selected state and country
+  const loadCitiesForState = useCallback((countryCode: string, stateCode: string) => {
+    if (!countryCode || !stateCode) return;
+    
+    setIsLoading(prev => ({...prev, cities: true}));
+    
+    const cityData = City.getCitiesOfState(countryCode, stateCode).map(city => ({
+      value: city.name,
+      label: city.name
+    }));
+    
+    setCities(cityData);
+    setIsLoading(prev => ({...prev, cities: false}));
+  }, []);
+  
+  // Load states for a selected country
+  const loadStatesForCountry = useCallback((countryCode: string) => {
     if (!countryCode) return;
     
     setIsLoading(prev => ({...prev, states: true}));
@@ -196,34 +201,36 @@ export default function ProfileHeader({
     }
     
     setIsLoading(prev => ({...prev, states: false}));
-  };
+  }, [formData.direccion?.Estado, loadCitiesForState]);
   
-  // Load cities for selected state and country
-  const loadCitiesForState = (countryCode: string, stateCode: string) => {
-    if (!countryCode || !stateCode) return;
-    
-    setIsLoading(prev => ({...prev, cities: true}));
-    
-    const cityData = City.getCitiesOfState(countryCode, stateCode).map(city => ({
-      value: city.name,
-      label: city.name
-    }));
-    
-    setCities(cityData);
-    setIsLoading(prev => ({...prev, cities: false}));
-  };
+  // Load states if the country is selected or changes
+  useEffect(() => {
+    if (formData.direccion?.Pais && selectedCountry) {
+      loadStatesForCountry(selectedCountry);
+    }
+  }, [formData.direccion?.Pais, selectedCountry, loadStatesForCountry]);
+  
+  // Load initial state and city data if values exist
+  useEffect(() => {
+    if (formData.direccion?.Pais) {
+      const foundCountry = countries.find(country => country.value === formData.direccion?.Pais);
+      if (foundCountry) {
+        setSelectedCountry(foundCountry.code);
+        loadStatesForCountry(foundCountry.code);
+      }
+    }
+  }, [formData.direccion?.Pais, countries, loadStatesForCountry]);
   
   // Handler for country selection
   const handleCountryChange = (selectedOption: CountryOption | null) => {
     if (selectedOption) {
+      console.log("Country selected:", selectedOption);
+      
       setFormData(prev => ({
         ...prev,
         direccion: {
-          // Ensure all required fields have string values
-          CP: prev.direccion?.CP || '',
-          Tipo: prev.direccion?.Tipo || '',
+          ...prev.direccion as Direccion,
           Pais: selectedOption.value,
-          // Reset the state and city when country changes
           Estado: '',
           Ciudad: ''
         }
@@ -242,12 +249,8 @@ export default function ProfileHeader({
       setFormData(prev => ({
         ...prev,
         direccion: {
-          // Ensure all required fields have string values
-          CP: prev.direccion?.CP || '',
-          Pais: prev.direccion?.Pais || '',
-          Tipo: prev.direccion?.Tipo || '',
+          ...prev.direccion as Direccion,
           Estado: selectedOption.value,
-          // Reset the city when state changes
           Ciudad: ''
         }
       }));
@@ -266,12 +269,7 @@ export default function ProfileHeader({
       setFormData(prev => ({
         ...prev,
         direccion: {
-          // Ensure all required fields have string values
-          CP: prev.direccion?.CP || '',
-          Pais: prev.direccion?.Pais || '',
-          Estado: prev.direccion?.Estado || '',
-          Tipo: prev.direccion?.Tipo || '',
-          // Then set the new city value
+          ...prev.direccion as Direccion,
           Ciudad: selectedOption.value
         }
       }));
@@ -318,6 +316,8 @@ export default function ProfileHeader({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("Form submission - Current form data:", formData);
+    
     // Ensure IDs exist for new records and match database schema
     const dataToSubmit = {
       // Main user data - matches Usuarios table
@@ -333,15 +333,14 @@ export default function ProfileHeader({
       ID_PeopleLead: undefined,
       
       // Address data - matches Direcciones table
-      direccion: formData.direccion ? {
-        ID_Direccion: formData.direccion.ID_Direccion || crypto.randomUUID(),
-        CP: formData.direccion.CP || '',
-        Pais: formData.direccion.Pais,
-        Estado: formData.direccion.Estado,
-        Ciudad: formData.direccion.Ciudad,
+      direccion: {
+        ID_Direccion: formData.direccion?.ID_Direccion || crypto.randomUUID(),
+        Pais: formData.direccion?.Pais || '',
+        Estado: formData.direccion?.Estado || '',
+        Ciudad: formData.direccion?.Ciudad || '',
         ID_Usuario: formData.ID_Usuario,
         Tipo: '' // Blank field as requested
-      } : undefined,
+      },
       
       // Phone data - matches Telefonos table
       telefono: formData.telefono ? {
@@ -362,6 +361,7 @@ export default function ProfileHeader({
       } : undefined
     };
     
+    console.log("Submitting profile data:", dataToSubmit);
     onProfileUpdate(dataToSubmit);
     setIsEditing(false);
     setPreviewImage(null);
@@ -567,7 +567,9 @@ export default function ProfileHeader({
                     style={{ height: '42px' }}
                     title="El email no se puede cambiar"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Email asociado a tu cuenta</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Email asociado a tu cuenta
+                  </p>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
@@ -627,9 +629,7 @@ export default function ProfileHeader({
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    País <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
                   <Select
                     isLoading={isLoading.countries}
                     options={countries}
@@ -707,19 +707,6 @@ export default function ProfileHeader({
                     menuPlacement="auto"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
-                  <input
-                    type="text"
-                    name="direccion.CP"
-                    value={formData.direccion?.CP || ''}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
-                    placeholder="12345"
-                    maxLength={10} // Match VARCHAR(10) in database
-                    style={{ height: '42px' }}
-                  />
-                </div>
               </div>
               
               <div>
@@ -744,7 +731,7 @@ export default function ProfileHeader({
                     type="button"
                     disabled={isSaving}
                     onClick={() => setIsEditing(false)} 
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 fast-transition shadow font-medium flex items-center gap-1 disabled:opacity-50"
+                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 fast-transition shadow-sm font-medium flex items-center gap-1 disabled:opacity-50"
                   >
                     <FiX size={16} className="text-white !important" />
                     <span className="text-white !important">Cancelar</span>
