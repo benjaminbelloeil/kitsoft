@@ -9,7 +9,7 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
   const supabase = createClient();
   
   try {
-    console.log("Starting profile save...");
+    console.log("Starting profile save with: ", JSON.stringify(profileData, null, 2));
     
     // Basic validation
     if (!profileData.ID_Usuario) {
@@ -26,14 +26,41 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
       url_avatar: profileData.URL_Avatar || 'placeholder-avatar.png'
     };
     
+    console.log("Attempting to upsert to usuarios table with data:", userData);
+    
     // Insert or update the user record
-    const { error: userError } = await supabase
+    const { data: upsertData, error: userError } = await supabase
       .from('usuarios')
-      .upsert(userData);
+      .upsert(userData)
+      .select();
     
     if (userError) {
       console.error('Error saving user:', userError);
-      return { success: false, error: `Error al guardar usuario: ${userError.message || 'Error desconocido'}` };
+      
+      // Try to create the user using the Postgres function instead
+      try {
+        const { data: fnData, error: fnError } = await supabase
+          .rpc('save_user_profile', {
+            p_id_usuario: userData.id_usuario,
+            p_nombre: userData.nombre,
+            p_apellido: userData.apellido,
+            p_titulo: userData.titulo,
+            p_bio: userData.bio,
+            p_url_avatar: userData.url_avatar
+          });
+        
+        if (fnError) {
+          console.error('Error using function save_user_profile:', fnError);
+          return { success: false, error: `Error al guardar usuario: ${fnError.message || 'Error desconocido'}` };
+        }
+        
+        console.log('User created using function:', fnData);
+      } catch (fnCatchError) {
+        console.error('Exception using save_user_profile function:', fnCatchError);
+        return { success: false, error: `Error al guardar usuario: ${userError.message || 'Error desconocido'}` };
+      }
+    } else {
+      console.log('User upserted successfully:', upsertData);
     }
     
     // Process address if provided
@@ -106,10 +133,9 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
     }
     
     return { success: true };
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error in saveUserProfile:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-    return { success: false, error: `Error inesperado: ${errorMessage}` };
+    return { success: false, error: `Error inesperado: ${error?.message || 'Error desconocido'}` };
   }
 }
 
@@ -122,68 +148,6 @@ export async function getUserCompleteProfile(userId: string): Promise<UserProfil
   try {
     console.log(`Fetching profile for user ID: ${userId}`);
     
-    // First verify the authenticated user matches our user ID
-    const { data: { user: authUser } } = await supabase.auth.getUser();
-    console.log('Current auth user:', authUser?.id);
-    console.log('Requested user profile:', userId);
-    
-    if (!authUser || authUser.id !== userId) {
-      console.warn('Auth user ID does not match requested profile ID or not authenticated');
-    }
-    
-    // Check for existing tables and contents
-    console.log('Checking database tables...');
-    
-    // First try a direct query to debug database connection
-    const { data: tableData, error: tableError } = await supabase
-      .from('usuarios')
-      .select('id_usuario, nombre')
-      .limit(10);
-      
-    if (tableError) {
-      console.error('Error accessing usuarios table:', tableError);
-      
-      // Try a simple test query to check general database access
-      const { data: testData, error: testError } = await supabase
-        .from('auth')
-        .select('*')
-        .limit(1);
-      
-      console.log('Test query result:', testData, testError);
-    } else {
-      console.log('All users found in database:', tableData);
-    }
-    
-    // Try a direct retrieve of the specific user
-    console.log(`Attempting direct user lookup for ID: ${userId}`);
-    
-    // Try bypass with direct SQL if possible
-    const { data: directUser, error: directUserError } = await supabase.rpc(
-      'get_user_profile_by_id',
-      { user_id: userId }
-    );
-    
-    if (directUserError) {
-      console.log('Direct user lookup via RPC failed:', directUserError);
-      // RPC might not exist, continue with normal query
-    } else if (directUser) {
-      console.log('Found user via direct lookup:', directUser);
-      // If we got user data, format and return it
-      if (directUser) {
-        // Map the data to match our expected format
-        const profile: UserProfile = {
-          ID_Usuario: directUser.id_usuario,
-          Nombre: directUser.nombre || '',
-          Apellido: directUser.apellido || '',
-          Titulo: directUser.titulo || '',
-          Bio: directUser.bio || '',
-          URL_Avatar: directUser.url_avatar || 'placeholder-avatar.png',
-          // ...other fields...
-        };
-        return profile;
-      }
-    }
-    
     // Get the main user data with error handling
     const { data: userData, error: userError } = await supabase
       .from('usuarios')
@@ -193,38 +157,12 @@ export async function getUserCompleteProfile(userId: string): Promise<UserProfil
     
     if (userError) {
       console.error(`Error fetching user: ${userError.message}`, userError);
-      
-      // Try alternate approach - insert empty user
-      console.log('Attempting to create user profile since none exists');
-      
-      // Create basic user profile with minimal data
-      const { error: insertError } = await supabase
+      // Try direct debugging
+      const { data: checkUser } = await supabase
         .from('usuarios')
-        .insert({
-          id_usuario: userId,
-          nombre: '',
-          apellido: '',
-          titulo: '',
-          bio: '',
-          url_avatar: 'placeholder-avatar.png'
-        });
-        
-      if (insertError) {
-        console.error('Failed to create user profile:', insertError);
-        return null;
-      }
-      
-      // Return minimal profile if we just created it
-      const newProfile: UserProfile = {
-        ID_Usuario: userId,
-        Nombre: '',
-        Apellido: '',
-        Titulo: '',
-        Bio: '',
-        URL_Avatar: 'placeholder-avatar.png',
-      };
-      
-      return newProfile;
+        .select('*');
+      console.log(`All users in database:`, checkUser);
+      return null;
     }
     
     console.log(`Found user data:`, userData);

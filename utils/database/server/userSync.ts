@@ -8,9 +8,9 @@ import { Usuario } from '@/interfaces/user';
 export async function getAllUsers(): Promise<Usuario[]> {
   const supabase = await createServerClient();
   const { data, error } = await supabase
-    .from('Usuarios')
+    .from('usuarios')
     .select('*')
-    .order('ID_Usuario');
+    .order('id_usuario');
   
   if (error) {
     console.error('Error fetching users:', error);

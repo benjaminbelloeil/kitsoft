@@ -9,9 +9,9 @@ import { Usuario } from '@/interfaces/user';
 export async function getUserProfile(userId: string): Promise<Usuario | null> {
   const supabase = createClient();
   const { data, error } = await supabase
-    .from('Usuarios')
+    .from('usuarios')
     .select('*')
-    .eq('ID_Usuario', userId)
+    .eq('id_usuario', userId)
     .single();
   
   if (error || !data) {
@@ -35,9 +35,9 @@ export async function updateUserProfile(
 ): Promise<boolean> {
   const supabase = createClient();
   const { error } = await supabase
-    .from('Usuarios')
+    .from('usuarios')
     .update(userData)
-    .eq('ID_Usuario', userId);
+    .eq('id_usuario', userId);
   
   if (error) {
     console.error('Error updating user profile:', error);
@@ -56,9 +56,9 @@ export async function ensureUserExists(userId: string): Promise<boolean> {
   
   // First check if user already exists
   const { data: existingUser } = await supabase
-    .from('Usuarios')
-    .select('ID_Usuario')
-    .eq('ID_Usuario', userId)
+    .from('usuarios')
+    .select('id_usuario')
+    .eq('id_usuario', userId)
     .single();
   
   if (existingUser) {
@@ -67,9 +67,9 @@ export async function ensureUserExists(userId: string): Promise<boolean> {
   
   // If not, create the user
   const { error } = await supabase
-    .from('Usuarios')
+    .from('usuarios')
     .insert({
-      ID_Usuario: userId
+      id_usuario: userId
     });
   
   if (error) {
