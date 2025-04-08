@@ -2,9 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { CircularProgress } from '@/components/cargabilidad/CircularProgress';
-import { LinearProgress } from '@/components/cargabilidad/LinearProgress';
-import { WeeklyLoadChart } from '@/components/cargabilidad/WeeklyLoadChart';
 import { ProjectCard } from '@/components/cargabilidad/ProjectCard';
 import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
 import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';

@@ -418,10 +418,12 @@ export default function ProfileHeader({ userData, onProfileUpdate }: ProfileHead
                     type="email"
                     name="correo.Correo"
                     value={formData.correo?.Correo || ''}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
+                    disabled
+                    className="w-full p-2 border border-gray-300 rounded bg-gray-100 cursor-not-allowed focus:outline-none"
                     style={{ height: '42px' }}
+                    title="El correo no se puede cambiar"
                   />
+                  <p className="text-xs text-gray-500 mt-1"></p>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
