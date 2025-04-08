@@ -1,0 +1,26 @@
+.feedback-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; }
+  .feedback-board .feedback-container {
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(128, 128, 128, 0.2);
+    max-width: 400px;
+    transition: box-shadow 0.2s ease-out;
+    cursor: pointer; }
+    .feedback-board .feedback-container:hover {
+      box-shadow: 0 5px 10px rgba(134, 0, 212, 0.5); }
+    .feedback-board .feedback-container .date {
+      text-align: right; }
+    .feedback-board .feedback-container .message {
+      margin-top: 20px; }
+    .feedback-board .feedback-container .author {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: right; }
+    .feedback-board .feedback-container .project {
+      font-style: italic;
+      text-align: right; }
+
+/*# sourceMappingURL=page.module.css.map */
