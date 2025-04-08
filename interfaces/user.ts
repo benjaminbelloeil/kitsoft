@@ -28,7 +28,18 @@ export interface UserProfile extends Usuario {
 }
 
 // This type is used when updating a user profile
-export interface UserProfileUpdate extends Partial<Omit<Usuario, 'ID_Usuario'>> {
+// We explicitly require ID_Usuario for identification purposes
+// but mark it as readonly to indicate it shouldn't be changed
+export interface UserProfileUpdate {
+  readonly ID_Usuario: string;  // Required for identification but not for updating
+  Nombre?: string;
+  Apellido?: string;
+  Titulo?: string;
+  Bio?: string;
+  URL_Avatar?: string | null;
+  URL_Curriculum?: string | null;
+  Fecha_Inicio_Empleo?: string | null;
+  ID_PeopleLead?: string | null;
   direccion?: Partial<Direccion>;
   telefono?: Partial<Telefono>;
   correo?: Partial<Correo>;

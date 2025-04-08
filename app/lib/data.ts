@@ -313,7 +313,7 @@ export const userData = {
   email: "carlos.rodriguez@accenture.com",
   phone: "+34 612 345 678",
   bio: "Ingeniero de software con más de 7 años de experiencia en desarrollo fullstack. Especializado en React, Node.js y arquitecturas cloud.",
-  avatar: "/placeholder-image.png", 
+  avatar: "placeholder-avatar.png", 
   projects: [
     { id: "p1", name: "Project Nova", cargabilidad: 70, color: "emerald" },
     { id: "p2", name: "Accenture Cloud First", cargabilidad: 20, color: "blue" },
