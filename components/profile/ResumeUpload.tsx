@@ -1,12 +1,38 @@
-import React, { useState } from "react";
-import { FiDownload, FiTrash2 } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiDownload, FiTrash2 } from 'react-icons/fi';
+import { getUserCurriculum, updateUserCurriculum, deleteUserCurriculum } from '@/utils/database/client/curriculumSync';
+
+const downloadFile = (file: File) => {
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(file);
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+};
 
 export default function ResumeUpload() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const fetchCurriculum = async () => {
+      const file = await getUserCurriculum('a117b71c-e71d-4b67-ae8b-781bde0a817b');
+      if (file) {
+        setResumeFile(file);
+      }
+    };
+
+    fetchCurriculum();
+  }, []);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setResumeFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setResumeFile(file);
+      await updateUserCurriculum('a117b71c-e71d-4b67-ae8b-781bde0a817b', file, setStatus);
+      setStatus('Currículum actualizado correctamente.');
     }
   };
 
@@ -29,13 +55,25 @@ export default function ResumeUpload() {
               <span className="block text-gray-500 mt-1">{(resumeFile.size / 1024 / 1024).toFixed(2)} MB</span>
             </div>
             <div className="flex justify-center gap-2">
-              <button className="px-3 py-2 bg-[#A100FF] rounded flex items-center gap-1 hover:bg-[#8500D4] fast-transition shadow">
+              <button
+                className="px-3 py-2 bg-[#A100FF] rounded flex items-center gap-1 hover:bg-[#8500D4] fast-transition shadow"
+                onClick={() => {
+                  if (resumeFile) {
+                    downloadFile(resumeFile);
+                  }
+                }}
+              >
                 <FiDownload size={16} className="text-white !important" />
                 <span className="text-white !important">Descargar</span>
               </button>
               <button 
                 className="px-3 py-2 bg-red-600 rounded flex items-center gap-1 hover:bg-red-700 fast-transition shadow"
-                onClick={() => setResumeFile(null)}
+                onClick={async () => {
+                  if (resumeFile) {
+                    await deleteUserCurriculum('a117b71c-e71d-4b67-ae8b-781bde0a817b', resumeFile.name, setStatus);
+                    setResumeFile(null);
+                  }
+                }}
               >
                 <FiTrash2 size={16} className="text-white !important" />
                 <span className="text-white !important">Eliminar</span>
@@ -62,6 +100,7 @@ export default function ResumeUpload() {
           </div>
         )}
       </div>
+      {status && <p className="mt-4 text-sm text-center text-green-600">{status}</p>}
     </div>
   );
 }
