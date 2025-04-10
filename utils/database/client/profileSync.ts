@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/utils/supabase/client';
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 
@@ -23,7 +24,7 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
       apellido: profileData.Apellido || '',
       titulo: profileData.Titulo || '',
       bio: profileData.Bio || '',
-      url_avatar: profileData.URL_Avatar || 'placeholder-avatar.png'
+      url_avatar: profileData.URL_Avatar || null // Changed from 'placeholder-avatar.png' to null
     };
     
     console.log("Attempting to upsert to usuarios table with data:", userData);
@@ -266,7 +267,7 @@ export async function getUserCompleteProfile(userId: string): Promise<UserProfil
       Apellido: userData.apellido || '',
       Titulo: userData.titulo || '',
       Bio: userData.bio || '',
-      URL_Avatar: userData.url_avatar || 'placeholder-avatar.png',
+      URL_Avatar: userData.url_avatar || null, // Changed from 'placeholder-avatar.png' to null
       URL_Curriculum: userData.url_curriculum || null,
       Fecha_Inicio_Empleo: userData.fecha_inicio_empleo || null,
       ID_PeopleLead: userData.id_peoplelead || null,

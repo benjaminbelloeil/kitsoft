@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { FiUpload, FiX, FiFileText, FiDownload } from "react-icons/fi";
+import { FiUpload, FiX, FiFileText, FiDownload, FiTrash2, FiLoader } from "react-icons/fi";
 import { updateUserCurriculum } from "@/utils/database/client/curriculumSync";
 import { createClient } from "@/utils/supabase/client";
 import { useNotificationState, UseNotification } from "@/components/ui/toast-notification";
@@ -19,6 +19,8 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
   const [existingCurriculum, setExistingCurriculum] = useState<string | null>(null);
   const [curriculumFilename, setCurriculumFilename] = useState<string | null>(null);
   const [originalFileName, setOriginalFileName] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   // Use provided notification state or create a local one
   const localNotifications = useNotificationState();
@@ -237,11 +239,12 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
   });
 
   const handleDelete = async () => {
-    if (!currentUserId || !existingCurriculum) {
+    if (!currentUserId || !existingCurriculum || isDeleting) {
       return;
     }
 
     try {
+      setIsDeleting(true);
       // Use the more aggressive deletion approach
       await forcefullyDeleteFile(currentUserId, curriculumFilename || '');
       updateStatus("Currículum eliminado correctamente");
@@ -253,14 +256,17 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
     } catch (error) {
       console.error("Error deleting file:", error);
       updateStatus("Error al eliminar el currículum", true);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   // Download file directly instead of opening in a new tab
   const handleDownload = async () => {
-    if (!existingCurriculum) return;
+    if (!existingCurriculum || isDownloading) return;
 
     try {
+      setIsDownloading(true);
       // Create a temporary link element
       const link = document.createElement('a');
       link.href = existingCurriculum;
@@ -268,9 +274,15 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Short delay to prevent multiple clicks
+      setTimeout(() => {
+        setIsDownloading(false);
+      }, 1000);
     } catch (err) {
       console.error("Error downloading file:", err);
       updateStatus("Error al descargar el archivo", true);
+      setIsDownloading(false);
     }
   };
 
@@ -304,37 +316,47 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
       ) : existingCurriculum ? (
         <div>
           <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg mb-4">
-            <div className="flex items-center">
-              <div className="bg-[#A100FF20] p-2 rounded-full mr-3">
+            <div className="flex items-center flex-1 min-w-0">
+              <div className="bg-[#A100FF20] p-2 rounded-full mr-3 flex-shrink-0">
                 <FiFileText size={20} className="text-[#A100FF]" />
               </div>
-              <div className="truncate max-w-[150px]">
+              <div className="truncate">
                 <p className="font-medium text-gray-700 truncate" title={originalFileName || ''}>
                   {originalFileName || "curriculum.pdf"}
                 </p>
                 <p className="text-xs text-gray-500">CV Actual</p>
               </div>
             </div>
-            <div className="flex">
+            <div className="flex space-x-1 flex-shrink-0">
               <button
                 onClick={handleDownload}
-                className="p-2 text-gray-600 hover:text-[#A100FF] transition-colors"
+                disabled={isDownloading}
+                className="p-2 text-gray-600 hover:text-[#A100FF] transition-colors rounded-full hover:bg-[#A100FF10] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#A100FF40]"
                 title="Descargar currículum"
               >
-                <FiDownload size={18} />
+                {isDownloading ? (
+                  <FiLoader size={18} className="animate-spin" />
+                ) : (
+                  <FiDownload size={18} />
+                )}
               </button>
               <button
                 onClick={handleDelete}
-                className="p-2 text-gray-600 hover:text-red-600 transition-colors"
+                disabled={isDeleting}
+                className="p-2 text-gray-600 hover:text-red-600 transition-colors rounded-full hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-200"
                 title="Eliminar currículum"
               >
-                <FiX size={18} />
+                {isDeleting ? (
+                  <FiLoader size={18} className="animate-spin" />
+                ) : (
+                  <FiTrash2 size={18} />
+                )}
               </button>
             </div>
           </div>
 
           {/* Upload a new one - Just drag or click area */}
-          <div {...getRootProps()} className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#A100FF] transition-colors">
+          <div {...getRootProps()} className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#A100FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF]">
             <input {...getInputProps()} />
             <p className="text-sm text-gray-600">Arrastra o haz click para reemplazar tu CV</p>
             <p className="text-xs text-gray-500 mt-1">El archivo se subirá automáticamente</p>
@@ -344,7 +366,7 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
         <div>
           <div
             {...getRootProps()}
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#A100FF] transition-colors cursor-pointer"
+            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#A100FF] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF]"
           >
             <input {...getInputProps()} />
             <div className="flex flex-col items-center">

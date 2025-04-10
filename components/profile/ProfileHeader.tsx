@@ -6,6 +6,7 @@ import { FiEdit2 } from "react-icons/fi";
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { getAuthUserEmail } from '@/utils/database/client/userSync';
 import { Skeleton } from "@/components/ui/skeleton";
+import PlaceholderAvatar from "@/components/ui/placeholder-avatar";
 import ProfileEditForm from './header/ProfileEditForm';
 import ProfileDisplay from './header/ProfileDisplay';
 
@@ -31,7 +32,7 @@ export default function ProfileHeader({
     Apellido: '',
     Titulo: '',
     Bio: '',
-    URL_Avatar: 'placeholder-avatar.png',
+    URL_Avatar: null,  // Changed from 'placeholder-avatar.png' to null
     direccion: {
       ID_Direccion: crypto.randomUUID(),
       Pais: '',
@@ -186,17 +187,12 @@ export default function ProfileHeader({
     }
   };
 
-  // Helper function to ensure URL has proper format
-  const getValidImageUrl = (url: string | null | undefined): string => {
-    if (!url) return 'placeholder-avatar.png';
-    
-    // If URL is already absolute (has protocol or starts with slash), return as is
-    if (url.startsWith('http') || url.startsWith('/')) {
-      return url;
-    }
-    
-    // Otherwise, add leading slash
-    return `/${url}`;
+  // Check if the avatar URL is empty or not valid
+  const hasValidAvatar = (url: string | null | undefined): boolean => {
+    return !!url && 
+      url !== 'placeholder-avatar.png' &&
+      !url.includes('undefined') &&
+      !url.includes('null');
   };
 
   if (loading) {
@@ -254,20 +250,31 @@ export default function ProfileHeader({
       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
         <div className="relative">
           <div className="p-2 bg-gradient-to-r from-[#A100FF20] to-[#8500D420] rounded-full">
-            <div 
-              className="w-40 h-40 relative rounded-full border-4 border-white shadow overflow-hidden"
-            >
-              <Image 
-                src={previewImage ? getValidImageUrl(previewImage) : getValidImageUrl(initialProfile.URL_Avatar)}
-                alt={`${initialProfile.Nombre ? initialProfile.Nombre : 'Usuario'} ${initialProfile.Apellido || ''}`}
-                fill
-                sizes="160px"
-                className="object-cover scale-140"
-                style={{ objectPosition: "center" }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "placeholder-avatar.png";
-                }}
-              />
+            <div className="w-40 h-40 relative rounded-full border-4 border-white shadow overflow-hidden">
+              {previewImage || hasValidAvatar(initialProfile.URL_Avatar) ? (
+                <Image 
+                  src={previewImage || (initialProfile.URL_Avatar as string)}
+                  alt={`${initialProfile.Nombre ? initialProfile.Nombre : 'Usuario'} ${initialProfile.Apellido || ''}`}
+                  fill
+                  sizes="160px"
+                  className="object-cover"
+                  style={{ objectPosition: "center" }}
+                  onError={() => {
+                    // If image fails to load, URL_Avatar will be set to null
+                    // which will trigger the PlaceholderAvatar component to render
+                    if (!previewImage) {
+                      setFormData(prev => ({ ...prev, URL_Avatar: null }));
+                    }
+                  }}
+                />
+              ) : (
+                <PlaceholderAvatar 
+                  size={160}
+                  className="w-full h-full"
+                  color="#A100FF"
+                  bgColor="#F9F0FF"
+                />
+              )}
             </div>
             <input 
               type="file" 
@@ -296,7 +303,7 @@ export default function ProfileHeader({
               previewImage={previewImage}
               isNewUser={isNewUser}
               isSaving={isSaving}
-              fileInputRef={fileInputRef}
+              fileInputRef={fileInputRef as React.RefObject<HTMLInputElement>}
               authEmail={authEmail}
             />
           ) : (

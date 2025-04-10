@@ -11,7 +11,7 @@ export interface Usuario {
   Apellido: string;
   Titulo: string;
   Bio: string;
-  URL_Avatar: string;
+  URL_Avatar: string | null;
   URL_Curriculum?: string | null;
   Fecha_Inicio_Empleo?: string | null;
   ID_PeopleLead?: string | null;
