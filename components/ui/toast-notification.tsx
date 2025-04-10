@@ -111,10 +111,6 @@ export interface UseNotification {
 export const useNotificationState = (): UseNotification => {
   const [notifications, setNotifications] = useState<NotificationProps[]>([]);
 
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
-  };
-
   const showNotification = (type: NotificationType, message: string, duration = 5000) => {
     const id = Math.random().toString(36).substr(2, 9);
     setNotifications(prev => [...prev, { id, type, message, duration }]);

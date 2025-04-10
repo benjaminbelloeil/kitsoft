@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { FiUpload, FiFile, FiX, FiFileText, FiDownload } from "react-icons/fi";
-import { updateUserCurriculum, deleteUserCurriculum } from "@/utils/database/client/curriculumSync";
+import { FiUpload, FiX, FiFileText, FiDownload } from "react-icons/fi";
+import { updateUserCurriculum } from "@/utils/database/client/curriculumSync";
 import { createClient } from "@/utils/supabase/client";
 import { useNotificationState, UseNotification } from "@/components/ui/toast-notification";
 
