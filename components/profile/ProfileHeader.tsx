@@ -10,6 +10,7 @@ import ProfileEditForm from './header/ProfileEditForm';
 import ProfileDisplay from './header/ProfileDisplay';
 import { updateUserAvatar } from '@/utils/database/client/avatarSync';
 import { SkeletonProfileHeader } from './SkeletonProfile';
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ProfileHeaderProps {
   userData: UserProfile;
@@ -223,86 +224,111 @@ export default function ProfileHeader({
   }
 
   return (
-    <header className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
-      <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-        <div className="relative">
-          <div className="p-2 bg-gradient-to-r from-[#A100FF20] to-[#8500D420] rounded-full">
-            <div className="w-40 h-40 relative rounded-full border-4 border-white shadow overflow-hidden">
-              {(previewImage || hasValidAvatar(initialProfile.URL_Avatar)) ? (
-                <Image 
-                  src={previewImage || (initialProfile.URL_Avatar as string)}
-                  alt={`${initialProfile.Nombre ? initialProfile.Nombre : 'Usuario'} ${initialProfile.Apellido || ''}`}
-                  fill
-                  sizes="160px"
-                  className="object-cover"
-                  style={{ objectPosition: "center" }}
-                  onError={() => {
-                    // If image fails to load, URL_Avatar will be set to null
-                    // which will trigger the PlaceholderAvatar component to render
-                    if (!previewImage) {
-                      setFormData(prev => ({ ...prev, URL_Avatar: null }));
-                    }
-                  }}
-                />
-              ) : (
-                <PlaceholderAvatar 
-                  size={160}
-                  className="w-full h-full"
-                  color="#A100FF"
-                  bgColor="#F9F0FF"
-                />
-              )}
-              
-              {isUploadingAvatar && (
-                <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center backdrop-blur-[2px]">
-                  <div className="h-10 w-10 rounded-full border-[3px] border-[#A100FF] border-t-transparent animate-spin"></div>
-                </div>
-              )}
-            </div>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*"
-              onChange={handleImageChange}
-              disabled={isUploadingAvatar}
-            />
-          </div>
-          <button 
-            className={`absolute bottom-1 right-1 p-2 rounded-full shadow-sm transition-colors ${
-              isUploadingAvatar 
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                : 'bg-[#A100FF20] text-[#A100FF] hover:bg-[#A100FF30]'
-            }`}
-            onClick={handleImageClick}
-            title="Cambiar foto de perfil"
-            disabled={isUploadingAvatar}
-          >
-            <FiEdit2 size={14} />
-          </button>
-        </div>
+    <header className="bg-white rounded-xl shadow-lg p-0 mb-8 overflow-hidden border border-gray-100">
+      <div className="relative">
+        {/* Decorative header background */}
+        <div className="h-32 bg-gradient-to-r from-purple-700 to-[#A100FF] w-full absolute top-0 left-0"></div>
         
-        <div className="flex-1 text-center md:text-left">
-          {isEditing ? (
-            <ProfileEditForm 
-              formData={formData}
-              setFormData={setFormData}
-              onSubmit={handleSubmit}
-              onCancel={() => setIsEditing(false)}
-              previewImage={previewImage}
-              isNewUser={isNewUser}
-              isSaving={isSaving}
-              fileInputRef={fileInputRef}
-              authEmail={authEmail}
-            />
-          ) : (
-            <ProfileDisplay
-              profile={initialProfile}
-              onEditClick={() => setIsEditing(true)}
-              authEmail={authEmail}
-              isNewUser={isNewUser}
-            />
-          )}
+        <div className="relative pt-12 px-6 pb-6">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            {/* Avatar section with improved styling */}
+            <div className="relative mt-6">
+              <div className="rounded-full p-1.5 bg-white shadow-lg">
+                <div className="relative h-36 w-36 md:h-44 md:w-44 rounded-full overflow-hidden border-4 border-white shadow-inner">
+                  {(previewImage || hasValidAvatar(initialProfile.URL_Avatar)) ? (
+                    <Image 
+                      src={previewImage || (initialProfile.URL_Avatar as string)}
+                      alt={`${initialProfile.Nombre ? initialProfile.Nombre : 'Usuario'} ${initialProfile.Apellido || ''}`}
+                      fill
+                      sizes="(max-width: 768px) 144px, 176px"
+                      className="object-cover"
+                      style={{ objectPosition: "center" }}
+                      onError={() => {
+                        if (!previewImage) {
+                          setFormData(prev => ({ ...prev, URL_Avatar: null }));
+                        }
+                      }}
+                    />
+                  ) : (
+                    <PlaceholderAvatar 
+                      size={176}
+                      className="w-full h-full"
+                      color="#A100FF"
+                      bgColor="#F9F0FF"
+                    />
+                  )}
+                  
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center backdrop-blur-[2px]">
+                      <div className="h-10 w-10 rounded-full border-[3px] border-[#A100FF] border-t-transparent animate-spin"></div>
+                    </div>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  disabled={isUploadingAvatar}
+                />
+              </div>
+              <button 
+                className={`absolute bottom-2 right-2 p-2.5 rounded-full shadow-md transition-all ${
+                  isUploadingAvatar 
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                    : 'bg-white text-[#A100FF] hover:bg-[#A100FF] hover:text-white'
+                }`}
+                onClick={handleImageClick}
+                title="Cambiar foto de perfil"
+                disabled={isUploadingAvatar}
+              >
+                <FiEdit2 size={16} />
+              </button>
+            </div>
+            
+            {/* Profile Content with Framer Motion animations */}
+            <div className="flex-1 w-full bg-white rounded-xl p-6 shadow-sm">
+              <AnimatePresence mode="wait" initial={false}>
+                {isEditing ? (
+                  <motion.div
+                    key="edit-form"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <ProfileEditForm 
+                      formData={formData}
+                      setFormData={setFormData}
+                      onSubmit={handleSubmit}
+                      onCancel={() => setIsEditing(false)}
+                      previewImage={previewImage}
+                      isNewUser={isNewUser}
+                      isSaving={isSaving}
+                      fileInputRef={fileInputRef}
+                      authEmail={authEmail}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="profile-display"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <ProfileDisplay
+                      profile={initialProfile}
+                      onEditClick={() => setIsEditing(true)}
+                      authEmail={authEmail}
+                      isNewUser={isNewUser}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
       </div>
     </header>

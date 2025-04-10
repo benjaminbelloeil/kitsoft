@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FiSave, FiX } from "react-icons/fi";
+import { FiSave, FiX, FiUser, FiBriefcase, FiMapPin, FiPhone, FiMail, FiFileText } from "react-icons/fi";
 import Select from 'react-select';
 import ReactCountryFlag from "react-country-flag";
 import { Country, State, City } from "country-state-city";
@@ -319,257 +319,307 @@ export default function ProfileEditForm({
   );
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div className="space-y-3 w-full md:w-2/3">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="Nombre"
-                value={formData.Nombre}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
-                placeholder="Tu nombre"
-                maxLength={20} // Match VARCHAR(20) in database
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Apellido <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="Apellido"
-                value={formData.Apellido}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
-                placeholder="Tu apellido"
-                maxLength={20} // Match VARCHAR(20) in database
-                required
-              />
-            </div>
+    <form onSubmit={onSubmit} className="space-y-6">
+      {/* Form sections with improved styling */}
+      <div className="bg-purple-50 rounded-lg p-4 mb-2 -mt-1">
+        <p className="text-sm text-purple-700">
+          {isNewUser 
+            ? 'Completa tu información profesional para comenzar.' 
+            : 'Actualiza tu información profesional.'}
+        </p>
+      </div>
+      
+      {/* Personal Information Section with icons */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+          <FiUser className="text-[#A100FF]" />
+          <h3 className="text-lg font-medium text-gray-700">Información personal</h3>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="Nombre"
+              value={formData.Nombre}
+              onChange={handleChange}
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
+              placeholder="Tu nombre"
+              maxLength={20}
+              required
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Título <span className="text-red-500">*</span>
+              Apellido <span className="text-red-500">*</span>
             </label>
+            <input
+              type="text"
+              name="Apellido"
+              value={formData.Apellido}
+              onChange={handleChange}
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
+              placeholder="Tu apellido"
+              maxLength={20}
+              required
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Título profesional <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+              <FiBriefcase size={16} />
+            </span>
             <input
               type="text"
               name="Titulo"
               value={formData.Titulo}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
+              className="w-full p-2.5 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
               placeholder="Ej: Desarrollador Full Stack"
-              maxLength={50} // Match VARCHAR(50) in database
+              maxLength={50}
               required
             />
           </div>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-            type="email"
-            name="correo.Correo"
-            value={authEmail || formData.correo?.Correo || ''}
-            disabled
-            className="w-full p-2 border border-gray-300 rounded bg-gray-100 cursor-not-allowed focus:outline-none"
-            style={{ height: '42px' }}
-            title="El email no se puede cambiar"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Email asociado a tu cuenta
-          </p>
+      {/* Contact Information Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+          <FiPhone className="text-[#A100FF]" />
+          <h3 className="text-lg font-medium text-gray-700">Contacto</h3>
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Código País <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                <FiMail size={16} />
+              </span>
+              <input
+                type="email"
+                name="correo.Correo"
+                value={authEmail || formData.correo?.Correo || ''}
+                disabled
+                className="w-full p-2.5 pl-10 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:outline-none"
+                title="El email no se puede cambiar"
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Email asociado a tu cuenta
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Código País <span className="text-red-500">*</span>
+              </label>
+              <Select
+                isLoading={isLoading.phoneCodes}
+                options={phoneCodes}
+                value={phoneCodes.find(option => option.value === formData.telefono?.Codigo_Pais)}
+                onChange={handlePhoneCodeChange}
+                placeholder="Código"
+                styles={customSelectStyles}
+                components={{ 
+                  Option: PhoneCodeOption,
+                  SingleValue: PhoneCodeSingleValue
+                }}
+                className="text-sm"
+                isSearchable
+                noOptionsMessage={() => "No se encontraron resultados"}
+                loadingMessage={() => "Cargando..."}
+                menuPosition="fixed"
+                menuPlacement="auto"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cod. Estado</label>
+              <input
+                type="text"
+                name="telefono.Codigo_Estado"
+                value={formData.telefono?.Codigo_Estado || ''}
+                onChange={handleChange}
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
+                placeholder="55"
+                maxLength={3}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Número <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="telefono.Numero"
+                value={formData.telefono?.Numero || ''}
+                onChange={handleChange}
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
+                placeholder="1234567890"
+                maxLength={10}
+                required
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Location Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+          <FiMapPin className="text-[#A100FF]" />
+          <h3 className="text-lg font-medium text-gray-700">Ubicación</h3>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
             <Select
-              isLoading={isLoading.phoneCodes}
-              options={phoneCodes}
-              value={phoneCodes.find(option => option.value === formData.telefono?.Codigo_Pais)}
-              onChange={handlePhoneCodeChange}
-              placeholder="Código"
+              isLoading={isLoading.countries}
+              options={countries}
+              value={countries.find(option => option.value === formData.direccion?.Pais)}
+              onChange={handleCountryChange}
+              placeholder="Seleccionar país"
               styles={customSelectStyles}
               components={{ 
-                Option: PhoneCodeOption,
-                SingleValue: PhoneCodeSingleValue
+                Option: CountryOption,
+                SingleValue: CountrySingleValue
               }}
               className="text-sm"
               isSearchable
-              noOptionsMessage={() => "No se encontraron resultados"}
-              loadingMessage={() => "Cargando..."}
+              required
+              noOptionsMessage={() => "No se encontraron países"}
+              loadingMessage={() => "Cargando países..."}
               menuPosition="fixed"
               menuPlacement="auto"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cod. Estado</label>
-            <input
-              type="text"
-              name="telefono.Codigo_Estado"
-              value={formData.telefono?.Codigo_Estado || ''}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
-              placeholder="55"
-              maxLength={3} // Match VARCHAR(3) in database
-              style={{ height: '42px' }}
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Estado <span className="text-red-500">*</span>
+            </label>
+            <Select
+              isLoading={isLoading.states}
+              options={states}
+              value={states.find(option => option.value === formData.direccion?.Estado)}
+              onChange={handleStateChange}
+              placeholder={
+                selectedCountry 
+                  ? isLoading.states 
+                    ? "Cargando estados..." 
+                    : "Seleccionar estado"
+                  : "Primero selecciona un país"
+              }
+              styles={customSelectStyles}
+              className="text-sm"
+              isSearchable
+              required
+              isDisabled={!selectedCountry || isLoading.states}
+              noOptionsMessage={() => "No se encontraron estados"}
+              loadingMessage={() => "Cargando estados..."}
+              menuPosition="fixed"
+              menuPlacement="auto"
             />
           </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Número <span className="text-red-500">*</span>
+              Ciudad <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              name="telefono.Numero"
-              value={formData.telefono?.Numero || ''}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
-              placeholder="1234567890"
-              maxLength={10} // Match VARCHAR(10) in database
-              style={{ height: '42px' }}
+            <Select
+              isLoading={isLoading.cities}
+              options={cities}
+              value={cities.find(option => option.value === formData.direccion?.Ciudad)}
+              onChange={handleCityChange}
+              placeholder={
+                selectedState
+                  ? isLoading.cities
+                    ? "Cargando ciudades..."
+                    : "Seleccionar ciudad"
+                  : "Primero selecciona un estado"
+              }
+              styles={customSelectStyles}
+              className="text-sm"
+              isSearchable
               required
+              isDisabled={!selectedState || isLoading.cities}
+              noOptionsMessage={() => "No se encontraron ciudades"}
+              loadingMessage={() => "Cargando ciudades..."}
+              menuPosition="fixed"
+              menuPlacement="auto"
             />
           </div>
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
-          <Select
-            isLoading={isLoading.countries}
-            options={countries}
-            value={countries.find(option => option.value === formData.direccion?.Pais)}
-            onChange={handleCountryChange}
-            placeholder="Seleccionar país"
-            styles={customSelectStyles}
-            components={{ 
-              Option: CountryOption,
-              SingleValue: CountrySingleValue
-            }}
-            className="text-sm"
-            isSearchable
-            required
-            noOptionsMessage={() => "No se encontraron países"}
-            loadingMessage={() => "Cargando países..."}
-            menuPosition="fixed"
-            menuPlacement="auto"
-          />
+      {/* Bio Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+          <FiFileText className="text-[#A100FF]" />
+          <h3 className="text-lg font-medium text-gray-700">Biografía</h3>
         </div>
+        
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Estado <span className="text-red-500">*</span>
+            Bio <span className="text-red-500">*</span>
           </label>
-          <Select
-            isLoading={isLoading.states}
-            options={states}
-            value={states.find(option => option.value === formData.direccion?.Estado)}
-            onChange={handleStateChange}
-            placeholder={
-              selectedCountry 
-                ? isLoading.states 
-                  ? "Cargando estados..." 
-                  : "Seleccionar estado"
-                : "Primero selecciona un país"
-            }
-            styles={customSelectStyles}
-            className="text-sm"
-            isSearchable
+          <textarea
+            name="Bio"
+            value={formData.Bio}
+            onChange={handleChange}
+            rows={4}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
+            placeholder="Cuéntanos sobre ti, tu experiencia y habilidades profesionales..."
+            maxLength={500}
             required
-            isDisabled={!selectedCountry || isLoading.states}
-            noOptionsMessage={() => "No se encontraron estados"}
-            loadingMessage={() => "Cargando estados..."}
-            menuPosition="fixed"
-            menuPlacement="auto"
           />
+          <p className="text-xs text-gray-500 mt-1 text-right">
+            {formData.Bio?.length || 0}/500 caracteres
+          </p>
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Ciudad <span className="text-red-500">*</span>
-          </label>
-          <Select
-            isLoading={isLoading.cities}
-            options={cities}
-            value={cities.find(option => option.value === formData.direccion?.Ciudad)}
-            onChange={handleCityChange}
-            placeholder={
-              selectedState
-                ? isLoading.cities
-                  ? "Cargando ciudades..."
-                  : "Seleccionar ciudad"
-                : "Primero selecciona un estado"
-            }
-            styles={customSelectStyles}
-            className="text-sm"
-            isSearchable
-            required
-            isDisabled={!selectedState || isLoading.cities}
-            noOptionsMessage={() => "No se encontraron ciudades"}
-            loadingMessage={() => "Cargando ciudades..."}
-            menuPosition="fixed"
-            menuPlacement="auto"
-          />
-        </div>
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Bio <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          name="Bio"
-          value={formData.Bio}
-          onChange={handleChange}
-          rows={3}
-          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF]"
-          placeholder="Cuéntanos sobre ti, tu experiencia y habilidades"
-          maxLength={500} // Match VARCHAR(500) in database
-          required
-        />
-      </div>
-      
-      <div className="flex justify-end gap-2">
+      {/* Form Actions */}
+      <div className="flex justify-end gap-3 pt-2">
         {!isNewUser && (
           <button 
             type="button"
             disabled={isSaving}
             onClick={onCancel} 
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 fast-transition shadow-sm font-medium flex items-center gap-1 disabled:opacity-50"
+            className="px-4 py-2.5 bg-red-600 border border-red-700 text-white rounded-lg hover:bg-red-700 transition-all shadow-sm font-medium flex items-center gap-2 disabled:opacity-50"
           >
-            <FiX size={16} className="text-white !important" />
-            <span className="text-white !important">Cancelar</span>
+            <FiX size={16} />
+            <span>Cancelar</span>
           </button>
         )}
         <button 
           type="submit"
           disabled={isSaving}
-          className="px-4 py-2 bg-[#A100FF] text-white rounded hover:bg-[#8500D4] fast-transition shadow font-medium flex items-center gap-1 disabled:opacity-50"
+          className="px-5 py-2.5 bg-[#A100FF] text-white rounded-lg hover:bg-[#8500D4] transition-all shadow-md font-medium flex items-center gap-2 disabled:opacity-50"
         >
           {isSaving ? (
             <>
               <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em]"></span>
-              <span className="ml-2 text-white !important">
+              <span className="ml-2">
                 {isNewUser ? 'Guardando...' : 'Guardando...'}
               </span>
             </>
           ) : (
             <>
-              <FiSave size={16} className="text-white !important" />
-              <span className="text-white !important">
+              <FiSave size={16} />
+              <span>
                 {isNewUser ? 'Crear perfil' : 'Guardar cambios'}
               </span>
             </>
