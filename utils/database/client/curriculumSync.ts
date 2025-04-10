@@ -92,9 +92,12 @@ const deleteUserCurriculum = async (
     return;
   }
 
-  const { success, error } = await updateUserCurriculum(userId);
+  const { error: updateError } = await supabase
+    .from('usuarios')
+    .update({ url_curriculum: null })
+    .eq('id_usuario', userId);
 
-  if (!success || error) {
+  if (updateError) {
     setStatus?.('Error al actualizar la base de datos');
   } else {
     setStatus?.('Currículum eliminado.');
@@ -120,13 +123,17 @@ const getUserCurriculum = async (userId: string): Promise<File | null> => {
       return null;
     }
 
-    const parts = data.url_curriculum.split('/').pop()?.split('-') ?? [];
-    const filename = parts.slice(5).join('-') || 'curriculum.pdf';
+    // Extract filename from the URL path
+    const fileName = data.url_curriculum.split('/').pop() || 'curriculum.pdf';
+    // Remove the userId prefix if it exists
+    const displayName = fileName.includes('-') ? 
+      fileName.substring(fileName.indexOf('-') + 1) : 
+      fileName;
 
     const response = await fetch(data.url_curriculum);
     const blob = await response.blob();
 
-    return new File([blob], filename, { type: blob.type });
+    return new File([blob], displayName, { type: blob.type });
   } catch (err) {
     console.error('Error al obtener el archivo del currículum:', err);
     return null;

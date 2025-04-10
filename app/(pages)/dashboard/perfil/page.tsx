@@ -182,7 +182,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="md:col-span-1 flex flex-col h-full">
-          <ResumeUpload />
+          <ResumeUpload userId={userProfile.ID_Usuario} />
           <CertificatesSection />
         </div>
       </div>
