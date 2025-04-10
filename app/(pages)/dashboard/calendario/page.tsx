@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { calendarEvents, userData, colorClasses } from "@/app/lib/data";
 import MiniCalendar from "@/components/calendar/MiniCalendar";
 import ProjectFilter from "@/components/calendar/ProjectFilter";
@@ -9,6 +9,7 @@ import MainCalendar from "@/components/calendar/MainCalendar";
 import EventPreview from "@/components/calendar/EventPreview";
 import DayEventsList from "@/components/calendar/DayEventsList";
 import NotificationBadge from "@/components/calendar/NotificationBadge";
+import { SkeletonCalendar } from "@/components/calendar/SkeletonCalendar";
 
 // Sample additional events to show multiple projects in a day
 const additionalEvents = [
@@ -81,10 +82,21 @@ export default function CalendarPage() {
   const [miniCalendarDate, setMiniCalendarDate] = useState(new Date());
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [animationClass, setAnimationClass] = useState("");
+  const [loading, setLoading] = useState(true);
   
   // New state for day events popup
   const [dayEventsDate, setDayEventsDate] = useState<Date | null>(null);
   const [dayEventsPosition, setDayEventsPosition] = useState<{ x: number, y: number, width: number } | null>(null);
+
+  // Simulate loading
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Toggle filter
   const toggleFilter = (projectId: string) => {
@@ -206,6 +218,11 @@ export default function CalendarPage() {
     setAnimationClass("animate-slideLeft");
     setTimeout(() => setAnimationClass(""), 300);
   };
+
+  // If loading, show skeleton
+  if (loading) {
+    return <SkeletonCalendar />;
+  }
 
   return (
     <div className="h-full flex flex-col relative">
