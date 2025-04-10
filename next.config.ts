@@ -12,13 +12,18 @@ const nextConfig: NextConfig = {
     return config;
   },
   images: {
-    domains: ['logos-world.net'],
+    domains: ['logos-world.net', 'rbgerynpltfzvbkgenva.supabase.co'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'logos-world.net',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'rbgerynpltfzvbkgenva.supabase.co',
+        pathname: '/storage/v1/object/public/**',
       },
     ],
   },

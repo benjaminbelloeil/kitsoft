@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Image from "next/image";
@@ -9,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import PlaceholderAvatar from "@/components/ui/placeholder-avatar";
 import ProfileEditForm from './header/ProfileEditForm';
 import ProfileDisplay from './header/ProfileDisplay';
+import { updateUserAvatar } from '@/utils/database/client/avatarSync';
 
 interface ProfileHeaderProps {
   userData: UserProfile;
@@ -32,7 +34,7 @@ export default function ProfileHeader({
     Apellido: '',
     Titulo: '',
     Bio: '',
-    URL_Avatar: null,  // Changed from 'placeholder-avatar.png' to null
+    URL_Avatar: null,
     direccion: {
       ID_Direccion: crypto.randomUUID(),
       Pais: '',
@@ -87,7 +89,8 @@ export default function ProfileHeader({
   }, [userData, isNewUser]);
   
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>;
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   
   // Fetch the authenticated user's email
@@ -127,7 +130,7 @@ export default function ProfileHeader({
       Apellido: formData.Apellido,
       Titulo: formData.Titulo, 
       Bio: formData.Bio,
-      // Optional fields that are left blank for now
+      // Avatar URL - this is already set correctly after upload
       URL_Avatar: formData.URL_Avatar || undefined,
       URL_Curriculum: undefined,
       Fecha_Inicio_Empleo: undefined,
@@ -172,18 +175,39 @@ export default function ProfileHeader({
     fileInputRef.current?.click();
   };
   
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const imageUrl = URL.createObjectURL(file);
-      setPreviewImage(imageUrl);
+      // Show local preview immediately
+      const localPreview = URL.createObjectURL(file);
+      setPreviewImage(localPreview);
       
-      // In a production environment, upload to usuarios/Avatars bucket
-      // and get the resulting URL to store in URL_Avatar
-      setFormData(prev => ({ 
-        ...prev, 
-        URL_Avatar: imageUrl // In production, this would be the actual URL from the bucket
-      }));
+      setIsUploadingAvatar(true);
+      
+      try {
+        // Upload the file to Supabase storage
+        const result = await updateUserAvatar(
+          formData.ID_Usuario, 
+          file, 
+          (msg) => console.log(msg) // Status messages could be shown in UI
+        );
+        
+        if (result.success && result.url) {
+          // Update form data with the real URL from Supabase
+          setFormData(prev => ({ 
+            ...prev, 
+            URL_Avatar: result.url || null 
+          }));
+          console.log("Avatar uploaded successfully:", result.url);
+        } else {
+          console.error("Avatar upload failed:", result.error);
+          // Optionally show an error message to the user
+        }
+      } catch (error) {
+        console.error("Error uploading avatar:", error);
+      } finally {
+        setIsUploadingAvatar(false);
+      }
     }
   };
 
@@ -251,7 +275,7 @@ export default function ProfileHeader({
         <div className="relative">
           <div className="p-2 bg-gradient-to-r from-[#A100FF20] to-[#8500D420] rounded-full">
             <div className="w-40 h-40 relative rounded-full border-4 border-white shadow overflow-hidden">
-              {previewImage || hasValidAvatar(initialProfile.URL_Avatar) ? (
+              {(previewImage || hasValidAvatar(initialProfile.URL_Avatar)) ? (
                 <Image 
                   src={previewImage || (initialProfile.URL_Avatar as string)}
                   alt={`${initialProfile.Nombre ? initialProfile.Nombre : 'Usuario'} ${initialProfile.Apellido || ''}`}
@@ -275,6 +299,12 @@ export default function ProfileHeader({
                   bgColor="#F9F0FF"
                 />
               )}
+              
+              {isUploadingAvatar && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-white border-r-transparent align-[-0.125em]"></div>
+                </div>
+              )}
             </div>
             <input 
               type="file" 
@@ -282,12 +312,14 @@ export default function ProfileHeader({
               className="hidden" 
               accept="image/*"
               onChange={handleImageChange}
+              disabled={isUploadingAvatar}
             />
           </div>
           <button 
             className="absolute bottom-1 right-1 bg-[#A100FF20] p-2 rounded-full text-[#A100FF] hover:bg-[#A100FF30] fast-transition shadow-sm"
             onClick={handleImageClick}
             title="Cambiar foto de perfil"
+            disabled={isUploadingAvatar}
           >
             <FiEdit2 size={14} className="text-[#A100FF]" />
           </button>
@@ -303,7 +335,7 @@ export default function ProfileHeader({
               previewImage={previewImage}
               isNewUser={isNewUser}
               isSaving={isSaving}
-              fileInputRef={fileInputRef as React.RefObject<HTMLInputElement>}
+              fileInputRef={fileInputRef}
               authEmail={authEmail}
             />
           ) : (
