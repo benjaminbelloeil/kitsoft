@@ -59,6 +59,12 @@ const navLinks: NavItem[] = [
         ]
     },
     {
+      name: "Certificaciones",
+      icon: "certificates",
+      href: "/dashboard/certificados",
+      hasDropdown: false
+    },
+    {
         name: "Calendario",
         icon: "calendar",
         href: "/dashboard/calendario",
