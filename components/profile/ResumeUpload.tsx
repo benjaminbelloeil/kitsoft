@@ -47,43 +47,76 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
   // Fetch existing curriculum if available
   const fetchCurriculum = async (id: string) => {
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('url_curriculum')
-        .eq('id_usuario', id)
-        .single();
+      // First check if the user ID exists
+      if (!id) {
+        console.log("No user ID provided");
+        return;
+      }
 
-      if (error) {
-        console.error("Error fetching curriculum:", error);
-      } else if (data?.url_curriculum) {
-        setExistingCurriculum(data.url_curriculum);
+      const supabase = createClient();
+      
+      // Check if user has a record in the database
+      try {
+        const { data: userData, error: userError } = await supabase
+          .from('usuarios')
+          .select('id_usuario')
+          .eq('id_usuario', id)
+          .maybeSingle(); // Use maybeSingle instead of single to prevent error when no rows found
         
-        // Extract filename from URL
-        const pathParts = data.url_curriculum.split('/');
-        const fileNameWithId = pathParts[pathParts.length - 1];
-        
-        // Get the original file name (after the userId-)
-        if (fileNameWithId.includes('-')) {
-          const original = fileNameWithId.substring(fileNameWithId.indexOf('-') + 1);
-          try {
-            setOriginalFileName(decodeURIComponent(original));
-          } catch (e) {
-            setOriginalFileName(original);
-          }
-          setCurriculumFilename(fileNameWithId);
-        } else {
-          setCurriculumFilename(fileNameWithId);
-          setOriginalFileName('curriculum.pdf');
+        // If user doesn't exist yet in usuarios table, don't try to fetch curriculum
+        if (userError) {
+          console.log("Error querying user:", userError.message || "Unknown error");
+          return;
         }
-      } else {
-        // Reset the state if no CV is found
-        setExistingCurriculum(null);
-        setCurriculumFilename(null);
-        setOriginalFileName(null);
+        
+        if (!userData) {
+          console.log("User profile not created yet, skipping curriculum fetch");
+          return;
+        }
+        
+        // Now try to fetch curriculum since user exists
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('url_curriculum')
+          .eq('id_usuario', id)
+          .single();
+
+        if (error) {
+          console.log("Curriculum fetch error:", error.message || "Unknown error");
+          return;
+        }
+        
+        if (data?.url_curriculum) {
+          setExistingCurriculum(data.url_curriculum);
+          
+          // Extract filename from URL
+          const pathParts = data.url_curriculum.split('/');
+          const fileNameWithId = pathParts[pathParts.length - 1];
+          
+          // Get the original file name (after the userId-)
+          if (fileNameWithId.includes('-')) {
+            const original = fileNameWithId.substring(fileNameWithId.indexOf('-') + 1);
+            try {
+              setOriginalFileName(decodeURIComponent(original));
+            } catch (e) {
+              setOriginalFileName(original);
+            }
+            setCurriculumFilename(fileNameWithId);
+          } else {
+            setCurriculumFilename(fileNameWithId);
+            setOriginalFileName('curriculum.pdf');
+          }
+        } else {
+          // Reset the state if no CV is found
+          setExistingCurriculum(null);
+          setCurriculumFilename(null);
+          setOriginalFileName(null);
+        }
+      } catch (queryError) {
+        console.log("Database query error:", queryError);
       }
     } catch (err) {
-      console.error("Error:", err);
+      console.log("General error in fetchCurriculum:", err);
     }
   };
 

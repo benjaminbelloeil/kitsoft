@@ -51,7 +51,7 @@ export default function ProfilePage() {
 
   const [userProfile, setUserProfile] = useState<UserProfile>(emptyProfile);
   const [isNewUser, setIsNewUser] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fullyLoaded, setFullyLoaded] = useState(false);
 
