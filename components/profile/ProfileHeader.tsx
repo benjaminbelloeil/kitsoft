@@ -301,8 +301,8 @@ export default function ProfileHeader({
               )}
               
               {isUploadingAvatar && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-white border-r-transparent align-[-0.125em]"></div>
+                <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center backdrop-blur-[2px]">
+                  <div className="h-10 w-10 rounded-full border-[3px] border-[#A100FF] border-t-transparent animate-spin"></div>
                 </div>
               )}
             </div>
@@ -316,12 +316,16 @@ export default function ProfileHeader({
             />
           </div>
           <button 
-            className="absolute bottom-1 right-1 bg-[#A100FF20] p-2 rounded-full text-[#A100FF] hover:bg-[#A100FF30] fast-transition shadow-sm"
+            className={`absolute bottom-1 right-1 p-2 rounded-full shadow-sm transition-colors ${
+              isUploadingAvatar 
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                : 'bg-[#A100FF20] text-[#A100FF] hover:bg-[#A100FF30]'
+            }`}
             onClick={handleImageClick}
             title="Cambiar foto de perfil"
             disabled={isUploadingAvatar}
           >
-            <FiEdit2 size={14} className="text-[#A100FF]" />
+            <FiEdit2 size={14} />
           </button>
         </div>
         
