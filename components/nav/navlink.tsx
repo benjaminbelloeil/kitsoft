@@ -13,7 +13,8 @@ import {
     FiSettings,
     FiBarChart2,
     FiFileText,
-    FiList
+    FiList,
+    FiAward
 } from "react-icons/fi";
 import NavBadge from "@/components/nav/NavBadge";
 
@@ -46,6 +47,8 @@ export default function NavLink() {
                 return <FiFileText className="size-5 shrink-0" />;
             case "analytics":
                 return <FiBarChart2 className="size-5 shrink-0" />;
+            case "certificates":
+                return <FiAward className="size-5 shrink-0" />;
             default:
                 return <FiList className="size-5 shrink-0" />;
         }
