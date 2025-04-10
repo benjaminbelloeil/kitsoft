@@ -6,6 +6,7 @@ import { Project } from '@/interfaces/project';
 import { Experience } from '@/interfaces/experience';
 import { createClient } from '@/utils/supabase/client';
 import { saveUserProfile, getUserCompleteProfile } from '@/utils/database/client/profileSync';
+import { NotificationContainer, useNotificationState } from "@/components/ui/toast-notification";
 
 // Import profile components
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -52,6 +53,9 @@ export default function ProfilePage() {
   const [isNewUser, setIsNewUser] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Global notification state
+  const notificationState = useNotificationState();
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -131,7 +135,7 @@ export default function ProfilePage() {
       const { success, error } = await saveUserProfile(safeUpdateData);
       
       if (success) {
-        alert('Perfil guardado exitosamente');
+        notificationState.showSuccess('Perfil guardado exitosamente');
         setIsNewUser(false); // User has now created/updated their profile
         
         // Refresh the profile data to ensure we have the latest
@@ -146,11 +150,11 @@ export default function ProfilePage() {
         }
       } else {
         console.error("Error saving profile:", error);
-        alert(error || 'Error al guardar el perfil. Verifica la consola para más detalles.');
+        notificationState.showError(error || 'Error al guardar el perfil. Verifica la consola para más detalles.');
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert('Error inesperado al guardar el perfil. Verifica la consola para más detalles.');
+      notificationState.showError('Error inesperado al guardar el perfil. Verifica la consola para más detalles.');
     } finally {
       setSaving(false);
     }
@@ -166,6 +170,20 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-5xl mx-auto py-8">
+      {/* Global notification container */}
+      <NotificationContainer 
+        notifications={notificationState.notifications} 
+        onClose={(id) => {
+          const filtered = notificationState.notifications.filter(n => n.id !== id);
+          notificationState.clearNotifications();
+          filtered.forEach(n => {
+            if (n.type === 'success') notificationState.showSuccess(n.message);
+            if (n.type === 'error') notificationState.showError(n.message);
+            if (n.type === 'info') notificationState.showInfo(n.message);
+          });
+        }} 
+      />
+
       {/* Profile Header Section */}
       <ProfileHeader 
         userData={userProfile} 
@@ -182,7 +200,10 @@ export default function ProfilePage() {
         </div>
 
         <div className="md:col-span-1 flex flex-col h-full">
-          <ResumeUpload userId={userProfile.ID_Usuario} />
+          <ResumeUpload 
+            userId={userProfile.ID_Usuario}
+            notificationState={notificationState} 
+          />
           <CertificatesSection />
         </div>
       </div>

@@ -2,20 +2,25 @@
 import { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { FiUpload, FiFile, FiX, FiFileText, FiDownload } from "react-icons/fi";
-import { updateUserCurriculum, deleteUserCurriculum, getUserCurriculum } from "@/utils/database/client/curriculumSync";
+import { updateUserCurriculum, deleteUserCurriculum } from "@/utils/database/client/curriculumSync";
 import { createClient } from "@/utils/supabase/client";
+import { useNotificationState, UseNotification } from "@/components/ui/toast-notification";
 
 interface ResumeUploadProps {
   userId?: string; // Make it optional for backward compatibility
+  notificationState?: UseNotification; // Optional prop to use the parent's notification state
 }
 
-export default function ResumeUpload({ userId }: ResumeUploadProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState("");
+export default function ResumeUpload({ userId, notificationState }: ResumeUploadProps) {
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(userId || null);
   const [existingCurriculum, setExistingCurriculum] = useState<string | null>(null);
   const [curriculumFilename, setCurriculumFilename] = useState<string | null>(null);
+  const [originalFileName, setOriginalFileName] = useState<string | null>(null);
+  
+  // Use provided notification state or create a local one
+  const localNotifications = useNotificationState();
+  const notifications = notificationState || localNotifications;
 
   // Get user ID on component mount if not provided as prop
   useEffect(() => {
@@ -55,13 +60,128 @@ export default function ResumeUpload({ userId }: ResumeUploadProps) {
         
         // Extract filename from URL
         const pathParts = data.url_curriculum.split('/');
-        const fileName = pathParts[pathParts.length - 1].split('-').slice(1).join('-');
-        setCurriculumFilename(fileName || 'curriculum.pdf');
+        const fileNameWithId = pathParts[pathParts.length - 1];
+        
+        // Get the original file name (after the userId-)
+        if (fileNameWithId.includes('-')) {
+          const original = fileNameWithId.substring(fileNameWithId.indexOf('-') + 1);
+          try {
+            setOriginalFileName(decodeURIComponent(original));
+          } catch (e) {
+            setOriginalFileName(original);
+          }
+          setCurriculumFilename(fileNameWithId);
+        } else {
+          setCurriculumFilename(fileNameWithId);
+          setOriginalFileName('curriculum.pdf');
+        }
+      } else {
+        // Reset the state if no CV is found
+        setExistingCurriculum(null);
+        setCurriculumFilename(null);
+        setOriginalFileName(null);
       }
     } catch (err) {
       console.error("Error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Use notification state to display messages
+  const updateStatus = (message: string, isError: boolean = false) => {
+    if (isError) {
+      notifications.showError(message);
+    } else {
+      notifications.showSuccess(message);
+    }
+  };
+
+  const handleUpload = async (file: File) => {
+    if (!currentUserId) {
+      updateStatus("Error: Usuario no identificado.", true);
+      return;
+    }
+
+    setLoading(true);
+    
+    // Force clean up any existing files first
+    if (existingCurriculum && curriculumFilename) {
+      try {
+        // Delete existing file from storage
+        await forcefullyDeleteFile(currentUserId, curriculumFilename);
+      } catch (error) {
+        console.error("Error cleaning up existing file:", error);
+        // Continue with upload even if cleanup fails
+      }
+    }
+    
+    const result = await updateUserCurriculum(currentUserId, file, 
+      (msg) => {
+        if (msg.includes('Error') || msg.includes('excede')) {
+          updateStatus(msg, true);
+        }
+      }
+    );
+    
+    if (result.success) {
+      updateStatus("Currículum subido con éxito");
+      setOriginalFileName(file.name);
+      fetchCurriculum(currentUserId);
+    } else {
+      updateStatus(`Error al subir el currículum: ${result.error}`, true);
+    }
+    
+    setLoading(false);
+  };
+
+  // A more aggressive approach to ensure files are removed from storage
+  const forcefullyDeleteFile = async (userId: string, filename: string) => {
+    const supabase = createClient();
+    
+    try {
+      // Try multiple path formats to ensure we find and delete the file
+      const possiblePaths = [
+        `Curriculum/${filename}`,
+        `Curriculum/${userId}-${filename}`,
+        // Try with the original filename without the userId prefix
+        filename.includes('-') 
+          ? `Curriculum/${filename}` 
+          : `Curriculum/${userId}-${filename}`
+      ];
+      
+      // Also try by listing files and looking for the right one
+      const { data: listData } = await supabase.storage
+        .from('usuarios')
+        .list('Curriculum');
+        
+      if (listData) {
+        const matchingFiles = listData.filter(item => 
+          item.name.includes(userId) || 
+          (filename.includes('-') && item.name.includes(filename))
+        );
+        
+        // Add these paths to our list to try
+        matchingFiles.forEach(file => {
+          possiblePaths.push(`Curriculum/${file.name}`);
+        });
+      }
+      
+      // Try to delete using each path
+      for (const path of [...new Set(possiblePaths)]) { // Remove duplicates
+        console.log(`Attempting to delete: ${path}`);
+        await supabase.storage.from('usuarios').remove([path]);
+      }
+      
+      // Also update the database to remove the reference
+      await supabase
+        .from('usuarios')
+        .update({ url_curriculum: null })
+        .eq('id_usuario', userId);
+        
+    } catch (err) {
+      console.error("Error in forcefullyDeleteFile:", err);
+      throw err;
     }
   };
 
@@ -75,67 +195,58 @@ export default function ResumeUpload({ userId }: ResumeUploadProps) {
     maxFiles: 1,
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
-        setFile(acceptedFiles[0]);
-        setStatus("");
+        // Upload immediately when file is selected
+        handleUpload(acceptedFiles[0]);
       }
     },
     onDropRejected: (rejectedFiles) => {
       if (rejectedFiles[0]?.errors[0]?.code === "file-too-large") {
-        setStatus("El archivo excede el tamaño máximo de 10MB.");
+        updateStatus("El archivo excede el tamaño máximo de 10MB.", true);
       } else {
-        setStatus("Tipo de archivo no permitido. Solo se permiten PDF, DOC y DOCX.");
+        updateStatus("Tipo de archivo no permitido. Solo se permiten PDF, DOC y DOCX.", true);
       }
     }
   });
-
-  const handleUpload = async () => {
-    if (!currentUserId) {
-      setStatus("Error: Usuario no identificado.");
-      return;
-    }
-
-    if (!file) {
-      setStatus("Por favor selecciona un archivo.");
-      return;
-    }
-
-    setLoading(true);
-    const result = await updateUserCurriculum(currentUserId, file, setStatus);
-    if (result.success) {
-      setStatus("Currículum subido con éxito.");
-      fetchCurriculum(currentUserId);
-    } else {
-      setStatus(`Error al subir el currículum: ${result.error}`);
-    }
-    setFile(null);
-    setLoading(false);
-  };
 
   const handleDelete = async () => {
     if (!currentUserId || !existingCurriculum) {
       return;
     }
 
-    if (!curriculumFilename) {
-      setStatus("No se puede identificar el nombre del archivo.");
-      return;
-    }
-
     setLoading(true);
-    await deleteUserCurriculum(currentUserId, curriculumFilename, setStatus);
-    setExistingCurriculum(null);
-    setCurriculumFilename(null);
-    setLoading(false);
+    
+    try {
+      // Use the more aggressive deletion approach
+      await forcefullyDeleteFile(currentUserId, curriculumFilename || '');
+      updateStatus("Currículum eliminado correctamente");
+      
+      // Clear the local state
+      setExistingCurriculum(null);
+      setCurriculumFilename(null);
+      setOriginalFileName(null);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      updateStatus("Error al eliminar el currículum", true);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Download file directly instead of opening in a new tab
   const handleDownload = async () => {
     if (!existingCurriculum) return;
 
     try {
-      window.open(existingCurriculum, '_blank');
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = existingCurriculum;
+      link.download = originalFileName || 'curriculum.pdf'; // Set the download filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error("Error downloading file:", err);
-      setStatus("Error al descargar el archivo");
+      updateStatus("Error al descargar el archivo", true);
     }
   };
 
@@ -144,8 +255,9 @@ export default function ResumeUpload({ userId }: ResumeUploadProps) {
       <h2 className="text-xl font-semibold text-gray-800 mb-4">Currículum</h2>
       
       {loading ? (
-        <div className="flex items-center justify-center p-6">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A100FF]"></div>
+        <div className="flex flex-col items-center justify-center p-6">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A100FF] mb-3"></div>
+          <p className="text-sm text-gray-600">Procesando tu currículum...</p>
         </div>
       ) : existingCurriculum ? (
         <div>
@@ -155,8 +267,8 @@ export default function ResumeUpload({ userId }: ResumeUploadProps) {
                 <FiFileText size={20} className="text-[#A100FF]" />
               </div>
               <div className="truncate max-w-[150px]">
-                <p className="font-medium text-gray-700 truncate">
-                  {curriculumFilename || "curriculum.pdf"}
+                <p className="font-medium text-gray-700 truncate" title={originalFileName || ''}>
+                  {originalFileName || "curriculum.pdf"}
                 </p>
                 <p className="text-xs text-gray-500">CV Actual</p>
               </div>
@@ -179,35 +291,12 @@ export default function ResumeUpload({ userId }: ResumeUploadProps) {
             </div>
           </div>
 
-          {/* Upload a new one */}
+          {/* Upload a new one - Just drag or click area */}
           <div {...getRootProps()} className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#A100FF] transition-colors">
             <input {...getInputProps()} />
             <p className="text-sm text-gray-600">Arrastra o haz click para reemplazar tu CV</p>
+            <p className="text-xs text-gray-500 mt-1">El archivo se subirá automáticamente</p>
           </div>
-
-          {file && (
-            <div className="mt-4">
-              <div className="flex items-center bg-[#A100FF10] p-3 rounded-lg">
-                <FiFile size={18} className="text-[#A100FF] mr-2" />
-                <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
-                <button
-                  onClick={() => setFile(null)}
-                  className="ml-2 text-gray-500 hover:text-red-500"
-                >
-                  <FiX size={18} />
-                </button>
-              </div>
-              <button
-                onClick={handleUpload}
-                disabled={loading}
-                className="mt-3 w-full py-2 bg-[#A100FF] text-white rounded-lg hover:bg-[#8500D4] transition-colors disabled:opacity-50"
-              >
-                <span className="flex items-center justify-center">
-                  <FiUpload size={16} className="mr-2" /> Reemplazar CV
-                </span>
-              </button>
-            </div>
-          )}
         </div>
       ) : (
         <div>
@@ -222,38 +311,9 @@ export default function ResumeUpload({ userId }: ResumeUploadProps) {
               </div>
               <p className="text-gray-700 mb-1">Arrastra tu CV aquí o haz click para seleccionar</p>
               <p className="text-xs text-gray-500">PDF, DOC o DOCX (Max: 10MB)</p>
+              <p className="text-xs text-gray-500 mt-1">El archivo se subirá automáticamente</p>
             </div>
           </div>
-          
-          {file && (
-            <div className="mt-4">
-              <div className="flex items-center bg-[#A100FF10] p-3 rounded-lg">
-                <FiFile size={18} className="text-[#A100FF] mr-2" />
-                <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
-                <button
-                  onClick={() => setFile(null)}
-                  className="ml-2 text-gray-500 hover:text-red-500"
-                >
-                  <FiX size={18} />
-                </button>
-              </div>
-              <button
-                onClick={handleUpload}
-                disabled={loading}
-                className="mt-3 w-full py-2 bg-[#A100FF] text-white rounded-lg hover:bg-[#8500D4] transition-colors disabled:opacity-50"
-              >
-                <span className="flex items-center justify-center">
-                  <FiUpload size={16} className="mr-2" /> Subir CV
-                </span>
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {status && (
-        <div className={`mt-4 text-sm p-2 rounded ${status.includes('Error') || status.includes('excede') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-          {status}
         </div>
       )}
     </div>

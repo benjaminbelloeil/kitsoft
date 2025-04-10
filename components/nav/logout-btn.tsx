@@ -36,7 +36,7 @@ export default function LogoutBtn() {
         <button
             onClick={handleSignOut}
             disabled={isLoading}
-            className="w-full flex items-center justify-center bg-[#A100FF] hover:bg-[#8c00d9] text-white font-bold py-2 px-6 rounded-lg shadow-[4px_4px_8px_0_rgba(161,0,255,0.2)] transition disabled:opacity-70"
+            className="w-full flex items-center justify-center bg-[#A100FF] hover:bg-[#8c00d9] text-white py-2 px-6 rounded-lg shadow-[4px_4px_8px_0_rgba(161,0,255,0.2)] transition disabled:opacity-70"
             >
                 <FiLogOut className="mr-2" size={20} />
                 {isLoading ? (
