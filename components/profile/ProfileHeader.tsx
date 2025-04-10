@@ -6,11 +6,11 @@ import { useState, useRef, useEffect } from "react";
 import { FiEdit2 } from "react-icons/fi";
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { getAuthUserEmail } from '@/utils/database/client/userSync';
-import { Skeleton } from "@/components/ui/skeleton";
 import PlaceholderAvatar from "@/components/ui/placeholder-avatar";
 import ProfileEditForm from './header/ProfileEditForm';
 import ProfileDisplay from './header/ProfileDisplay';
 import { updateUserAvatar } from '@/utils/database/client/avatarSync';
+import { SkeletonProfileHeader } from './SkeletonProfile';
 
 interface ProfileHeaderProps {
   userData: UserProfile;
@@ -220,53 +220,7 @@ export default function ProfileHeader({
   };
 
   if (loading) {
-    return (
-      <header className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100 animate-pulse">
-        <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-          {/* Avatar skeleton */}
-          <div className="relative">
-            <div className="p-2 bg-gray-100 rounded-full">
-              <div className="w-40 h-40 relative rounded-full border-4 border-white shadow overflow-hidden">
-                <Skeleton className="absolute inset-0" />
-              </div>
-            </div>
-            <div className="absolute bottom-1 right-1 bg-gray-200 p-2 rounded-full">
-              <Skeleton className="h-4 w-4 rounded-full" />
-            </div>
-          </div>
-          
-          <div className="flex-1 w-full space-y-4">
-            {/* Name and title skeletons */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div className="space-y-2">
-                <Skeleton className="h-8 w-60" />
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-              <Skeleton className="h-10 w-32 rounded-md mx-auto md:mx-0 mt-4 md:mt-0" />
-            </div>
-            
-            {/* Contact info skeletons */}
-            <div className="mt-4 space-y-2 pt-2">
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-5 w-1/2" />
-            </div>
-            
-            {/* Border divider skeleton */}
-            <div className="my-4">
-              <Skeleton className="h-[1px] w-full" />
-            </div>
-            
-            {/* Bio skeleton */}
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          </div>
-        </div>
-      </header>
-    );
+    return <SkeletonProfileHeader />;
   }
 
   return (

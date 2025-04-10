@@ -1,6 +1,6 @@
 import React from "react";
 import { CargabilidadSectionProps } from '@/interfaces/project';
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCargabilidad } from './SkeletonProfile';
 
 // Progress circle component for cargabilidad
 const ProgressCircle = ({ percentage, color }: { percentage: number, color: string }) => {
@@ -48,46 +48,13 @@ const ProgressCircle = ({ percentage, color }: { percentage: number, color: stri
   );
 };
 
-// Skeleton for the progress circle
-const ProgressCircleSkeleton = () => {
-  return (
-    <div className="relative h-[120px] w-[120px] flex items-center justify-center rounded-full bg-gray-100">
-      <Skeleton className="absolute w-full h-full rounded-full opacity-30" />
-      <Skeleton className="h-12 w-12 rounded-md" />
-    </div>
-  );
-};
-
 interface Props extends CargabilidadSectionProps {
   loading?: boolean;
 }
 
 export default function CargabilidadSection({ projects, loading = false }: Props) {
   if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 flex flex-col h-full animate-pulse">
-        <div className="flex items-center pb-3 border-b border-gray-100 mb-6">
-          <Skeleton className="h-9 w-9 rounded-md mr-2" />
-          <Skeleton className="h-6 w-48" />
-        </div>
-        
-        <div className="flex flex-wrap gap-6 flex-1">
-          <div className="bg-white rounded-lg p-5 flex-1 min-w-[200px] text-center border border-gray-100 shadow-md flex flex-col justify-center">
-            <Skeleton className="h-6 w-32 mx-auto mb-4" />
-            <div className="flex justify-center">
-              <ProgressCircleSkeleton />
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg p-5 flex-1 min-w-[200px] text-center border border-gray-100 shadow-md flex flex-col justify-center">
-            <Skeleton className="h-6 w-28 mx-auto mb-4" />
-            <div className="flex justify-center">
-              <ProgressCircleSkeleton />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <SkeletonCargabilidad />;
   }
 
   return (

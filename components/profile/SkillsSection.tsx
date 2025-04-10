@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiPlus, FiX, FiCheck } from "react-icons/fi";
 import { SkillsSectionProps } from '@/interfaces/skill';
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonSkills } from "./SkeletonProfile";
 
 interface Props extends SkillsSectionProps {
   loading?: boolean;
@@ -25,24 +25,7 @@ export default function SkillsSection({ initialSkills, loading = false }: Props)
   };
 
   if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 animate-pulse">
-        <div className="flex items-center pb-3 border-b border-gray-100 mb-6">
-          <Skeleton className="h-9 w-9 rounded-md mr-2" />
-          <Skeleton className="h-6 w-32" />
-        </div>
-        
-        <div className="flex flex-wrap gap-3">
-          {[...Array(8)].map((_, i) => (
-            <Skeleton 
-              key={i} 
-              className={`h-8 rounded-md ${i < 3 ? 'w-24' : i < 5 ? 'w-32' : 'w-20'}`} 
-            />
-          ))}
-          <Skeleton className="h-8 w-32 rounded-md" />
-        </div>
-      </div>
-    );
+    return <SkeletonSkills />;
   }
 
   return (

@@ -6,7 +6,7 @@ import { FiUpload, FiX, FiFileText, FiDownload, FiTrash2, FiLoader } from "react
 import { updateUserCurriculum } from "@/utils/database/client/curriculumSync";
 import { createClient } from "@/utils/supabase/client";
 import { useNotificationState, UseNotification } from "@/components/ui/toast-notification";
-import { SkeletonCard, Skeleton } from "@/components/ui/skeleton";
+import { SkeletonResume } from "./SkeletonProfile";
 
 interface ResumeUploadProps {
   userId?: string; // Make it optional for backward compatibility
@@ -286,34 +286,15 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
     }
   };
 
+  if (loading) {
+    return <SkeletonResume />;
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-      {loading ? (
-        <div className="mb-4">
-          <Skeleton className="h-7 w-32" />
-        </div>
-      ) : (
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Currículum</h2>
-      )}
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Currículum</h2>
       
-      {loading ? (
-        <div className="flex flex-col">
-          <SkeletonCard className="rounded-lg overflow-hidden">
-            <div className="flex items-center p-3">
-              <div className="mr-3">
-                <div className="h-10 w-10 rounded-full animate-pulse bg-gray-200"></div>
-              </div>
-              <div className="flex-1">
-                <div className="h-4 w-1/2 animate-pulse bg-gray-200 mb-2 rounded"></div>
-                <div className="h-3 w-1/4 animate-pulse bg-gray-200 rounded"></div>
-              </div>
-              <div className="w-16 flex justify-end">
-                <div className="h-8 w-8 animate-pulse bg-gray-200 rounded-md"></div>
-              </div>
-            </div>
-          </SkeletonCard>
-        </div>
-      ) : existingCurriculum ? (
+      {existingCurriculum ? (
         <div>
           <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg mb-4">
             <div className="flex items-center flex-1 min-w-0">
