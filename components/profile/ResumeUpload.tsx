@@ -6,14 +6,15 @@ import { FiUpload, FiX, FiFileText, FiDownload } from "react-icons/fi";
 import { updateUserCurriculum } from "@/utils/database/client/curriculumSync";
 import { createClient } from "@/utils/supabase/client";
 import { useNotificationState, UseNotification } from "@/components/ui/toast-notification";
+import { SkeletonCard, Skeleton } from "@/components/ui/skeleton";
 
 interface ResumeUploadProps {
   userId?: string; // Make it optional for backward compatibility
   notificationState?: UseNotification; // Optional prop to use the parent's notification state
+  loading?: boolean; // Added loading prop
 }
 
-export default function ResumeUpload({ userId, notificationState }: ResumeUploadProps) {
-  const [loading, setLoading] = useState(false);
+export default function ResumeUpload({ userId, notificationState, loading = false }: ResumeUploadProps) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(userId || null);
   const [existingCurriculum, setExistingCurriculum] = useState<string | null>(null);
   const [curriculumFilename, setCurriculumFilename] = useState<string | null>(null);
@@ -45,7 +46,6 @@ export default function ResumeUpload({ userId, notificationState }: ResumeUpload
 
   // Fetch existing curriculum if available
   const fetchCurriculum = async (id: string) => {
-    setLoading(true);
     try {
       const supabase = createClient();
       const { data, error } = await supabase
@@ -84,8 +84,6 @@ export default function ResumeUpload({ userId, notificationState }: ResumeUpload
       }
     } catch (err) {
       console.error("Error:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -104,8 +102,6 @@ export default function ResumeUpload({ userId, notificationState }: ResumeUpload
       return;
     }
 
-    setLoading(true);
-    
     // Force clean up any existing files first
     if (existingCurriculum && curriculumFilename) {
       try {
@@ -132,8 +128,6 @@ export default function ResumeUpload({ userId, notificationState }: ResumeUpload
     } else {
       updateStatus(`Error al subir el currículum: ${result.error}`, true);
     }
-    
-    setLoading(false);
   };
 
   // A more aggressive approach to ensure files are removed from storage
@@ -214,8 +208,6 @@ export default function ResumeUpload({ userId, notificationState }: ResumeUpload
       return;
     }
 
-    setLoading(true);
-    
     try {
       // Use the more aggressive deletion approach
       await forcefullyDeleteFile(currentUserId, curriculumFilename || '');
@@ -228,8 +220,6 @@ export default function ResumeUpload({ userId, notificationState }: ResumeUpload
     } catch (error) {
       console.error("Error deleting file:", error);
       updateStatus("Error al eliminar el currículum", true);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -253,12 +243,30 @@ export default function ResumeUpload({ userId, notificationState }: ResumeUpload
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Currículum</h2>
+      {loading ? (
+        <div className="mb-4">
+          <Skeleton className="h-7 w-32" />
+        </div>
+      ) : (
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Currículum</h2>
+      )}
       
       {loading ? (
-        <div className="flex flex-col items-center justify-center p-6">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A100FF] mb-3"></div>
-          <p className="text-sm text-gray-600">Procesando tu currículum...</p>
+        <div className="flex flex-col">
+          <SkeletonCard className="rounded-lg overflow-hidden">
+            <div className="flex items-center p-3">
+              <div className="mr-3">
+                <div className="h-10 w-10 rounded-full animate-pulse bg-gray-200"></div>
+              </div>
+              <div className="flex-1">
+                <div className="h-4 w-1/2 animate-pulse bg-gray-200 mb-2 rounded"></div>
+                <div className="h-3 w-1/4 animate-pulse bg-gray-200 rounded"></div>
+              </div>
+              <div className="w-16 flex justify-end">
+                <div className="h-8 w-8 animate-pulse bg-gray-200 rounded-md"></div>
+              </div>
+            </div>
+          </SkeletonCard>
         </div>
       ) : existingCurriculum ? (
         <div>

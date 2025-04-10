@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { FiCheckCircle, FiFileText, FiDownload, FiTrash2, FiPlus } from "react-icons/fi";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function CertificatesSection() {
+interface CertificatesSectionProps {
+  loading?: boolean;
+}
+
+export default function CertificatesSection({ loading = false }: CertificatesSectionProps) {
   const [certificates, setCertificates] = useState<{name: string, file: File}[]>([]);
 
   // Certificate upload handler
@@ -26,6 +31,40 @@ export default function CertificatesSection() {
     updatedCertificates.splice(index, 1);
     setCertificates(updatedCertificates);
   };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 animate-pulse flex-grow">
+        <div className="flex items-center pb-3 border-b border-gray-100 mb-6">
+          <Skeleton className="h-9 w-9 rounded-md mr-2" />
+          <Skeleton className="h-6 w-32" />
+        </div>
+        
+        <div className="space-y-4">
+          {[...Array(2)].map((_, i) => (
+            <div 
+              key={i} 
+              className="p-3 border border-gray-200 rounded-lg flex justify-between items-center"
+            >
+              <div className="flex items-center">
+                <Skeleton className="h-8 w-8 rounded-full mr-2" />
+                <div>
+                  <Skeleton className="h-4 w-24 mb-1" />
+                  <Skeleton className="h-3 w-12" />
+                </div>
+              </div>
+              <div className="flex space-x-1">
+                <Skeleton className="h-7 w-7 rounded-md" />
+                <Skeleton className="h-7 w-7 rounded-md" />
+              </div>
+            </div>
+          ))}
+          
+          <Skeleton className="h-24 w-full rounded-lg mt-4" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex-grow">

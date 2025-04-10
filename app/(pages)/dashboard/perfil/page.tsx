@@ -53,6 +53,7 @@ export default function ProfilePage() {
   const [isNewUser, setIsNewUser] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [fullyLoaded, setFullyLoaded] = useState(false);
 
   // Global notification state
   const notificationState = useNotificationState();
@@ -69,7 +70,10 @@ export default function ProfilePage() {
         
         if (!user) {
           console.error("No authenticated user found");
-          setLoading(false);
+          setTimeout(() => {
+            setLoading(false);
+            setFullyLoaded(true);
+          }, 300);
           return;
         }
         
@@ -107,7 +111,11 @@ export default function ProfilePage() {
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
-        setLoading(false);
+        // Add a slight delay to ensure all components load at the same time
+        setTimeout(() => {
+          setLoading(false);
+          setFullyLoaded(true);
+        }, 300);
       }
     }
     
@@ -160,14 +168,6 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto py-8 flex justify-center items-center min-h-[400px]">
-        <div className="animate-pulse text-gray-500">Cargando perfil...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-5xl mx-auto py-8">
       {/* Global notification container */}
@@ -190,28 +190,37 @@ export default function ProfilePage() {
         onProfileUpdate={handleProfileUpdate}
         isNewUser={isNewUser}
         isSaving={saving}
+        loading={!fullyLoaded}
       />
 
       {/* Rest of the page content */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {/* Cargabilidad section */}
         <div className="md:col-span-2">
-          <CargabilidadSection projects={userProfile.projects || []} />
+          <CargabilidadSection 
+            projects={userProfile.projects || []}
+            loading={!fullyLoaded}
+          />
         </div>
 
         <div className="md:col-span-1 flex flex-col h-full">
           <ResumeUpload 
             userId={userProfile.ID_Usuario}
             notificationState={notificationState} 
+            loading={!fullyLoaded}
           />
-          <CertificatesSection />
+          <CertificatesSection loading={!fullyLoaded} />
         </div>
       </div>
 
-      <SkillsSection initialSkills={userProfile.skills ? userProfile.skills.map(skill => skill.Nombre) : []} />
+      <SkillsSection 
+        initialSkills={userProfile.skills ? userProfile.skills.map(skill => skill.Nombre) : []}
+        loading={!fullyLoaded}
+      />
 
       <ExperienceSection 
         initialExperiences={(userProfile.experience || []).map(transformExperienceForComponent)} 
+        loading={!fullyLoaded}
       />
     </div>
   );

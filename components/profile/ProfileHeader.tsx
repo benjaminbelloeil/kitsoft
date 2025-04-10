@@ -13,28 +13,31 @@ import { CountryOption, StateOption, CityOption, Direccion } from '@/interfaces/
 import { PhoneCodeOption } from '@/interfaces/contact';
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { getAuthUserEmail } from '@/utils/database/client/userSync';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProfileHeaderProps {
   userData: UserProfile;
   onProfileUpdate: (updatedData: UserProfileUpdate) => void;
   isNewUser?: boolean;
-  isSaving?: boolean; // Add this prop
+  isSaving?: boolean;
+  loading?: boolean;
 }
 
 export default function ProfileHeader({ 
   userData, 
   onProfileUpdate, 
   isNewUser = false,
-  isSaving = false // Default to false
+  isSaving = false,
+  loading = false
 }: ProfileHeaderProps) {
   // Initialize with empty profile data if the profile is new
   const emptyProfile: UserProfile = {
     ID_Usuario: userData?.ID_Usuario || '',
-    Nombre: '',  // Changed from 'Nombre' to empty string
+    Nombre: '',
     Apellido: '',
     Titulo: '',
     Bio: '',
-    URL_Avatar: 'placeholder-avatar.png', // Ensure proper URL format with leading slash
+    URL_Avatar: 'placeholder-avatar.png',
     direccion: {
       ID_Direccion: crypto.randomUUID(),
       Pais: '',
@@ -62,8 +65,32 @@ export default function ProfileHeader({
   // Use the provided data or empty profile
   const initialProfile = isNewUser ? emptyProfile : { ...emptyProfile, ...userData };
   
-  const [isEditing, setIsEditing] = useState(isNewUser); // Auto-edit mode for new users
+  // Start in NON-editing mode by default (false), regardless of isNewUser
+  // We'll handle the specific new user case in useEffect
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // When user data changes or component mounts, determine if we should be in edit mode
+  useEffect(() => {
+    // Only auto-enter edit mode for true new users without data
+    const shouldBeInEditMode = isNewUser && 
+      (!userData?.Nombre || !userData?.Apellido || !userData?.Titulo);
+      
+    setIsEditing(shouldBeInEditMode);
+  }, [isNewUser, userData]);
+  
+  // Initialize form data with userData if available
   const [formData, setFormData] = useState(initialProfile);
+  
+  // When userData changes, update the form data to prevent blank forms on reload
+  useEffect(() => {
+    if (!isNewUser && userData && Object.keys(userData).length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        ...userData
+      }));
+    }
+  }, [userData, isNewUser]);
+  
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
@@ -462,6 +489,53 @@ export default function ProfileHeader({
       {data.value}
     </div>
   );
+
+  if (loading) {
+    return (
+      <header className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100 animate-pulse">
+        <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+          {/* Avatar skeleton */}
+          <div className="relative">
+            <div className="p-2 bg-gray-100 rounded-full">
+              <div className="w-40 h-40 relative rounded-full border-4 border-white shadow overflow-hidden">
+                <Skeleton className="absolute inset-0" />
+              </div>
+            </div>
+            <div className="absolute bottom-1 right-1 bg-gray-200 p-2 rounded-full">
+              <Skeleton className="h-4 w-4 rounded-full" />
+            </div>
+          </div>
+          
+          <div className="flex-1 w-full space-y-4">
+            {/* Name and title skeletons */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-60" />
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+              <Skeleton className="h-10 w-32 rounded-md mx-auto md:mx-0 mt-4 md:mt-0" />
+            </div>
+            
+            {/* Contact info skeletons */}
+            <div className="mt-4 space-y-2 pt-2">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-5 w-1/2" />
+            </div>
+            
+            {/* Bio skeleton */}
+            <div className="mt-4 border-t pt-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">

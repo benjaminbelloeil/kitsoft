@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FiPlus, FiTrash2, FiSave, FiX } from "react-icons/fi";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Experience {
   company: string;
@@ -10,9 +11,10 @@ interface Experience {
 
 interface ExperienceSectionProps {
   initialExperiences: Experience[];
+  loading?: boolean;
 }
 
-export default function ExperienceSection({ initialExperiences }: ExperienceSectionProps) {
+export default function ExperienceSection({ initialExperiences, loading = false }: ExperienceSectionProps) {
   const [experiences, setExperiences] = useState<Experience[]>(initialExperiences);
   const [newExperience, setNewExperience] = useState<Experience>({
     company: "",
@@ -33,6 +35,42 @@ export default function ExperienceSection({ initialExperiences }: ExperienceSect
     updatedExperiences.splice(index, 1);
     setExperiences(updatedExperiences);
   };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 animate-pulse">
+        <div className="flex justify-between items-center mb-6 pb-3 border-b border-gray-100">
+          <div className="flex items-center">
+            <Skeleton className="h-9 w-9 rounded-md mr-2" />
+            <Skeleton className="h-6 w-32" />
+          </div>
+          <Skeleton className="h-10 w-24 rounded-md" />
+        </div>
+        
+        <div className="space-y-6">
+          {[1, 2].map((_, index) => (
+            <div 
+              key={index} 
+              className="border-l-3 border-gray-200 pl-6 relative p-4 rounded-r-lg mb-2"
+            >
+              <div className="absolute -left-1.5 top-6 h-4 w-4 rounded-full bg-gray-200"></div>
+              <div className="flex flex-col md:flex-row md:justify-between md:items-start">
+                <div className="w-full">
+                  <Skeleton className="h-5 w-48 mb-2" />
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-3 w-24 mb-3" />
+                  <Skeleton className="h-4 w-full max-w-md" />
+                </div>
+                <div className="mt-2 md:mt-0 md:ml-4">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300">
