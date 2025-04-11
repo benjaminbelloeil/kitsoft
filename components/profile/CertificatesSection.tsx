@@ -4,9 +4,10 @@ import { SkeletonCertificates } from "./SkeletonProfile";
 
 interface CertificatesSectionProps {
   loading?: boolean;
+  className?: string; // Add className prop for custom styling
 }
 
-export default function CertificatesSection({ loading = false }: CertificatesSectionProps) {
+export default function CertificatesSection({ loading = false, className = '' }: CertificatesSectionProps) {
   const [certificates, setCertificates] = useState<{name: string, file: File}[]>([]);
 
   // Certificate upload handler
@@ -37,7 +38,7 @@ export default function CertificatesSection({ loading = false }: CertificatesSec
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex-grow">
+    <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full ${className}`}>
       <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
         <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
           <FiCheckCircle className="h-5 w-5 text-[#A100FF]" />
@@ -45,44 +46,48 @@ export default function CertificatesSection({ loading = false }: CertificatesSec
         Certificados
       </h2>
       
-      <div className="space-y-4">
-        {certificates.length > 0 ? (
-          <div className="space-y-3">
-            {certificates.map((cert, index) => (
-              <div 
-                key={index} 
-                className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF20] bg-white shadow-sm"
-              >
-                <div className="flex items-center">
-                  <FiFileText className="text-[#A100FF] mr-2" size={18} />
-                  <div className="truncate max-w-[150px]">
-                    <p className="font-medium text-sm text-gray-800">{cert.name}</p>
-                    <p className="text-xs text-gray-500">{(cert.file.size / 1024).toFixed(0)} KB</p>
+      <div className="space-y-4 flex-grow flex flex-col">
+        <div className="flex-grow">
+          {certificates.length > 0 ? (
+            <div className="space-y-3 mb-4">
+              {certificates.map((cert, index) => (
+                <div 
+                  key={index} 
+                  className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF20] bg-white shadow-sm"
+                >
+                  <div className="flex items-center">
+                    <FiFileText className="text-[#A100FF] mr-2" size={18} />
+                    <div className="truncate max-w-[150px]">
+                      <p className="font-medium text-sm text-gray-800">{cert.name}</p>
+                      <p className="text-xs text-gray-500">{(cert.file.size / 1024).toFixed(0)} KB</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-1">
+                    <button 
+                      className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
+                      title="Descargar"
+                    >
+                      <FiDownload size={14} />
+                    </button>
+                    <button 
+                      className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
+                      onClick={() => handleRemoveCertificate(index)}
+                      title="Eliminar"
+                    >
+                      <FiTrash2 size={14} />
+                    </button>
                   </div>
                 </div>
-                <div className="flex space-x-1">
-                  <button 
-                    className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
-                    title="Descargar"
-                  >
-                    <FiDownload size={14} />
-                  </button>
-                  <button 
-                    className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
-                    onClick={() => handleRemoveCertificate(index)}
-                    title="Eliminar"
-                  >
-                    <FiTrash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500 text-sm italic">No hay certificados subidos</p>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="flex-grow flex items-center justify-center mb-4">
+              <p className="text-center text-gray-500 text-sm italic">No hay certificados subidos</p>
+            </div>
+          )}
+        </div>
         
-        <div className="border-2 border-dashed border-[#A100FF20] rounded-lg p-4 text-center hover:bg-[#A100FF05] transition-colors duration-200">
+        <div className="border-2 border-dashed border-[#A100FF20] rounded-lg p-4 text-center hover:bg-[#A100FF05] transition-colors duration-200 mt-auto">
           <label htmlFor="certificate-upload" className="cursor-pointer block py-2">
             <div className="flex flex-col items-center">
               <FiPlus size={20} className="text-[#A100FF] mb-1" />
