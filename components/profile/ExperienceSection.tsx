@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FiPlus, FiTrash2, FiX, FiCalendar, FiBriefcase, FiCheck, FiEdit2 } from "react-icons/fi";
 import { RiBuilding4Line } from "react-icons/ri"; // Added a building icon
 import { motion, AnimatePresence } from "framer-motion"; // Import framer-motion
@@ -87,6 +87,10 @@ export default function ExperienceSection({ initialExperiences, loading = false 
   const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [resetFormState, setResetFormState] = useState(false);
+
+  const formRef = useRef<HTMLDivElement>(null);
+  const [formHeight, setFormHeight] = useState<number | "auto">("auto");
 
   // Fetch user ID on component mount
   useEffect(() => {
@@ -117,6 +121,19 @@ export default function ExperienceSection({ initialExperiences, loading = false 
     
     fetchUserId();
   }, [initialExperiences]);
+
+  // Effect to capture form height when it's displayed
+  useEffect(() => {
+    if (isAddingExperience && formRef.current) {
+      // Set a timeout to ensure the form has rendered completely
+      setTimeout(() => {
+        if (formRef.current) {
+          const height = formRef.current.offsetHeight;
+          setFormHeight(height);
+        }
+      }, 50);
+    }
+  }, [isAddingExperience]);
 
   const handleAddExperience = async () => {
     if (!userId) return;
@@ -220,17 +237,25 @@ export default function ExperienceSection({ initialExperiences, loading = false 
   };
 
   const handleCancelEdit = () => {
-    setNewExperience({
-      company: "",
-      position: "",
-      startDate: "",
-      endDate: "",
-      description: "",
-      isCurrentPosition: false
-    });
-    setIsEditingExperience(false);
-    setEditingExperienceId(null);
+    // Just set flag to start exit animation
     setIsAddingExperience(false);
+    setResetFormState(true);
+  };
+
+  const handleAnimationComplete = () => {
+    if (resetFormState) {
+      setNewExperience({
+        company: "",
+        position: "",
+        startDate: "",
+        endDate: "",
+        description: "",
+        isCurrentPosition: false
+      });
+      setIsEditingExperience(false);
+      setEditingExperienceId(null);
+      setResetFormState(false);
+    }
   };
 
   const handleCurrentPositionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,17 +289,32 @@ export default function ExperienceSection({ initialExperiences, loading = false 
         </button>
       </div>
       
-      {/* Animation wrapper for the form */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait" onExitComplete={handleAnimationComplete}>
         {isAddingExperience && (
           <motion.div
-            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-            animate={{ opacity: 1, height: "auto", marginBottom: 32 }}
-            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            key="experience-form" 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: 1, 
+              height: formHeight,
+              marginBottom: 32
+            }}
+            exit={{ 
+              opacity: 0, 
+              height: 0,
+              marginBottom: 0 
+            }}
+            transition={{ 
+              type: "tween", // Using tween instead of spring for more predictable animation
+              duration: 0.4,
+              ease: "easeInOut"
+            }}
             className="overflow-hidden"
           >
-            <div className="p-6 border border-[#A100FF20] rounded-lg bg-gradient-to-b from-[#A100FF08] to-transparent backdrop-blur-sm shadow-md">
+            <div 
+              ref={formRef}
+              className="p-6 border border-[#A100FF20] rounded-lg bg-gradient-to-b from-[#A100FF08] to-transparent backdrop-blur-sm shadow-md"
+            >
               <h3 className="font-medium mb-5 text-lg text-gray-800 border-b pb-2 border-[#A100FF20]">
                 {isEditingExperience ? 'Editar experiencia laboral' : 'Nueva experiencia laboral'}
               </h3>
@@ -386,7 +426,6 @@ export default function ExperienceSection({ initialExperiences, loading = false 
                   />
                 </div>
                 
-                {/* Sticky button container to ensure they're always visible */}
                 <div className="flex justify-end space-x-3 pt-4 sticky bottom-0">
                   <button 
                     className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-sm font-medium flex items-center gap-2"
@@ -429,7 +468,6 @@ export default function ExperienceSection({ initialExperiences, loading = false 
         </motion.div>
       )}
       
-      {/* Experience cards with Edit button */}
       <div className="mt-4">
         {experiences.map((exp, index) => (
           <motion.div 
