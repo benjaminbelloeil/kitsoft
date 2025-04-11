@@ -31,10 +31,10 @@ export default function LoginForm() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-3xl lg:text-4xl font-bold mb-3 text-black">
-          Welcome to <span className="text-accenture bg-gradient-to-r from-accenture to-accenture-dark bg-clip-text text-transparent">Accenture</span>
+          Bienvenido a <span className="text-accenture bg-gradient-to-r from-accenture to-accenture-dark bg-clip-text text-transparent">Accenture</span>
         </h1>
         <p className="text-gray-700 text-lg">
-          Sign in to access your account
+          Inicie sesión para acceder a su cuenta
         </p>
       </motion.div>
       
@@ -61,7 +61,7 @@ export default function LoginForm() {
           whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.2 }}
         >
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
           <div className="relative">
             <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors ${focusedField === 'email' ? 'text-[#A100FF]' : 'text-gray-400'}`}>
               <Mail className="h-5 w-5" />
@@ -76,7 +76,7 @@ export default function LoginForm() {
               onFocus={() => setFocusedField('email')}
               onBlur={() => setFocusedField(null)}
               className="focus-accenture pl-10 w-full px-4 py-3.5 border border-gray-200 rounded-lg transition-all shadow-sm text-black hover:border-gray-300 focus:shadow-md focus:outline-none"
-              placeholder="your@email.com"
+              placeholder="ejemplo@accenture.com"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             />
           </div>
@@ -88,14 +88,14 @@ export default function LoginForm() {
           transition={{ duration: 0.2 }}
         >
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
             <motion.a 
               href="#" 
               className="text-sm font-medium text-[#A100FF] hover:text-[#8c00d9]"
               whileHover={{ scale: 1.05, x: 2 }}
               whileTap={{ scale: 0.98 }}
             >
-              Forgot password?
+              ¿Olvidó su contraseña?
             </motion.a>
           </div>
           <div className="relative">
@@ -130,7 +130,7 @@ export default function LoginForm() {
             className="h-4 w-4 text-[#A100FF] focus:ring-[#A100FF] border-gray-300 rounded focus:ring-offset-0 focus:outline-none"
           />
           <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-700">
-            Remember me
+            Recordarme
           </label>
         </motion.div>
         
@@ -150,7 +150,7 @@ export default function LoginForm() {
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-b-transparent border-white"></div>
           ) : (
             <span className="flex items-center font-medium">
-              Sign in
+              Iniciar sesión
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </span>
           )}
@@ -162,7 +162,7 @@ export default function LoginForm() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <p>Need access? <a href="#" className="text-[#A100FF] hover:underline font-medium">Request access</a></p>
+          <p>¿Necesita acceso? <a href="#" className="text-[#A100FF] hover:underline font-medium">Solicitar acceso</a></p>
         </motion.div>
       </motion.form>
     </div>
