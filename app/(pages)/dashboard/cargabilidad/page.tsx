@@ -37,6 +37,7 @@ const PersonalLoadPage = () => {
   return (
     <main className="min-h-screen p-4 sm:p-6 md:p-10">
       <div className="max-w-6xl mx-auto">
+        {/*Resumen de Cargabilidad de Empleado*/}
         <EmployeeSummary
           name={employee.name}
           role={employee.role}
@@ -45,10 +46,11 @@ const PersonalLoadPage = () => {
           availableHours={availableHours}
           totalHoursPerWeek={employee.totalHoursPerWeek}
         />
-
-        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        {/*Elemento de Tabs*/}
+       
 
         <div className="bg-white rounded-xl shadow-md mb-6">
+          <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
           <div className="p-6">
             {activeTab === 'projects' ? (
               <div>
