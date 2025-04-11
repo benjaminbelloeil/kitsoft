@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { userData } from "@/app/lib/data"; // Keep this import for other sections
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { Project } from '@/interfaces/project';
-import { Experience } from '@/interfaces/experience';
 import { createClient } from '@/utils/supabase/client';
 import { saveUserProfile, getUserCompleteProfile } from '@/utils/database/client/profileSync';
 import { NotificationContainer, useNotificationState } from "@/components/ui/toast-notification";
@@ -15,14 +14,6 @@ import ResumeUpload from "@/components/profile/ResumeUpload";
 import CertificatesSection from "@/components/profile/CertificatesSection";
 import SkillsSection from "@/components/profile/SkillsSection";
 import ExperienceSection from "@/components/profile/ExperienceSection";
-
-// Transform experience data to match the component's interface
-const transformExperienceForComponent = (exp: Experience) => ({
-  company: exp.Empresa,
-  position: exp.Titulo,
-  period: `${exp.Fecha_Inicio}${exp.Fecha_Fin ? ` - ${exp.Fecha_Fin}` : ' - Presente'}`,
-  description: exp.Descripcion
-});
 
 export default function ProfilePage() {
   // Create an empty profile with placeholder header data
@@ -40,13 +31,7 @@ export default function ProfilePage() {
       Nivel: 3, 
       Categoria: 'General' 
     })) : [],
-    experience: userData.experience ? userData.experience.map(exp => ({
-      Empresa: exp.company,
-      Titulo: exp.position,
-      Descripcion: exp.description,
-      Fecha_Inicio: exp.period.split(' - ')[0],
-      Fecha_Fin: exp.period.includes('Presente') ? null : exp.period.split(' - ')[1]
-    })) : []
+    experience: [] // Remove dummy experience data
   };
 
   const [userProfile, setUserProfile] = useState<UserProfile>(emptyProfile);
@@ -91,7 +76,7 @@ export default function ProfilePage() {
         console.log("Profile data received:", profileData);
         
         if (profileData) {
-          // If profile exists, use it but keep the projects/skills/experience
+          // If profile exists, use it but keep the projects/skills
           setUserProfile(prev => {
             console.log("Updating user profile with:", profileData);
             return {
@@ -99,7 +84,7 @@ export default function ProfilePage() {
               // Ensure these properties exist
               projects: prev.projects || [],
               skills: prev.skills || [],
-              experience: prev.experience || []
+              experience: [] // Remove dummy experiences
             };
           });
           setIsNewUser(false);
@@ -218,8 +203,9 @@ export default function ProfilePage() {
         loading={!fullyLoaded}
       />
 
+      {/* Pass empty array as initialExperiences to let ExperienceSection load directly from database */}
       <ExperienceSection 
-        initialExperiences={(userProfile.experience || []).map(transformExperienceForComponent)} 
+        initialExperiences={[]} 
         loading={!fullyLoaded}
       />
     </div>

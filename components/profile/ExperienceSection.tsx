@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from "react";
-import { FiPlus, FiTrash2, FiX, FiCalendar, FiBriefcase, FiCheck } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiPlus, FiTrash2, FiX, FiCalendar, FiBriefcase, FiCheck, FiEdit2 } from "react-icons/fi";
 import { RiBuilding4Line } from "react-icons/ri"; // Added a building icon
 import { motion, AnimatePresence } from "framer-motion"; // Import framer-motion
 import { SkeletonExperience } from "./SkeletonProfile";
+import { getUserExperiences, createUserExperience, updateUserExperience, deleteUserExperience } from "@/utils/database/client/experienceSync";
+import { createClient } from '@/utils/supabase/client';
 
 interface Experience {
   company: string;
@@ -13,6 +15,7 @@ interface Experience {
 }
 
 interface ExperienceWithDates {
+  id?: string;
   company: string;
   position: string;
   startDate: string;
@@ -80,14 +83,143 @@ export default function ExperienceSection({ initialExperiences, loading = false 
     isCurrentPosition: false
   });
   const [isAddingExperience, setIsAddingExperience] = useState(false);
+  const [isEditingExperience, setIsEditingExperience] = useState(false);
+  const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const handleAddExperience = () => {
-    const finalExperience = {
-      ...newExperience,
-      endDate: newExperience.isCurrentPosition ? null : newExperience.endDate
+  // Fetch user ID on component mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        
+        // If we have a user ID and no initial experiences, try to fetch from database
+        if (user.id && initialExperiences.length === 0) {
+          const fetchedExperiences = await getUserExperiences(user.id);
+          if (fetchedExperiences && fetchedExperiences.length > 0) {
+            const formattedExperiences = fetchedExperiences.map(exp => ({
+              id: exp.id_experiencia,
+              company: exp.compañia,
+              position: exp.posicion,
+              startDate: exp.fecha_inicio,
+              endDate: exp.fecha_fin,
+              description: exp.descripcion,
+              isCurrentPosition: exp.fecha_fin === null
+            }));
+            setExperiences(formattedExperiences);
+          }
+        }
+      }
     };
+    
+    fetchUserId();
+  }, [initialExperiences]);
 
-    setExperiences([...experiences, finalExperience]);
+  const handleAddExperience = async () => {
+    if (!userId) return;
+    
+    setIsSaving(true);
+    
+    try {
+      const { success, id } = await createUserExperience(userId, newExperience);
+      
+      if (success) {
+        const finalExperience = {
+          ...newExperience,
+          id,
+          endDate: newExperience.isCurrentPosition ? null : newExperience.endDate
+        };
+        
+        setExperiences([...experiences, finalExperience]);
+        setNewExperience({
+          company: "",
+          position: "",
+          startDate: "",
+          endDate: "",
+          description: "",
+          isCurrentPosition: false
+        });
+        setIsAddingExperience(false);
+      } else {
+        // Handle error
+        console.error("Error saving experience");
+      }
+    } catch (error) {
+      console.error("Exception saving experience:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleEditExperience = (experience: ExperienceWithDates) => {
+    setNewExperience(experience);
+    setEditingExperienceId(experience.id || null);
+    setIsEditingExperience(true);
+    setIsAddingExperience(true);
+  };
+
+  const handleUpdateExperience = async () => {
+    if (!userId || !editingExperienceId) return;
+    
+    setIsSaving(true);
+    
+    try {
+      const { success } = await updateUserExperience(editingExperienceId, userId, newExperience);
+      
+      if (success) {
+        const updatedExperiences = experiences.map(exp => 
+          exp.id === editingExperienceId 
+            ? { ...newExperience, id: editingExperienceId, endDate: newExperience.isCurrentPosition ? null : newExperience.endDate } 
+            : exp
+        );
+        
+        setExperiences(updatedExperiences);
+        setNewExperience({
+          company: "",
+          position: "",
+          startDate: "",
+          endDate: "",
+          description: "",
+          isCurrentPosition: false
+        });
+        setIsEditingExperience(false);
+        setEditingExperienceId(null);
+        setIsAddingExperience(false);
+      } else {
+        // Handle error
+        console.error("Error updating experience");
+      }
+    } catch (error) {
+      console.error("Exception updating experience:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRemoveExperience = async (index: number, id?: string) => {
+    if (id && userId) {
+      // If we have an ID, delete from the database
+      const { success } = await deleteUserExperience(id, userId);
+      
+      if (success) {
+        const updatedExperiences = [...experiences];
+        updatedExperiences.splice(index, 1);
+        setExperiences(updatedExperiences);
+      } else {
+        console.error("Error deleting experience");
+      }
+    } else {
+      // Otherwise just remove from local state
+      const updatedExperiences = [...experiences];
+      updatedExperiences.splice(index, 1);
+      setExperiences(updatedExperiences);
+    }
+  };
+
+  const handleCancelEdit = () => {
     setNewExperience({
       company: "",
       position: "",
@@ -96,13 +228,9 @@ export default function ExperienceSection({ initialExperiences, loading = false 
       description: "",
       isCurrentPosition: false
     });
+    setIsEditingExperience(false);
+    setEditingExperienceId(null);
     setIsAddingExperience(false);
-  };
-
-  const handleRemoveExperience = (index: number) => {
-    const updatedExperiences = [...experiences];
-    updatedExperiences.splice(index, 1);
-    setExperiences(updatedExperiences);
   };
 
   const handleCurrentPositionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,6 +257,7 @@ export default function ExperienceSection({ initialExperiences, loading = false 
         <button 
           className="px-3 py-2 bg-gradient-to-r from-[#A100FF] to-[#8A00E3] rounded-md hover:from-[#8A00E3] hover:to-[#7500C0] transition-all duration-300 flex items-center gap-2 shadow-sm"
           onClick={() => setIsAddingExperience(true)}
+          disabled={isAddingExperience}
         >
           <FiPlus size={16} className="text-white" />
           <span className="text-white font-medium">Añadir Experiencia</span>
@@ -146,7 +275,9 @@ export default function ExperienceSection({ initialExperiences, loading = false 
             className="overflow-hidden"
           >
             <div className="p-6 border border-[#A100FF20] rounded-lg bg-gradient-to-b from-[#A100FF08] to-transparent backdrop-blur-sm shadow-md">
-              <h3 className="font-medium mb-5 text-lg text-gray-800 border-b pb-2 border-[#A100FF20]">Nueva experiencia laboral</h3>
+              <h3 className="font-medium mb-5 text-lg text-gray-800 border-b pb-2 border-[#A100FF20]">
+                {isEditingExperience ? 'Editar experiencia laboral' : 'Nueva experiencia laboral'}
+              </h3>
               
               <div className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -259,20 +390,24 @@ export default function ExperienceSection({ initialExperiences, loading = false 
                 <div className="flex justify-end space-x-3 pt-4 sticky bottom-0">
                   <button 
                     className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-sm font-medium flex items-center gap-2"
-                    onClick={() => setIsAddingExperience(false)}
+                    onClick={handleCancelEdit}
                     type="button"
+                    disabled={isSaving}
                   >
                     <FiX size={16} className="text-white" />
                     <span className="text-white">Cancelar</span>
                   </button>
                   <button 
                     className="px-4 py-2.5 bg-gradient-to-r from-[#A100FF] to-[#8A00E3] rounded-lg hover:from-[#8A00E3] hover:to-[#7500C0] transition-all duration-300 shadow-sm font-medium flex items-center gap-2 disabled:opacity-50"
-                    onClick={handleAddExperience}
-                    disabled={!newExperience.company || !newExperience.position || !newExperience.startDate || (!newExperience.endDate && !newExperience.isCurrentPosition)}
+                    onClick={isEditingExperience ? handleUpdateExperience : handleAddExperience}
+                    disabled={isSaving || !newExperience.company || !newExperience.position || !newExperience.startDate || (!newExperience.endDate && !newExperience.isCurrentPosition)}
                     type="button"
                   >
                     <FiCheck size={16} className="text-white" />
-                    <span className="text-white">Agregar</span>
+                    <span className="text-white">
+                      {isEditingExperience ? 'Guardar cambios' : 'Agregar'}
+                      {isSaving && '...'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -294,25 +429,21 @@ export default function ExperienceSection({ initialExperiences, loading = false 
         </motion.div>
       )}
       
-      {/* Improved experience timeline design with better date positioning */}
+      {/* Experience cards with Edit button */}
       <div className="mt-4">
         {experiences.map((exp, index) => (
           <motion.div 
-            key={index}
+            key={exp.id || index}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
             className="mb-4 last:mb-0"
           >
             <div className="group">
-              {/* Experience card with reduced spacing */}
               <div className="flex flex-col md:flex-row items-start rounded-lg overflow-hidden bg-white transition-all duration-300 ease-in-out hover:shadow-md border border-gray-100 hover:border-[#A100FF20]">
-                {/* Left color accent - changes color on hover */}
                 <div className="w-full md:w-1 md:h-auto bg-gray-200 group-hover:bg-[#A100FF] transition-colors duration-300 md:self-stretch flex-shrink-0"></div>
                 
-                {/* Content section with restructured layout */}
                 <div className="flex-grow p-4">
-                  {/* Company and position header */}
                   <div className="flex flex-col mb-3">
                     <h3 className="text-lg font-semibold text-gray-800 group-hover:text-[#A100FF] transition-colors duration-300">
                       {exp.position}
@@ -325,7 +456,6 @@ export default function ExperienceSection({ initialExperiences, loading = false 
                       </p>
                     </div>
                     
-                    {/* Date badge - now styled as a subtle inline element under company */}
                     <div className="text-xs text-gray-500 flex items-center gap-1 mt-1.5">
                       <FiCalendar size={12} className="text-gray-400" />
                       <span className="inline-block">
@@ -338,18 +468,25 @@ export default function ExperienceSection({ initialExperiences, loading = false 
                     </div>
                   </div>
                   
-                  {/* Description - separated from header info */}
                   <div className="pt-1 border-t border-gray-100">
                     <p className="text-gray-600 text-sm whitespace-pre-line mt-2">{exp.description}</p>
                   </div>
                 </div>
                 
-                {/* Delete button */}
-                <div className="self-start p-3">
+                <div className="self-start p-3 flex flex-col gap-2">
+                  <button 
+                    className="p-1.5 text-gray-400 hover:text-[#A100FF] hover:bg-[#A100FF10] rounded-full transition-all duration-300"
+                    onClick={() => handleEditExperience(exp)}
+                    title="Editar experiencia"
+                    disabled={isAddingExperience}
+                  >
+                    <FiEdit2 size={15} />
+                  </button>
                   <button 
                     className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all duration-300"
-                    onClick={() => handleRemoveExperience(index)}
+                    onClick={() => handleRemoveExperience(index, exp.id)}
                     title="Eliminar experiencia"
+                    disabled={isAddingExperience}
                   >
                     <FiTrash2 size={15} />
                   </button>
