@@ -59,6 +59,12 @@ const navLinks: NavItem[] = [
         ]
     },
     {
+      name: "Cursos",
+      icon: "certificates",
+      href: "/dashboard/cursos",
+      hasDropdown: false
+    },
+    {
         name: "Calendario",
         icon: "calendar",
         href: "/dashboard/calendario",
@@ -418,6 +424,118 @@ export const calendarEvents = [
   }
 ];
 
+//Courses Data
+  // Datos de cursos de muestra
+export const mockCourses = [
+  {
+    id: '1',
+    name: 'AWS Certified Solutions Architect - Associate',
+    issuer: 'Amazon Web Services',
+    description: 'Validación de conocimientos técnicos para diseñar y desplegar arquitecturas seguras y robustas en la plataforma AWS.',
+    status: 'completed',
+    category: 'cloud',
+    completionDate: '2024-02-15',
+    expirationDate: '2027-02-15',
+    credentialID: 'AWS-ASA-12345',
+    credentialURL: 'https://aws.amazon.com/verification',
+    relevanceScore: 85,
+    skills: ['AWS', 'Cloud Architecture', 'EC2', 'S3', 'Lambda']
+  },
+  {
+    id: '2',
+    name: 'Certified Scrum Master (CSM)',
+    issuer: 'Scrum Alliance',
+    description: 'Certificación que acredita conocimientos de los principios de Scrum y la habilidad para facilitar sesiones de Scrum.',
+    status: 'completed',
+    category: 'agile',
+    completionDate: '2023-11-10',
+    expirationDate: '2025-11-10',
+    credentialID: 'CSM-98765',
+    credentialURL: 'https://www.scrumalliance.org/certification',
+    relevanceScore: 75,
+    skills: ['Scrum', 'Agile', 'Project Management', 'Team Facilitation']
+  },
+  {
+    id: '3',
+    name: 'Microsoft Azure Fundamentals (AZ-900)',
+    issuer: 'Microsoft',
+    description: 'Certificación que demuestra conocimientos básicos sobre servicios cloud en Azure, modelos de precios y facturación.',
+    status: 'in-progress',
+    category: 'cloud',
+    expirationDate: '2025-12-31',
+    relevanceScore: 80,
+    modules: [
+      {
+        id: 'm1',
+        name: 'Conceptos de Cloud',
+        description: 'Introducción a los conceptos básicos de computación en la nube',
+        completed: true
+      },
+      {
+        id: 'm2',
+        name: 'Servicios de Azure Core',
+        description: 'Servicios principales y productos disponibles en Azure',
+        completed: true
+      },
+      {
+        id: 'm3',
+        name: 'Seguridad, Privacidad y Cumplimiento',
+        description: 'Aspectos de seguridad y privacidad en Azure',
+        completed: false
+      },
+      {
+        id: 'm4',
+        name: 'Precios y Soporte de Azure',
+        description: 'Modelos de precios, SLAs y ciclo de vida de servicios',
+        completed: false
+      }
+    ]
+  },
+  {
+    id: '4',
+    name: 'Google Professional Data Engineer',
+    issuer: 'Google Cloud',
+    description: 'Certificación que valida la capacidad para diseñar e implementar soluciones de procesamiento de datos, ML y análisis de datos.',
+    status: 'in-progress',
+    category: 'data',
+    expirationDate: '2026-01-20',
+    relevanceScore: 90,
+    modules: [
+      {
+        id: 'm1',
+        name: 'Diseño de soluciones de datos',
+        description: 'Arquitectura y diseño de soluciones de procesamiento de datos',
+        completed: true
+      },
+      {
+        id: 'm2',
+        name: 'Construcción de soluciones de procesamiento de datos',
+        description: 'Implementación de pipelines de datos y ETL',
+        completed: false
+      },
+      {
+        id: 'm3',
+        name: 'Operación de soluciones de datos',
+        description: 'Monitoreo, optimización y solución de problemas',
+        completed: false
+      }
+    ]
+  },
+  {
+    id: '5',
+    name: 'ITIL 4 Foundation',
+    issuer: 'Axelos',
+    description: 'Certificación que proporciona una comprensión del marco de gestión de servicios ITIL y cómo puede mejorar el trabajo y servicios.',
+    status: 'completed',
+    category: 'methodology',
+    completionDate: '2023-08-22',
+    expirationDate: null, // No expira
+    credentialID: 'ITIL-F-54321',
+    credentialURL: 'https://www.axelos.com/certifications/itil-certifications',
+    relevanceScore: 70,
+    skills: ['ITSM', 'Service Management', 'ITIL Framework']
+  }
+];
 // Helper functions for the calendar
 export function getMonthDays(month: number, year: number) {
   const date = new Date(year, month, 1);
@@ -460,26 +578,30 @@ export function calculateProjectProgress(projectId: string): number {
   return Math.round((completedTasks / project.tasks.length) * 100);
 }
 
-export const colorClasses: Record<string, { bg: string, light: string, border: string, text: string }> = {
+export const colorClasses: Record<string, { bg: string, light: string, border: string, text: string, color: string }> = {
   emerald: { 
+    color: "#10B981",
     bg: "bg-emerald-500", 
     light: "bg-emerald-50", 
     border: "border-emerald-500",
     text: "text-emerald-700"
   },
   blue: { 
+    color: "blue",
     bg: "bg-blue-500", 
     light: "bg-blue-50", 
     border: "border-blue-500",
     text: "text-blue-700"
   },
   purple: { 
+    color: "purple",
     bg: "bg-purple-500", 
     light: "bg-purple-50", 
     border: "border-purple-500",
     text: "text-purple-700"
   },
   accenture: { 
+    color: "#A100FF",
     bg: "bg-[#A100FF]", 
     light: "bg-[#A100FF20]", 
     border: "border-[#A100FF]",

@@ -292,7 +292,12 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Currículum</h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center pb-3 border-b border-gray-100">
+        <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
+          <FiFileText className="h-5 w-5 text-[#A100FF]" />
+        </span>
+        Currículum
+      </h2>
       
       {existingCurriculum ? (
         <div>
