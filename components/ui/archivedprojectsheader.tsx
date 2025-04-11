@@ -58,13 +58,13 @@ export default function ArchivedProjectsHeader({
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-bold">Proyectos Archivados</h1>
-              <p className="text-sm opacity-90">Historial de proyectos</p>
+              <h1 className="text-xl font-bold text-white">Proyectos Archivados</h1>
+              <p className="text-sm opacity-90 text-white">Historial de proyectos</p>
             </div>
           </div>
 
           <div className="flex items-center">
-            <span className="text-lg font-medium mr-3">{userName}</span>
+            <span className="text-lg font-medium mr-3 text-white">{userName}</span>
             <div className="bg-white px-4 py-2 rounded-md">
               <span className="text-lg font-semibold text-gray-800">{archivedCount} proyecto{archivedCount !== 1 ? 's' : ''}</span>
             </div>
