@@ -188,12 +188,12 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Resume section */}
         <div className="md:col-span-1 flex">
-          <ResumeUpload 
+          {userProfile && <ResumeUpload 
             userId={userProfile.ID_Usuario}
             notificationState={notificationState} 
             loading={!fullyLoaded}
             className="w-full" 
-          />
+          />}
         </div>
 
         {/* Certificates section */}
