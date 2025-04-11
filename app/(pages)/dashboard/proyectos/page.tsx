@@ -1,4 +1,3 @@
-// app/dashboard/proyectos/page.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -7,6 +6,7 @@ import {
   calculateProjectProgress, 
   colorClasses 
 } from '@/app/lib/data';
+import ProjectsHeader from '@/components/ui/projectsheader';
 
 export default function ProjectsPage() {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
@@ -47,47 +47,26 @@ export default function ProjectsPage() {
     };
   }, [selectedProject]);
 
+  // Obtener el color adecuado para el proyecto
+  const getProjectColor = (color: string) => {
+    switch(color) {
+      case 'emerald': return 'bg-emerald-500';
+      case 'blue': return 'bg-blue-500';
+      case 'purple': return 'bg-purple-500';
+      case 'accenture':
+      default: return 'bg-[#A100FF]';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header Card */}
-        <div className="bg-white rounded-xl shadow-md mb-6 p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#A100FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold">Proyectos Activos</h1>
-            </div>
-            
-            <div className="flex space-x-2">
-              <button 
-                onClick={() => setViewMode('grid')}
-                className={`flex items-center px-3 py-1.5 rounded-md ${
-                  viewMode === 'grid' ? 'bg-[#A100FF] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                Grid
-              </button>
-              <button 
-                onClick={() => setViewMode('list')}
-                className={`flex items-center px-3 py-1.5 rounded-md ${
-                  viewMode === 'list' ? 'bg-[#A100FF] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                Lista
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Header simplificado con botones de cambio de vista integrados */}
+        <ProjectsHeader 
+          userName="Carlos Rodríguez" 
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Content Section */}
         {activeProjects.length === 0 ? (
@@ -108,7 +87,9 @@ export default function ProjectsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeProjects.map(project => {
                 const progress = calculateProjectProgress(project.id);
-                const projectColorClasses = colorClasses[project.color] || colorClasses.accenture;
+                const completedTasks = project.tasks.filter(t => t.completed).length;
+                const totalTasks = project.tasks.length;
+                const projectColor = getProjectColor(project.color);
                 
                 return (
                   <div 
@@ -116,7 +97,7 @@ export default function ProjectsPage() {
                     onClick={() => setSelectedProject(project)}
                     className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg"
                   >
-                    <div className="bg-[#A100FF] p-4 rounded-t-xl">
+                    <div className={`${projectColor} p-4 rounded-t-xl`}>
                       <div className="flex justify-between items-center">
                         <h3 className="text-lg font-semibold text-white">{project.name}</h3>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-green-800">
@@ -129,8 +110,8 @@ export default function ProjectsPage() {
                     <div className="p-5">
                       <p className="text-gray-700 text-sm mb-6 line-clamp-2">{project.description}</p>
                       
-                      <div className="mt-4 flex justify-between items-center">
-                        <div className="relative w-16 h-16">
+                      <div className="relative w-full h-24 flex flex-col justify-center">
+                        <div className="absolute left-0 w-16 h-16">
                           <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 100 100">
                             <circle 
                               cx="50" cy="50" r="45" 
@@ -141,7 +122,12 @@ export default function ProjectsPage() {
                             <circle 
                               cx="50" cy="50" r="45" 
                               fill="none" 
-                              stroke={projectColorClasses.color} 
+                              stroke={
+                                project.color === 'emerald' ? '#10B981' : 
+                                project.color === 'blue' ? '#3B82F6' : 
+                                project.color === 'purple' ? '#A855F7' : 
+                                '#A100FF'
+                              } 
                               strokeWidth="10"
                               strokeDasharray={`${2 * Math.PI * 45 * progress / 100} ${2 * Math.PI * 45 * (100 - progress) / 100}`}
                               strokeLinecap="round"
@@ -151,13 +137,10 @@ export default function ProjectsPage() {
                             {progress}%
                           </div>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm text-gray-500 mb-1">
-                            Tareas completadas
-                          </span>
-                          <span className="font-medium">
-                            {project.tasks.filter(t => t.completed).length}/{project.tasks.length}
-                          </span>
+                        
+                        <div className="ml-20">
+                          <p className="text-sm text-gray-500 mb-1">Tareas completadas</p>
+                          <p className="font-medium">{completedTasks}/{totalTasks}</p>
                         </div>
                       </div>
                     </div>
@@ -170,7 +153,9 @@ export default function ProjectsPage() {
             <div className="space-y-4">
               {activeProjects.map(project => {
                 const progress = calculateProjectProgress(project.id);
-                const projectColorClasses = colorClasses[project.color] || colorClasses.accenture;
+                const completedTasks = project.tasks.filter(t => t.completed).length;
+                const totalTasks = project.tasks.length;
+                const projectColor = getProjectColor(project.color);
                 
                 return (
                   <div 
@@ -178,7 +163,7 @@ export default function ProjectsPage() {
                     onClick={() => setSelectedProject(project)}
                     className="bg-white rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-all overflow-hidden"
                   >
-                    <div className="bg-[#A100FF] p-4 rounded-t-xl">
+                    <div className={`${projectColor} p-4 rounded-t-xl`}>
                       <div className="flex justify-between items-center">
                         <h3 className="text-lg font-semibold text-white">{project.name}</h3>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-green-800">
@@ -204,7 +189,6 @@ export default function ProjectsPage() {
                               project.color === 'emerald' ? '#10B981' : 
                               project.color === 'blue' ? '#3B82F6' : 
                               project.color === 'purple' ? '#A855F7' : 
-                              project.color === 'accenture' ? '#A100FF' : 
                               '#A100FF'
                             } 
                             strokeWidth="10"
@@ -220,7 +204,7 @@ export default function ProjectsPage() {
                         <p className="text-sm text-gray-700 line-clamp-2">{project.description}</p>
                         <div className="mt-2">
                           <span className="text-sm text-gray-500">
-                            Tareas completadas: {project.tasks.filter(t => t.completed).length}/{project.tasks.length}
+                            Tareas completadas: {completedTasks}/{totalTasks}
                           </span>
                         </div>
                       </div>
@@ -237,7 +221,7 @@ export default function ProjectsPage() {
           )
         )}
 
-        {/* Modal de detalle de proyecto */}
+        {/* Modal de detalle de proyecto (se mantiene igual) */}
         {selectedProject && (
           <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4">
             <div 
@@ -248,6 +232,7 @@ export default function ProjectsPage() {
                 overflowY: 'auto',
               }}
             >
+              {/* ... Contenido del modal ... */}
               <div className="p-6 border-b bg-white sticky top-0 z-10">
                 <div className="flex items-center justify-between">
                   <button 
