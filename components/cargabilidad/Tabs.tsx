@@ -9,30 +9,27 @@ interface Props {
 
 export const Tabs = ({ activeTab, setActiveTab }: Props) => {
   return (
-    <div className="bg-white rounded-xl shadow-md mb-6">
-      <div className="border-b">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab('projects')}
-            className={`px-6 py-3 font-medium text-sm ${
-              activeTab === 'projects'
-                ? 'border-b-2 border-indigo-600 text-indigo-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Mis Proyectos
-          </button>
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`px-6 py-3 font-medium text-sm ${
-              activeTab === 'dashboard'
-                ? 'border-b-2 border-indigo-600 text-indigo-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Dashboard
-          </button>
-        </div>
+    <div className="w-full px-4 pt-4">
+      <div className="flex gap-2 md:gap-4">
+        <button
+          onClick={() => setActiveTab('projects')}
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 
+            ${activeTab === 'projects'
+              ? 'bg-purple-100 text-purple-700 shadow-sm'
+              : 'text-gray-500 hover:text-purple-600'}`}
+        >
+          Mis Proyectos
+        </button>
+
+        <button
+          onClick={() => setActiveTab('dashboard')}
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 
+            ${activeTab === 'dashboard'
+              ? 'bg-purple-100 text-purple-700 shadow-sm'
+              : 'text-gray-500 hover:text-purple-600'}`}
+        >
+          Dashboard
+        </button>
       </div>
     </div>
   );

@@ -17,9 +17,9 @@ interface Props {
 export const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 flex flex-col items-center text-center">
-      <CircularProgress value={project.load} />
+      
       <h2 className="text-lg font-semibold mt-4">{project.name}</h2>
-
+      <CircularProgress value={project.load} />
       {project.deadline && (
         <div className="flex items-center gap-1 text-sm text-gray-500 mt-2">
           <FiCalendar size={14} />
@@ -31,7 +31,7 @@ export const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
         <FiClock size={14} />
         <span>{project.hoursPerWeek} horas/semana</span>
       </div>
-
+      
       <div className="flex gap-3 mt-4 text-gray-500 text-sm">
         <button title='Editar' className="hover:text-indigo-600 cursor-pointer p-2 hover:bg-indigo-50 rounded-full transition-colors" onClick={onEdit}>
           <FiEdit2 size={16} title="Editar" />
