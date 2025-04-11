@@ -9,7 +9,6 @@ import { NotificationContainer, useNotificationState } from "@/components/ui/toa
 
 // Import profile components
 import ProfileHeader from "@/components/profile/ProfileHeader";
-import CargabilidadSection from "@/components/profile/CargabilidadSection";
 import ResumeUpload from "@/components/profile/ResumeUpload";
 import CertificatesSection from "@/components/profile/CertificatesSection";
 import SkillsSection from "@/components/profile/SkillsSection";
@@ -178,23 +177,21 @@ export default function ProfilePage() {
         loading={!fullyLoaded}
       />
 
-      {/* Rest of the page content */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {/* Cargabilidad section */}
-        <div className="md:col-span-2">
-          <CargabilidadSection 
-            projects={userProfile.projects || []}
-            loading={!fullyLoaded}
-          />
-        </div>
-
-        <div className="md:col-span-1 flex flex-col h-full">
+      {/* Resume and Certificates section - replacing Cargabilidad */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Resume section */}
+        <div className="md:col-span-1 flex">
           <ResumeUpload 
             userId={userProfile.ID_Usuario}
             notificationState={notificationState} 
             loading={!fullyLoaded}
+            className="w-full" 
           />
-          <CertificatesSection loading={!fullyLoaded} />
+        </div>
+
+        {/* Certificates section */}
+        <div className="md:col-span-1 flex">
+          <CertificatesSection loading={!fullyLoaded} className="w-full" />
         </div>
       </div>
 

@@ -12,9 +12,10 @@ interface ResumeUploadProps {
   userId?: string; // Make it optional for backward compatibility
   notificationState?: UseNotification; // Optional prop to use the parent's notification state
   loading?: boolean; // Added loading prop
+  className?: string; // Add className prop for custom styling
 }
 
-export default function ResumeUpload({ userId, notificationState, loading = false }: ResumeUploadProps) {
+export default function ResumeUpload({ userId, notificationState, loading = false, className = '' }: ResumeUploadProps) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(userId || null);
   const [existingCurriculum, setExistingCurriculum] = useState<string | null>(null);
   const [curriculumFilename, setCurriculumFilename] = useState<string | null>(null);
@@ -291,81 +292,86 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center pb-3 border-b border-gray-100">
+    <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full ${className}`}>
+      <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
         <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
           <FiFileText className="h-5 w-5 text-[#A100FF]" />
         </span>
         Currículum
       </h2>
       
-      {existingCurriculum ? (
-        <div>
-          <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg mb-4">
-            <div className="flex items-center flex-1 min-w-0">
-              <div className="bg-[#A100FF20] p-2 rounded-full mr-3 flex-shrink-0">
-                <FiFileText size={20} className="text-[#A100FF]" />
+      <div className="flex-grow flex flex-col">
+        {existingCurriculum ? (
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg mb-4">
+              <div className="flex items-center flex-1 min-w-0">
+                <div className="bg-[#A100FF20] p-2 rounded-full mr-3 flex-shrink-0">
+                  <FiFileText size={20} className="text-[#A100FF]" />
+                </div>
+                <div className="truncate">
+                  <p className="font-medium text-gray-700 truncate" title={originalFileName || ''}>
+                    {originalFileName || "curriculum.pdf"}
+                  </p>
+                  <p className="text-xs text-gray-500">CV Actual</p>
+                </div>
               </div>
-              <div className="truncate">
-                <p className="font-medium text-gray-700 truncate" title={originalFileName || ''}>
-                  {originalFileName || "curriculum.pdf"}
-                </p>
-                <p className="text-xs text-gray-500">CV Actual</p>
+              <div className="flex space-x-1 flex-shrink-0">
+                <button
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                  className="p-2 text-gray-600 hover:text-[#A100FF] transition-colors rounded-full hover:bg-[#A100FF10] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#A100FF40]"
+                  title="Descargar currículum"
+                >
+                  {isDownloading ? (
+                    <FiLoader size={18} className="animate-spin" />
+                  ) : (
+                    <FiDownload size={18} />
+                  )}
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="p-2 text-gray-600 hover:text-red-600 transition-colors rounded-full hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-200"
+                  title="Eliminar currículum"
+                >
+                  {isDeleting ? (
+                    <FiLoader size={18} className="animate-spin" />
+                  ) : (
+                    <FiTrash2 size={18} />
+                  )}
+                </button>
               </div>
             </div>
-            <div className="flex space-x-1 flex-shrink-0">
-              <button
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className="p-2 text-gray-600 hover:text-[#A100FF] transition-colors rounded-full hover:bg-[#A100FF10] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#A100FF40]"
-                title="Descargar currículum"
-              >
-                {isDownloading ? (
-                  <FiLoader size={18} className="animate-spin" />
-                ) : (
-                  <FiDownload size={18} />
-                )}
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="p-2 text-gray-600 hover:text-red-600 transition-colors rounded-full hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-200"
-                title="Eliminar currículum"
-              >
-                {isDeleting ? (
-                  <FiLoader size={18} className="animate-spin" />
-                ) : (
-                  <FiTrash2 size={18} />
-                )}
-              </button>
-            </div>
-          </div>
 
-          {/* Upload a new one - Just drag or click area */}
-          <div {...getRootProps()} className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#A100FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF]">
-            <input {...getInputProps()} />
-            <p className="text-sm text-gray-600">Arrastra o haz click para reemplazar tu CV</p>
-            <p className="text-xs text-gray-500 mt-1">El archivo se subirá automáticamente</p>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <div
-            {...getRootProps()}
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#A100FF] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF]"
-          >
-            <input {...getInputProps()} />
-            <div className="flex flex-col items-center">
-              <div className="p-3 bg-[#A100FF20] rounded-full mb-3">
-                <FiUpload size={24} className="text-[#A100FF]" />
-              </div>
-              <p className="text-gray-700 mb-1">Arrastra tu CV aquí o haz click para seleccionar</p>
-              <p className="text-xs text-gray-500">PDF, DOC o DOCX (Max: 10MB)</p>
+            {/* Upload a new one - Just drag or click area */}
+            <div 
+              {...getRootProps()} 
+              className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#A100FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF] flex-grow flex flex-col justify-center"
+            >
+              <input {...getInputProps()} />
+              <p className="text-sm text-gray-600">Arrastra o haz click para reemplazar tu CV</p>
               <p className="text-xs text-gray-500 mt-1">El archivo se subirá automáticamente</p>
             </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="flex-grow flex flex-col">
+            <div
+              {...getRootProps()}
+              className="border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-[#A100FF] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF] flex-grow flex flex-col justify-center p-8"
+            >
+              <input {...getInputProps()} />
+              <div className="flex flex-col items-center">
+                <div className="p-3 bg-[#A100FF20] rounded-full mb-3">
+                  <FiUpload size={24} className="text-[#A100FF]" />
+                </div>
+                <p className="text-gray-700 mb-1">Arrastra tu CV aquí o haz click para seleccionar</p>
+                <p className="text-xs text-gray-500">PDF, DOC o DOCX (Max: 10MB)</p>
+                <p className="text-xs text-gray-500 mt-1">El archivo se subirá automáticamente</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
