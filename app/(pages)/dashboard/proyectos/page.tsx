@@ -1,5 +1,6 @@
 'use client';
 
+import { userData } from "@/app/lib/data";
 import { useState, useEffect, useRef } from 'react';
 import { 
   getProjectsByStatus, 
@@ -63,7 +64,7 @@ export default function ProjectsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header simplificado con botones de cambio de vista integrados */}
         <ProjectsHeader 
-          userName="Carlos Rodríguez" 
+          userName={userData.name} 
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
