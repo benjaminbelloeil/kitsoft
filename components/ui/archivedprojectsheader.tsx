@@ -16,7 +16,7 @@ export default function ArchivedProjectsHeader({
 }: ArchivedProjectsHeaderProps) {
   const [archivedCount, setArchivedCount] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
-  const [totalTasks, setTotalTasks] = useState(0);
+  const [, setTotalTasks] = useState(0);
   const [avgTasksPerProject, setAvgTasksPerProject] = useState(0);
   
   useEffect(() => {
