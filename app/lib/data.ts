@@ -460,26 +460,30 @@ export function calculateProjectProgress(projectId: string): number {
   return Math.round((completedTasks / project.tasks.length) * 100);
 }
 
-export const colorClasses: Record<string, { bg: string, light: string, border: string, text: string }> = {
+export const colorClasses: Record<string, { bg: string, light: string, border: string, text: string, color: string }> = {
   emerald: { 
+    color: "#10B981",
     bg: "bg-emerald-500", 
     light: "bg-emerald-50", 
     border: "border-emerald-500",
     text: "text-emerald-700"
   },
   blue: { 
+    color: "blue",
     bg: "bg-blue-500", 
     light: "bg-blue-50", 
     border: "border-blue-500",
     text: "text-blue-700"
   },
   purple: { 
+    color: "purple",
     bg: "bg-purple-500", 
     light: "bg-purple-50", 
     border: "border-purple-500",
     text: "text-purple-700"
   },
   accenture: { 
+    color: "#A100FF",
     bg: "bg-[#A100FF]", 
     light: "bg-[#A100FF20]", 
     border: "border-[#A100FF]",
