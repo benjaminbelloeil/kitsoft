@@ -105,13 +105,13 @@ export default function ProjectsHeader({
             </svg>
           </div>
           <div>
-            <h1 className="text-xl font-bold">Proyectos Activos</h1>
-            <p className="text-sm opacity-90">Resumen de métricas</p>
+            <h1 className="text-xl font-bold text-white">Proyectos Activos</h1>
+            <p className="text-sm opacity-90 text-white">Resumen de métricas</p>
           </div>
         </div>
 
         <div className="flex items-center">
-          <span className="mr-4 text-lg font-medium">{userName}</span>
+          <span className="mr-4 text-lg font-medium text-white">{userName}</span>
           <div className="relative w-16 h-16">
             <svg className="w-16 h-16" viewBox="0 0 100 100">
               <circle 
