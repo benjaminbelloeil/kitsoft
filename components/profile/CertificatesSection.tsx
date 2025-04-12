@@ -165,6 +165,7 @@ export default function CertificatesSection({ userID, loading = false, className
 
   return (
     <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full w-full ${className}`}>
+    <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full w-full ${className}`}>
       <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
         <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
           <FiCheckCircle className="h-5 w-5 text-[#A100FF]" />
@@ -173,84 +174,45 @@ export default function CertificatesSection({ userID, loading = false, className
       </h2>
       
       <div className="space-y-4 flex-grow flex flex-col">
-        {!showForm && (
-          <div className="flex-grow">
-            {certificates.length > 0 ? (
-              <div className="grid gap-4 mb-4 grid-cols-1">
-                {certificates.map((cert, index) => (
-                  <div 
-                    key={index}
-                    className="overflow-hidden rounded-lg bg-white border border-gray-200 hover:border-[#A100FF30] shadow-sm transition-all duration-300 hover:shadow-md group"
-                  >
-                    <div className="flex items-start p-4">
-                      <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] rounded-lg p-3 mr-4 shadow-sm">
-                        <div className="text-center w-10 h-10 flex items-center justify-center">
-                          <span className="text-[#A100FF] font-semibold">{getFileExtension(cert.file)}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800 mb-1">{cert.nombre}</h3>
-                        
-                        <div className="flex flex-wrap gap-3 mt-2">
-                          <div className="flex items-center text-xs bg-[#A100FF08] px-2 py-1 rounded">
-                            <FiCalendar className="text-[#A100FF] mr-1" size={12} />
-                            <span>Obtenido: {formatDate(cert.obtainedDate)}</span>
-                          </div>
-                          {cert.expirationDate && (
-                            <div className="flex items-center text-xs bg-[#A100FF08] px-2 py-1 rounded">
-                              <FiClock className="text-[#A100FF] mr-1" size={12} />
-                              <span>Expira: {formatDate(cert.expirationDate)}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center text-xs bg-[#A100FF08] px-2 py-1 rounded">
-                            <FiFileText className="text-[#A100FF] mr-1" size={12} />
-                            <span>{(cert.file.size / 1024).toFixed(0)} KB</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button 
-                          className="p-2 text-gray-500 hover:text-[#A100FF] hover:bg-[#A100FF10] rounded-full transition-colors"
-                          title="Descargar"
-                          onClick={() => {
-                            const blobUrl = URL.createObjectURL(cert.file);
-                            const a = document.createElement('a');
-                            a.href = blobUrl;
-                            a.download = cert.nombre + ".pdf";
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(blobUrl);
-                          }}
-                        >
-                          <FiDownload size={16} />
-                        </button>
-                        <button 
-                          className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                          onClick={() => handleRemoveCertificate(cert)}
-                          title="Eliminar"
-                        >
-                          <FiTrash2 size={16} />
-                        </button>
-                      </div>
+        <div className="flex-grow">
+          {certificates.length > 0 ? (
+            <div className="space-y-3 mb-4">
+              {certificates.map((cert, index) => (
+                <div 
+                  key={index} 
+                  className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF20] bg-white shadow-sm"
+                >
+                  <div className="flex items-center">
+                    <FiFileText className="text-[#A100FF] mr-2 flex-shrink-0" size={18} />
+                    <div className="truncate max-w-[200px]">
+                      <p className="font-medium text-sm text-gray-800">{cert.name}</p>
+                      <p className="text-xs text-gray-500">{(cert.file.size / 1024).toFixed(0)} KB</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex-grow flex items-center justify-center mb-4">
-                <div className="text-center p-8">
-                  <div className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-2">
-                    <FiFileText className="h-6 w-6 text-[#A100FF]" />
+                  <div className="flex space-x-1">
+                    <button 
+                      className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
+                      title="Descargar"
+                    >
+                      <FiDownload size={14} />
+                    </button>
+                    <button 
+                      className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
+                      onClick={() => handleRemoveCertificate(index)}
+                      title="Eliminar"
+                    >
+                      <FiTrash2 size={14} />
+                    </button>
                   </div>
-                  <p className="text-gray-500 text-sm">No hay certificados subidos</p>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="flex-grow flex items-center justify-center mb-4">
+              <p className="text-center text-gray-500 text-sm italic">No hay certificados subidos</p>
+            </div>
+          )}
+        </div>
         
         <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showForm ? 'mt-4 opacity-100 max-h-[1000px]' : 'h-0 opacity-0'}`}>
           <div className={`p-5 bg-gradient-to-r from-white to-[#A100FF08] border-2 border-[#A100FF20] rounded-xl shadow-sm transform transition-transform duration-500 ease-in-out ${showForm ? 'translate-y-0' : 'translate-y-10'}`}>
