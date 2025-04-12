@@ -79,12 +79,28 @@ export function SkeletonCargabilidad() {
 
 export function SkeletonResume() {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 animate-pulse">
-      <div className="mb-4">
-        <Skeleton className="h-7 w-32" />
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 animate-pulse flex flex-col h-full w-full">
+      {/* Header */}
+      <div className="flex items-center mb-6 pb-3 border-b border-gray-100">
+        <div className="bg-gray-200 h-10 w-10 rounded-md mr-2"></div>
+        <div className="bg-gray-200 h-7 w-32 rounded"></div>
       </div>
-      <div className="flex flex-col">
-        <Skeleton className="h-32 w-full rounded-lg" />
+      
+      {/* Content - make sure both skeletons have identical structure and sizing */}
+      <div className="flex-grow flex flex-col">
+        <div className="flex-grow mb-4 h-24 flex items-center justify-center">
+          {/* Empty state placeholder */}
+          <div className="bg-gray-100 h-5 w-48 rounded"></div>
+        </div>
+        
+        {/* Upload area - ensure same height */}
+        <div className="border-2 border-dashed border-gray-200 rounded-lg p-4">
+          <div className="flex flex-col items-center space-y-2 py-2 h-[72px] justify-center">
+            <div className="h-5 w-5 bg-gray-200 rounded-full"></div>
+            <div className="h-4 w-36 bg-gray-200 rounded"></div>
+            <div className="h-3 w-44 bg-gray-200 rounded"></div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -92,33 +108,28 @@ export function SkeletonResume() {
 
 export function SkeletonCertificates() {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 animate-pulse flex-grow">
-      <div className="flex items-center pb-3 border-b border-gray-100 mb-6">
-        <Skeleton className="h-9 w-9 rounded-md mr-2" />
-        <Skeleton className="h-6 w-32" />
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 animate-pulse flex flex-col h-full w-full">
+      {/* Header */}
+      <div className="flex items-center mb-6 pb-3 border-b border-gray-100">
+        <div className="bg-gray-200 h-10 w-10 rounded-md mr-2"></div>
+        <div className="bg-gray-200 h-7 w-32 rounded"></div>
       </div>
       
-      <div className="space-y-4">
-        {[...Array(2)].map((_, i) => (
-          <div 
-            key={i} 
-            className="p-3 border border-gray-200 rounded-lg flex justify-between items-center"
-          >
-            <div className="flex items-center">
-              <Skeleton className="h-8 w-8 rounded-full mr-2" />
-              <div>
-                <Skeleton className="h-4 w-24 mb-1" />
-                <Skeleton className="h-3 w-12" />
-              </div>
-            </div>
-            <div className="flex space-x-1">
-              <Skeleton className="h-7 w-7 rounded-md" />
-              <Skeleton className="h-7 w-7 rounded-md" />
-            </div>
-          </div>
-        ))}
+      {/* Content - make sure both skeletons have identical structure and sizing */}
+      <div className="flex-grow flex flex-col">
+        <div className="flex-grow mb-4 h-24 flex items-center justify-center">
+          {/* Empty state placeholder */}
+          <div className="bg-gray-100 h-5 w-48 rounded"></div>
+        </div>
         
-        <Skeleton className="h-24 w-full rounded-lg mt-4" />
+        {/* Upload area - ensure same height */}
+        <div className="border-2 border-dashed border-gray-200 rounded-lg p-4">
+          <div className="flex flex-col items-center space-y-2 py-2 h-[72px] justify-center">
+            <div className="h-5 w-5 bg-gray-200 rounded-full"></div>
+            <div className="h-4 w-36 bg-gray-200 rounded"></div>
+            <div className="h-3 w-44 bg-gray-200 rounded"></div>
+          </div>
+        </div>
       </div>
     </div>
   );

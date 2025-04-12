@@ -38,7 +38,7 @@ export default function CertificatesSection({ loading = false, className = '' }:
   }
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full ${className}`}>
+    <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full w-full ${className}`}>
       <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
         <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
           <FiCheckCircle className="h-5 w-5 text-[#A100FF]" />
@@ -56,8 +56,8 @@ export default function CertificatesSection({ loading = false, className = '' }:
                   className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF20] bg-white shadow-sm"
                 >
                   <div className="flex items-center">
-                    <FiFileText className="text-[#A100FF] mr-2" size={18} />
-                    <div className="truncate max-w-[150px]">
+                    <FiFileText className="text-[#A100FF] mr-2 flex-shrink-0" size={18} />
+                    <div className="truncate max-w-[200px]">
                       <p className="font-medium text-sm text-gray-800">{cert.name}</p>
                       <p className="text-xs text-gray-500">{(cert.file.size / 1024).toFixed(0)} KB</p>
                     </div>
