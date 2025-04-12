@@ -180,19 +180,14 @@ export default function ProfilePage() {
       {/* Resume and Certificates section - replacing Cargabilidad */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Resume section */}
-        <div className="md:col-span-1 flex">
-          {userProfile && <ResumeUpload 
-            userId={userProfile.ID_Usuario}
-            notificationState={notificationState} 
-            loading={!fullyLoaded}
-            className="w-full" 
-          />}
-        </div>
+        <ResumeUpload 
+          userId={userProfile.ID_Usuario}
+          notificationState={notificationState} 
+          loading={!fullyLoaded}
+        />
 
         {/* Certificates section */}
-        <div className="md:col-span-1 flex">
-          <CertificatesSection loading={!fullyLoaded} className="w-full" />
-        </div>
+        <CertificatesSection loading={!fullyLoaded} />
       </div>
 
       <SkillsSection 
