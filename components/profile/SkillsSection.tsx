@@ -17,9 +17,9 @@ interface Props extends SkillsSectionProps {
   loading?: boolean;
 }
 
-export default function SkillsSection({ initialSkills, loading = false }: Props) {
+export default function SkillsSection({ loading = false }: Props) {
   const [skills, setSkills] = useState<Array<{id: string, name: string, level: number}>>([]);
-  const [fetched, setFetched] = useState(false);
+  const [, setFetched] = useState(false);
 
   // Fetch skills from database when component mounts
   useEffect(() => {
