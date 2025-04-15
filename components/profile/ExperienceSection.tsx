@@ -1,17 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
-import { FiPlus, FiTrash2, FiX, FiCalendar, FiBriefcase, FiCheck, FiEdit2 } from "react-icons/fi";
-import { RiBuilding4Line } from "react-icons/ri"; // Added a building icon
-import { motion, AnimatePresence } from "framer-motion"; // Import framer-motion
+import { FiPlus, FiTrash2, FiX, FiCalendar, FiBriefcase, FiCheck, FiEdit2, FiSearch } from "react-icons/fi";
+import { RiBuilding4Line } from "react-icons/ri";
+import { AiFillTag } from "react-icons/ai";
+import { motion, AnimatePresence } from "framer-motion";
 import { SkeletonExperience } from "./SkeletonProfile";
 import { getUserExperiences, createUserExperience, updateUserExperience, deleteUserExperience } from "@/utils/database/client/experienceSync";
+import { searchSkills, addSkillToExperience, removeSkillFromExperience, updateSkillLevel } from "@/utils/database/client/skillsSync";
 import { createClient } from '@/utils/supabase/client';
+import { EventEmitter } from '@/utils/eventEmitter';
 
 interface Experience {
   company: string;
   position: string;
   period: string;
   description: string;
+}
+
+interface ExperienceSkill {
+  id?: string;
+  name: string;
+  level: number; // 1 = Beginner, 2 = Intermediate, 3 = Professional
 }
 
 interface ExperienceWithDates {
@@ -22,12 +31,27 @@ interface ExperienceWithDates {
   endDate: string | null;
   description: string;
   isCurrentPosition?: boolean;
+  skills?: ExperienceSkill[]; // Update to include the level
 }
 
 interface ExperienceSectionProps {
   initialExperiences: Experience[];
   loading?: boolean;
 }
+
+// Map level number to label
+const skillLevelLabels: Record<number, string> = {
+  1: 'Principiante',
+  2: 'Intermedio', 
+  3: 'Profesional'
+};
+
+// Map level number to CSS class
+const skillLevelClasses: Record<number, string> = {
+  1: 'bg-blue-100 text-blue-700 border-blue-200',
+  2: 'bg-yellow-100 text-yellow-700 border-yellow-200', 
+  3: 'bg-green-100 text-green-700 border-green-200'
+};
 
 const extractDatesFromPeriod = (period: string): { startDate: string, endDate: string | null } => {
   const parts = period.split(' - ');
@@ -69,7 +93,8 @@ export default function ExperienceSection({ initialExperiences, loading = false 
       startDate,
       endDate,
       description: exp.description,
-      isCurrentPosition: endDate === null
+      isCurrentPosition: endDate === null,
+      skills: [] // Initialize empty skills array
     };
   });
 
@@ -80,16 +105,23 @@ export default function ExperienceSection({ initialExperiences, loading = false 
     startDate: "",
     endDate: "",
     description: "",
-    isCurrentPosition: false
+    isCurrentPosition: false,
+    skills: [] // Initialize empty skills array
   });
+  const [skillInput, setSkillInput] = useState("");
+  const [skillSearchResults, setSkillSearchResults] = useState<Array<{id: string, titulo: string}>>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState<{id?: string, name: string, level: number} | null>(null);
   const [isAddingExperience, setIsAddingExperience] = useState(false);
   const [isEditingExperience, setIsEditingExperience] = useState(false);
   const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [resetFormState, setResetFormState] = useState(false);
+  const [showSkillLevelSelect, setShowSkillLevelSelect] = useState(false);
 
   const formRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
   const [formHeight, setFormHeight] = useState<number | "auto">("auto");
 
   // Fetch user ID on component mount
@@ -111,7 +143,12 @@ export default function ExperienceSection({ initialExperiences, loading = false 
               startDate: exp.fecha_inicio,
               endDate: exp.fecha_fin,
               description: exp.descripcion,
-              isCurrentPosition: exp.fecha_fin === null
+              isCurrentPosition: exp.fecha_fin === null,
+              skills: exp.habilidades ? exp.habilidades.map((skill: any) => ({
+                id: skill.id_habilidad,
+                name: skill.titulo,
+                level: skill.nivel_experiencia || 1
+              })) : []
             }));
             setExperiences(formattedExperiences);
           }
@@ -121,6 +158,42 @@ export default function ExperienceSection({ initialExperiences, loading = false 
     
     fetchUserId();
   }, [initialExperiences]);
+
+  // Effect to handle skill search
+  useEffect(() => {
+    const handleSkillSearch = async () => {
+      if (skillInput.trim().length < 2) {
+        setSkillSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      const results = await searchSkills(skillInput);
+      setSkillSearchResults(results);
+      setIsSearching(false);
+    };
+
+    // Debounce the search to avoid excessive API calls
+    const debounceTimeout = setTimeout(handleSkillSearch, 300);
+
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
+  }, [skillInput]);
+
+  // Effect to handle clicks outside of search results
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSkillSearchResults([]);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Effect to capture form height when it's displayed
   useEffect(() => {
@@ -143,7 +216,19 @@ export default function ExperienceSection({ initialExperiences, loading = false 
     try {
       const { success, id } = await createUserExperience(userId, newExperience);
       
-      if (success) {
+      if (success && id) {
+        // Add skills to experience
+        if (newExperience.skills && newExperience.skills.length > 0) {
+          for (const skill of newExperience.skills) {
+            await addSkillToExperience(
+              skill.name, 
+              id, 
+              userId, 
+              skill.level
+            );
+          }
+        }
+
         const finalExperience = {
           ...newExperience,
           id,
@@ -157,11 +242,17 @@ export default function ExperienceSection({ initialExperiences, loading = false 
           startDate: "",
           endDate: "",
           description: "",
-          isCurrentPosition: false
+          isCurrentPosition: false,
+          skills: []
         });
+        setSkillInput("");
         setIsAddingExperience(false);
+        
+        // Use event emitter to notify other components about new skills
+        if (newExperience.skills && newExperience.skills.length > 0) {
+          EventEmitter.emit('skillsUpdated', newExperience.skills.map(skill => skill.name));
+        }
       } else {
-        // Handle error
         console.error("Error saving experience");
       }
     } catch (error) {
@@ -172,7 +263,10 @@ export default function ExperienceSection({ initialExperiences, loading = false 
   };
 
   const handleEditExperience = (experience: ExperienceWithDates) => {
-    setNewExperience(experience);
+    setNewExperience({
+      ...experience,
+      skills: experience.skills || []
+    });
     setEditingExperienceId(experience.id || null);
     setIsEditingExperience(true);
     setIsAddingExperience(true);
@@ -187,6 +281,30 @@ export default function ExperienceSection({ initialExperiences, loading = false 
       const { success } = await updateUserExperience(editingExperienceId, userId, newExperience);
       
       if (success) {
+        // Update the skills for the experience
+        if (newExperience.skills) {
+          // First, ensure all new skills are added with correct levels
+          for (const skill of newExperience.skills) {
+            if (skill.id) {
+              // Update existing skill level
+              await updateSkillLevel(
+                skill.id,
+                editingExperienceId,
+                userId,
+                skill.level
+              );
+            } else {
+              // Add new skill
+              await addSkillToExperience(
+                skill.name,
+                editingExperienceId,
+                userId,
+                skill.level
+              );
+            }
+          }
+        }
+
         const updatedExperiences = experiences.map(exp => 
           exp.id === editingExperienceId 
             ? { ...newExperience, id: editingExperienceId, endDate: newExperience.isCurrentPosition ? null : newExperience.endDate } 
@@ -200,13 +318,26 @@ export default function ExperienceSection({ initialExperiences, loading = false 
           startDate: "",
           endDate: "",
           description: "",
-          isCurrentPosition: false
+          isCurrentPosition: false,
+          skills: []
         });
+        setSkillInput("");
         setIsEditingExperience(false);
         setEditingExperienceId(null);
         setIsAddingExperience(false);
+        
+        // Use event emitter to notify other components about updated skills
+        const allSkills = updatedExperiences.reduce((acc: string[], exp) => {
+          if (exp.skills && exp.skills.length > 0) {
+            return [...acc, ...exp.skills.map(skill => skill.name)];
+          }
+          return acc;
+        }, []);
+        
+        if (allSkills.length > 0) {
+          EventEmitter.emit('skillsUpdated', allSkills);
+        }
       } else {
-        // Handle error
         console.error("Error updating experience");
       }
     } catch (error) {
@@ -218,7 +349,6 @@ export default function ExperienceSection({ initialExperiences, loading = false 
 
   const handleRemoveExperience = async (index: number, id?: string) => {
     if (id && userId) {
-      // If we have an ID, delete from the database
       const { success } = await deleteUserExperience(id, userId);
       
       if (success) {
@@ -229,7 +359,6 @@ export default function ExperienceSection({ initialExperiences, loading = false 
         console.error("Error deleting experience");
       }
     } else {
-      // Otherwise just remove from local state
       const updatedExperiences = [...experiences];
       updatedExperiences.splice(index, 1);
       setExperiences(updatedExperiences);
@@ -237,7 +366,6 @@ export default function ExperienceSection({ initialExperiences, loading = false 
   };
 
   const handleCancelEdit = () => {
-    // Just set flag to start exit animation
     setIsAddingExperience(false);
     setResetFormState(true);
   };
@@ -250,8 +378,10 @@ export default function ExperienceSection({ initialExperiences, loading = false 
         startDate: "",
         endDate: "",
         description: "",
-        isCurrentPosition: false
+        isCurrentPosition: false,
+        skills: []
       });
+      setSkillInput("");
       setIsEditingExperience(false);
       setEditingExperienceId(null);
       setResetFormState(false);
@@ -264,6 +394,102 @@ export default function ExperienceSection({ initialExperiences, loading = false 
       isCurrentPosition: e.target.checked,
       endDate: e.target.checked ? null : newExperience.endDate
     });
+  };
+
+  const handleAddSkill = (skillId?: string, skillTitle?: string) => {
+    if (selectedSkill) {
+      const newSkill = {
+        id: skillId || selectedSkill.id,
+        name: skillTitle || selectedSkill.name,
+        level: selectedSkill.level
+      };
+      
+      if (!newExperience.skills?.some(s => s.name.toLowerCase() === newSkill.name.toLowerCase())) {
+        setNewExperience({
+          ...newExperience,
+          skills: [...(newExperience.skills || []), newSkill]
+        });
+      }
+      
+      setSelectedSkill(null);
+      setShowSkillLevelSelect(false);
+      setSkillInput("");
+      setSkillSearchResults([]);
+    } else if (skillTitle) {
+      setSelectedSkill({
+        id: skillId,
+        name: skillTitle,
+        level: 1
+      });
+      setShowSkillLevelSelect(true);
+      setSkillInput("");
+    } else if (skillInput.trim()) {
+      setSelectedSkill({
+        name: skillInput.trim(),
+        level: 1
+      });
+      setShowSkillLevelSelect(true);
+    }
+  };
+
+  const handleSkillLevelSelect = (level: number) => {
+    if (selectedSkill) {
+      const newSkill = {
+        id: selectedSkill.id,
+        name: selectedSkill.name,
+        level
+      };
+      
+      if (!newExperience.skills?.some(s => s.name.toLowerCase() === newSkill.name.toLowerCase())) {
+        setNewExperience({
+          ...newExperience,
+          skills: [...(newExperience.skills || []), newSkill]
+        });
+      }
+      
+      setSelectedSkill(null);
+      setShowSkillLevelSelect(false);
+      setSkillInput("");
+    }
+  };
+
+  const handleUpdateSkillLevel = (skillIndex: number, level: number) => {
+    if (newExperience.skills) {
+      const updatedSkills = [...newExperience.skills];
+      updatedSkills[skillIndex] = {
+        ...updatedSkills[skillIndex],
+        level
+      };
+      
+      setNewExperience({
+        ...newExperience,
+        skills: updatedSkills
+      });
+    }
+  };
+
+  const handleRemoveSkill = (skillIndex: number) => {
+    if (newExperience.skills) {
+      const updatedSkills = [...newExperience.skills];
+      updatedSkills.splice(skillIndex, 1);
+      
+      setNewExperience({
+        ...newExperience,
+        skills: updatedSkills
+      });
+    }
+  };
+
+  const handleSkillInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (skillSearchResults.length > 0) {
+        const firstResult = skillSearchResults[0];
+        handleAddSkill(firstResult.id, firstResult.titulo);
+      } else if (skillInput.trim()) {
+        handleAddSkill(undefined, skillInput.trim());
+      }
+    }
   };
 
   if (loading) {
@@ -305,7 +531,7 @@ export default function ExperienceSection({ initialExperiences, loading = false 
               marginBottom: 0 
             }}
             transition={{ 
-              type: "tween", // Using tween instead of spring for more predictable animation
+              type: "tween",
               duration: 0.4,
               ease: "easeInOut"
             }}
@@ -418,12 +644,149 @@ export default function ExperienceSection({ initialExperiences, loading = false 
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Descripción</label>
                   <textarea
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF] bg-white transition-all duration-300"
-                    rows={3} // Fixed height to prevent layout issues
+                    rows={3}
                     value={newExperience.description}
                     onChange={(e) => setNewExperience({...newExperience, description: e.target.value})}
                     placeholder="Describe tus responsabilidades y logros en este cargo"
-                    style={{ resize: "none" }} // Prevent user resizing
+                    style={{ resize: "none" }}
                   />
+                </div>
+                
+                <div className="transition-all duration-300 focus-within:scale-[1.01]">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Habilidades adquiridas
+                  </label>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+                    {showSkillLevelSelect && selectedSkill && (
+                      <div className="mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                        <p className="text-sm font-medium text-gray-700 mb-2">
+                          Selecciona tu nivel de experiencia para <span className="text-[#A100FF]">{selectedSkill.name}</span>:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => handleSkillLevelSelect(1)}
+                            className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md text-sm border border-blue-200 hover:bg-blue-200 transition-colors"
+                          >
+                            Principiante
+                          </button>
+                          <button
+                            onClick={() => handleSkillLevelSelect(2)}
+                            className="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-md text-sm border border-yellow-200 hover:bg-yellow-200 transition-colors"
+                          >
+                            Intermedio
+                          </button>
+                          <button
+                            onClick={() => handleSkillLevelSelect(3)}
+                            className="px-3 py-1.5 bg-green-100 text-green-700 rounded-md text-sm border border-green-200 hover:bg-green-200 transition-colors"
+                          >
+                            Profesional
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setSelectedSkill(null);
+                              setShowSkillLevelSelect(false);
+                            }}
+                            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-sm border border-gray-200 hover:bg-gray-200 transition-colors ml-auto"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {!showSkillLevelSelect && (
+                      <div className="relative" ref={searchRef}>
+                        <div className="flex items-center mb-3">
+                          <div className="relative flex-grow">
+                            <span className="absolute left-3 top-2.5 text-gray-500">
+                              <FiSearch size={16} />
+                            </span>
+                            <input
+                              type="text"
+                              className="w-full p-2 pl-9 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF] bg-white shadow-sm transition-all duration-300"
+                              value={skillInput}
+                              onChange={(e) => setSkillInput(e.target.value)}
+                              placeholder="Buscar o añadir una habilidad (ej. React, Python)"
+                              onKeyDown={handleSkillInputKeyDown}
+                            />
+                          </div>
+                          <button 
+                            className="ml-2 h-[38px] px-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-300 transition-all duration-300 font-medium flex items-center gap-1 shadow-sm disabled:opacity-50 text-sm"
+                            onClick={() => handleAddSkill()}
+                            disabled={!skillInput.trim()}
+                            type="button"
+                          >
+                            <FiPlus size={14} /> Añadir
+                          </button>
+                        </div>
+
+                        {skillSearchResults.length > 0 && (
+                          <div className="absolute z-10 w-full bg-white mt-1 border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                            {skillSearchResults.map((skill) => (
+                              <div
+                                key={skill.id}
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                onClick={() => handleAddSkill(skill.id, skill.titulo)}
+                              >
+                                {skill.titulo}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {newExperience.skills && newExperience.skills.length > 0 ? (
+                        newExperience.skills.map((skill, index) => (
+                          <div
+                            key={index}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-md shadow-sm border transition-all duration-300 ${skillLevelClasses[skill.level]}`}
+                          >
+                            <span className="text-sm font-medium">{skill.name}</span>
+                            <div className="relative ml-1 group">
+                              <span className="text-xs px-1 rounded bg-white bg-opacity-50">
+                                {skillLevelLabels[skill.level]}
+                              </span>
+                              
+                              <div className="absolute hidden group-hover:flex flex-col bg-white border border-gray-200 rounded-md shadow-lg p-1 z-10 right-0 top-full mt-1 w-32">
+                                <button 
+                                  className="text-xs px-2 py-1 hover:bg-blue-100 text-blue-700 rounded text-left"
+                                  onClick={() => handleUpdateSkillLevel(index, 1)}
+                                >
+                                  Principiante
+                                </button>
+                                <button 
+                                  className="text-xs px-2 py-1 hover:bg-yellow-100 text-yellow-700 rounded text-left"
+                                  onClick={() => handleUpdateSkillLevel(index, 2)}
+                                >
+                                  Intermedio
+                                </button>
+                                <button 
+                                  className="text-xs px-2 py-1 hover:bg-green-100 text-green-700 rounded text-left"
+                                  onClick={() => handleUpdateSkillLevel(index, 3)}
+                                >
+                                  Profesional
+                                </button>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleRemoveSkill(index)}
+                              className="ml-1 text-gray-500 hover:text-red-500 transition-colors"
+                              title="Eliminar habilidad"
+                            >
+                              <FiX size={16} />
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm italic px-2 py-2">
+                          Añade las competencias adquiridas en esta posición.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="flex justify-end space-x-3 pt-4 sticky bottom-0">
@@ -509,6 +872,22 @@ export default function ExperienceSection({ initialExperiences, loading = false 
                   <div className="pt-1 border-t border-gray-100">
                     <p className="text-gray-600 text-sm whitespace-pre-line mt-2">{exp.description}</p>
                   </div>
+                  
+                  {exp.skills && exp.skills.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {exp.skills.map((skill, skillIndex) => (
+                        <span 
+                          key={skillIndex}
+                          className={`px-2 py-0.5 rounded text-xs border ${skillLevelClasses[skill.level]}`}
+                        >
+                          {skill.name}
+                          <span className="ml-1 text-xs opacity-80">
+                            • {skillLevelLabels[skill.level]}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="self-start p-3 flex flex-col gap-2">
