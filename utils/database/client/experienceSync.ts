@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/utils/supabase/client';
+import { getExperienceSkills } from './skillsSync';
 
 // Define interfaces
 interface Experience {
@@ -60,7 +61,8 @@ export async function getUserExperiences(userId: string): Promise<any[]> {
   const supabase = createClient();
   
   try {
-    const { data, error } = await supabase
+    // Fetch the experiences
+    const { data: experiences, error } = await supabase
       .from('experiencia')
       .select('*')
       .eq('id_usuario', userId)
@@ -71,7 +73,49 @@ export async function getUserExperiences(userId: string): Promise<any[]> {
       return [];
     }
     
-    return data || [];
+    if (!experiences || experiences.length === 0) {
+      return [];
+    }
+    
+    // Fetch skills for each experience
+    const experiencesWithSkills = await Promise.all(
+      experiences.map(async (exp) => {
+        // Get the skills for this experience
+        try {
+          const expSkills = await supabase
+            .from('experiencias_habilidades')
+            .select(`
+              id_habilidad,
+              nivel_experiencia,
+              habilidades (
+                id_habilidad,
+                titulo
+              )
+            `)
+            .eq('id_experiencia', exp.id_experiencia);
+            
+          // Transform skills to the format expected by the UI
+          const skills = expSkills.data ? expSkills.data.map(skillRecord => ({
+            id_habilidad: skillRecord.id_habilidad,
+            nivel_experiencia: skillRecord.nivel_experiencia,
+            titulo: skillRecord.habilidades ? skillRecord.habilidades.titulo : 'Unnamed skill'
+          })) : [];
+          
+          return {
+            ...exp,
+            habilidades: skills
+          };
+        } catch (skillError) {
+          console.error(`Error fetching skills for experience ${exp.id_experiencia}:`, skillError);
+          return {
+            ...exp,
+            habilidades: []
+          };
+        }
+      })
+    );
+    
+    return experiencesWithSkills;
   } catch (err) {
     console.error('Exception in getUserExperiences:', err);
     return [];
