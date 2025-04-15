@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/utils/supabase/client';
 
 export interface SkillData {
@@ -9,6 +8,7 @@ export interface SkillData {
 export interface UserSkill {
   id_habilidad: string;
   id_usuario: string;
+  
   nivel_experiencia: number;
   titulo?: string; // For convenience when joining with habilidades table
 }
@@ -77,7 +77,6 @@ export async function getUserSkills(userId: string): Promise<UserSkill[]> {
   const supabase = createClient();
   
   try {
-    // Join usuarios_habilidades with habilidades to get the skill title
     const { data, error } = await supabase
       .from('usuarios_habilidades')
       .select(`
@@ -162,10 +161,10 @@ export async function addSkillToExperience(
       .from('habilidades')
       .select('id_habilidad')
       .ilike('titulo', skillName)
-      .limit(1);
+      .single();
     
-    if (existingSkill && existingSkill.length > 0) {
-      skillId = existingSkill[0].id_habilidad;
+    if (existingSkill) {
+      skillId = existingSkill.id_habilidad;
     } else {
       // Create the skill if it doesn't exist
       skillId = crypto.randomUUID();
@@ -222,13 +221,11 @@ export async function addSkillToExperience(
  */
 export async function removeSkillFromExperience(
   skillId: string,
-  experienceId: string,
-  userId: string
+  experienceId: string
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
   
   try {
-    // First delete from experiencias_habilidades
     const { error } = await supabase
       .from('experiencias_habilidades')
       .delete()
@@ -238,29 +235,6 @@ export async function removeSkillFromExperience(
     if (error) {
       console.error('Error removing skill from experience:', error);
       return { success: false, error: error.message };
-    }
-    
-    // Check if the skill is still used in any other experience
-    const { data: stillUsed, error: checkError } = await supabase
-      .from('experiencias_habilidades')
-      .select('id_experiencia')
-      .eq('id_habilidad', skillId);
-    
-    if (checkError) {
-      console.error('Error checking if skill is still used:', checkError);
-    }
-    
-    // If skill is no longer used in any experience, remove from user skills too
-    if (!stillUsed || stillUsed.length === 0) {
-      const { error: removeError } = await supabase
-        .from('usuarios_habilidades')
-        .delete()
-        .eq('id_habilidad', skillId)
-        .eq('id_usuario', userId);
-      
-      if (removeError) {
-        console.error('Error removing skill from user:', removeError);
-      }
     }
     
     return { success: true };
@@ -294,7 +268,7 @@ export async function updateSkillLevel(
       return { success: false, error: expError.message };
     }
     
-    // Also update the user's skill level
+    // Also update the user's skill level if needed
     const { error: userError } = await supabase
       .from('usuarios_habilidades')
       .update({ nivel_experiencia: level })
@@ -303,6 +277,7 @@ export async function updateSkillLevel(
     
     if (userError) {
       console.error('Error updating user skill level:', userError);
+      // Don't fail the operation, as the main update succeeded
     }
     
     return { success: true };
