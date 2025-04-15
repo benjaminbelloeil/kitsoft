@@ -185,9 +185,20 @@ const ExperienceEditForm = ({
       }
 
       setIsSearching(true);
-      const results = await searchSkills(skillInput);
-      setSkillSearchResults(results);
-      setIsSearching(false);
+      try {
+        const results = await searchSkills(skillInput);
+        // Map the SkillData objects to the expected structure with id and titulo properties
+        const formattedResults = results ? results.map(skill => ({
+          id: skill.id_habilidad,
+          titulo: skill.titulo
+        })) : [];
+        setSkillSearchResults(formattedResults);
+      } catch (error) {
+        console.error("Error searching skills:", error);
+        setSkillSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     };
 
     const debounceTimeout = setTimeout(handleSkillSearch, 300);
