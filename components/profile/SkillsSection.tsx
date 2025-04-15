@@ -1,28 +1,53 @@
-import React, { useState } from "react";
-import { FiPlus, FiX, FiCheck } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
 import { SkillsSectionProps } from '@/interfaces/skill';
 import { SkeletonSkills } from "./SkeletonProfile";
+import { motion } from "framer-motion";
+import { FiTool } from "react-icons/fi";
+import { createClient } from '@/utils/supabase/client';
+import { getUserSkills } from "@/utils/database/client/skillsSync";
+
+// Define level colors to match those in ExperienceSection
+const skillLevelClasses: Record<number, string> = {
+  1: 'bg-blue-100 text-blue-700 border-blue-200',
+  2: 'bg-yellow-100 text-yellow-700 border-yellow-200', 
+  3: 'bg-green-100 text-green-700 border-green-200'
+};
 
 interface Props extends SkillsSectionProps {
   loading?: boolean;
 }
 
 export default function SkillsSection({ initialSkills, loading = false }: Props) {
-  const [skills, setSkills] = useState<string[]>(initialSkills);
-  const [newSkill, setNewSkill] = useState("");
-  const [isAddingSkill, setIsAddingSkill] = useState(false);
+  const [skills, setSkills] = useState<Array<{id: string, name: string, level: number}>>([]);
+  const [fetched, setFetched] = useState(false);
 
-  const handleAddSkill = () => {
-    if (newSkill.trim()) {
-      setSkills([...skills, newSkill.trim()]);
-      setNewSkill("");
-      setIsAddingSkill(false);
-    }
-  };
-
-  const handleRemoveSkill = (indexToRemove: number) => {
-    setSkills(skills.filter((_, index) => index !== indexToRemove));
-  };
+  // Fetch skills from database when component mounts
+  useEffect(() => {
+    const fetchSkillsFromDatabase = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return;
+      
+      try {
+        const fetchedSkills = await getUserSkills(user.id);
+        if (!fetchedSkills || fetchedSkills.length === 0) return;
+        
+        const formattedSkills = fetchedSkills.map(skill => ({
+          id: skill.id_habilidad,
+          name: skill.titulo || '',
+          level: skill.nivel_experiencia
+        }));
+        
+        setSkills(formattedSkills);
+        setFetched(true);
+      } catch (error) {
+        console.error("Error fetching skills:", error);
+      }
+    };
+    
+    fetchSkillsFromDatabase();
+  }, []);
 
   if (loading) {
     return <SkeletonSkills />;
@@ -40,64 +65,32 @@ export default function SkillsSection({ initialSkills, loading = false }: Props)
       </h2>
       
       <div className="flex flex-wrap gap-3">
-        {skills.map((skill, index) => (
-          <div 
-            key={index} 
-            className="px-3 py-1.5 bg-[#A100FF15] text-[#A100FF] rounded-md text-sm border border-[#A100FF20] shadow-sm flex items-center gap-1"
-          >
-            <span>{skill}</span>
-            <button
-              className="ml-1 text-red-500 hover:text-red-700 transition-colors"
-              onClick={() => handleRemoveSkill(index)}
-              title="Remove skill"
+        {skills.length > 0 ? (
+          skills.map((skill, index) => (
+            <motion.span
+              key={skill.id || index}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              className={`px-3 py-1.5 rounded-md text-sm border shadow-sm ${skillLevelClasses[skill.level] || skillLevelClasses[1]}`}
             >
-              <FiX size={16} />
-            </button>
-          </div>
-        ))}
-
-        {isAddingSkill ? (
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <input
-                type="text"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#A100FF] focus:border-[#A100FF] w-48"
-                placeholder="Nueva habilidad"
-                autoFocus
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddSkill();
-                  }
-                }}
-              />
-            </div>
-            <div className="flex gap-1">
-              <button
-                onClick={handleAddSkill}
-                className="px-3 py-2 bg-[#A100FF] rounded hover:bg-[#8500D4] transition-colors shadow flex items-center gap-1"
-              >
-                <FiCheck size={16} className="text-white !important" />
-                <span className="text-white !important">Añadir</span>
-              </button>
-              <button
-                onClick={() => setIsAddingSkill(false)}
-                className="px-3 py-2 bg-red-600 rounded hover:bg-red-700 transition-colors shadow flex items-center gap-1"
-              >
-                <FiX size={16} className="text-white !important" />
-                <span className="text-white !important">Cancelar</span>
-              </button>
-            </div>
-          </div>
+              {skill.name}
+            </motion.span>
+          ))
         ) : (
-          <button 
-            className="px-3 py-1.5 bg-[#A100FF] rounded flex items-center gap-1 hover:bg-[#8500D4] transition-colors shadow-sm"
-            onClick={() => setIsAddingSkill(true)}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="w-full py-10 flex flex-col items-center justify-center"
           >
-            <FiPlus size={16} className="text-white !important" />
-            <span className="text-white !important">Añadir habilidad</span>
-          </button>
+            <div className="bg-gradient-to-r from-[#A100FF10] to-transparent p-4 rounded-full mb-3">
+              <FiTool size={36} className="text-[#A100FF60]" />
+            </div>
+            <h3 className="text-base font-medium text-gray-700 mb-2">Sin habilidades registradas</h3>
+            <p className="text-gray-500 text-center text-sm">
+              Añade habilidades en tus experiencias profesionales.
+            </p>
+          </motion.div>
         )}
       </div>
     </div>
