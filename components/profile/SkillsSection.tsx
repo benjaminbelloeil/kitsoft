@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { SkillsSectionProps } from '@/interfaces/skill';
 import { SkeletonSkills } from "./SkeletonProfile";
@@ -5,13 +6,6 @@ import { motion } from "framer-motion";
 import { FiTool, FiStar, FiAward, FiTrendingUp } from "react-icons/fi";
 import { createClient } from '@/utils/supabase/client';
 import { getUserSkills } from "@/utils/database/client/skillsSync";
-
-// Define level colors to match those in ExperienceSection
-const skillLevelClasses: Record<number, string> = {
-  1: 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100',
-  2: 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100', 
-  3: 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
-};
 
 // Get icon for skill level
 const getSkillLevelIcon = (level: number) => {
