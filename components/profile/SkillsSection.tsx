@@ -2,15 +2,25 @@ import React, { useState, useEffect } from "react";
 import { SkillsSectionProps } from '@/interfaces/skill';
 import { SkeletonSkills } from "./SkeletonProfile";
 import { motion } from "framer-motion";
-import { FiTool } from "react-icons/fi";
+import { FiTool, FiStar, FiAward, FiTrendingUp } from "react-icons/fi";
 import { createClient } from '@/utils/supabase/client';
 import { getUserSkills } from "@/utils/database/client/skillsSync";
 
 // Define level colors to match those in ExperienceSection
 const skillLevelClasses: Record<number, string> = {
-  1: 'bg-blue-100 text-blue-700 border-blue-200',
-  2: 'bg-yellow-100 text-yellow-700 border-yellow-200', 
-  3: 'bg-green-100 text-green-700 border-green-200'
+  1: 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100',
+  2: 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100', 
+  3: 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
+};
+
+// Get icon for skill level
+const getSkillLevelIcon = (level: number) => {
+  switch (level) {
+    case 1: return <FiStar className="mr-1.5" />;
+    case 2: return <FiTrendingUp className="mr-1.5" />;
+    case 3: return <FiAward className="mr-1.5" />;
+    default: return <FiStar className="mr-1.5" />;
+  }
 };
 
 interface Props extends SkillsSectionProps {
@@ -18,9 +28,30 @@ interface Props extends SkillsSectionProps {
   externalSkills?: Array<{id: string, name: string, level: number}>;
 }
 
-export default function SkillsSection({ loading = false, externalSkills = [] }: Props) {
+export default function SkillsSection({ loading = false, externalSkills = [], initialSkills = [] }: Props) {
   const [skills, setSkills] = useState<Array<{id: string, name: string, level: number}>>([]);
+  const [skillGroups, setSkillGroups] = useState<{
+    beginner: Array<{id: string, name: string, level: number}>,
+    intermediate: Array<{id: string, name: string, level: number}>,
+    professional: Array<{id: string, name: string, level: number}>
+  }>({
+    beginner: [],
+    intermediate: [],
+    professional: []
+  });
   const [, setFetched] = useState(false);
+
+  // Group skills by level
+  useEffect(() => {
+    if (skills.length > 0) {
+      const grouped = {
+        beginner: skills.filter(skill => skill.level === 1),
+        intermediate: skills.filter(skill => skill.level === 2),
+        professional: skills.filter(skill => skill.level === 3)
+      };
+      setSkillGroups(grouped);
+    }
+  }, [skills]);
 
   // Fetch skills from database when component mounts or externalSkills change
   useEffect(() => {
@@ -72,35 +103,95 @@ export default function SkillsSection({ loading = false, externalSkills = [] }: 
         Habilidades
       </h2>
       
-      <div className="flex flex-wrap gap-3">
-        {skills.length > 0 ? (
-          skills.map((skill, index) => (
-            <motion.span
-              key={skill.id || index}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={`px-3 py-1.5 rounded-md text-sm border shadow-sm ${skillLevelClasses[skill.level] || skillLevelClasses[1]}`}
-            >
-              {skill.name}
-            </motion.span>
-          ))
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full py-10 flex flex-col items-center justify-center"
-          >
-            <div className="bg-gradient-to-r from-[#A100FF10] to-transparent p-4 rounded-full mb-3">
-              <FiTool size={36} className="text-[#A100FF60]" />
+      {skills.length > 0 ? (
+        <div className="space-y-5">
+          {/* Professional skills */}
+          {skillGroups.professional.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center">
+                <FiAward className="text-emerald-500 mr-2" /> Nivel Profesional
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {skillGroups.professional.map((skill, index) => (
+                  <motion.span
+                    key={skill.id || index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                    className="inline-flex items-center px-3 py-1.5 rounded-md text-sm border shadow-sm transition-all duration-200 bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                  >
+                    {getSkillLevelIcon(3)}
+                    {skill.name}
+                  </motion.span>
+                ))}
+              </div>
             </div>
-            <h3 className="text-base font-medium text-gray-700 mb-2">Sin habilidades registradas</h3>
-            <p className="text-gray-500 text-center text-sm">
-              Añade habilidades en tus experiencias profesionales.
-            </p>
-          </motion.div>
-        )}
-      </div>
+          )}
+          
+          {/* Intermediate skills */}
+          {skillGroups.intermediate.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center">
+                <FiTrendingUp className="text-amber-500 mr-2" /> Nivel Intermedio
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {skillGroups.intermediate.map((skill, index) => (
+                  <motion.span
+                    key={skill.id || index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                    className="inline-flex items-center px-3 py-1.5 rounded-md text-sm border shadow-sm transition-all duration-200 bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100"
+                  >
+                    {getSkillLevelIcon(2)}
+                    {skill.name}
+                  </motion.span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Beginner skills */}
+          {skillGroups.beginner.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center">
+                <FiStar className="text-blue-500 mr-2" /> Nivel Principiante
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {skillGroups.beginner.map((skill, index) => (
+                  <motion.span
+                    key={skill.id || index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                    className="inline-flex items-center px-3 py-1.5 rounded-md text-sm border shadow-sm transition-all duration-200 bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+                  >
+                    {getSkillLevelIcon(1)}
+                    {skill.name}
+                  </motion.span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="w-full py-10 flex flex-col items-center justify-center"
+        >
+          <div className="bg-gradient-to-r from-[#A100FF10] to-transparent p-4 rounded-full mb-3">
+            <FiTool size={36} className="text-[#A100FF60]" />
+          </div>
+          <h3 className="text-base font-medium text-gray-700 mb-2">Sin habilidades registradas</h3>
+          <p className="text-gray-500 text-center text-sm">
+            Añade habilidades en tus experiencias profesionales.
+          </p>
+        </motion.div>
+      )}
     </div>
   );
 }

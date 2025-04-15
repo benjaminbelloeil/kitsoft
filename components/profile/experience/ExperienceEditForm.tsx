@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { FiPlus, FiX, FiCalendar, FiBriefcase, FiCheck, FiSearch } from "react-icons/fi";
+import React, { useRef, useState, useEffect } from "react";
+import { FiPlus, FiX, FiCalendar, FiBriefcase, FiCheck, FiSearch, FiStar, FiAward, FiTrendingUp } from "react-icons/fi";
 import { RiBuilding4Line } from "react-icons/ri";
 import { searchSkills } from "@/utils/database/client/skillsSync";
 
@@ -10,10 +10,21 @@ const skillLevelLabels: Record<number, string> = {
   3: 'Profesional'
 };
 
+// Updated with better color combinations
 const skillLevelClasses: Record<number, string> = {
-  1: 'bg-blue-100 text-blue-700 border-blue-200',
-  2: 'bg-yellow-100 text-yellow-700 border-yellow-200', 
-  3: 'bg-green-100 text-green-700 border-green-200'
+  1: 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100',
+  2: 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100', 
+  3: 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
+};
+
+// Get icon for skill level
+const getSkillLevelIcon = (level: number) => {
+  switch (level) {
+    case 1: return <FiStar className="mr-1.5" />;
+    case 2: return <FiTrendingUp className="mr-1.5" />;
+    case 3: return <FiAward className="mr-1.5" />;
+    default: return <FiStar className="mr-1.5" />;
+  }
 };
 
 interface ExperienceSkill {
@@ -126,7 +137,23 @@ const ExperienceEditForm = ({
     }
   };
 
-  const handleUpdateSkillLevel = (skillIndex: number, level: number) => {
+  // Update skill level - DIRECT BUTTON METHOD
+  const handleUpdateSkillLevel = (skillIndex: number, newLevel: number) => {
+    if (formData.skills) {
+      const updatedSkills = [...formData.skills];
+      updatedSkills[skillIndex] = {
+        ...updatedSkills[skillIndex],
+        level: newLevel
+      };
+      
+      onFormChange({
+        ...formData,
+        skills: updatedSkills
+      });
+    }
+  };
+
+  const handleSelectLevel = (skillIndex: number, level: number) => {
     if (formData.skills) {
       const updatedSkills = [...formData.skills];
       updatedSkills[skillIndex] = {
@@ -166,7 +193,7 @@ const ExperienceEditForm = ({
   };
 
   // Search for skills when input changes
-  React.useEffect(() => {
+  useEffect(() => {
     const handleSkillSearch = async () => {
       if (skillInput.trim().length < 2) {
         setSkillSearchResults([]);
@@ -184,7 +211,7 @@ const ExperienceEditForm = ({
   }, [skillInput]);
   
   // Handle clicks outside search results
-  React.useEffect(() => {
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setSkillSearchResults([]);
@@ -200,14 +227,16 @@ const ExperienceEditForm = ({
   return (
     <div 
       ref={formRef}
-      className="p-6 border border-[#A100FF20] rounded-lg bg-gradient-to-b from-[#A100FF08] to-transparent backdrop-blur-sm shadow-md"
+      className="p-6 border border-gray-100 rounded-lg bg-white shadow-md"
     >
-      <h3 className="font-medium mb-5 text-lg text-gray-800 border-b pb-2 border-[#A100FF20]">
+      <h3 className="font-medium mb-5 text-lg text-gray-800 border-b pb-2 border-gray-100">
         {isEditing ? 'Editar experiencia laboral' : 'Nueva experiencia laboral'}
       </h3>
       
       <div className="space-y-5">
+        {/* Company and Position fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Company field */}
           <div className="transition-all duration-300 focus-within:scale-[1.01]">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Empresa</label>
             <div className="relative">
@@ -224,6 +253,7 @@ const ExperienceEditForm = ({
             </div>
           </div>
           
+          {/* Position field */}
           <div className="transition-all duration-300 focus-within:scale-[1.01]">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Posición</label>
             <div className="relative">
@@ -241,7 +271,9 @@ const ExperienceEditForm = ({
           </div>
         </div>
         
+        {/* Date fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Start date */}
           <div className="transition-all duration-300 focus-within:scale-[1.01]">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Fecha de inicio</label>
             <div className="relative">
@@ -258,6 +290,7 @@ const ExperienceEditForm = ({
             </div>
           </div>
           
+          {/* End date */}
           <div className={`transition-all duration-300 focus-within:scale-[1.01] ${formData.isCurrentPosition ? 'opacity-50' : ''}`}>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Fecha de fin</label>
             <div className="relative">
@@ -276,6 +309,7 @@ const ExperienceEditForm = ({
           </div>
         </div>
         
+        {/* Current position toggle */}
         <div className="flex items-center my-3 bg-gray-50 p-3 rounded-lg border border-gray-200 hover:border-[#A100FF40] transition-all duration-300">
           <label className="flex items-center w-full cursor-pointer" onClick={(e) => {
             e.preventDefault();
@@ -301,6 +335,7 @@ const ExperienceEditForm = ({
           </label>
         </div>
         
+        {/* Description field */}
         <div className="transition-all duration-300 focus-within:scale-[1.01]">
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Descripción</label>
           <textarea
@@ -313,42 +348,45 @@ const ExperienceEditForm = ({
           />
         </div>
         
+        {/* Skills section */}
         <div className="transition-all duration-300 focus-within:scale-[1.01]">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Habilidades adquiridas
+          <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center">
+            <span>Habilidades adquiridas</span>
+            <span className="ml-2 text-xs text-gray-500 font-normal">Selecciona tu nivel en cada habilidad</span>
           </label>
           
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+            {/* Initial skill level selection for new skills */}
             {showSkillLevelSelect && selectedSkill && (
               <div className="mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Selecciona tu nivel de experiencia para <span className="text-[#A100FF]">{selectedSkill.name}</span>:
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  Selecciona tu nivel de experiencia para <span className="text-[#A100FF] font-semibold">{selectedSkill.name}</span>:
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleSkillLevelSelect(1)}
-                    className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md text-sm border border-blue-200 hover:bg-blue-200 transition-colors"
+                    className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md text-sm border border-blue-200 hover:bg-blue-100 transition-all duration-200 flex items-center"
                   >
-                    Principiante
+                    <FiStar className="mr-1.5" /> Principiante
                   </button>
                   <button
                     onClick={() => handleSkillLevelSelect(2)}
-                    className="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-md text-sm border border-yellow-200 hover:bg-yellow-200 transition-colors"
+                    className="px-3 py-1.5 bg-amber-50 text-amber-600 rounded-md text-sm border border-amber-200 hover:bg-amber-100 transition-all duration-200 flex items-center"
                   >
-                    Intermedio
+                    <FiTrendingUp className="mr-1.5" /> Intermedio
                   </button>
                   <button
                     onClick={() => handleSkillLevelSelect(3)}
-                    className="px-3 py-1.5 bg-green-100 text-green-700 rounded-md text-sm border border-green-200 hover:bg-green-200 transition-colors"
+                    className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-md text-sm border border-emerald-200 hover:bg-emerald-100 transition-all duration-200 flex items-center"
                   >
-                    Profesional
+                    <FiAward className="mr-1.5" /> Profesional
                   </button>
                   <button 
                     onClick={() => {
                       setSelectedSkill(null);
                       setShowSkillLevelSelect(false);
                     }}
-                    className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-sm border border-gray-200 hover:bg-gray-200 transition-colors ml-auto"
+                    className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-sm border border-gray-200 hover:bg-gray-200 transition-all duration-200 ml-auto"
                   >
                     Cancelar
                   </button>
@@ -356,6 +394,7 @@ const ExperienceEditForm = ({
               </div>
             )}
             
+            {/* Skill search */}
             {!showSkillLevelSelect && (
               <div className="relative" ref={searchRef}>
                 <div className="flex items-center mb-3">
@@ -387,9 +426,10 @@ const ExperienceEditForm = ({
                     {skillSearchResults.map((skill) => (
                       <div
                         key={skill.id}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm flex items-center"
                         onClick={() => handleAddSkill(skill.id, skill.titulo)}
                       >
+                        <span className="mr-2 text-[#A100FF]">#</span>
                         {skill.titulo}
                       </div>
                     ))}
@@ -398,46 +438,71 @@ const ExperienceEditForm = ({
               </div>
             )}
             
+            {/* Skills list with improved level buttons */}
             <div className="flex flex-wrap gap-2 mt-3">
               {formData.skills && formData.skills.length > 0 ? (
                 formData.skills.map((skill, index) => (
                   <div
                     key={index}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-md shadow-sm border transition-all duration-300 ${skillLevelClasses[skill.level]}`}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-md shadow-sm border transition-all duration-200 ${skillLevelClasses[skill.level]}`}
                   >
+                    {getSkillLevelIcon(skill.level)}
                     <span className="text-sm font-medium">{skill.name}</span>
-                    <div className="relative ml-1 group">
-                      <span className="text-xs px-1 rounded bg-white bg-opacity-50">
-                        {skillLevelLabels[skill.level]}
-                      </span>
-                      
-                      <div className="absolute hidden group-hover:flex flex-col bg-white border border-gray-200 rounded-md shadow-lg p-1 z-10 right-0 top-full mt-1 w-32">
-                        <button 
-                          className="text-xs px-2 py-1 hover:bg-blue-100 text-blue-700 rounded text-left"
-                          onClick={() => handleUpdateSkillLevel(index, 1)}
-                        >
-                          Principiante
-                        </button>
-                        <button 
-                          className="text-xs px-2 py-1 hover:bg-yellow-100 text-yellow-700 rounded text-left"
-                          onClick={() => handleUpdateSkillLevel(index, 2)}
-                        >
-                          Intermedio
-                        </button>
-                        <button 
-                          className="text-xs px-2 py-1 hover:bg-green-100 text-green-700 rounded text-left"
-                          onClick={() => handleUpdateSkillLevel(index, 3)}
-                        >
-                          Profesional
-                        </button>
-                      </div>
+                    
+                    {/* LEVEL BUTTONS - NO PURPLE BORDER */}
+                    <div className="ml-1.5 flex items-center bg-white rounded-full px-2 py-1 border border-gray-100 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => handleSelectLevel(index, 1)}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center mx-0.5 transition-all focus:outline-none skill-level-button level-icon-button ${
+                          skill.level === 1 
+                            ? 'bg-blue-100 text-blue-600 shadow-inner' 
+                            : 'text-gray-400 hover:bg-blue-50 hover:text-blue-500'
+                        }`}
+                        aria-label="Nivel Principiante"
+                        title="Principiante"
+                        style={{ outline: 'none' }}
+                      >
+                        <FiStar size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectLevel(index, 2)}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center mx-0.5 transition-all focus:outline-none skill-level-button level-icon-button ${
+                          skill.level === 2 
+                            ? 'bg-amber-100 text-amber-600 shadow-inner' 
+                            : 'text-gray-400 hover:bg-amber-50 hover:text-amber-500'
+                        }`}
+                        aria-label="Nivel Intermedio"
+                        title="Intermedio"
+                        style={{ outline: 'none' }}
+                      >
+                        <FiTrendingUp size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectLevel(index, 3)}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center mx-0.5 transition-all focus:outline-none skill-level-button level-icon-button ${
+                          skill.level === 3 
+                            ? 'bg-emerald-100 text-emerald-600 shadow-inner' 
+                            : 'text-gray-400 hover:bg-emerald-50 hover:text-emerald-500'
+                        }`}
+                        aria-label="Nivel Profesional"
+                        title="Profesional"
+                        style={{ outline: 'none' }}
+                      >
+                        <FiAward size={14} />
+                      </button>
                     </div>
+                    
                     <button
                       onClick={() => handleRemoveSkill(index)}
-                      className="ml-1 text-gray-500 hover:text-red-500 transition-colors"
+                      className="ml-1.5 text-gray-400 hover:text-red-500 transition-colors p-0.5 hover:bg-red-50 rounded-full focus:outline-none skill-level-button"
                       title="Eliminar habilidad"
+                      type="button"
+                      style={{ outline: 'none' }}
                     >
-                      <FiX size={16} />
+                      <FiX size={14} />
                     </button>
                   </div>
                 ))
@@ -450,6 +515,7 @@ const ExperienceEditForm = ({
           </div>
         </div>
         
+        {/* Form action buttons */}
         <div className="flex justify-end space-x-3 pt-4 sticky bottom-0">
           <button 
             className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-sm font-medium flex items-center gap-2"
@@ -479,5 +545,5 @@ const ExperienceEditForm = ({
 };
 
 export default ExperienceEditForm;
-export { skillLevelLabels, skillLevelClasses };
+export { skillLevelLabels, skillLevelClasses, getSkillLevelIcon };
 export type { ExperienceFormData, ExperienceSkill };

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React from "react";
-import { FiTrash2, FiCalendar, FiEdit2 } from "react-icons/fi";
+import React, { useState, useRef, useEffect } from "react";
+import { FiTrash2, FiCalendar, FiEdit2, FiAward, FiStar, FiTrendingUp, FiChevronDown } from "react-icons/fi";
 import { RiBuilding4Line } from "react-icons/ri";
 import { motion } from "framer-motion";
-import { ExperienceSkill, skillLevelClasses } from "./ExperienceEditForm";
+import { ExperienceSkill, skillLevelClasses, skillLevelLabels } from "./ExperienceEditForm";
 
 interface ExperienceItem {
   id?: string;
@@ -35,6 +35,16 @@ const formatDateDisplay = (dateString: string): string => {
     });
   } catch (error) {
     return dateString; // Fallback to original string if parsing fails
+  }
+};
+
+// Get icon for skill level
+const getSkillLevelIcon = (level: number) => {
+  switch (level) {
+    case 1: return <FiStar size={12} className="mr-1" />;
+    case 2: return <FiTrendingUp size={12} className="mr-1" />;
+    case 3: return <FiAward size={12} className="mr-1" />;
+    default: return <FiStar size={12} className="mr-1" />;
   }
 };
 
@@ -91,20 +101,14 @@ const ExperienceList = ({
                   <p className="text-gray-600 text-sm whitespace-pre-line mt-2">{exp.description}</p>
                 </div>
                 
+                {/* Enhanced skills display */}
                 {exp.skills && exp.skills.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {exp.skills.map((skill, skillIndex) => (
-                      <span 
-                        key={skillIndex}
-                        className={`px-2 py-0.5 rounded text-xs border ${skillLevelClasses[skill.level]}`}
-                      >
-                        {skill.name}
-                        <span className="ml-1 text-xs opacity-80">
-                          • {skill.level === 1 ? 'Principiante' : 
-                             skill.level === 2 ? 'Intermedio' : 
-                             'Profesional'}
-                        </span>
-                      </span>
+                      <SkillBadge 
+                        key={skillIndex} 
+                        skill={skill} 
+                      />
                     ))}
                   </div>
                 )}
@@ -133,6 +137,22 @@ const ExperienceList = ({
         </motion.div>
       ))}
     </div>
+  );
+};
+
+// Separate component for skill badges to manage state independently
+const SkillBadge = ({ skill }: { skill: ExperienceSkill }) => {
+  return (
+    <motion.span 
+      whileHover={{ scale: 1.05 }}
+      className={`inline-flex items-center px-3 py-1.5 rounded-md text-xs border shadow-sm transition-all duration-200 ${skillLevelClasses[skill.level]}`}
+    >
+      {getSkillLevelIcon(skill.level)}
+      <span className="font-medium">{skill.name}</span>
+      <span className="ml-1.5 px-1.5 py-0.5 bg-white bg-opacity-60 rounded-full text-[10px] font-medium">
+        {skillLevelLabels[skill.level]}
+      </span>
+    </motion.span>
   );
 };
 
