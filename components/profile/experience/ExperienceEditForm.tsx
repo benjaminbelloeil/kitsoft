@@ -137,22 +137,6 @@ const ExperienceEditForm = ({
     }
   };
 
-  // Update skill level - DIRECT BUTTON METHOD
-  const handleUpdateSkillLevel = (skillIndex: number, newLevel: number) => {
-    if (formData.skills) {
-      const updatedSkills = [...formData.skills];
-      updatedSkills[skillIndex] = {
-        ...updatedSkills[skillIndex],
-        level: newLevel
-      };
-      
-      onFormChange({
-        ...formData,
-        skills: updatedSkills
-      });
-    }
-  };
-
   const handleSelectLevel = (skillIndex: number, level: number) => {
     if (formData.skills) {
       const updatedSkills = [...formData.skills];
@@ -350,9 +334,8 @@ const ExperienceEditForm = ({
         
         {/* Skills section */}
         <div className="transition-all duration-300 focus-within:scale-[1.01]">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center">
-            <span>Habilidades adquiridas</span>
-            <span className="ml-2 text-xs text-gray-500 font-normal">Selecciona tu nivel en cada habilidad</span>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Habilidades adquiridas
           </label>
           
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
@@ -396,7 +379,7 @@ const ExperienceEditForm = ({
             
             {/* Skill search */}
             {!showSkillLevelSelect && (
-              <div className="relative" ref={searchRef}>
+              <div className="relative z-30" ref={searchRef}>
                 <div className="flex items-center mb-3">
                   <div className="relative flex-grow">
                     <span className="absolute left-3 top-2.5 text-gray-500">
@@ -422,14 +405,13 @@ const ExperienceEditForm = ({
                 </div>
 
                 {skillSearchResults.length > 0 && (
-                  <div className="absolute z-10 w-full bg-white mt-1 border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                  <div className="absolute z-50 w-full bg-white mt-1 border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                     {skillSearchResults.map((skill) => (
                       <div
                         key={skill.id}
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm flex items-center"
                         onClick={() => handleAddSkill(skill.id, skill.titulo)}
                       >
-                        <span className="mr-2 text-[#A100FF]">#</span>
                         {skill.titulo}
                       </div>
                     ))}
@@ -516,7 +498,7 @@ const ExperienceEditForm = ({
         </div>
         
         {/* Form action buttons */}
-        <div className="flex justify-end space-x-3 pt-4 sticky bottom-0">
+        <div className="flex justify-end space-x-3 pt-4 sticky bottom-0 z-40 bg-white">
           <button 
             className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-sm font-medium flex items-center gap-2"
             onClick={onCancel}
@@ -532,11 +514,21 @@ const ExperienceEditForm = ({
             disabled={isSaving || !formData.company || !formData.position || !formData.startDate || (!formData.endDate && !formData.isCurrentPosition)}
             type="button"
           >
-            <FiCheck size={16} className="text-white" />
-            <span className="text-white">
-              {isEditing ? 'Guardar cambios' : 'Agregar'}
-              {isSaving && '...'}
-            </span>
+            {!isSaving ? (
+              <>
+                <FiCheck size={16} className="text-white" />
+                <span className="text-white">
+                  {isEditing ? 'Guardar cambios' : 'Agregar'}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite] mr-2"></span>
+                <span className="text-white">
+                  {isEditing ? 'Guardando' : 'Agregando'}
+                </span>
+              </>
+            )}
           </button>
         </div>
       </div>
