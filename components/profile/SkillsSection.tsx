@@ -15,39 +15,47 @@ const skillLevelClasses: Record<number, string> = {
 
 interface Props extends SkillsSectionProps {
   loading?: boolean;
+  externalSkills?: Array<{id: string, name: string, level: number}>;
 }
 
-export default function SkillsSection({ loading = false }: Props) {
+export default function SkillsSection({ loading = false, externalSkills = [] }: Props) {
   const [skills, setSkills] = useState<Array<{id: string, name: string, level: number}>>([]);
   const [, setFetched] = useState(false);
 
-  // Fetch skills from database when component mounts
+  // Fetch skills from database when component mounts or externalSkills change
   useEffect(() => {
-    const fetchSkillsFromDatabase = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) return;
-      
-      try {
-        const fetchedSkills = await getUserSkills(user.id);
-        if (!fetchedSkills || fetchedSkills.length === 0) return;
+    if (externalSkills && externalSkills.length > 0) {
+      // Use the externally provided skills if available
+      setSkills(externalSkills);
+      setFetched(true);
+    } else {
+      // Otherwise fetch from the database
+      const fetchSkillsFromDatabase = async () => {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
         
-        const formattedSkills = fetchedSkills.map(skill => ({
-          id: skill.id_habilidad,
-          name: skill.titulo || '',
-          level: skill.nivel_experiencia
-        }));
+        if (!user) return;
         
-        setSkills(formattedSkills);
-        setFetched(true);
-      } catch (error) {
-        console.error("Error fetching skills:", error);
-      }
-    };
-    
-    fetchSkillsFromDatabase();
-  }, []);
+        try {
+          const fetchedSkills = await getUserSkills(user.id);
+          if (!fetchedSkills || fetchedSkills.length === 0) return;
+          
+          const formattedSkills = fetchedSkills.map(skill => ({
+            id: skill.id_habilidad,
+            name: skill.titulo || '',
+            level: skill.nivel_experiencia
+          }));
+          
+          setSkills(formattedSkills);
+          setFetched(true);
+        } catch (error) {
+          console.error("Error fetching skills:", error);
+        }
+      };
+      
+      fetchSkillsFromDatabase();
+    }
+  }, [externalSkills]);
 
   if (loading) {
     return <SkeletonSkills />;

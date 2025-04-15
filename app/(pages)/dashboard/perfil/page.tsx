@@ -38,6 +38,7 @@ export default function ProfilePage() {
   const [, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fullyLoaded, setFullyLoaded] = useState(false);
+  const [globalSkills, setGlobalSkills] = useState<Array<{id: string, name: string, level: number}>>([]);
 
   // Global notification state
   const notificationState = useNotificationState();
@@ -152,6 +153,11 @@ export default function ProfilePage() {
     }
   };
 
+  // Handler for skills changes from ExperienceSection
+  const handleSkillsChanged = (skills: Array<{id: string, name: string, level: number}>) => {
+    setGlobalSkills(skills);
+  };
+
   return (
     <div className="max-w-5xl mx-auto py-8">
       {/* Global notification container */}
@@ -191,14 +197,14 @@ export default function ProfilePage() {
       </div>
 
       <SkillsSection 
-        initialSkills={userProfile.skills ? userProfile.skills.map(skill => skill.Nombre) : []}
         loading={!fullyLoaded}
-      />
+        externalSkills={globalSkills} initialSkills={[]}      />
 
       {/* Pass empty array as initialExperiences to let ExperienceSection load directly from database */}
       <ExperienceSection 
         initialExperiences={[]} 
         loading={!fullyLoaded}
+        onSkillsChanged={handleSkillsChanged}
       />
     </div>
   );

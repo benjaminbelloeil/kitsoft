@@ -5,7 +5,7 @@ import { FiPlus, FiBriefcase } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { SkeletonExperience } from "./SkeletonProfile";
 import { getUserExperiences, createUserExperience, updateUserExperience, deleteUserExperience } from "@/utils/database/client/experienceSync";
-import { addSkillToExperience, updateSkillLevel } from "@/utils/database/client/skillsSync";
+import { addSkillToExperience, updateSkillLevel, removeSkillFromExperience } from "@/utils/database/client/skillsSync";
 import { createClient } from '@/utils/supabase/client';
 import ExperienceEditForm, { ExperienceFormData, ExperienceSkill } from "./experience/ExperienceEditForm";
 import ExperienceList, { ExperienceItem } from "./experience/ExperienceList";
@@ -20,6 +20,7 @@ interface Experience {
 interface ExperienceSectionProps {
   initialExperiences: Experience[];
   loading?: boolean;
+  onSkillsChanged?: (skills: Array<{ id: string, name: string, level: number }>) => void;
 }
 
 const extractDatesFromPeriod = (period: string): { startDate: string, endDate: string | null } => {
@@ -34,7 +35,7 @@ const extractDatesFromPeriod = (period: string): { startDate: string, endDate: s
   return { startDate, endDate };
 };
 
-export default function ExperienceSection({ initialExperiences, loading = false }: ExperienceSectionProps) {
+export default function ExperienceSection({ initialExperiences, loading = false, onSkillsChanged }: ExperienceSectionProps) {
   const initialExperiencesWithDates: ExperienceItem[] = initialExperiences.map(exp => {
     const { startDate, endDate } = extractDatesFromPeriod(exp.period);
     return {
@@ -64,6 +65,7 @@ export default function ExperienceSection({ initialExperiences, loading = false 
   const [isSaving, setIsSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [resetFormState, setResetFormState] = useState(false);
+  const [allSkills, setAllSkills] = useState<Array<{ id: string, name: string, level: number }>>([]);
 
   const [formHeight, setFormHeight] = useState<number | "auto">("auto");
   const formRef = useRef<HTMLDivElement>(null);
@@ -76,37 +78,73 @@ export default function ExperienceSection({ initialExperiences, loading = false 
       if (user) {
         setUserId(user.id);
         
-        // If we have a user ID and no initial experiences, try to fetch from database
-        if (user.id && initialExperiences.length === 0) {
+        // If we have a user ID, try to fetch from database
+        if (user.id) {
           const fetchedExperiences = await getUserExperiences(user.id);
           if (fetchedExperiences && fetchedExperiences.length > 0) {
-            const formattedExperiences = fetchedExperiences.map(exp => ({
-              id: exp.id_experiencia,
-              company: exp.compañia,
-              position: exp.posicion,
-              startDate: exp.fecha_inicio,
-              endDate: exp.fecha_fin,
-              description: exp.descripcion,
-              isCurrentPosition: exp.fecha_fin === null,
-              skills: exp.habilidades ? exp.habilidades.map((skill: any) => ({
-                id: skill.id_habilidad,
-                name: skill.titulo,
-                level: skill.nivel_experiencia || 1
-              })) : []
-            }));
+            console.log("Fetched experiences:", fetchedExperiences);
+            
+            const formattedExperiences = fetchedExperiences.map(exp => {
+              // Map the skills correctly from the DB format
+              const mappedSkills = Array.isArray(exp.habilidades) 
+                ? exp.habilidades.map((skill: any) => ({
+                    id: skill.id_habilidad,
+                    name: skill.titulo || '',
+                    level: skill.nivel_experiencia || 1
+                  })) 
+                : [];
+              
+              return {
+                id: exp.id_experiencia,
+                company: exp.compañia,
+                position: exp.posicion,
+                startDate: exp.fecha_inicio,
+                endDate: exp.fecha_fin,
+                description: exp.descripcion,
+                isCurrentPosition: exp.fecha_fin === null,
+                skills: mappedSkills
+              };
+            });
+            
             setExperiences(formattedExperiences);
+            
+            // Extract all skills from experiences and maintain them in state
+            const extractedSkills: Array<{ id: string, name: string, level: number }> = [];
+            formattedExperiences.forEach(exp => {
+              if (exp.skills && Array.isArray(exp.skills)) {
+                exp.skills.forEach(skill => {
+                  const existingSkill = extractedSkills.find(s => s.id === skill.id);
+                  if (!existingSkill) {
+                    extractedSkills.push({
+                      id: skill.id,
+                      name: skill.name,
+                      level: skill.level
+                    });
+                  } else {
+                    // Keep the highest level if skill appears in multiple experiences
+                    existingSkill.level = Math.max(existingSkill.level, skill.level);
+                  }
+                });
+              }
+            });
+            
+            setAllSkills(extractedSkills);
+            
+            // Notify parent of skills change
+            if (onSkillsChanged) {
+              onSkillsChanged(extractedSkills);
+            }
           }
         }
       }
     };
     
     fetchUserId();
-  }, [initialExperiences]);
+  }, [initialExperiences, onSkillsChanged]);
 
-  // Effect to capture form height when it's displayed
+  // Effect to handle form height calculation
   useEffect(() => {
     if (isAddingExperience && formRef.current) {
-      // Set a timeout to ensure the form has rendered completely
       setTimeout(() => {
         if (formRef.current) {
           const height = formRef.current.offsetHeight;
@@ -115,6 +153,39 @@ export default function ExperienceSection({ initialExperiences, loading = false 
       }, 50);
     }
   }, [isAddingExperience]);
+
+  // Update skills state and notify parent component
+  const updateGlobalSkills = (updatedExperiences: ExperienceItem[]) => {
+    const newSkillsList: Array<{ id: string, name: string, level: number }> = [];
+    
+    updatedExperiences.forEach(exp => {
+      if (exp.skills && Array.isArray(exp.skills)) {
+        exp.skills.forEach(skill => {
+          const existingSkillIndex = newSkillsList.findIndex(s => s.id === skill.id);
+          if (existingSkillIndex === -1) {
+            newSkillsList.push({
+              id: skill.id || '',
+              name: skill.name,
+              level: skill.level
+            });
+          } else {
+            // If the skill exists, update it with the highest level
+            newSkillsList[existingSkillIndex].level = Math.max(
+              newSkillsList[existingSkillIndex].level,
+              skill.level
+            );
+          }
+        });
+      }
+    });
+    
+    setAllSkills(newSkillsList);
+    
+    // Notify parent component
+    if (onSkillsChanged) {
+      onSkillsChanged(newSkillsList);
+    }
+  };
 
   // Handle adding a new experience
   const handleAddExperience = async () => {
@@ -129,12 +200,17 @@ export default function ExperienceSection({ initialExperiences, loading = false 
         // Add skills to experience
         if (newExperience.skills && newExperience.skills.length > 0) {
           for (const skill of newExperience.skills) {
-            await addSkillToExperience(
+            const response = await addSkillToExperience(
               skill.name, 
               id, 
               userId, 
               skill.level
             );
+            
+            if (response.success && response.skillId) {
+              // Update the skill ID for future reference
+              skill.id = response.skillId;
+            }
           }
         }
 
@@ -144,7 +220,9 @@ export default function ExperienceSection({ initialExperiences, loading = false 
           endDate: newExperience.isCurrentPosition ? null : newExperience.endDate
         };
         
-        setExperiences([...experiences, finalExperience]);
+        const updatedExperiences = [...experiences, finalExperience];
+        setExperiences(updatedExperiences);
+        updateGlobalSkills(updatedExperiences);
         resetForm();
       } else {
         console.error("Error saving experience");
@@ -177,9 +255,26 @@ export default function ExperienceSection({ initialExperiences, loading = false 
       const { success } = await updateUserExperience(editingExperienceId, userId, newExperience);
       
       if (success) {
-        // Update the skills for the experience
+        // Get the existing experience to compare skills
+        const existingExperience = experiences.find(exp => exp.id === editingExperienceId);
+        const existingSkills = existingExperience?.skills || [];
+        
+        // Find skills that need to be removed (present in existing but not in new)
+        const skillsToRemove = existingSkills.filter(existingSkill => 
+          !newExperience.skills?.some(newSkill => 
+            newSkill.id === existingSkill.id
+          )
+        );
+        
+        // Remove skills that are no longer associated with this experience
+        for (const skill of skillsToRemove) {
+          if (skill.id) {
+            await removeSkillFromExperience(skill.id, editingExperienceId, userId);
+          }
+        }
+        
+        // Update or add skills for the experience
         if (newExperience.skills) {
-          // First, ensure all new skills are added with correct levels
           for (const skill of newExperience.skills) {
             if (skill.id) {
               // Update existing skill level
@@ -191,12 +286,17 @@ export default function ExperienceSection({ initialExperiences, loading = false 
               );
             } else {
               // Add new skill
-              await addSkillToExperience(
+              const response = await addSkillToExperience(
                 skill.name,
                 editingExperienceId,
                 userId,
                 skill.level
               );
+              
+              if (response.success && response.skillId) {
+                // Update the skill ID for future reference
+                skill.id = response.skillId;
+              }
             }
           }
         }
@@ -208,6 +308,7 @@ export default function ExperienceSection({ initialExperiences, loading = false 
         );
         
         setExperiences(updatedExperiences);
+        updateGlobalSkills(updatedExperiences);
         resetForm();
       } else {
         console.error("Error updating experience");
@@ -221,20 +322,32 @@ export default function ExperienceSection({ initialExperiences, loading = false 
 
   // Handle removing an experience
   const handleRemoveExperience = async (index: number, id?: string) => {
-    if (id && userId) {
+    if (!userId || !id) return;
+    
+    try {
+      // Get the experience to find its skills
+      const experienceToRemove = experiences.find(exp => exp.id === id);
+      if (experienceToRemove?.skills) {
+        // Remove all skills associated with this experience
+        for (const skill of experienceToRemove.skills) {
+          if (skill.id) {
+            await removeSkillFromExperience(skill.id, id, userId);
+          }
+        }
+      }
+      
       const { success } = await deleteUserExperience(id, userId);
       
       if (success) {
         const updatedExperiences = [...experiences];
         updatedExperiences.splice(index, 1);
         setExperiences(updatedExperiences);
+        updateGlobalSkills(updatedExperiences);
       } else {
         console.error("Error deleting experience");
       }
-    } else {
-      const updatedExperiences = [...experiences];
-      updatedExperiences.splice(index, 1);
-      setExperiences(updatedExperiences);
+    } catch (error) {
+      console.error("Error removing experience:", error);
     }
   };
 
