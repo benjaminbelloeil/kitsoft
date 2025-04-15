@@ -271,6 +271,29 @@ button.bg-red-600 span {
   color: #ffffff !important;
 }
 
+/* Fix for skill level buttons - completely remove any borders, outlines, or focus effects */
+.skill-level-button:focus,
+.skill-level-button:focus-visible,
+button[type="button"]:focus,
+button[type="button"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Override button focus styles specifically for experience skill buttons */
+.level-icon-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Remove any focus effects from skill level selection buttons */
+button:focus, 
+button:focus-visible {
+  outline: none !important;
+}
+
 /* Animation utilities */
 .fast-transition {
   transition: all 0.1s cubic-bezier(0.16, 1, 0.3, 1);
