@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { userData } from "@/app/lib/data";
+import { userData as staticUserData } from "@/app/lib/data";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Sun, Moon, Sunrise } from "lucide-react";
+import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
+import { createClient } from '@/utils/supabase/client';
 
 // Import component sections
 import Header from "@/components/dashboard/Header";
@@ -25,6 +27,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [timeString, setTimeString] = useState("");
+  
+  // Store user data from the database
+  const [userData, setUserData] = useState(staticUserData);
 
   // Example data - this would come from the backend in a real app
   const myProjects = [
@@ -124,6 +129,35 @@ export default function DashboardPage() {
     { day: "Sáb", hours: 0, color: "bg-gray-200" },
     { day: "Dom", hours: 0, color: "bg-gray-200" },
   ];
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    async function fetchUserData() {
+      try {
+        const supabase = createClient();
+        // Get current authenticated user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Get complete profile data for the user
+          const profileData = await getUserCompleteProfile(user.id);
+          
+          if (profileData) {
+            // Update user data with fetched profile
+            setUserData({
+              ...staticUserData, // Keep static data for other properties
+              name: `${profileData.Nombre || ''} ${profileData.Apellido || ''}`.trim() || staticUserData.name,
+              title: profileData.Titulo || staticUserData.title,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    }
+    
+    fetchUserData();
+  }, []);
 
   // Update greeting based on time of day - improved with icons and live updating
   useEffect(() => {
