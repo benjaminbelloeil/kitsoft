@@ -9,6 +9,8 @@ import MainCalendar from "@/components/calendar/MainCalendar";
 import EventPreview from "@/components/calendar/EventPreview";
 import DayEventsList from "@/components/calendar/DayEventsList";
 import { SkeletonCalendar } from "@/components/calendar/SkeletonCalendar";
+import { FiCalendar, FiSearch } from "react-icons/fi";
+import NotificationBadge from "@/components/calendar/NotificationBadge";
 
 // Sample additional events to show multiple projects in a day
 const additionalEvents = [
@@ -225,15 +227,41 @@ export default function CalendarPage() {
 
   return (
     <div className="h-full flex flex-col relative max-w-[1920px] mx-auto px-4 md:px-6 pt-6">
-      {/* Enhanced header with better styling - but without notification badge */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-2 border-b border-gray-100">
-        <div>
-          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-[#A100FF] mb-1">
-            Calendario de Proyectos
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Visualiza y gestiona todos tus eventos y reuniones
-          </p>
+      {/* Simplified header - cleaner with only essential elements */}
+      <div className="mb-6">
+        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:border-[#A100FF20] transition-all duration-300">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            {/* Title section with enhanced visuals */}
+            <div className="flex items-center">
+              <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
+                <FiCalendar size={24} className="text-[#A100FF]" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-[#A100FF]">
+                  Calendario de Proyectos
+                </h1>
+                <p className="text-gray-500 mt-1">
+                  {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            </div>
+            
+            {/* Right side controls - only search and notifications */}
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              {/* Search input with animation - updated color */}
+              <div className="relative group flex-1 sm:flex-initial sm:w-64">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#A100FF] transition-colors" />
+                <input
+                  type="search"
+                  placeholder="Buscar eventos..."
+                  className="w-full py-1.5 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF80] transition-colors"
+                />
+              </div>
+              
+              {/* Notification badge */}
+              <NotificationBadge />
+            </div>
+          </div>
         </div>
       </div>
 
