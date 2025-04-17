@@ -188,22 +188,15 @@ export default function DashboardPage() {
         setGreetingState(newGreeting);
       }
       
-      // Update current date and time
-      const now = new Date();
-      setCurrentDate(now);
-      setTimeString(
-        now.toLocaleTimeString('es-ES', { 
-          hour: '2-digit', 
-          minute: '2-digit'
-        })
-      );
+      // Update current date
+      setCurrentDate(new Date());
     };
     
     // Initial update
     updateGreeting();
     
     // Set up an interval to check every minute if greeting should change
-    const intervalId = setInterval(updateGreeting, 60000);
+    const greetingIntervalId = setInterval(updateGreeting, 60000);
     
     // Simulate loading
     const timer = setTimeout(() => {
@@ -212,9 +205,32 @@ export default function DashboardPage() {
     
     return () => {
       clearTimeout(timer);
-      clearInterval(intervalId);
+      clearInterval(greetingIntervalId);
     };
   }, [greetingState.text]);
+
+  // Add a separate effect for updating time every second
+  useEffect(() => {
+    // Function to update the time string
+    const updateTimeString = () => {
+      const now = new Date();
+      setTimeString(
+        now.toLocaleTimeString('es-ES', { 
+          hour: '2-digit', 
+          minute: '2-digit'
+        })
+      );
+    };
+
+    // Update immediately
+    updateTimeString();
+    
+    // Update every second
+    const timeIntervalId = setInterval(updateTimeString, 1000);
+    
+    // Clear interval on unmount
+    return () => clearInterval(timeIntervalId);
+  }, []); // Empty dependency array means this runs once on mount
 
   // Utility functions
   const getDateColor = (dateStr: string) => {
