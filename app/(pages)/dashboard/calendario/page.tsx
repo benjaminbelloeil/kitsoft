@@ -8,7 +8,6 @@ import ProjectFilter from "@/components/calendar/ProjectFilter";
 import MainCalendar from "@/components/calendar/MainCalendar";
 import EventPreview from "@/components/calendar/EventPreview";
 import DayEventsList from "@/components/calendar/DayEventsList";
-import NotificationBadge from "@/components/calendar/NotificationBadge";
 import { SkeletonCalendar } from "@/components/calendar/SkeletonCalendar";
 
 // Sample additional events to show multiple projects in a day
@@ -221,26 +220,30 @@ export default function CalendarPage() {
 
   // If loading, show skeleton
   if (loading) {
-    return <SkeletonCalendar />;
+    return <div className="max-w-[1920px] mx-auto px-4 md:px-6 pt-6"><SkeletonCalendar /></div>;
   }
 
   return (
-    <div className="h-full flex flex-col relative">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Calendario de Proyectos</h1>
-        
-        {/* Notifications badge - now using context */}
-        <div className="flex items-center">
-          <NotificationBadge />
+    <div className="h-full flex flex-col relative max-w-[1920px] mx-auto px-4 md:px-6 pt-6">
+      {/* Enhanced header with better styling - but without notification badge */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-2 border-b border-gray-100">
+        <div>
+          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-[#A100FF] mb-1">
+            Calendario de Proyectos
+          </h1>
+          <p className="text-gray-500 text-sm">
+            Visualiza y gestiona todos tus eventos y reuniones
+          </p>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-auto pb-6"> {/* Added more padding at bottom */}
+      {/* The rest of the calendar with fixed overflow issues */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
         {/* Left sidebar */}
         <div className="w-full lg:w-64 flex-shrink-0 space-y-4">
-          <div className="flex flex-row lg:flex-col gap-4">
+          <div className="flex flex-col gap-4">
             {/* Mini calendar */}
-            <div className="flex-1 lg:flex-none">
+            <div>
               <MiniCalendar 
                 miniCalendarDate={miniCalendarDate}
                 selectedDate={selectedDate}
@@ -251,7 +254,7 @@ export default function CalendarPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex-1 lg:flex-none">
+            <div>
               <ProjectFilter 
                 projects={userData.projects}
                 activeFilters={activeFilters}
@@ -304,22 +307,24 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Main content area with calendar */}
-        <div className="flex-1 flex flex-col min-h-[650px]"> {/* Changed to flex and increased min-height */}
-          {/* Main calendar - always uses full width */}
-          <MainCalendar
-            currentDate={currentDate}
-            selectedDate={selectedDate}
-            selectDate={selectDate}
-            selectEvent={selectEvent}
-            prevMonth={prevMonth}
-            nextMonth={nextMonth}
-            animationClass={animationClass}
-            getEventsForDate={getEventsForDate}
-            formatTime={formatTime}
-            showDayEvents={showDayEvents}
-            goToToday={goToToday}
-          />
+        {/* Main content area with calendar - prevent horizontal overflow */}
+        <div className="flex-1 flex flex-col min-h-[650px] overflow-hidden">
+          {/* Main calendar - always uses full width and now prevents overflow */}
+          <div className="h-full overflow-hidden">
+            <MainCalendar
+              currentDate={currentDate}
+              selectedDate={selectedDate}
+              selectDate={selectDate}
+              selectEvent={selectEvent}
+              prevMonth={prevMonth}
+              nextMonth={nextMonth}
+              animationClass={animationClass}
+              getEventsForDate={getEventsForDate}
+              formatTime={formatTime}
+              showDayEvents={showDayEvents}
+              goToToday={goToToday}
+            />
+          </div>
         </div>
       </div>
       
@@ -332,7 +337,7 @@ export default function CalendarPage() {
         findProject={findProject}
       />
       
-      {/* Day events list popup - shows all events for a clicked day */}
+      {/* Day events list popup */}
       <DayEventsList
         date={dayEventsDate}
         events={eventsForDayPopup}
