@@ -21,6 +21,13 @@ export default function GreetingCard({
   currentDate,
   timeString
 }: GreetingCardProps) {
+  // Get the full name from userData
+  // If name is available use it, otherwise use Nombre (first name) and Apellido (last name) if available
+  const userName = userData.name || 
+                 ((userData.Nombre || userData.nombre) ? 
+                  `${userData.Nombre || userData.nombre} ${userData.Apellido || userData.apellido || ''}`.trim() : 
+                  'Usuario');
+
   return (
     <div className="max-w-[1920px] mx-auto mb-10 px-4">
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
@@ -44,7 +51,7 @@ export default function GreetingCard({
               </span>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  {greetingState.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-[#A100FF]">{userData.name}</span>
+                  {greetingState.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-[#A100FF]">{userName}</span>
                 </h1>
                 <p className="text-gray-500 mt-1">¡Bienvenido de nuevo! Aquí tienes un resumen de tu actividad.</p>
               </div>
