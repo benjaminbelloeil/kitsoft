@@ -1,17 +1,6 @@
 // app/lib/data.ts
-// Define types for navigation items
-export interface DropdownItem {
-  name: string;
-  href: string;
-}
-
-export interface NavItem {
-  name: string;
-  icon: string;
-  href: string;
-  hasDropdown: boolean;
-  dropdownItems?: DropdownItem[];
-}
+// Import navigation types from the nav folder instead of defining them here
+import { NavItem, navLinks, DropdownItem } from "@/components/navbar/navigation-data";
 
 // Definición de tipos para los proyectos y tareas
 export interface Task {
@@ -36,49 +25,9 @@ export interface Project {
   tasks: Task[];
 }
 
-const navLinks: NavItem[] = [
-    {
-        name: "Dashboard",
-        icon: "dashboard",
-        href: "/dashboard",
-        hasDropdown: true,
-        dropdownItems: [
-            { name: "Resumen", href: "/dashboard" },
-            { name: "Cargabilidad", href: "/dashboard/cargabilidad" },
-            { name: "Retroalimentación", href: "/dashboard/retroalimentacion" }
-        ]
-    },
-    {
-        name: "Proyectos",
-        icon: "projects",
-        href: "/dashboard/proyectos",
-        hasDropdown: true,
-        dropdownItems: [
-            { name: "Activos", href: "/dashboard/proyectos" },
-            { name: "Archivados", href: "/dashboard/proyectos/archivados" }
-        ]
-    },
-    {
-      name: "Cursos",
-      icon: "certificates",
-      href: "/dashboard/cursos",
-      hasDropdown: false
-    },
-    {
-        name: "Calendario",
-        icon: "calendar",
-        href: "/dashboard/calendario",
-        hasDropdown: false
-    },
-    {
-        name: "Perfil",
-        icon: "profile",
-        href: "/dashboard/perfil",
-        hasDropdown: false
-    },
-]
-
-export {navLinks}
+// Re-export navLinks and types for backwards compatibility
+export { navLinks };
+export type { NavItem, DropdownItem };
 
 // Datos detallados de proyectos
 export const projectsData: Project[] = [
