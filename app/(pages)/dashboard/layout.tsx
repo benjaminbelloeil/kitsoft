@@ -1,4 +1,4 @@
-import Navbar from "@/components/nav/navbar";
+import Navbar from "@/components/navbar/navbar";
 import { NotificationProvider } from "@/context/notification-context";
 
 export default function Layout({ children }: { children: React.ReactNode }) {

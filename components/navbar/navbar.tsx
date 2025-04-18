@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
-import NavLink from "@/components/nav/navlink"
-import LogoutBtn from "@/components/nav/logout-btn"
+import NavLink from "@/components/navbar/navlink"
+import LogoutBtn from "@/components/navbar/logout-btn"
 
 export default function Navbar() {
     return (

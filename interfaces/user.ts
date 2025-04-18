@@ -6,6 +6,7 @@ import { Experience } from '@/interfaces/experience';
 import { Certificate } from '@/interfaces/certificate';
 
 export interface Usuario {
+  id_usuario: string;
   ID_Usuario: string;
   Nombre: string;
   Apellido: string;

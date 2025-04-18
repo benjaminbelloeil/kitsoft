@@ -126,3 +126,22 @@ export async function getAuthUserEmail(): Promise<string | null> {
     return null;
   }
 }
+
+/**
+ * Client-side function to get all users
+ * Use this in client components
+ */
+export async function getAllUsersClient(): Promise<Usuario[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('usuarios')
+    .select('*')
+    .order('id_usuario');
+  
+  if (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+  
+  return data as Usuario[];
+}

@@ -65,6 +65,11 @@ export async function uploadCertificate(
       .upload(filePath, certificateData.file, options);
       
     if (uploadError) {
+      console.error('Error uploading certificate file:', uploadError);
+      return { success: false, error: uploadError.message };
+    }
+    
+    const { data: urlData } = supabase.storage
       .from('usuarios')
       .getPublicUrl(filePath);
       

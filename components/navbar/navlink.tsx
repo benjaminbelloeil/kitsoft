@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { navLinks, NavItem } from "@/app/lib/data";
+import { navLinks, NavItem } from "@/components/navbar/navigation-data";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from "clsx";
