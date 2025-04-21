@@ -110,11 +110,16 @@ export const EmployeeSummary = ({
           color="blue" 
         />
         <SummaryItem 
-          icon={<div className='bg-red-100 p-2 rounded-xl shadow-md'><FiCheckCircle className={availableHours >= 0 ? 'text-red-600' : 'text-red-600'}/></div>} 
-          title="Horas Disponibles" 
-          value={`${Math.abs(availableHours)}h ${availableHours >= 0 ? 'disponibles' : 'excedidas'}`} 
-          color={availableHours >= 0 ? 'green' : 'red'} 
-        />
+          icon={
+            <div className={`${availableHours >= 0 ? 'bg-green-100' : 'bg-red-100'} p-2 rounded-xl shadow-md`}>
+              <FiCheckCircle className={availableHours >= 0 ? 'text-green-600' : 'text-red-600'} />
+            </div>
+          } 
+  title="Horas Disponibles" 
+  value={`${Math.abs(availableHours)}h ${availableHours >= 0 ? 'disponibles' : 'excedidas'}`} 
+  color={availableHours >= 0 ? 'green' : 'red'} 
+/>
+
       </div>
     </div>
   );
