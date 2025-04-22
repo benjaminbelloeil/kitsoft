@@ -1,10 +1,10 @@
-// layoout.tsx
-// import type { Metadata } from "next";
+// layout.tsx
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavigationProvider } from "@/context/navigation-context";
-import { PageTransition } from "@/components/ui/page-transition";
+import { UserProvider } from "@/context/user-context";
 import { Metadata } from "next";
+import { PageTransition } from "@/components/ui/page-transition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Accenture - Sign In",
-  description: "Access the Accenture Portal to transform your business with innovative solutions and professional services.",
+  title: "Accenture Resource Management",
+  description: "Resource management platform for Accenture projects",
   icons: {
     icon: "/favicon.ico",
   },
@@ -37,8 +37,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full bg-white`}
       >
         <NavigationProvider>
-          <PageTransition />
-          {children}
+          <UserProvider>
+            <PageTransition />
+            {children}
+          </UserProvider>
         </NavigationProvider>
       </body>
     </html>

@@ -9,6 +9,7 @@ export interface NavItem {
   icon: string;
   href: string;
   hasDropdown: boolean;
+  requiresAdmin?: boolean;
   dropdownItems?: DropdownItem[];
 }
 
@@ -56,6 +57,7 @@ export const navLinks: NavItem[] = [
     name: "Admin",
     icon: "settings",
     href: "/dashboard/admin",
-    hasDropdown: false
+    hasDropdown: false,
+    requiresAdmin: true
   }
 ];

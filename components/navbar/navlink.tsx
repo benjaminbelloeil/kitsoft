@@ -16,10 +16,17 @@ import {
     FiList,
     FiAward
 } from "react-icons/fi";
+import { useUser } from "@/context/user-context";
 
 export default function NavLink() {
     const pathname = usePathname();
     const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({});
+    const { isAdmin } = useUser();
+    
+    // Filter navigation links based on user role
+    const filteredNavLinks = navLinks.filter(link => 
+        !link.requiresAdmin || (link.requiresAdmin && isAdmin)
+    );
     
     // Toggle dropdown state
     const toggleDropdown = (name: string) => {
@@ -71,7 +78,7 @@ export default function NavLink() {
     // Initialize dropdowns that should be open - fixed with useEffect
     useEffect(() => {
         const initialDropdowns: {[key: string]: boolean} = {};
-        navLinks.forEach(link => {
+        filteredNavLinks.forEach(link => {
             if (isDropdownOpenByDefault(link)) {
                 initialDropdowns[link.name] = true;
             }
@@ -83,7 +90,7 @@ export default function NavLink() {
         <div className="custom-scrollbar flex-1 overflow-y-auto pt-2 nav-container">
             <nav role="navigation" className="px-4 nav-tabs">
                 <ul className="space-y-1.5">
-                    {navLinks.map((link) => (
+                    {filteredNavLinks.map((link) => (
                         <li key={link.name} className="overflow-hidden">
                             {link.hasDropdown ? (
                                 <div className="w-full">

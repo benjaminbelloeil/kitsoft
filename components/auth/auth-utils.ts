@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { useNavigation } from '@/context/navigation-context';
+import { useUser } from '@/context/user-context';
+import { ensureUserHasRole } from '@/utils/database/client/userRoleSync';
 
 // Hook for handling login form state and submission
 export function useLoginForm() {
@@ -14,6 +16,7 @@ export function useLoginForm() {
   const router = useRouter();
   const supabase = createClient();
   const { startNavigation } = useNavigation();
+  const { refreshUserRole } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +39,14 @@ export function useLoginForm() {
         setError(authError.message);
         setIsLoading(false);
       } else {
+        // Ensure user has a role assigned (level 0 by default)
+        if (data?.user) {
+          await ensureUserHasRole(data.user.id);
+        }
+        
+        // Refresh user role information
+        await refreshUserRole();
+        
         // Only start navigation animation after successful authentication
         startNavigation();
         
@@ -70,6 +81,7 @@ export function useAuthCheck() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
+  const { refreshUserRole } = useUser();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -81,6 +93,12 @@ export function useAuthCheck() {
         if (session) {
           setIsAuthenticated(true);
           setUser(session.user);
+          
+          // Ensure user has a role assigned
+          await ensureUserHasRole(session.user.id);
+          
+          // Update user role information
+          await refreshUserRole();
         } else {
           setIsAuthenticated(false);
           setUser(null);
@@ -96,9 +114,18 @@ export function useAuthCheck() {
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         setIsAuthenticated(!!session);
         setUser(session?.user || null);
+        
+        if (session) {
+          // Ensure user has a role assigned
+          await ensureUserHasRole(session.user.id);
+          
+          // Update user role information when auth state changes
+          await refreshUserRole();
+        }
+        
         setIsLoading(false);
       }
     );
@@ -109,7 +136,7 @@ export function useAuthCheck() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase.auth, router]);
+  }, [supabase.auth, router, refreshUserRole]);
 
   const handleSignOut = async () => {
     try {
