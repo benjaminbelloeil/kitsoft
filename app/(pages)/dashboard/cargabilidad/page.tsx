@@ -5,6 +5,7 @@ import { ProjectCard } from '@/components/cargabilidad/ProjectCard';
 import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
 import { HistoryTab } from '@/components/cargabilidad/RecordTab'; // Importamos el nuevo componente
 import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
+import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
 import { Tabs } from '@/components/cargabilidad/Tabs';
 
 interface Project {
@@ -26,9 +27,8 @@ interface HistoryEntry {
 
 const PersonalLoadPage = () => {
   const [projects, setProjects] = useState<Project[]>([
-    { name: 'Expediente Alfa', load: 65, deadline: '2025-05-15', hoursPerWeek: 18 },
-    { name: 'Delta Zero', load: 35, deadline: '2025-06-30', hoursPerWeek: 10 },
-    { name: 'Omega UX', load: 35, deadline: '2025-06-30', hoursPerWeek: 10 },
+    { name: 'Expediente Alfa', load: 65, deadline: '2025-05-15', hoursPerWeek: 20 },
+    { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 12 },
   ]);
 
   // Añadimos 'history' a las opciones de pestañas
@@ -199,9 +199,16 @@ const PersonalLoadPage = () => {
     }
   ];
 
+  const AvailableHoursRatio = availableHours / employee.totalHoursPerWeek;
+
   return (
     <main className="min-h-screen p-4 sm:p-6 md:p-10">
       <div className="max-w-6xl mx-auto">
+        {/* Sistema de Alarma de cargabildad */}
+
+        {/* <LoadAlert totalLoad={totalLoad} /> */}
+        
+        {/* Tarjetas de Proyectos */}
         {/* Resumen de Cargabilidad de Empleado */}
         <EmployeeSummary
           name={employee.name}
@@ -210,6 +217,7 @@ const PersonalLoadPage = () => {
           totalUsedHours={totalUsedHours}
           availableHours={availableHours}
           totalHoursPerWeek={employee.totalHoursPerWeek}
+          projects={projects} // Pasamos los proyectos al componente
         />
         
         <div className="bg-white rounded-xl shadow-md mb-6">

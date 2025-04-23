@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { FiPieChart, FiCheckCircle, FiClock, FiFileText } from 'react-icons/fi';
+import React, { useEffect, useState } from 'react';
+import { FiPieChart, FiCheckCircle, FiClock } from 'react-icons/fi';
 import { CircularProgress } from './CircularProgress';
 
 interface Props {
@@ -11,12 +11,23 @@ interface Props {
   totalUsedHours: number;
   availableHours: number;
   totalHoursPerWeek: number;
-  projects?: Array<{
+  projects: Array<{
     name: string;
-    hours: number;
-    color: string;
+    hoursPerWeek: number;
   }>;
 }
+
+// Colores predefinidos para los proyectos
+const PROJECT_COLORS = [
+  'bg-purple-500',
+  'bg-blue-500',
+  'bg-indigo-500',
+  'bg-pink-500',
+  'bg-teal-500',
+  'bg-green-500',
+  'bg-orange-500',
+  'bg-red-500',
+];
 
 export const EmployeeSummary = ({
   name,
@@ -27,8 +38,37 @@ export const EmployeeSummary = ({
   totalHoursPerWeek,
   projects = []
 }: Props) => {
+  const availableRatio = availableHours / totalHoursPerWeek;
+  
+  // Estado para controlar la animación de carga
+  const [isLoading, setIsLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    // Simular un tiempo de carga
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    
+    // Animación de entrada
+    const visibilityTimer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
+    
+    return () => {
+      clearTimeout(loadingTimer);
+      clearTimeout(visibilityTimer);
+    };
+  }, []);
+
+  // Asignar un color a cada proyecto
+  const projectsWithColors = projects.map((project, index) => ({
+    ...project,
+    color: PROJECT_COLORS[index % PROJECT_COLORS.length]
+  }));
+
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+    <div className={`bg-white rounded-xl shadow-md overflow-hidden mb-6 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       {/* Header with slanted purple background */}
       <div className="relative bg-gradient-to-r from-purple-600 to-purple-800 pt-6 pb-10">
         {/* SVG for diagonal cut */}
@@ -53,7 +93,7 @@ export const EmployeeSummary = ({
           </div>
 
           {/* CircularProgress positioned to overlap the wave */}
-          <div className="absolute right-6 md:right-10 top-16 md:top-8 z-10">
+          <div className="absolute right-6 md:right-10 top-16 md:top-4 z-10">
             <div className="bg-white rounded-full p-1 shadow-lg">
               <CircularProgress value={totalLoad} size="medium" />
             </div>
@@ -61,42 +101,81 @@ export const EmployeeSummary = ({
         </div>
       </div>
 
-      {/* Linear progress bar */}
+      {/* Linear progress bar with project divisions */}
       <div className="px-6 pt-6 pb-2">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Distribución de horas ({totalUsedHours}/{totalHoursPerWeek}h)</h3>
-        <div className="h-5 w-full bg-gray-100 rounded-full overflow-hidden">
-          {projects.length > 0 ? (
-            <div className="flex h-full">
-              {projects.map((project, index) => {
-                const widthPercentage = (project.hours / totalHoursPerWeek) * 100;
-                return (
-                  <div
-                    key={index}
-                    className={`h-full bg-${project.color}-500`}
-                    style={{ width: `${widthPercentage}%` }}
-                    title={`${project.name}: ${project.hours}h (${widthPercentage.toFixed(1)}%)`}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div 
-              className="h-full bg-purple-500" 
-              style={{ width: `${(totalUsedHours / totalHoursPerWeek) * 100}%` }}
-            />
-          )}
-        </div>
-        <div className="flex justify-end mt-1">
-          <p className="text-xs text-gray-500">
-            {availableHours >= 0 ? 
-              `${availableHours}h disponibles` : 
-              `${Math.abs(availableHours)}h excedidas`
-            }
+        {isLoading ? (
+          // Barra de carga animada
+          <div className="w-full h-6 rounded-full overflow-hidden bg-gray-200">
+            <div className="h-full bg-gray-300 animate-pulse"></div>
+          </div>
+        ) : (
+          // Barra con proyectos
+          <div className="w-full h-6 rounded-full overflow-hidden bg-gray-200 flex text-white text-xs font-medium">
+            {/* Proyectos con diferentes colores */}
+            {projectsWithColors.map((project, index) => {
+              const projectRatio = project.hoursPerWeek / totalHoursPerWeek;
+              return (
+                <div
+                  key={index}
+                  className={`flex items-center justify-center h-full ${project.color} transition-all duration-700 ease-out`}
+                  style={{ 
+                    width: `${projectRatio * 100}%`,
+                    transitionDelay: `${index * 150}ms`,
+                    transform: isVisible ? 'scaleX(1)' : 'scaleX(0)',
+                    transformOrigin: 'left'
+                  }}
+                >
+                  {projectRatio > 0.1 && (
+                    <span className="px-2 truncate text-white font-semibold">{project.name}</span>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Horas disponibles */}
+            {availableHours > 0 && (
+              <div
+                className="flex items-center justify-center h-full bg-gray-100 transition-all duration-700 ease-out"
+                style={{ 
+                  width: `${(availableHours / totalHoursPerWeek) * 100}%`,
+                  transitionDelay: `${projects.length * 150}ms`,
+                  transform: isVisible ? 'scaleX(1)' : 'scaleX(0)',
+                  transformOrigin: 'left'
+                }}
+              >
+                {availableRatio > 0.075 && (
+                  <span className="px-2 truncate text-gray-800">{availableHours}h disponibles</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className='relative'>
+          <p className="absolute left-1/2 -translate-x-1/2 mt-1 text-xs text-gray-500">         
+            {(totalUsedHours / totalHoursPerWeek * 100).toFixed(1)}% de cargabilidad          
           </p>
+          {availableRatio <= 0.075 && (
+            <span className="absolute right-0 mt-1 mr-1 text-xs text-gray-500"> 
+              {availableHours}h disponibles
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+      {/* Leyenda de proyectos */}
+      {/* <div className="px-6 pt-2 pb-2">
+        <div className="flex flex-wrap gap-3">
+          {projectsWithColors.map((project, index) => (
+            <div key={index} className="flex items-center">
+              <div className={`w-3 h-3 rounded-full mr-1 ${project.color}`}></div>
+              <span className="text-xs text-gray-600">{project.name} ({project.hoursPerWeek}h)</span>
+            </div>
+          ))}
+        </div>
+      </div> */}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 mt-3">
         <SummaryItem 
           icon={<div className='bg-purple-100 p-2 rounded-xl shadow-md'><FiPieChart className='text-purple-600'/></div>} 
           title="Carga Total" 
@@ -115,11 +194,10 @@ export const EmployeeSummary = ({
               <FiCheckCircle className={availableHours >= 0 ? 'text-green-600' : 'text-red-600'} />
             </div>
           } 
-  title="Horas Disponibles" 
-  value={`${Math.abs(availableHours)}h ${availableHours >= 0 ? 'disponibles' : 'excedidas'}`} 
-  color={availableHours >= 0 ? 'green' : 'red'} 
-/>
-
+          title="Horas Disponibles" 
+          value={`${Math.abs(availableHours)}h ${availableHours >= 0 ? 'disponibles' : 'excedidas'}`} 
+          color={availableHours >= 0 ? 'green' : 'red'} 
+        />
       </div>
     </div>
   );

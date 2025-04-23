@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import StatusBadge from './StatusBadge';
 import ProgressBar from './ProgressBar';
 import { colorClasses } from './CourseUtils';
@@ -11,6 +11,18 @@ interface CourseDetailModalProps {
 export default function CourseDetailModal({ course, onClose }: CourseDetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [onClose]);
+
   if (!course) return null;
   
   const courseColor = colorClasses[course.category as keyof typeof colorClasses] || colorClasses.accenture;
@@ -90,19 +102,6 @@ export default function CourseDetailModal({ course, onClose }: CourseDetailModal
                   <span className="text-sm font-medium text-gray-500">ID de Credencial:</span>
                   <span className="ml-2 text-gray-900">{course.credentialID}</span>
                 </div>
-                {course.credentialURL && (
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">Verificar en:</span>
-                    <a 
-                      href={course.credentialURL} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={`ml-2 text-${course.category === 'cloud' ? 'blue' : course.category === 'data' ? 'green' : 'purple'}-600 hover:underline`}
-                    >
-                      {new URL(course.credentialURL).hostname}
-                    </a>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -162,7 +161,7 @@ export default function CourseDetailModal({ course, onClose }: CourseDetailModal
         <div className="border-t border-gray-200 p-4 sm:p-6 flex justify-end">
           {course.status === 'completed' && course.credentialURL && (
             <a 
-              href={course.credentialURL} 
+              href="./cursos"
               target="_blank" 
               rel="noopener noreferrer"
               className={`${courseColor.bg} text-white px-4 py-2 rounded-lg shadow-sm hover:opacity-90 mr-3`}
