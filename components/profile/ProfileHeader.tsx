@@ -29,6 +29,7 @@ export default function ProfileHeader({
 }: ProfileHeaderProps) {
   // Initialize with empty profile data if the profile is new
   const emptyProfile: UserProfile = {
+    id_usuario: userData?.ID_Usuario || '',
     ID_Usuario: userData?.ID_Usuario || '',
     Nombre: '',
     Apellido: '',
@@ -62,18 +63,27 @@ export default function ProfileHeader({
   // Use the provided data or empty profile
   const initialProfile = isNewUser ? emptyProfile : { ...emptyProfile, ...userData };
   
+  // Use a ref to track if we've initialized the edit mode, so we don't keep
+  // switching between edit and preview as data loads
+  const editModeInitialized = useRef(false);
+  
   // Start in NON-editing mode by default (false), regardless of isNewUser
-  // We'll handle the specific new user case in useEffect
   const [isEditing, setIsEditing] = useState(false);
   
   // When user data changes or component mounts, determine if we should be in edit mode
+  // BUT only do this initial check once to avoid flipping between states
   useEffect(() => {
+    // Skip if we're still loading or if we've already set the initial edit mode
+    if (loading || editModeInitialized.current) return;
+    
     // Only auto-enter edit mode for true new users without data
     const shouldBeInEditMode = isNewUser && 
       (!userData?.Nombre || !userData?.Apellido || !userData?.Titulo);
       
     setIsEditing(shouldBeInEditMode);
-  }, [isNewUser, userData]);
+    // Mark that we've initialized the edit mode
+    editModeInitialized.current = true;
+  }, [isNewUser, userData, loading]);
   
   // Initialize form data with userData if available
   const [formData, setFormData] = useState(initialProfile);
