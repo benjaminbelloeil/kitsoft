@@ -2,47 +2,63 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function SkeletonProfileHeader() {
   return (
-    <header className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100 animate-pulse">
-      <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-        {/* Avatar skeleton */}
-        <div className="relative">
-          <div className="p-2 bg-gray-100 rounded-full">
-            <div className="w-40 h-40 relative rounded-full border-4 border-white shadow overflow-hidden">
-              <Skeleton className="absolute inset-0" />
-            </div>
-          </div>
-          <div className="absolute bottom-1 right-1 bg-gray-200 p-2 rounded-full">
-            <Skeleton className="h-4 w-4 rounded-full" />
-          </div>
-        </div>
+    <header className="bg-white rounded-xl shadow-lg p-0 mb-8 overflow-hidden border border-gray-100">
+      <div className="relative">
+        {/* Decorative header background - exact same as real component */}
+        <div className="h-32 bg-gradient-to-r from-purple-700 to-[#A100FF] w-full absolute top-0 left-0"></div>
         
-        <div className="flex-1 w-full space-y-4">
-          {/* Name and title skeletons */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-60" />
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-32" />
+        <div className="relative pt-12 px-6 pb-6">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            {/* Avatar skeleton - match EXACT positioning as real component */}
+            <div className="relative mt-6">
+              <div className="rounded-full p-1.5 bg-white shadow-lg">
+                <div className="relative h-36 w-36 md:h-44 md:w-44 rounded-full overflow-hidden border-4 border-white shadow-inner">
+                  <Skeleton className="h-full w-full absolute inset-0" />
+                </div>
+              </div>
+              {/* Edit button positioned exactly like in real component */}
+              <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <Skeleton className="h-4 w-4 rounded-full" />
+              </div>
             </div>
-            <Skeleton className="h-10 w-32 rounded-md mx-auto md:mx-0 mt-4 md:mt-0" />
-          </div>
-          
-          {/* Contact info skeletons */}
-          <div className="mt-4 space-y-2 pt-2">
-            <Skeleton className="h-5 w-3/4" />
-            <Skeleton className="h-5 w-1/2" />
-          </div>
-          
-          {/* Border divider skeleton */}
-          <div className="my-4">
-            <Skeleton className="h-[1px] w-full" />
-          </div>
-          
-          {/* Bio skeleton */}
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
+            
+            {/* Profile content skeleton with EXACT same dimensions/spacing */}
+            <div className="flex-1 w-full bg-white rounded-xl p-6 shadow-sm">
+              <div className="space-y-3">
+                {/* Name and title section with same vertical spacing */}
+                <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                  <div className="space-y-2 w-full max-w-md">
+                    <Skeleton className="h-8 w-full max-w-[260px]" />
+                    <Skeleton className="h-6 w-full max-w-[200px]" />
+                  </div>
+                  <Skeleton className="h-10 w-32 rounded-lg md:self-start" />
+                </div>
+                
+                {/* Contact information - EXACT same padding/margins as real component */}
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex items-center space-x-2 p-2 rounded-md">
+                    <Skeleton className="h-9 w-9 rounded-md flex-shrink-0" />
+                    <div className="flex-1">
+                      <Skeleton className="h-4 w-16 mb-1" />
+                      <Skeleton className="h-5 w-full max-w-[180px]" />
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 p-2 rounded-md">
+                    <Skeleton className="h-9 w-9 rounded-md flex-shrink-0" />
+                    <div className="flex-1">
+                      <Skeleton className="h-4 w-16 mb-1" />
+                      <Skeleton className="h-5 w-full max-w-[180px]" />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Bio section - exact same margins/padding as real component */}
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <Skeleton className="h-5 w-24 mb-3" />
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
