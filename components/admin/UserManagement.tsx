@@ -17,10 +17,10 @@ import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 
 interface User {
   id_usuario: string;
-  nombre: string;
-  apellido: string;
-  titulo: string;
-  url_avatar: string | null;
+  nombre?: string;
+  apellido?: string;
+  titulo?: string;
+  url_avatar?: string | null | undefined;
   role?: {
     id_nivel?: string;
     numero?: number;
