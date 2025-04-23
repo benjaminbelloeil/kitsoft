@@ -294,6 +294,44 @@ button:focus-visible {
   outline: none !important;
 }
 
+/* Special class for admin buttons to completely prevent outlines */
+.admin-action-btn {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.admin-action-btn:focus,
+.admin-action-btn:focus-visible,
+.admin-action-btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  ring-width: 0 !important;
+}
+
+/* Specific override for action buttons in admin panels */
+button.p-2.rounded-full {
+  outline: none !important;
+  box-shadow: none !important;
+  ring-width: 0 !important;
+}
+
+button.p-2.rounded-full:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  ring-width: 0 !important;
+}
+
+/* Ensure FiCheck and FiX icons always have correct color */
+button.bg-red-600 svg,
+button.bg-green-600 svg,
+button.text-white svg {
+  color: white !important;
+  stroke: white !important;
+  fill: none !important;
+}
+
 /* Animation utilities */
 .fast-transition {
   transition: all 0.1s cubic-bezier(0.16, 1, 0.3, 1);

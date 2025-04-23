@@ -7,6 +7,7 @@ export interface User {
   apellido: string;
   titulo: string;
   url_avatar: string | null;
+  email?: string; // Added email field
   role?: {
     id_nivel?: string;
     numero?: number;
@@ -22,7 +23,7 @@ export interface UserRole {
 }
 
 /**
- * Get all users with their current role status
+ * Get all users with their current role status and email
  */
 export async function getAllUsersWithRoles(): Promise<User[]> {
   const supabase = createClient();
@@ -39,7 +40,7 @@ export async function getAllUsersWithRoles(): Promise<User[]> {
       return [];
     }
     
-    // For each user, get their current role
+    // For each user, get their current role and email
     const usersWithRoles = await Promise.all((users || []).map(async (user) => {
       // Get the role for this user
       const { data: roleData } = await supabase
@@ -57,13 +58,22 @@ export async function getAllUsersWithRoles(): Promise<User[]> {
         .limit(1)
         .single();
       
+      // Get the email for this user
+      const { data: emailData } = await supabase
+        .from('correos')
+        .select('correo')
+        .eq('id_usuario', user.id_usuario)
+        .limit(1)
+        .maybeSingle();
+      
       // Check if user has any role entry (registered)
       const registered = roleData !== null;
       
       return {
         ...user,
         registered,
-        role: roleData?.niveles || null
+        role: roleData?.niveles || null,
+        email: emailData?.correo || null
       };
     }));
     
@@ -144,6 +154,110 @@ export async function updateUserRole(
     return { success: true };
   } catch (err: any) {
     console.error('Exception in updateUserRole:', err);
+    return { success: false, error: err.message || 'An unexpected error occurred' };
+  }
+}
+
+/**
+ * Delete a user completely from the system
+ * This removes all related data from various tables
+ */
+export async function deleteUser(
+  userId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  try {
+    console.log(`Deleting user ${userId}`);
+    
+    // Delete from various tables in sequence to handle foreign keys
+    // Starting with the most dependent tables first
+    
+    // 1. Delete user's role assignments
+    const { error: roleError } = await supabase
+      .from('usuarios_niveles')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (roleError) {
+      console.error('Error deleting user roles:', roleError);
+      // Continue anyway, as we want to delete as much as possible
+    }
+    
+    // 2. Delete user's skills
+    const { error: skillsError } = await supabase
+      .from('usuarios_habilidades')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (skillsError) {
+      console.error('Error deleting user skills:', skillsError);
+    }
+    
+    // 3. Delete user's certificates
+    const { error: certsError } = await supabase
+      .from('usuarios_certificados')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (certsError) {
+      console.error('Error deleting user certificates:', certsError);
+    }
+    
+    // 4. Delete user's experiences
+    const { error: expError } = await supabase
+      .from('experiencia')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (expError) {
+      console.error('Error deleting user experiences:', expError);
+    }
+    
+    // 5. Delete user's emails
+    const { error: emailError } = await supabase
+      .from('correos')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (emailError) {
+      console.error('Error deleting user emails:', emailError);
+    }
+    
+    // 6. Delete user's phone details
+    const { error: phoneError } = await supabase
+      .from('telefono')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (phoneError) {
+      console.error('Error deleting user phone:', phoneError);
+    }
+    
+    // 7. Delete user's address
+    const { error: addressError } = await supabase
+      .from('direccion')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (addressError) {
+      console.error('Error deleting user address:', addressError);
+    }
+    
+    // Finally delete the user record
+    const { error: userError } = await supabase
+      .from('usuarios')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (userError) {
+      console.error('Error deleting user record:', userError);
+      return { success: false, error: userError.message };
+    }
+    
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception in deleteUser:', err);
     return { success: false, error: err.message || 'An unexpected error occurred' };
   }
 }

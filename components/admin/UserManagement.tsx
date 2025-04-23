@@ -219,7 +219,7 @@ export default function UserManagement() {
                 {editingUser === user.id_usuario ? (
                   <div className="flex items-center space-x-2">
                     <select
-                      className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:outline-none focus:ring-0"
                       value={selectedRole || ''}
                       onChange={(e) => setSelectedRole(e.target.value)}
                     >
@@ -233,7 +233,7 @@ export default function UserManagement() {
                     
                     <button 
                       onClick={() => saveRoleChange(user.id_usuario)}
-                      className="p-2 text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="p-2 text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-0 admin-action-btn"
                       title="Guardar"
                     >
                       <FiCheck size={16} />
@@ -241,7 +241,7 @@ export default function UserManagement() {
                     
                     <button 
                       onClick={cancelEditing}
-                      className="p-2 text-white bg-gray-500 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                      className="p-2 text-white bg-red-600 rounded-full hover:bg-red-700 focus:outline-none focus:ring-0 admin-action-btn"
                       title="Cancelar"
                     >
                       <FiX size={16} />
@@ -261,7 +261,7 @@ export default function UserManagement() {
                     
                     <button 
                       onClick={() => startEditing(user.id_usuario, user.role?.id_nivel)}
-                      className="p-2 text-gray-500 hover:text-purple-600 focus:outline-none"
+                      className="p-2 text-gray-500 hover:text-purple-600 focus:outline-none focus:ring-0 admin-action-btn"
                       title="Editar rol"
                     >
                       <FiEdit2 size={16} />
