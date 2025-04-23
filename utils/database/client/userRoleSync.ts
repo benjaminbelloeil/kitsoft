@@ -53,11 +53,11 @@ export async function ensureUserHasRole(userId: string): Promise<{ success: bool
       initialRoleCheckComplete = true;
       
       // Log the role number for debugging
-      console.log(`User ${userId} has role number: ${roleData?.niveles?.numero}`);
+      console.log(`User ${userId} has role number: ${roleData?.niveles?.[0]?.numero}`);
       
       return { 
         success: true, 
-        roleNumber: roleData?.niveles?.numero 
+        roleNumber: roleData?.niveles?.[0]?.numero 
       };
     } else {
       // Multiple roles - clean up and keep only the most recent
@@ -171,7 +171,7 @@ async function cleanupAndGetRole(userId: string): Promise<{ success: boolean; ro
     
     return { 
       success: true, 
-      roleNumber: mostRecentRole.niveles?.numero 
+      roleNumber: mostRecentRole.niveles?.[0]?.numero 
     };
   } catch (err) {
     console.error('Error in cleanupAndGetRole:', err);
@@ -209,8 +209,8 @@ export async function checkUserIsAdmin(userId: string): Promise<boolean> {
     }
     
     // Check if the user is an admin (level 1)
-    const isAdmin = userRole.niveles.numero === 1;
-    console.log(`User ${userId} has role number: ${userRole.niveles.numero}, isAdmin: ${isAdmin}`);
+    const isAdmin = userRole.niveles[0]?.numero === 1;
+    console.log(`User ${userId} has role number: ${userRole.niveles[0]?.numero}, isAdmin: ${isAdmin}`);
     return isAdmin;
   } catch (err) {
     console.error('Exception in checkUserIsAdmin:', err);
