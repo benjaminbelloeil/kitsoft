@@ -17,6 +17,7 @@ import ExperienceSection from "@/components/profile/ExperienceSection";
 export default function ProfilePage() {
   // Create an empty profile with placeholder header data
   const emptyProfile: UserProfile = {
+    id_usuario: "user-id", // Required by UserProfile interface
     ID_Usuario: "user-id", // This will be replaced with the actual user ID
     Nombre: "",
     Apellido: "",
