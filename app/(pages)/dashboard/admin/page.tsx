@@ -53,6 +53,7 @@ export default function AdminPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Modal animation variants
   const modalBackdropVariants = {
@@ -208,7 +209,9 @@ export default function AdminPage() {
 
   // Execute user deletion
   const executeUserDelete = async () => {
-    if (!userToDelete) return;
+    if (!userToDelete || isDeleting) return;
+    
+    setIsDeleting(true);
     
     try {
       const result = await deleteUser(userToDelete);
@@ -226,11 +229,12 @@ export default function AdminPage() {
     } catch (err) {
       notifications.showError("Error al eliminar usuario");
       console.error("Error deleting user:", err);
+    } finally {
+      // Reset states
+      setIsDeleting(false);
+      setUserToDelete(null);
+      setShowDeleteModal(false);
     }
-    
-    // Reset state
-    setUserToDelete(null);
-    setShowDeleteModal(false);
   };
 
   // Get badge color based on role
@@ -700,7 +704,7 @@ export default function AdminPage() {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            onClick={() => setShowDeleteModal(false)}
+            onClick={() => !isDeleting && setShowDeleteModal(false)}
           >
             <motion.div 
               className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl border border-gray-100"
@@ -744,19 +748,34 @@ export default function AdminPage() {
               
               <div className="flex justify-end space-x-3 mt-6">
                 <button
-                  onClick={() => setShowDeleteModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  onClick={() => !isDeleting && setShowDeleteModal(false)}
+                  className={`px-4 py-2 border border-gray-300 rounded-lg text-gray-700 transition-colors focus:outline-none focus:ring-0 ${
+                    isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
+                  }`}
+                  disabled={isDeleting}
                 >
                   Cancelar
                 </button>
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={!isDeleting ? { scale: 1.05 } : {}}
+                  whileTap={!isDeleting ? { scale: 0.95 } : {}}
                   onClick={executeUserDelete}
-                  className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                  disabled={isDeleting}
+                  className={`flex items-center px-4 py-2 bg-red-600 text-white rounded-lg transition-colors focus:outline-none focus:ring-0 ${
+                    isDeleting ? 'opacity-80 cursor-not-allowed' : 'hover:bg-red-700'
+                  }`}
                 >
-                  <FiTrash2 className="mr-2" size={16} />
-                  Eliminar Usuario
+                  {isDeleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Eliminando...
+                    </>
+                  ) : (
+                    <>
+                      <FiTrash2 className="mr-2" size={16} />
+                      Eliminar Usuario
+                    </>
+                  )}
                 </motion.button>
               </div>
             </motion.div>
