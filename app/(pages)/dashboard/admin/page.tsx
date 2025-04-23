@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
@@ -17,12 +18,15 @@ import {
   FiUserX,
   FiFilter,
   FiChevronDown,
-  FiAlertCircle
+  FiAlertCircle,
+  FiTrash2,
+  FiMail
 } from "react-icons/fi";
 import { 
   getAllUsersWithRoles, 
   getAllRoles,
   updateUserRole,
+  deleteUser,
   User,
   UserRole
 } from "@/utils/database/client/userManagementSync";
@@ -47,11 +51,13 @@ export default function AdminPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<{userId: string, roleId: string} | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
   // Modal animation variants
   const modalBackdropVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.2 } }
+    visible: { opacity: 1, transition: { duration: 0.3 } }
   };
 
   const modalContentVariants = {
@@ -112,7 +118,8 @@ export default function AdminPage() {
     const searchTerm = search.toLowerCase();
     const matchesSearch = fullName.includes(searchTerm) || 
                         (user.titulo || "").toLowerCase().includes(searchTerm) ||
-                        (user.role?.titulo || "").toLowerCase().includes(searchTerm);
+                        (user.role?.titulo || "").toLowerCase().includes(searchTerm) ||
+                        (user.email || "").toLowerCase().includes(searchTerm);
     
     // Apply role filter
     if (filter === "all") return matchesSearch;
@@ -193,6 +200,39 @@ export default function AdminPage() {
     setIsRefreshing(false);
   };
 
+  // Confirm user deletion
+  const confirmDelete = (userId: string) => {
+    setUserToDelete(userId);
+    setShowDeleteModal(true);
+  };
+
+  // Execute user deletion
+  const executeUserDelete = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      const result = await deleteUser(userToDelete);
+      
+      if (result.success) {
+        notifications.showSuccess("Usuario eliminado con éxito");
+        
+        // Update local state to remove the user
+        setUsers(prevUsers => 
+          prevUsers.filter(user => user.id_usuario !== userToDelete)
+        );
+      } else {
+        notifications.showError(`Error al eliminar usuario: ${result.error}`);
+      }
+    } catch (err) {
+      notifications.showError("Error al eliminar usuario");
+      console.error("Error deleting user:", err);
+    }
+    
+    // Reset state
+    setUserToDelete(null);
+    setShowDeleteModal(false);
+  };
+
   // Get badge color based on role
   const getRoleBadgeStyle = (user: User) => {
     if (!user.registered) return 'bg-gray-100 text-gray-800';
@@ -216,7 +256,7 @@ export default function AdminPage() {
         </p>
       </div>
       
-      {/* Tabs navigation - more visually appealing tab design */}
+      {/* Tabs navigation */}
       <div className="border-b border-gray-200 mb-8">
         <nav className="-mb-px flex space-x-4 sm:space-x-8">
           <button
@@ -295,7 +335,7 @@ export default function AdminPage() {
                 />
               </div>
               
-              {/* Enhanced dropdown filter */}
+              {/* Dropdown filter */}
               <div className="relative w-full sm:w-auto z-20">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -357,10 +397,10 @@ export default function AdminPage() {
               
               <button 
                 onClick={refreshData}
-                className={`p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors ${isRefreshing ? 'animate-spin' : ''}`}
+                className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
                 disabled={isRefreshing}
               >
-                <FiRefreshCw size={18} />
+                <FiRefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
               </button>
             </div>
           </div>
@@ -381,7 +421,7 @@ export default function AdminPage() {
             </div>
           </div>
           
-          {/* User list - visually enhanced */}
+          {/* User list */}
           <div className="space-y-4 mb-6">
             {loading ? (
               // Loading skeleton
@@ -440,16 +480,28 @@ export default function AdminPage() {
                             </h3>
                           </div>
                           
+                          {/* Email display */}
+                          <div className="flex items-center text-sm text-gray-500 truncate">
+                            {user.email ? (
+                              <>
+                                <FiMail className="mr-1 text-gray-400" size={14} />
+                                <span>{user.email}</span>
+                              </>
+                            ) : (
+                              <span className="text-gray-400">Sin correo electrónico</span>
+                            )}
+                          </div>
+                          
                           <p className="text-sm text-gray-500 truncate">
                             {user.titulo || "Sin título profesional"}
                           </p>
                         </div>
                         
-                        <div className="ml-4">
+                        <div className="ml-4 flex items-center">
                           {editingUser === user.id_usuario ? (
                             <div className="flex items-center space-x-2">
                               <select
-                                className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:outline-none focus:ring-0"
                                 value={selectedRole || ""}
                                 onChange={(e) => setSelectedRole(e.target.value)}
                               >
@@ -461,23 +513,25 @@ export default function AdminPage() {
                                 ))}
                               </select>
                               
+                              {/* Save button - added admin-action-btn class */}
                               <button 
                                 onClick={() => selectedRole && confirmRoleChange(user.id_usuario, selectedRole)}
                                 disabled={!selectedRole}
-                                className={`p-2 text-white rounded-full focus:outline-none focus:ring-2 ${
-                                  selectedRole ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-gray-400 cursor-not-allowed'
+                                className={`p-2 text-white rounded-full focus:outline-none focus:ring-0 admin-action-btn ${
+                                  selectedRole ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
                                 }`}
                                 title="Guardar"
                               >
-                                <FiCheck size={16} />
+                                <FiCheck size={16} className="text-white" />
                               </button>
                               
+                              {/* Cancel button - added admin-action-btn class */}
                               <button 
                                 onClick={cancelEditing}
-                                className="p-2 text-white bg-gray-500 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                className="p-2 text-white bg-red-600 rounded-full hover:bg-red-700 focus:outline-none focus:ring-0 admin-action-btn"
                                 title="Cancelar"
                               >
-                                <FiX size={16} />
+                                <FiX size={16} className="text-white" />
                               </button>
                             </div>
                           ) : (
@@ -489,12 +543,22 @@ export default function AdminPage() {
                                 {getRoleLabel(user)}
                               </span>
                               
+                              {/* Edit button - added admin-action-btn class */}
                               <button 
                                 onClick={() => startEditing(user.id_usuario, user.role?.id_nivel)}
-                                className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors focus:outline-none"
+                                className="p-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors focus:outline-none focus:ring-0 admin-action-btn"
                                 title="Editar rol"
                               >
-                                <FiEdit2 size={16} />
+                                <FiEdit2 size={16} className="text-indigo-500 group-hover:text-purple-600" />
+                              </button>
+                              
+                              {/* Delete button - added admin-action-btn class */}
+                              <button 
+                                onClick={() => confirmDelete(user.id_usuario)}
+                                className="p-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors focus:outline-none focus:ring-0 admin-action-btn"
+                                title="Eliminar usuario"
+                              >
+                                <FiTrash2 size={16} className="text-rose-500 group-hover:text-red-600" />
                               </button>
                             </div>
                           )}
@@ -577,11 +641,11 @@ export default function AdminPage() {
         </div>
       </div>
       
-      {/* Enhanced Confirmation Modal with animations */}
+      {/* Role Change Confirmation Modal with transparent backdrop */}
       <AnimatePresence>
         {showConfirmModal && (
           <motion.div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/30"
             variants={modalBackdropVariants}
             initial="hidden"
             animate="visible"
@@ -589,7 +653,7 @@ export default function AdminPage() {
             onClick={() => setShowConfirmModal(false)}
           >
             <motion.div 
-              className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl"
+              className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl border border-gray-100"
               variants={modalContentVariants}
               initial="hidden"
               animate="visible"
@@ -620,6 +684,79 @@ export default function AdminPage() {
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   Confirmar
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Enhanced User Deletion Confirmation Modal with improved transparent backdrop and warning text */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/30"
+            variants={modalBackdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            onClick={() => setShowDeleteModal(false)}
+          >
+            <motion.div 
+              className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl border border-gray-100"
+              variants={modalContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center mb-4">
+                <div className="mr-4 p-3 rounded-full bg-red-100">
+                  <FiAlertCircle className="text-red-600" size={24} />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Confirmar eliminación</h3>
+              </div>
+              
+              <div className="pl-12 space-y-3">
+                <p className="text-gray-700">
+                  ¿Estás seguro que deseas eliminar este usuario?
+                </p>
+                
+                <div className="bg-red-50 border border-red-100 rounded-md p-3 mb-2">
+                  <div className="flex items-center">
+                    <FiAlertCircle className="text-red-600 mr-2 flex-shrink-0" size={16} />
+                    <p className="text-red-700 text-sm">
+                      Esta acción <span className="font-medium">no se puede deshacer</span> y eliminará:
+                    </p>
+                  </div>
+                  <ul className="mt-2 text-sm text-red-700 list-disc pl-5 space-y-1">
+                    <li>Todos los datos personales del usuario</li>
+                    <li>Experiencia laboral y habilidades</li>
+                    <li>Certificaciones y curriculum</li>
+                    <li>Configuración y preferencias</li>
+                  </ul>
+                </div>
+                
+                <p className="text-gray-600 text-sm">
+                  El usuario tendrá que volver a registrarse si necesita acceder a la plataforma de nuevo.
+                </p>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  Cancelar
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={executeUserDelete}
+                  className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  <FiTrash2 className="mr-2" size={16} />
+                  Eliminar Usuario
                 </motion.button>
               </div>
             </motion.div>
