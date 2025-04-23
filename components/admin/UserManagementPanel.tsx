@@ -20,6 +20,12 @@ import { useNotificationState } from "@/components/ui/toast-notification";
 import RoleChangeModal from "./modals/RoleChangeModal";
 import DeleteUserModal from "./modals/DeleteUserModal";
 
+// Cache key for user management data
+const USER_MANAGEMENT_DATA_KEY = 'user_management_data';
+const USER_MANAGEMENT_TIMESTAMP_KEY = 'user_management_timestamp';
+// Extending the freshness threshold to avoid unnecessary refreshes
+const DATA_FRESHNESS_THRESHOLD = 30 * 60 * 1000; // 30 minutes instead of 5
+
 export default function UserManagementPanel() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<UserRole[]>([]);
@@ -34,6 +40,8 @@ export default function UserManagementPanel() {
   const notifications = useNotificationState();
   const [pendingRoleChange, setPendingRoleChange] = useState<{userId: string, roleId: string} | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [visibilityChanged, setVisibilityChanged] = useState(false);
 
   // Dropdown animation variants
   const dropdownVariants = {
@@ -46,9 +54,114 @@ export default function UserManagementPanel() {
     }
   };
 
-  // Load users and roles
-  const loadData = async () => {
-    setLoading(true);
+  // Handle visibility change events
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Only mark that visibility changed, don't trigger loading state
+        setVisibilityChanged(true);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    
+    // Remove event listener on cleanup
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  // Load data with enhanced caching mechanism
+  useEffect(() => {
+    // Skip if not initial load and not coming back from visibility change
+    if (!isInitialLoad && !visibilityChanged) return;
+    
+    const loadData = async () => {
+      try {
+        // Check if we have cached data and if it's still fresh
+        const cachedData = localStorage.getItem(USER_MANAGEMENT_DATA_KEY);
+        const timestamp = localStorage.getItem(USER_MANAGEMENT_TIMESTAMP_KEY);
+        const isFresh = timestamp && (Date.now() - parseInt(timestamp, 10)) < DATA_FRESHNESS_THRESHOLD;
+        
+        // Coming back from another tab - use cached data without showing loading state
+        if (visibilityChanged && cachedData && isFresh) {
+          setVisibilityChanged(false);
+          const parsedData = JSON.parse(cachedData);
+          // Only update state if we have data - don't show loading indicators
+          if (parsedData.users && parsedData.roles) {
+            setUsers(parsedData.users);
+            setRoles(parsedData.roles);
+          }
+          return;
+        }
+        
+        // Initial load with cached data - use it but don't show loading state
+        if (isInitialLoad && cachedData && isFresh) {
+          const parsedData = JSON.parse(cachedData);
+          setUsers(parsedData.users || []);
+          setRoles(parsedData.roles || []);
+          setLoading(false);
+          setIsInitialLoad(false);
+          setVisibilityChanged(false);
+          return;
+        }
+        
+        // No fresh cached data - show loading state and fetch new data
+        if (!cachedData || !isFresh) {
+          if (isInitialLoad) {
+            setLoading(true);
+          }
+          
+          // Fetch fresh data
+          const [usersData, rolesData] = await Promise.all([
+            getAllUsersWithRoles(),
+            getAllRoles()
+          ]);
+          
+          // Cache the new data in localStorage for better persistence
+          localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
+            users: usersData,
+            roles: rolesData
+          }));
+          localStorage.setItem(USER_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
+          
+          // Update state
+          setUsers(usersData);
+          setRoles(rolesData);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error loading user management data:", error);
+        setLoading(false);
+      } finally {
+        setIsInitialLoad(false);
+        setVisibilityChanged(false);
+      }
+    };
+    
+    loadData();
+  }, [isInitialLoad, visibilityChanged]);
+
+  // Update cache function - use localStorage instead of sessionStorage
+  const updateCache = (updatedUsers: User[]) => {
+    try {
+      const currentCache = localStorage.getItem(USER_MANAGEMENT_DATA_KEY);
+      if (currentCache) {
+        const parsedCache = JSON.parse(currentCache);
+        localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
+          ...parsedCache,
+          users: updatedUsers
+        }));
+      }
+    } catch (error) {
+      console.error("Error updating cache:", error);
+    }
+  };
+
+  // Add a more robust refresh function
+  const refreshData = async () => {
+    setIsRefreshing(true);
     
     try {
       const [usersData, rolesData] = await Promise.all([
@@ -56,20 +169,22 @@ export default function UserManagementPanel() {
         getAllRoles()
       ]);
       
+      // Update cache with fresh data using localStorage
+      localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
+        users: usersData,
+        roles: rolesData
+      }));
+      localStorage.setItem(USER_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
+      
       setUsers(usersData);
       setRoles(rolesData);
     } catch (error) {
-      console.error("Error loading data:", error);
-      notifications.showError("Error al cargar los datos");
+      console.error("Error refreshing user data:", error);
+      notifications.showError("Error al actualizar los datos de usuarios");
     } finally {
-      setLoading(false);
+      setIsRefreshing(false);
     }
   };
-
-  // Load data on mount
-  useEffect(() => {
-    loadData();
-  }, []);
 
   // Handler for confirming role change
   const handleConfirmRoleChange = (userId: string, roleId: string) => {
@@ -83,36 +198,30 @@ export default function UserManagementPanel() {
     setShowDeleteModal(true);
   };
 
-  // Refresh data
-  const refreshData = async () => {
-    setIsRefreshing(true);
-    await loadData();
-    setIsRefreshing(false);
-  };
-
   // Update users state after role change
   const updateUserRole = (userId: string, roleId: string) => {
     const newRole = roles.find(r => r.id_nivel === roleId);
     
-    setUsers(prevUsers => 
-      prevUsers.map(user => {
-        if (user.id_usuario === userId) {
-          return {
-            ...user,
-            registered: true,
-            role: newRole || user.role
-          };
-        }
-        return user;
-      })
-    );
+    const updatedUsers = users.map(user => {
+      if (user.id_usuario === userId) {
+        return {
+          ...user,
+          registered: true,
+          role: newRole || user.role
+        };
+      }
+      return user;
+    });
+
+    setUsers(updatedUsers);
+    updateCache(updatedUsers);
   };
 
   // Update users state after user deletion
   const removeUserFromState = (userId: string) => {
-    setUsers(prevUsers => 
-      prevUsers.filter(user => user.id_usuario !== userId)
-    );
+    const updatedUsers = users.filter(user => user.id_usuario !== userId);
+    setUsers(updatedUsers);
+    updateCache(updatedUsers);
   };
 
   return (
