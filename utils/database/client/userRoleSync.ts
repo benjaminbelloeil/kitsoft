@@ -20,6 +20,9 @@ export async function ensureUserHasRole(userId: string): Promise<{ success: bool
   try {
     console.log('Starting role check for user', userId);
     
+    // First check and clean up potential duplicate roles
+    await cleanupUserRoles(userId);
+    
     // First get existing role count for this user
     const { count, error: countError } = await supabase
       .from('usuarios_niveles')
@@ -226,12 +229,83 @@ export function resetRoleCheckState() {
 }
 
 /**
- * Clean up duplicate role entries for a user
+ * Clean up duplicate role entries for a user - enhanced version
  * @param userId - The user's ID from Supabase Auth
  */
-export async function cleanupUserRoles(userId: string): Promise<void> {
-  // Since we now handle cleanup in the main function, just call that
-  await ensureUserHasRole(userId);
+export async function cleanupUserRoles(userId: string): Promise<boolean> {
+  const supabase = createClient();
+  
+  try {
+    // Get all roles for this user ordered by date (most recent first)
+    const { data: roles, error: rolesError } = await supabase
+      .from('usuarios_niveles')
+      .select(`
+        id_historial, 
+        fecha_cambio,
+        id_nivel_actual,
+        niveles:id_nivel_actual(numero)
+      `)
+      .eq('id_usuario', userId)
+      .order('fecha_cambio', { ascending: false });
+      
+    if (rolesError) {
+      console.error('Error fetching roles for cleanup:', rolesError);
+      return false;
+    }
+    
+    if (!roles || roles.length <= 1) {
+      // No duplicates to clean up
+      return true;
+    }
+    
+    console.log(`Found ${roles.length} role entries for user ${userId}, cleaning up...`);
+    
+    // Filter out null entries first (these are likely corrupted)
+    const validRoles = roles.filter(r => r.id_nivel_actual !== null);
+    
+    if (validRoles.length === 0) {
+      // All roles are null - delete all and create a fresh one
+      const { error: deleteError } = await supabase
+        .from('usuarios_niveles')
+        .delete()
+        .eq('id_usuario', userId);
+        
+      if (deleteError) {
+        console.error('Error deleting null role entries:', deleteError);
+        return false;
+      }
+      
+      // Create a new staff role
+      const result = await createStaffRole(userId);
+      return result.success;
+    }
+    
+    // Keep the most recent valid role
+    const mostRecentValidRole = validRoles[0];
+    const idsToDelete = roles
+      .filter(role => role.id_historial !== mostRecentValidRole.id_historial)
+      .map(role => role.id_historial);
+    
+    // Delete the older/invalid roles
+    if (idsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('usuarios_niveles')
+        .delete()
+        .in('id_historial', idsToDelete);
+        
+      if (deleteError) {
+        console.error('Error deleting duplicate roles:', deleteError);
+        return false;
+      }
+      
+      console.log(`Successfully deleted ${idsToDelete.length} duplicate role entries`);
+    }
+    
+    return true;
+  } catch (err) {
+    console.error('Error in cleanupUserRoles:', err);
+    return false;
+  }
 }
 
 /**

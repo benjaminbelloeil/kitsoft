@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiUser, FiEdit2, FiCheck, FiX, FiTrash2, FiMail } from "react-icons/fi";
+import { FiUser, FiEdit2, FiCheck, FiX, FiTrash2, FiMail, FiClock } from "react-icons/fi";
 import { User, UserRole } from '@/utils/database/client/userManagementSync';
 import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 
@@ -45,6 +45,27 @@ export default function UserListItem({
     return user.role?.titulo || "Empleado"; 
   };
 
+  // Format the last login date if available
+  const formatLastLogin = (lastLogin: string | null | undefined) => {
+    if (!lastLogin) return null;
+    
+    const date = new Date(lastLogin);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) return null;
+    
+    // Format date in Spanish
+    return date.toLocaleDateString('es-ES', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const lastLoginDate = formatLastLogin(user.lastLogin);
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -82,6 +103,14 @@ export default function UserListItem({
               <span className="text-gray-400">Sin correo electrónico</span>
             )}
           </div>
+          
+          {/* Show last login as a small text under the title - only if there is a last login */}
+          {lastLoginDate && (
+            <div className="flex items-center text-xs text-gray-400 mt-1">
+              <FiClock className="mr-1" size={12} />
+              <span>Último acceso: {lastLoginDate}</span>
+            </div>
+          )}
           
           <p className="text-sm text-gray-500 truncate">
             {user.titulo || "Sin título profesional"}

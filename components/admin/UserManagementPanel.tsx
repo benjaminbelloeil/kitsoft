@@ -13,13 +13,16 @@ import {
   getAllUsersWithRoles, 
   getAllRoles,
   User,
-  UserRole
+  UserRole,
+  deleteUser,
+  cleanupDuplicateEntries
 } from "@/utils/database/client/userManagementSync";
 import { changeUserRole } from "@/utils/database/client/userRoleSync";
 import UserList from "./UserList";
 import { useNotificationState } from "@/components/ui/toast-notification";
 import RoleChangeModal from "./modals/RoleChangeModal";
 import DeleteUserModal from "./modals/DeleteUserModal";
+import supabase from "@/app/lib/supabaseClient";
 
 // Cache key for user management data
 const USER_MANAGEMENT_DATA_KEY = 'user_management_data';
@@ -41,6 +44,7 @@ export default function UserManagementPanel() {
   const notifications = useNotificationState();
   const [pendingRoleChange, setPendingRoleChange] = useState<{userId: string, roleId: string} | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [userToDeleteName, setUserToDeleteName] = useState<string>("");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [visibilityChanged, setVisibilityChanged] = useState(false);
 
@@ -112,6 +116,31 @@ export default function UserManagementPanel() {
         if (!cachedData || !isFresh) {
           if (isInitialLoad) {
             setLoading(true);
+          }
+          
+          // First attempt to clean up duplicate entries for all users
+          if (isInitialLoad) {
+            try {
+              // Get all users and cleanup potential duplicates
+              const { data: allUsers } = await supabase
+                .from('usuarios')
+                .select('id_usuario')
+                .order('id_usuario');
+                
+              if (allUsers && allUsers.length > 0) {
+                console.log(`Attempting to clean up duplicates for ${allUsers.length} users`);
+                
+                // Process in batches to avoid timeouts
+                const batchSize = 5;
+                for (let i = 0; i < allUsers.length; i += batchSize) {
+                  const batch = allUsers.slice(i, i + batchSize);
+                  await Promise.all(batch.map(user => cleanupDuplicateEntries(user.id_usuario)));
+                }
+              }
+            } catch (cleanupError) {
+              console.error("Error during duplicate cleanup:", cleanupError);
+              // Continue with loading even if cleanup fails
+            }
           }
           
           // Fetch fresh data
@@ -195,7 +224,13 @@ export default function UserManagementPanel() {
 
   // Handler for confirming user deletion
   const handleConfirmDelete = (userId: string) => {
+    const userToDelete = users.find(u => u.id_usuario === userId);
+    const userName = userToDelete ? 
+      `${userToDelete.nombre || ''} ${userToDelete.apellido || ''}`.trim() : 
+      'Usuario';
+    
     setUserToDelete(userId);
+    setUserToDeleteName(userName || 'Usuario sin nombre');
     setShowDeleteModal(true);
   };
 
@@ -252,6 +287,32 @@ export default function UserManagementPanel() {
       // Close modal and clean up
       setShowConfirmModal(false);
       setPendingRoleChange(null);
+    }
+  };
+
+  // Handle the actual user deletion process
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      const result = await deleteUser(userToDelete);
+      
+      if (result.success) {
+        // Remove from local state
+        removeUserFromState(userToDelete);
+        notifications.showSuccess("Usuario eliminado con éxito");
+      } else {
+        notifications.showError(result.error || "Error al eliminar el usuario");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      notifications.showError("Error inesperado al eliminar el usuario");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setUserToDelete(null);
     }
   };
 
@@ -400,20 +461,8 @@ export default function UserManagementPanel() {
         isOpen={showDeleteModal}
         isDeleting={isDeleting}
         onClose={() => !isDeleting && setShowDeleteModal(false)}
-        onConfirm={async () => {
-          if (userToDelete) {
-            setIsDeleting(true);
-            // This would call your deleteUser function and handle the state updates
-            // For now, we'll just simulate success
-            setTimeout(() => {
-              removeUserFromState(userToDelete);
-              setIsDeleting(false);
-              setShowDeleteModal(false);
-              setUserToDelete(null);
-              notifications.showSuccess("Usuario eliminado con éxito");
-            }, 1000);
-          }
-        }}
+        onConfirm={handleDeleteUser}
+        userName={userToDeleteName}
       />
 
       {/* Click outside handler for dropdown */}
