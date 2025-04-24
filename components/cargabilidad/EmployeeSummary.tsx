@@ -4,6 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { FiPieChart, FiCheckCircle, FiClock } from 'react-icons/fi';
 import { CircularProgress } from './CircularProgress';
 
+interface Project {
+  name: string;
+  load?: number;
+  deadline?: string;
+  hoursPerWeek: number;
+  color: string; // Color ya viene asignado desde page.tsx
+}
+
 interface Props {
   name: string;
   role: string;
@@ -11,23 +19,8 @@ interface Props {
   totalUsedHours: number;
   availableHours: number;
   totalHoursPerWeek: number;
-  projects: Array<{
-    name: string;
-    hoursPerWeek: number;
-  }>;
+  projects: Project[];
 }
-
-// Colores predefinidos para los proyectos
-const PROJECT_COLORS = [
-  'bg-purple-500',
-  'bg-blue-500',
-  'bg-indigo-500',
-  'bg-pink-500',
-  'bg-teal-500',
-  'bg-green-500',
-  'bg-orange-500',
-  'bg-red-500',
-];
 
 export const EmployeeSummary = ({
   name,
@@ -60,12 +53,6 @@ export const EmployeeSummary = ({
       clearTimeout(visibilityTimer);
     };
   }, []);
-
-  // Asignar un color a cada proyecto
-  const projectsWithColors = projects.map((project, index) => ({
-    ...project,
-    color: PROJECT_COLORS[index % PROJECT_COLORS.length]
-  }));
 
   return (
     <div className={`bg-white rounded-xl shadow-md overflow-hidden mb-6 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -109,10 +96,10 @@ export const EmployeeSummary = ({
             <div className="h-full bg-gray-300 animate-pulse"></div>
           </div>
         ) : (
-          // Barra con proyectos
+          // Barra con proyectos - usando los colores asignados en page.tsx
           <div className="w-full h-6 rounded-full overflow-hidden bg-gray-200 flex text-white text-xs font-medium">
-            {/* Proyectos con diferentes colores */}
-            {projectsWithColors.map((project, index) => {
+            {/* Proyectos con sus colores asignados */}
+            {projects.map((project, index) => {
               const projectRatio = project.hoursPerWeek / totalHoursPerWeek;
               return (
                 <div
@@ -126,7 +113,7 @@ export const EmployeeSummary = ({
                   }}
                 >
                   {projectRatio > 0.1 && (
-                    <span className="px-2 truncate text-white font-semibold">{project.name}</span>
+                    <span className="px-2 truncate text-white">{project.hoursPerWeek}h carga</span>
                   )}
                 </div>
               );
@@ -153,7 +140,7 @@ export const EmployeeSummary = ({
         
         <div className='relative'>
           <p className="absolute left-1/2 -translate-x-1/2 mt-1 text-xs text-gray-500">         
-            {(totalUsedHours / totalHoursPerWeek * 100).toFixed(1)}% de cargabilidad          
+            {(totalUsedHours / totalHoursPerWeek * 100).toFixed(1)}% de cargabilidad semanal        
           </p>
           {availableRatio <= 0.075 && (
             <span className="absolute right-0 mt-1 mr-1 text-xs text-gray-500"> 
@@ -164,18 +151,18 @@ export const EmployeeSummary = ({
       </div>
 
       {/* Leyenda de proyectos */}
-      {/* <div className="px-6 pt-2 pb-2">
+      <div className="px-6 pt-2 pb-2">
         <div className="flex flex-wrap gap-3">
-          {projectsWithColors.map((project, index) => (
+          {projects.map((project, index) => (
             <div key={index} className="flex items-center">
               <div className={`w-3 h-3 rounded-full mr-1 ${project.color}`}></div>
               <span className="text-xs text-gray-600">{project.name} ({project.hoursPerWeek}h)</span>
             </div>
           ))}
         </div>
-      </div> */}
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 mt-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3">
         <SummaryItem 
           icon={<div className='bg-purple-100 p-2 rounded-xl shadow-md'><FiPieChart className='text-purple-600'/></div>} 
           title="Carga Total" 
@@ -185,7 +172,7 @@ export const EmployeeSummary = ({
         <SummaryItem 
           icon={<div className='bg-blue-100 p-2 rounded-xl shadow-md'><FiClock className='text-blue-600'/></div>} 
           title="Horas Asignadas" 
-          value={`${totalUsedHours} de ${totalHoursPerWeek}h`} 
+          value={`${totalUsedHours}h de ${totalHoursPerWeek}h`} 
           color="blue" 
         />
         <SummaryItem 

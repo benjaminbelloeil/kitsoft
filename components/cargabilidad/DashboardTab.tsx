@@ -33,13 +33,13 @@ export const DashboardTab = ({ projects, weeklyLoad, availableHours, totalHoursP
       <div className="bg-white rounded-xl border border-gray-100 p-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
           <FiPieChart className="text-indigo-600" />
-          Distribución de Horas por Proyecto
+          Cargabilidad por Proyecto
         </h3>
         <div className="space-y-4">
           {projects.map((project, index) => (
             <LinearProgress
               key={index}
-              value={(project.hoursPerWeek / totalHoursPerWeek) * 100}
+              value={(project.load) }
               label={project.name}
             />
           ))}

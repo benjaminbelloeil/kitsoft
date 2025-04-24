@@ -13,7 +13,7 @@ export const LinearProgress = ({ value, label }: Props) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-gray-50 p-2 rounded-lg mb-4">
       <div className="flex justify-between mb-1">
         <span className="text-sm font-medium text-gray-700">{label}</span>
         <span className="text-sm font-medium text-gray-700">{value.toFixed(1)}%</span>

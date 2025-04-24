@@ -8,11 +8,23 @@ import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
 import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
 import { Tabs } from '@/components/cargabilidad/Tabs';
 
+export const PROJECT_COLORS = [
+  'bg-purple-500',
+  'bg-blue-500',
+  'bg-indigo-500',
+  'bg-pink-500',
+  'bg-teal-500',
+  'bg-green-500',
+  'bg-orange-500',
+  'bg-red-500',
+];
+
 interface Project {
   name: string;
   load: number;
   deadline?: string;
   hoursPerWeek: number;
+  color?: string; // Color del proyecto, opcional
 }
 
 interface HistoryEntry {
@@ -27,8 +39,8 @@ interface HistoryEntry {
 
 const PersonalLoadPage = () => {
   const [projects, setProjects] = useState<Project[]>([
-    { name: 'Expediente Alfa', load: 65, deadline: '2025-05-15', hoursPerWeek: 20 },
-    { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 12 },
+    { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hoursPerWeek: 20, color: PROJECT_COLORS[0] },
+    { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 12, color: PROJECT_COLORS[1] },
   ]);
 
   // Añadimos 'history' a las opciones de pestañas
