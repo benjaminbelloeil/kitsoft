@@ -101,51 +101,32 @@ export default function AdminPage() {
         </p>
       </div>
 
-      {/* Tabs navigation - always show this part */}
+      {/* Improved tabs navigation with better visual cues */}
       <div className="border-b border-gray-200 mb-8">
-        <nav className="-mb-px flex space-x-4 sm:space-x-8">
-          <button
-            onClick={() => !isLoading && setActiveTab("users")}
-            className={`whitespace-nowrap py-3 px-3 border-b-2 font-medium text-sm transition-colors duration-200 ${
-              activeTab === "users"
-                ? "border-purple-600 text-purple-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            } ${isLoading ? "opacity-70 cursor-wait" : ""}`}
-            disabled={isLoading}
-          >
-            <div className="flex items-center">
-              <FiUsers className="mr-2" />
-              <span className="hidden sm:inline">Gestión de</span> Usuarios
-            </div>
-          </button>
-          <button
-            onClick={() => !isLoading && setActiveTab("settings")}
-            className={`whitespace-nowrap py-3 px-3 border-b-2 font-medium text-sm transition-colors duration-200 ${
-              activeTab === "settings"
-                ? "border-purple-600 text-purple-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            } ${isLoading ? "opacity-70 cursor-wait" : ""}`}
-            disabled={isLoading}
-          >
-            <div className="flex items-center">
-              <FiSettings className="mr-2" />
-              Configuración
-            </div>
-          </button>
-          <button
-            onClick={() => !isLoading && setActiveTab("logs")}
-            className={`whitespace-nowrap py-3 px-3 border-b-2 font-medium text-sm transition-colors duration-200 ${
-              activeTab === "logs"
-                ? "border-purple-600 text-purple-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            } ${isLoading ? "opacity-70 cursor-wait" : ""}`}
-            disabled={isLoading}
-          >
-            <div className="flex items-center">
-              <FiActivity className="mr-2" />
-              Registros
-            </div>
-          </button>
+        <nav className="-mb-px flex space-x-6 sm:space-x-8">
+          <TabButton 
+            isActive={activeTab === "users"} 
+            isLoading={isLoading} 
+            onClick={() => setActiveTab("users")}
+            icon={<FiUsers className="mr-2" />}
+            label={<><span className="hidden sm:inline">Gestión de</span> Usuarios</>}
+          />
+          
+          <TabButton 
+            isActive={activeTab === "settings"} 
+            isLoading={isLoading} 
+            onClick={() => setActiveTab("settings")}
+            icon={<FiSettings className="mr-2" />}
+            label="Configuración"
+          />
+          
+          <TabButton 
+            isActive={activeTab === "logs"} 
+            isLoading={isLoading} 
+            onClick={() => setActiveTab("logs")}
+            icon={<FiActivity className="mr-2" />}
+            label="Registros"
+          />
         </nav>
       </div>
 
@@ -256,5 +237,45 @@ export default function AdminPage() {
         onClose={(id) => notifications.clearNotifications()}
       />
     </div>
+  );
+}
+
+// Tab Button Component for consistent styling
+interface TabButtonProps {
+  isActive: boolean;
+  isLoading: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: React.ReactNode;
+}
+
+function TabButton({ isActive, isLoading, onClick, icon, label }: TabButtonProps) {
+  return (
+    <button
+      onClick={() => !isLoading && onClick()}
+      className={`
+        group relative whitespace-nowrap py-3 px-1 font-medium text-sm transition-all duration-200
+        ${isActive 
+          ? "text-purple-600" 
+          : "text-gray-500 hover:text-gray-700"}
+        ${isLoading ? "opacity-70 cursor-wait" : "cursor-pointer"}
+      `}
+      disabled={isLoading}
+    >
+      <div className="flex items-center">
+        {icon}
+        {label}
+      </div>
+      
+      {/* Tab bottom highlight */}
+      <span
+        className={`
+          absolute bottom-0 left-0 w-full h-0.5 transform transition-all duration-300 ease
+          ${isActive 
+            ? "bg-purple-600" 
+            : "bg-transparent group-hover:bg-gray-300"}
+        `}
+      />
+    </button>
   );
 }
