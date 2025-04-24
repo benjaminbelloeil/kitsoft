@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiUser, FiEdit2, FiCheck, FiX, FiTrash2, FiMail, FiClock } from "react-icons/fi";
