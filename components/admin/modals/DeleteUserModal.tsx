@@ -6,13 +6,15 @@ interface DeleteUserModalProps {
   isDeleting: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  userName?: string;
 }
 
 export default function DeleteUserModal({ 
   isOpen, 
   isDeleting, 
   onClose, 
-  onConfirm 
+  onConfirm,
+  userName
 }: DeleteUserModalProps) {
   // Modal animation variants
   const modalBackdropVariants = {
@@ -63,7 +65,11 @@ export default function DeleteUserModal({
             
             <div className="pl-12 space-y-3">
               <p className="text-gray-700">
-                ¿Estás seguro que deseas eliminar este usuario?
+                {userName ? (
+                  <>¿Estás seguro que deseas eliminar el usuario <span className="font-medium">{userName}</span>?</>
+                ) : (
+                  <>¿Estás seguro que deseas eliminar este usuario?</>
+                )}
               </p>
               
               <div className="bg-red-50 border border-red-100 rounded-md p-3 mb-2">
@@ -74,6 +80,7 @@ export default function DeleteUserModal({
                   </p>
                 </div>
                 <ul className="mt-2 text-sm text-red-700 list-disc pl-5 space-y-1">
+                  <li>La cuenta de autenticación del usuario</li>
                   <li>Todos los datos personales del usuario</li>
                   <li>Experiencia laboral y habilidades</li>
                   <li>Certificaciones y curriculum</li>
