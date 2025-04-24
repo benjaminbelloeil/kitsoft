@@ -53,19 +53,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
       
       console.log("User role data:", userNivel);
       
-      if (error || !userNivel) {
+      if (error || !userNivel || !userNivel.niveles) {
         console.error("Error fetching user role:", error);
         setUserRole(null);
         setIsAdmin(false);
       } else {
-        setUserRole(userNivel.niveles as UserRole);
+        // Handle niveles as the correct type - it appears to be an array in the response
+        const roleData = Array.isArray(userNivel.niveles) ? userNivel.niveles[0] : userNivel.niveles;
+        setUserRole(roleData as UserRole);
         
         // Explicitly check if user is admin (nivel.numero === 1)
-        if (userNivel.niveles && userNivel.niveles.numero === 1) {
-          console.log("User is ADMIN with role number:", userNivel.niveles.numero);
+        if (roleData && roleData.numero === 1) {
+          console.log("User is ADMIN with role number:", roleData.numero);
           setIsAdmin(true);
         } else {
-          console.log("User is NOT admin with role number:", userNivel.niveles?.numero);
+          console.log("User is NOT admin with role number:", roleData?.numero);
           setIsAdmin(false);
         }
       }
