@@ -261,3 +261,81 @@ export async function resetUserRole(userId: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Changes a user's role in the database
+ * @param userId - The user's ID from Supabase Auth
+ * @param newRoleNumber - The new role number to assign (0 for staff, 1 for admin)
+ * @returns Success status of the operation
+ */
+export async function changeUserRole(userId: string, newRoleNumber: number): Promise<boolean> {
+  const supabase = createClient();
+  
+  try {
+    console.log(`Changing role for user ${userId} to role number ${newRoleNumber}`);
+    
+    // Get the user's current role information
+    const { data: currentRole, error: currentRoleError } = await supabase
+      .from('usuarios_niveles')
+      .select(`
+        id_historial,
+        id_nivel_actual,
+        niveles:id_nivel_actual(numero)
+      `)
+      .eq('id_usuario', userId)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (currentRoleError) {
+      console.error('Error fetching current role:', currentRoleError);
+      return false;
+    }
+    
+    const currentRoleNumber = currentRole?.niveles?.[0]?.numero;
+    const currentRoleId = currentRole?.id_nivel_actual;
+    
+    // If the role is already the requested one, no need to change
+    if (currentRoleNumber === newRoleNumber) {
+      console.log(`User ${userId} already has role ${newRoleNumber}, no change needed`);
+      return true;
+    }
+    
+    // Get the ID of the new role
+    const { data: newRole, error: newRoleError } = await supabase
+      .from('niveles')
+      .select('id_nivel')
+      .eq('numero', newRoleNumber)
+      .single();
+    
+    if (newRoleError || !newRole) {
+      console.error(`Error fetching role with number ${newRoleNumber}:`, newRoleError);
+      return false;
+    }
+    
+    // Update the existing role entry, preserving the previous role ID
+    const { error: updateError } = await supabase
+      .from('usuarios_niveles')
+      .update({
+        id_nivel_actual: newRole.id_nivel,
+        id_nivel_previo: currentRoleId, // Store the current role as the previous role
+        fecha_cambio: new Date().toISOString(),
+      })
+      .eq('id_historial', currentRole.id_historial);
+    
+    if (updateError) {
+      console.error('Error updating user role:', updateError);
+      return false;
+    }
+    
+    console.log(`Successfully changed role for user ${userId} to ${newRoleNumber}`);
+    
+    // Reset the role check state to force a refresh on next auth check
+    resetRoleCheckState();
+    
+    return true;
+  } catch (err) {
+    console.error('Exception in changeUserRole:', err);
+    return false;
+  }
+}

@@ -15,6 +15,7 @@ import {
   User,
   UserRole
 } from "@/utils/database/client/userManagementSync";
+import { changeUserRole } from "@/utils/database/client/userRoleSync";
 import UserList from "./UserList";
 import { useNotificationState } from "@/components/ui/toast-notification";
 import RoleChangeModal from "./modals/RoleChangeModal";
@@ -224,6 +225,36 @@ export default function UserManagementPanel() {
     updateCache(updatedUsers);
   };
 
+  // New function to handle role change
+  const handleRoleChange = async () => {
+    if (pendingRoleChange) {
+      try {
+        // Get the role number from the selected role
+        const selectedRole = roles.find(role => role.id_nivel === pendingRoleChange.roleId);
+        if (!selectedRole) return;
+
+        // Call the database function to change the user's role
+        const success = await changeUserRole(pendingRoleChange.userId, selectedRole.numero);
+        
+        if (success) {
+          notifications.showSuccess(`El usuario ahora tiene rol de ${selectedRole.titulo}`);
+          
+          // Update the local state
+          updateUserRole(pendingRoleChange.userId, pendingRoleChange.roleId);
+        } else {
+          notifications.showError("No se pudo actualizar el rol del usuario");
+        }
+      } catch (error) {
+        console.error("Error changing role:", error);
+        notifications.showError("Ocurrió un error al cambiar el rol");
+      }
+      
+      // Close modal and clean up
+      setShowConfirmModal(false);
+      setPendingRoleChange(null);
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -361,13 +392,7 @@ export default function UserManagementPanel() {
       <RoleChangeModal 
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        onConfirm={() => {
-          if (pendingRoleChange) {
-            updateUserRole(pendingRoleChange.userId, pendingRoleChange.roleId);
-            setShowConfirmModal(false);
-            setPendingRoleChange(null);
-          }
-        }}
+        onConfirm={handleRoleChange}
       />
 
       {/* Delete User Modal */}
