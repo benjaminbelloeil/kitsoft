@@ -60,8 +60,6 @@
    select:focus,
    button:focus {
      outline: none !important;
-     border-color: var(--accenture-purple) !important;
-     box-shadow: 0 0 0 1px var(--accenture-purple) !important;
    }
    
    /* Override autofill styles for Chrome */
