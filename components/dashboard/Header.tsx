@@ -185,7 +185,7 @@ export default function Header({ userData }: { userData: any }) {
                   {userData.name.substring(0, 1)}
                 </div>
                 <div className="ml-2 hidden md:block">
-                  <div className="text-sm font-medium group-hover:text-[#A100FF] transition-colors">{userData.name}</div>
+                  <div className="text-sm font-medium text-gray-800 group-hover:text-gray-900 transition-colors">{userData.name}</div>
                   <div className="text-xs text-gray-500">{userData.title}</div>
                 </div>
               </Link>
