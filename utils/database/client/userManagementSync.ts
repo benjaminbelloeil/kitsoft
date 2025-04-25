@@ -503,32 +503,9 @@ export async function deleteUser(userId: string): Promise<{ success: boolean; er
       return { success: false, error: userDeleteError.message || 'Error deleting user' };
     }
     
-    // Final step - try to delete the user from the authentication system
+    // Final step - try to delete the user from the authentication system using RPC
     try {
       console.log("Attempting to delete user from auth system");
-      
-      // Try with the server API route
-      try {
-        console.log("Attempting to delete auth user via API route");
-        const response = await fetch('/api/admin/delete-auth-user', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId }),
-        });
-        
-        if (response.ok) {
-          console.log("Successfully deleted user from auth via API route");
-          return { success: true };
-        } else {
-          // API route failed, continue to other methods
-          console.log("API route failed, trying RPC method");
-        }
-      } catch (apiErr) {
-        console.log("API route error:", apiErr);
-        // Continue to next approach
-      }
       
       // Try with RPC function (this may fail with permission issues)
       try {
