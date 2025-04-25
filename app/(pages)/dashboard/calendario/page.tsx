@@ -237,7 +237,7 @@ export default function CalendarPage() {
                 <FiCalendar size={24} className="text-[#A100FF]" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-[#A100FF]">
+                <h1 className="text-2xl font-bold text-black">
                   Calendario de Proyectos
                 </h1>
                 <p className="text-gray-500 mt-1">
