@@ -1,3 +1,4 @@
+import { div } from 'framer-motion/client';
 import styles from './page.module.css'
 
 
@@ -58,6 +59,15 @@ export default function FeedbackBoard() {
 	)
 }
 
+export function FeedbackSearchBar({}) {
+	return (
+		<div className={styles['search-bar']}>
+			<input type="text" placeholder='Buscar'/>
+
+		</div>
+	)
+}
+
 interface Feedback {
 	id: string
 	author: string,
@@ -68,10 +78,14 @@ interface Feedback {
 function FeedbackMessage({author, message, projectName, date}: Feedback) {
 	return (
 		<div className={styles['feedback-container']}>
-			<h3 className={styles['date']}>{date.toDateString()}</h3>
-			<p className={styles['message']}>{message}</p>
-			<h2 className={styles['author']}>{author}</h2>
-			<h3 className={styles['project']}>{projectName}</h3>
+			<div className={styles['content']}>
+				<h3 className={styles['date']}>{date.toDateString()}</h3>
+				<p className={styles['message']}>{`"${message}"`}</p>
+			</div>
+			<div className={styles['footer']}>
+				<h2 className={styles['author']}>{author}</h2>
+				<h3 className={styles['project']}>{projectName}</h3>
+			</div>
 		</div>
 	)
 }
