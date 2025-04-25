@@ -1,0 +1,39 @@
+.feedback-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; }
+  .feedback-board .feedback-container {
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(128, 128, 128, 0.2);
+    max-width: 400px;
+    transition: box-shadow 0.2s ease-out;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column; }
+    .feedback-board .feedback-container:hover {
+      box-shadow: 0 5px 10px rgba(134, 0, 212, 0.5); }
+    .feedback-board .feedback-container .content {
+      padding: 10px 30px;
+      flex-basis: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around; }
+      .feedback-board .feedback-container .content .date {
+        text-align: right; }
+      .feedback-board .feedback-container .content .message {
+        margin-top: 20px; }
+    .feedback-board .feedback-container .footer {
+      background-color: rgba(134, 0, 212, 0.5);
+      padding: 7px 30px;
+      color: white; }
+      .feedback-board .feedback-container .footer .author {
+        font-weight: bold;
+        text-align: right;
+        color: white; }
+      .feedback-board .feedback-container .footer .project {
+        font-style: italic;
+        text-align: right;
+        color: white; }
+
+/*# sourceMappingURL=page.module.css.map */
