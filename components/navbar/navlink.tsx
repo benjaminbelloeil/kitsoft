@@ -98,13 +98,14 @@ export default function NavLink() {
                                         aria-expanded={openDropdowns[link.name] || false}
                                         onClick={() => toggleDropdown(link.name)}
                                         className={clsx(
-                                            "nav-tab-btn rounded-lg px-4 font-medium flex w-full items-center gap-2.5 py-2.5 relative outline-none",
+                                            "nav-tab-btn rounded-lg px-4 font-medium flex w-full items-center gap-2.5 py-2.5 relative",
+                                            "outline-none focus:outline-none focus-visible:outline-none active:outline-none",
                                             {
                                                 "bg-[#A100FF20] text-[#A100FF] font-medium": isActiveLink(link),
                                                 "text-gray-700 hover:bg-gray-50 hover:text-[#A100FF]": !isActiveLink(link)
                                             }
                                         )}
-                                        style={{ border: 'none', outline: 'none' }}
+                                        style={{ WebkitTapHighlightColor: 'transparent' }}
                                     >
                                         {getIcon(link.icon)}
                                         <span className="text-sm">{link.name}</span>
@@ -127,13 +128,14 @@ export default function NavLink() {
                                                     key={item.name}
                                                     href={item.href}
                                                     className={clsx(
-                                                        "nav-tab-link rounded-md py-1.5 px-4 text-xs flex items-center w-full outline-none",
+                                                        "nav-tab-link rounded-md py-1.5 px-4 text-xs flex items-center w-full",
+                                                        "outline-none focus:outline-none focus-visible:outline-none active:outline-none",
                                                         {
                                                             "text-[#A100FF] font-medium bg-[#A100FF10]": pathname === item.href,
                                                             "text-gray-600 hover:text-[#A100FF] hover:bg-gray-50": pathname !== item.href
                                                         }
                                                     )}
-                                                    style={{ border: 'none', outline: 'none' }}
+                                                    style={{ WebkitTapHighlightColor: 'transparent' }}
                                                 >
                                                     {pathname === item.href && (
                                                         <span className="mr-1.5 w-1 h-1 rounded-full bg-[#A100FF]"></span>
@@ -148,13 +150,14 @@ export default function NavLink() {
                                 <Link
                                     href={link.href}
                                     className={clsx(
-                                        "nav-tab-link rounded-lg px-4 font-medium flex items-center gap-2.5 py-2.5 w-full relative outline-none",
+                                        "nav-tab-link rounded-lg px-4 font-medium flex items-center gap-2.5 py-2.5 w-full relative",
+                                        "outline-none focus:outline-none focus-visible:outline-none active:outline-none",
                                         {
                                             "bg-[#A100FF20] text-[#A100FF] font-medium": pathname === link.href,
                                             "text-gray-700 hover:bg-gray-50 hover:text-[#A100FF]": pathname !== link.href
                                         }
                                     )}
-                                    style={{ border: 'none', outline: 'none' }}
+                                    style={{ WebkitTapHighlightColor: 'transparent' }}
                                 >
                                     {getIcon(link.icon)}
                                     <span className="text-sm">{link.name}</span>
