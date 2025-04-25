@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiUser, FiEdit2, FiCheck, FiX, FiTrash2, FiMail, FiClock } from "react-icons/fi";
+import { FiUser, FiEdit2, FiCheck, FiX, FiTrash2, FiMail, FiClock, FiUserX } from "react-icons/fi";
 import { User, UserRole } from '@/utils/database/client/userManagementSync';
 import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 
@@ -44,6 +44,12 @@ export default function UserListItem({
   const getRoleLabel = (user: User) => {
     if (!user.registered) return "Sin registrar";
     return user.role?.titulo || "Empleado"; 
+  };
+
+  // Get the appropriate icon for the user's status
+  const getRoleIcon = (user: User) => {
+    if (!user.registered) return <FiUserX className="mr-1.5" />;
+    return <FiUser className="mr-1.5" />;
   };
 
   // Format the last login date if available
@@ -163,7 +169,7 @@ export default function UserListItem({
               <span 
                 className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${getRoleBadgeStyle(user)}`}
               >
-                <FiUser className="mr-1.5" />
+                {getRoleIcon(user)}
                 {getRoleLabel(user)}
               </span>
               
