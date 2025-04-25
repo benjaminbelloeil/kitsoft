@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
-=======
 import styles from './page.module.css'
 >>>>>>> 8326a61 (Remueve imports innecesarios)
 
