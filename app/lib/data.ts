@@ -485,6 +485,144 @@ export const mockCourses = [
     skills: ['ITSM', 'Service Management', 'ITIL Framework']
   }
 ];
+
+// Feedback data types and mock data
+export interface FeedbackItem {
+  id: string;
+  from: {
+    id: string;
+    name: string;
+    avatar: string;
+    role: string;
+  };
+  date: string;
+  rating: number;
+  category: string;
+  message: string;
+  project?: string;
+}
+
+export const feedbackData: FeedbackItem[] = [
+  {
+    id: "f1",
+    from: {
+      id: "u2",
+      name: "Ana Martínez",
+      avatar: "/avatars/avatar-5.png",
+      role: "Directora de Producto"
+    },
+    date: "2025-02-15",
+    rating: 4.5,
+    category: "Colaboración",
+    message: "Gran trabajo en el último sprint. Tu colaboración con el equipo de diseño mejoró significativamente el resultado final del proyecto. Sigue así y considera compartir más tus conocimientos con el resto del equipo.",
+    project: "Rediseño Web Corporativa"
+  },
+  {
+    id: "f2",
+    from: {
+      id: "u3",
+      name: "Carlos Rodríguez",
+      avatar: "/avatars/avatar-3.png", 
+      role: "Líder Técnico"
+    },
+    date: "2025-02-10",
+    rating: 5,
+    category: "Calidad del Código",
+    message: "Excelente trabajo implementando patrones de diseño en el último módulo. Tu código es limpio, bien documentado y fácil de mantener. El equipo se beneficia mucho de tu atención al detalle.",
+  },
+  {
+    id: "f3",
+    from: {
+      id: "u4",
+      name: "Laura Sánchez",
+      avatar: "/avatars/avatar-2.png",
+      role: "Gerente de Proyecto"
+    },
+    date: "2025-02-05",
+    rating: 4,
+    category: "Cumplimiento de Plazos",
+    message: "Has entregado consistentemente dentro de los plazos acordados. Para mejorar, podrías trabajar en comunicar antes cuando preveas posibles retrasos para ajustar mejor la planificación.",
+    project: "App Móvil Gestión Interna"
+  },
+  {
+    id: "f4",
+    from: {
+      id: "u5",
+      name: "Miguel Torres",
+      avatar: "/avatars/avatar-4.png",
+      role: "Desarrollador Senior"
+    },
+    date: "2025-01-28",
+    rating: 4.8,
+    category: "Resolución de Problemas",
+    message: "Tu capacidad para resolver problemas complejos es impresionante. El bug que arreglaste la semana pasada había estado causando problemas durante meses. Gracias por tu dedicación y perseverancia.",
+    project: "Integración APIs de Proveedores"
+  },
+  {
+    id: "f5",
+    from: {
+      id: "u6",
+      name: "Elena Gómez",
+      avatar: "/avatars/avatar-6.png",
+      role: "Diseñadora UX/UI"
+    },
+    date: "2025-01-20",
+    rating: 4.2,
+    category: "Comunicación",
+    message: "Aprecio mucho cómo integras los requisitos de diseño en tus implementaciones. Para mejorar, podrías pedir más aclaraciones al inicio del proceso para evitar revisiones posteriores.",
+    project: "Rediseño Web Corporativa"
+  }
+];
+
+export const feedbackStats = [
+  { 
+    title: "Promedio General", 
+    value: "4.5", 
+    trend: "+0.3",
+    color: "blue" 
+  },
+  { 
+    title: "Calidad de Código", 
+    value: "4.8", 
+    trend: "+0.2",
+    color: "indigo" 
+  },
+  { 
+    title: "Colaboración", 
+    value: "4.6", 
+    trend: "+0.4",
+    color: "cyan" 
+  },
+  { 
+    title: "Cumplimiento", 
+    value: "4.2", 
+    trend: "0.0",
+    color: "emerald" 
+  }
+];
+
+export const feedbackRecipients = [
+  { id: "r1", name: "Carlos Rodríguez", role: "Líder Técnico", avatar: "/avatars/avatar-3.png" },
+  { id: "r2", name: "Ana Martínez", role: "Directora de Producto", avatar: "/avatars/avatar-5.png" },
+  { id: "r3", name: "Laura Sánchez", role: "Gerente de Proyecto", avatar: "/avatars/avatar-2.png" },
+  { id: "r4", name: "Miguel Torres", role: "Desarrollador Senior", avatar: "/avatars/avatar-4.png" },
+];
+
+export const monthlyFeedbackProgress = [
+  { month: "Ene", rating: 4.0 },
+  { month: "Feb", rating: 4.2 },
+  { month: "Mar", rating: 4.1 },
+  { month: "Abr", rating: 4.3 },
+  { month: "May", rating: 4.3 },
+  { month: "Jun", rating: 4.4 },
+  { month: "Jul", rating: 4.5 },
+  { month: "Ago", rating: 4.7 },
+  { month: "Sep", rating: 4.6 },
+  { month: "Oct", rating: 4.5 },
+  { month: "Nov", rating: 4.7 },
+  { month: "Dic", rating: 4.8 },
+];
+
 // Helper functions for the calendar
 export function getMonthDays(month: number, year: number) {
   const date = new Date(year, month, 1);

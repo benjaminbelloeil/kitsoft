@@ -1,550 +1,83 @@
 /* ===================================
    1. IMPORTS & FRAMEWORK
    =================================== */
-@import "tailwindcss";
+   @import "tailwindcss";
 
-/* ===================================
-   2. VARIABLES & THEME SETTINGS
-   =================================== */
-:root {
-  /* Light theme colors */
-  --background: #ffffff;
-  --foreground: #171717;
-  --accenture-purple: #A100FF;
-  --accenture-purple-dark: #8500D4;
-  --accenture-black: #000000;
-  --accenture-gray: #F2F2F2;
+   /* ===================================
+      2. VARIABLES & THEME SETTINGS
+      =================================== */
+   :root {
+     /* Light theme colors */
+     --background: #ffffff;
+     --foreground: #171717;
+     --accenture-purple: #A100FF;
+     --accenture-purple-dark: #8500D4;
+     --accenture-black: #000000;
+     --accenture-gray: #F2F2F2;
+     
+     /* System variables */
+     --color-background: var(--background);
+     --color-foreground: var(--foreground);
+     --font-sans: var(--font-geist-sans);
+     --font-mono: var(--font-geist-mono);
+   }
+   
+   @media (prefers-color-scheme: dark) {
+     :root {
+       --background: #0a0a0a;
+       --foreground: #ededed;
+       --accenture-gray: #1a1a1a;
+     }
+   }
+   
+   /* ===================================
+      3. BASE STYLES
+      =================================== */
+   body {
+     background: var(--background);
+     color: var(--foreground);
+     font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+   }
+   
+   a, button {
+     transition: all 0.3s ease-in-out;
+   }
+   
+   /* Remove default focus styles and blue outlines */
+   *:focus {
+     outline: none !important;
+   }
+   
+   /* Remove default blue selection color */
+   ::selection {
+     background-color: rgba(161, 0, 255, 0.2);
+     color: currentColor;
+   }
+   
+   /* Override browser default focus for specific elements */
+   input:focus, 
+   textarea:focus, 
+   select:focus,
+   button:focus {
+     outline: none !important;
+   }
+   
+   /* Override autofill styles for Chrome */
+   input:-webkit-autofill,
+   input:-webkit-autofill:hover,
+   input:-webkit-autofill:focus,
+   input:-webkit-autofill:active {
+     -webkit-box-shadow: 0 0 0 30px white inset !important;
+     -webkit-text-fill-color: #000000 !important;
+     transition: background-color 5000s ease-in-out 0s;
+     border-color: var(--accenture-purple) !important;
+   }
+
+   /* ===================================
+      4. TYPOGRAPHY
+      =================================== */
+   /* Link styling */
+   a {
+     transition: all 0.3s ease-in-out;
+   }
   
-  /* System variables */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --accenture-gray: #1a1a1a;
-  }
-}
-
-/* ===================================
-   3. BASE STYLES
-   =================================== */
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
-}
-
-a, button {
-  transition: all 0.3s ease-in-out;
-}
-
-/* Remove default focus styles and blue outlines */
-*:focus {
-  outline: none !important;
-}
-
-/* Remove default blue selection color */
-::selection {
-  background-color: rgba(161, 0, 255, 0.2);
-  color: currentColor;
-}
-
-/* Override browser default focus for specific elements */
-input:focus, 
-textarea:focus, 
-select:focus,
-button:focus {
-  outline: none !important;
-  border-color: var(--accenture-purple) !important;
-  box-shadow: 0 0 0 1px var(--accenture-purple) !important;
-}
-
-/* Remove focus styles for navigation tabs */
-.nav-tabs button:focus,
-.nav-tabs a:focus {
-  outline: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-/* Override autofill styles for Chrome */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px white inset !important;
-  -webkit-text-fill-color: #000000 !important;
-  transition: background-color 5000s ease-in-out 0s;
-  border-color: var(--accenture-purple) !important;
-}
-
-/* Add these specific rules to target nav tabs and prevent borders/focus effects */
-
-/* Specifically target navigation elements */
-.nav-container .nav-tabs button,
-.nav-container .nav-tabs a,
-.nav-tab-btn,
-.nav-tab-link {
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.nav-container .nav-tabs button:focus,
-.nav-container .nav-tabs a:focus,
-.nav-tab-btn:focus,
-.nav-tab-link:focus {
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Fix for specific issue with selected tabs */
-.nav-tabs button[aria-expanded="true"],
-.nav-tabs button[aria-expanded="true"]:focus,
-.nav-tabs a[aria-current="page"],
-.nav-tabs a[aria-current="page"]:focus {
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* ===================================
-   4. TYPOGRAPHY
-   =================================== */
-/* Base text color */
-p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
-  color: #000000;
-}
-
-/* Link styling */
-a {
-  transition: all 0.3s ease-in-out;
-}
-
-/* ===================================
-   5. COMPONENT STYLES
-   =================================== */
-/* --- BUTTONS --- */
-/* Common button styling */
-.login-button,
-.sign-in-button,
-button[type="submit"],
-form button {
-  color: #ffffff !important;
-}
-
-.login-button *,
-.sign-in-button *,
-button[type="submit"] *,
-form button * {
-  color: #ffffff !important;
-}
-
-/* Accenture-specific button styles */
-button.bg-accenture,
-button.accenture-gradient,
-button.bg-accenture-dark,
-button.bg-purple-600,
-button.bg-purple-700,
-button.bg-purple-800 {
-  color: #ffffff !important;
-}
-
-button.bg-accenture *,
-button.accenture-gradient *,
-button.bg-accenture-dark *,
-button.bg-purple-600 *,
-button.bg-purple-700 *,
-button.bg-purple-800 * {
-  color: #ffffff !important;
-}
-
-/* --- NAVIGATION --- */
-/* Active navigation styles */
-.nav-active-item {
-  position: relative;
-}
-
-.nav-active-item::before {
-  content: '';
-  position: absolute;
-  left: -10px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 60%;
-  width: 3px;
-  background-color: var(--accenture-purple);
-  border-radius: 0 3px 3px 0;
-}
-
-/* Custom scrollbar for navigation */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(161, 0, 255, 0.15);
-  border-radius: 20px;
-}
-
-/* ===================================
-   6. BRAND & COLOR UTILITIES
-   =================================== */
-.accenture-gradient {
-  background: linear-gradient(135deg, var(--accenture-purple) 0%, #7B00E0 100%);
-}
-
-.text-accenture {
-  color: var(--accenture-purple);
-}
-
-.bg-accenture {
-  background-color: var(--accenture-purple);
-}
-
-.bg-accenture-dark {
-  background-color: var(--accenture-purple-dark);
-}
-
-.border-accenture {
-  border-color: var(--accenture-purple);
-}
-
-.focus-accenture:focus {
-  outline: none !important;
-  border-color: var(--accenture-purple) !important;
-  box-shadow: 0 0 0 2px rgba(161, 0, 255, 0.2) !important;
-}
-
-/* ===================================
-   7. UTILITIES & HELPERS
-   =================================== */
-/* Text color overrides */
-.text-white, 
-.login-card p, 
-.login-card h1, 
-.login-card h2, 
-.login-card h3, 
-.login-card h4, 
-.login-card h5, 
-.login-card h6,
-.login-button,
-.login-button span,
-.login-button-text,
-button[type="submit"],
-button.login-button,
-button.sign-in-button,
-.sign-in-button,
-.sign-in-button span,
-.sign-in-button *,
-form button,
-form button span,
-form button * {
-  color: #ffffff !important;
-}
-
-/* Add these rules for our profile page buttons */
-button.bg-\[#A100FF\],
-button.bg-\[#A100FF\] *,
-button.bg-red-600,
-button.bg-red-600 * {
-  color: #ffffff !important;
-}
-
-button.bg-\[#A100FF\] svg,
-button.bg-red-600 svg {
-  color: #ffffff !important;
-}
-
-button.bg-\[#A100FF\] span,
-button.bg-red-600 span {
-  color: #ffffff !important;
-}
-
-/* Fix for skill level buttons - completely remove any borders, outlines, or focus effects */
-.skill-level-button:focus,
-.skill-level-button:focus-visible,
-button[type="button"]:focus,
-button[type="button"]:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
-}
-
-/* Override button focus styles specifically for experience skill buttons */
-.level-icon-button:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
-}
-
-/* Remove any focus effects from skill level selection buttons */
-button:focus, 
-button:focus-visible {
-  outline: none !important;
-}
-
-/* Special class for admin buttons to completely prevent outlines */
-.admin-action-btn {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-.admin-action-btn:focus,
-.admin-action-btn:focus-visible,
-.admin-action-btn:active {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  ring-width: 0 !important;
-}
-
-/* Specific override for action buttons in admin panels */
-button.p-2.rounded-full {
-  outline: none !important;
-  box-shadow: none !important;
-  ring-width: 0 !important;
-}
-
-button.p-2.rounded-full:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  ring-width: 0 !important;
-}
-
-/* Ensure FiCheck and FiX icons always have correct color */
-button.bg-red-600 svg,
-button.bg-green-600 svg,
-button.text-white svg {
-  color: white !important;
-  stroke: white !important;
-  fill: none !important;
-}
-
-/* Animation utilities */
-.fast-transition {
-  transition: all 0.1s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, opacity, background, color;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-2px);
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    max-height: 500px;
-  }
-}
-
-@keyframes slideLeft {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideRight {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes popIn {
-  0% { 
-    opacity: 0;
-    transform: scale(0.95);
-    transform-origin: top left;
-  }
-  100% { 
-    opacity: 1;
-    transform: scale(1);
-    transform-origin: top left;
-  }
-}
-
-.event-preview-popup {
-  animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.event-preview-popup {
-  animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  transform-origin: top left;
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  overflow: hidden;
-  will-change: transform, opacity, max-height;
-}
-
-.animate-slideLeft {
-  animation: slideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
-}
-
-.animate-slideRight {
-  animation: slideRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
-}
-
-/* Calendar-specific animations */
-@keyframes overlayFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.event-overlay {
-  animation: overlayFadeIn 0.2s ease-out forwards;
-}
-
-/* Event preview overlay - for mobile views */
-@media (max-width: 1023px) {
-  .event-preview-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.95);
-    z-index: 50;
-    overflow-y: auto;
-    padding: 1rem;
-  }
-}
-
-/* Page transition effects */
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
-}
-.page-transition-exit {
-  opacity: 1;
-  transform: translateY(0);
-}
-.page-transition-exit-active {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 300ms, transform 300ms;
-}
-
-/* Override any browser-specific focus styles */
-input:focus, 
-textarea:focus, 
-select:focus {
-  outline: none !important;
-  border-color: var(--accenture-purple) !important;
-  box-shadow: 0 0 0 1px var(--accenture-purple) !important;
-}
-
-button:focus, 
-a:focus {
-  outline: none !important;
-}
-
-/* Navigation-specific focus overrides */
-nav button:focus,
-nav a:focus,
-.nav-tabs button:focus,
-.nav-tabs a:focus,
-nav [role="tab"]:focus {
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-/* ===================================
-   8. MEDIA QUERIES & DARK MODE
-   =================================== */
-@media (prefers-color-scheme: dark) {
-  /* Dark mode text colors */
-  p, h1, h2, h3, h4, h5, h6, span, div, button, input, textarea, select, option {
-    color: #000000 !important;
-  }
-  
-  /* Dark mode exceptions for white text */
-  .text-white, 
-  .login-card p, 
-  .login-card h1, 
-  .login-card h2, 
-  .login-card h3, 
-  .login-card h4, 
-  .login-card h5, 
-  .login-card h6,
-  .login-button,
-  .login-button span,
-  .login-button-text,
-  button[type="submit"],
-  button.login-button,
-  button.sign-in-button,
-  .sign-in-button,
-  .sign-in-button span,
-  .sign-in-button *,
-  form button,
-  form button span,
-  form button * {
-    color: #ffffff !important;
-  }
-}
-
-.fixed.inset-0.z-50.bg-black.bg-opacity-60.flex.items-center.justify-center {
-  backdrop-filter: blur(4px);
-  background-color: rgba(0, 0, 0, 0.4);
-}
-
-/* React Select Custom Styles */
-.select-control-uniform {
-  height: 42px;
-  min-height: 42px;
-}
-
-.select-value-container {
-  height: 42px;
-  padding: 0 6px;
-  display: flex;
-  align-items: center;
-}
-
-.select-indicators {
-  height: 42px;
-}
-
-.select-option {
-  padding: 8px 12px;
-}
-
-.select-option-flag {
-  display: flex;
-  align-items: center;
-}
-
-.country-flag {
-  margin-right: 8px;
-}
