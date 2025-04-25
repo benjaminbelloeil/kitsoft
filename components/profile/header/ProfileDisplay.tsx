@@ -67,7 +67,7 @@ export default function ProfileDisplay({
             <div className="mt-2 flex items-center">
               <FiBriefcase size={14} className="mr-1.5 flex-shrink-0 text-gray-800" />
               {profile.Titulo ? (
-                <span className="text-[#A100FF] font-medium">
+                <span className="titulo-profesional text-gray-800 font-medium">
                   {profile.Titulo}
                 </span>
               ) : (

@@ -74,12 +74,12 @@ const ExperienceList = ({
               
               <div className="flex-grow p-4">
                 <div className="flex flex-col mb-3">
-                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-[#A100FF] transition-colors duration-300">
+                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-gray-900 transition-colors duration-300">
                     {exp.position}
                   </h3>
                   
                   <div className="flex items-center">
-                    <p className="text-[#A100FF] font-medium flex items-center gap-1">
+                    <p className="company-name text-gray-700 font-medium flex items-center gap-1">
                       <RiBuilding4Line size={14} className="text-gray-500" />
                       {exp.company}
                     </p>
