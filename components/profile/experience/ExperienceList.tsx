@@ -91,7 +91,7 @@ const ExperienceList = ({
                       {formatDateDisplay(exp.startDate)}
                       {exp.endDate ? 
                         <span> — {formatDateDisplay(exp.endDate)}</span> : 
-                        <span className="text-[#A100FF80]"> — Presente</span>
+                        <span className="text-gray-500 font-medium"> — Presente</span>
                       }
                     </span>
                   </div>
