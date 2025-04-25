@@ -233,14 +233,15 @@ export default function FeedbackPage() {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  {/* Rating box with fixed height */}
+                  {/* Rating box */}
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
                       <span className="h-2 w-2 bg-amber-400 mr-1.5 rounded-full"></span>
                       Valoración:
                     </label>
-                    <div className="feedback-form-box bg-gradient-to-r from-gray-50 to-white rounded-md border border-gray-200 shadow-inner">
-                      <div className="rating-box-top">
+                    <div className="flex flex-col h-[65px] p-2.5 bg-gradient-to-r from-gray-50 to-white rounded-md border border-gray-200 shadow-inner">
+                      {/* Stars container */}
+                      <div className="flex justify-center items-center flex-grow">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
@@ -256,7 +257,8 @@ export default function FeedbackPage() {
                         ))}
                       </div>
                       
-                      <div className="rating-box-bottom text-xs font-medium text-gray-700">
+                      {/* Rating text */}
+                      <div className="text-center text-xs font-medium text-gray-700 pt-1">
                         {rating > 0 
                           ? `${rating}/5 - ${rating > 3 ? 'Excelente' : rating > 2 ? 'Bueno' : 'Regular'}`
                           : 'Selecciona una valoración'}
@@ -264,22 +266,23 @@ export default function FeedbackPage() {
                     </div>
                   </div>
                   
-                  {/* Category selector with fixed height */}
+                  {/* Category selector - using only Tailwind */}
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
                       <span className="h-2 w-2 bg-emerald-400 mr-1.5 rounded-full"></span>
                       Categoría:
                     </label>
-                    <div className="feedback-form-box bg-gradient-to-r from-gray-50 to-white rounded-md border border-gray-200 shadow-inner">
-                      <div className="category-box-top">
+                    <div className="flex flex-col h-[65px] p-2.5 bg-gradient-to-r from-gray-50 to-white rounded-md border border-gray-200 shadow-inner">
+                      {/* Category buttons container */}
+                      <div className="flex flex-wrap gap-1.5 overflow-y-auto max-h-[30px] content-start">
                         {["Colaboración", "Calidad", "Cumplimiento", "Comunicación"].map((cat) => (
                           <button
                             type="button"
                             key={cat}
-                            className={`category-button px-2.5 py-1 text-xs rounded-full transition-all ${
+                            className={`px-2.5 py-0.5 text-xs rounded-full whitespace-nowrap outline-none focus:outline-none focus:ring-0 transition-all ${
                               category === cat
-                                ? "bg-indigo-100 text-indigo-700 border border-indigo-300 shadow-sm" 
-                                : "bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                                ? "bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm" 
+                                : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
                             }`}
                             onClick={() => setCategory(cat)}
                           >
@@ -288,7 +291,8 @@ export default function FeedbackPage() {
                         ))}
                       </div>
                       
-                      <div className="category-box-bottom text-xs font-medium text-gray-500">
+                      {/* Category text */}
+                      <div className="text-center text-xs font-medium text-gray-500 pt-1 mt-auto">
                         {!category && 'Selecciona una categoría'}
                       </div>
                     </div>
@@ -570,13 +574,13 @@ export default function FeedbackPage() {
                   </div>
                 </div>
                 
-                {/* Category tags with specific category-tag class */}
-                <div className="flex gap-1.5 mb-2.5">
-                  <span className="category-tag inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-50 text-indigo-800 border border-indigo-100 shadow-sm">
+                {/* Category tags with pure Tailwind */}
+                <div className="flex flex-wrap gap-1.5 mb-2.5">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-50 text-indigo-800 border border-indigo-100 shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
                     {item.category}
                   </span>
                   {item.project && (
-                    <span className="category-tag inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-100 shadow-sm">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-100 shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
                       {item.project}
                     </span>
                   )}
