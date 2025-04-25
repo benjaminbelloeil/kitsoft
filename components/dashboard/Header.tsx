@@ -48,7 +48,6 @@ export default function Header({ userData }: { userData: any }) {
           <div className="flex items-center mr-4 transition-all duration-300 hover:scale-105">
             <div className="hidden md:flex items-center">
               <h1 className="text-xl font-bold tracking-tight">
-                <span className="bg-gradient-to-r from-[#A100FF] to-purple-700 bg-clip-text text-transparent">Accenture</span>
               </h1>
             </div>
           </div>
