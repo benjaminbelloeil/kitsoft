@@ -194,7 +194,7 @@ export default function ProfilePage() {
         />
 
         {/* Certificates section */}
-        <CertificatesSection loading={!fullyLoaded} />
+        <CertificatesSection userID={userProfile.ID_Usuario} loading={!fullyLoaded} />
       </div>
 
       <SkillsSection 
