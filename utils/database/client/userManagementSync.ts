@@ -15,6 +15,7 @@ export interface User {
     titulo?: string;
   };
   lastLogin?: string | null;
+  hasLoggedIn?: boolean; // New field to track if the user has ever logged in
 }
 
 export interface UserRole {
@@ -76,12 +77,24 @@ export async function getAllUsersWithRoles(): Promise<User[]> {
         .limit(1)
         .maybeSingle();
       
-      // Check if user has any role entry - this is the only criteria for being registered
-      const registered = roleData !== null;
+      // NEW: Check auth_user_view to see if the user has ever logged in
+      const { data: authData } = await supabase
+        .from('auth_user_view')
+        .select('last_sign_in_at')
+        .eq('id', user.id_usuario)
+        .maybeSingle();
+      
+      // A user is considered registered if they have a role entry AND have logged in at least once
+      const hasLoggedIn = authData?.last_sign_in_at !== null;
+      const hasRoleEntry = roleData !== null;
+      
+      // User is only fully registered if they have both a role and have logged in
+      const registered = hasRoleEntry && hasLoggedIn;
       
       return {
         ...user,
         registered,
+        hasLoggedIn,
         role: roleData?.niveles || null,
         email: emailData?.correo || null,
         lastLogin: loginData?.fecha_acceso || null
