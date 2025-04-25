@@ -23,7 +23,6 @@ interface TasksSectionProps {
 
 export default function TasksSection({
   tasks,
-  getDateColor,
   formatDate,
   getProjectColor,
   getStatusColor,
@@ -52,7 +51,7 @@ export default function TasksSection({
                   <p className="text-sm text-gray-500">
                     {task.projectName}
                   </p>
-                  <p className={`text-sm ${getDateColor(task.dueDate)}`}>
+                  <p className="text-sm text-gray-500">
                     Vencimiento: {formatDate(task.dueDate)}
                   </p>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(task.status)}`}>

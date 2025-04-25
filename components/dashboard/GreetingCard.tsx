@@ -31,14 +31,27 @@ export default function GreetingCard({
   return (
     <div className="max-w-[1920px] mx-auto mb-10 px-4">
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-        {/* Decorative header gradient */}
-        <div className="h-3 bg-gradient-to-r from-indigo-600 via-[#A100FF] to-purple-500"></div>
         
         {/* Content with overlay decorations */}
         <div className="relative px-6 py-8">
-          {/* Decorative circles */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#A100FF10] to-transparent rounded-full -mt-32 -mr-32"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-indigo-100 to-transparent rounded-full -mb-10 -ml-10"></div>
+          {/* Enhanced decorative circles/bubbles with increased visibility */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#A100FF20] to-transparent rounded-full -mt-32 -mr-32"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-indigo-200 to-transparent rounded-full -mb-10 -ml-10"></div>
+          
+          {/* Existing decorative bubbles with increased visibility */}
+          <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-gradient-to-tr from-[#A100FF15] to-transparent rounded-full"></div>
+          <div className="absolute bottom-1/4 right-1/3 w-24 h-24 bg-gradient-to-bl from-indigo-100 to-transparent rounded-full opacity-80"></div>
+          <div className="absolute top-3/4 left-1/4 w-12 h-12 bg-gradient-to-br from-[#A100FF25] to-transparent rounded-full"></div>
+          <div className="absolute top-1/2 left-1/3 w-8 h-8 bg-gradient-to-tl from-blue-100 to-transparent rounded-full"></div>
+          <div className="absolute bottom-1/2 right-[20%] w-10 h-10 bg-gradient-to-br from-purple-100 to-transparent rounded-full"></div>
+          
+          {/* Additional new bubbles with better visibility */}
+          <div className="absolute top-10 left-[15%] w-20 h-20 bg-gradient-to-br from-[#7B68EE30] to-transparent rounded-full"></div>
+          <div className="absolute bottom-16 right-16 w-16 h-16 bg-gradient-to-tl from-[#A100FF20] to-transparent rounded-full"></div>
+          <div className="absolute top-[40%] right-[10%] w-12 h-12 bg-gradient-to-bl from-[#5D3FD325] to-transparent rounded-full"></div>
+          <div className="absolute bottom-[30%] left-[20%] w-14 h-14 bg-gradient-to-tr from-[#9370DB25] to-transparent rounded-full"></div>
+          <div className="absolute top-[70%] right-[25%] w-8 h-8 bg-gradient-to-br from-[#483D8B20] to-transparent rounded-full animate-pulse"></div>
+          <div className="absolute top-[25%] left-[40%] w-10 h-10 bg-gradient-to-tl from-[#6A5ACD20] to-transparent rounded-full"></div>
           
           <div className="relative z-10">
             {/* Animated greeting with better icon styling */}
@@ -51,7 +64,7 @@ export default function GreetingCard({
               </span>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  {greetingState.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-[#A100FF]">{userName}</span>
+                  {greetingState.text}, <span className="text-black">{userName}</span>
                 </h1>
                 <p className="text-gray-500 mt-1">¡Bienvenido de nuevo! Aquí tienes un resumen de tu actividad.</p>
               </div>

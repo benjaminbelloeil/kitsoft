@@ -23,7 +23,6 @@ interface ProjectsSectionProps {
 
 export default function ProjectsSection({
   projects,
-  getDateColor,
   formatDate,
   getProjectColor
 }: ProjectsSectionProps) {
@@ -51,7 +50,7 @@ export default function ProjectsSection({
                   <h3 className="font-medium text-gray-900">{project.name}</h3>
                   <p className="text-sm text-gray-500 mt-1 flex items-center">
                     <Clock className="w-4 h-4 mr-1" />
-                    Fecha límite: <span className={`ml-1 ${getDateColor(project.dueDate)}`}>{formatDate(project.dueDate)}</span>
+                    Fecha límite: <span className="ml-1 text-gray-500">{formatDate(project.dueDate)}</span>
                   </p>
                 </div>
                 <div className="mt-2 sm:mt-0">
