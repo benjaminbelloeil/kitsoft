@@ -57,7 +57,7 @@ export const EmployeeSummary = ({
   return (
     <div className={`bg-white border border-gray-100  rounded-xl shadow-md overflow-hidden mb-6 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       {/* Header with slanted purple background */}
-      <div className="h-20 relative border-b border-gray-300 underline-color-black rounded-t-xl">
+      <div className="h-24 relative border-b border-gray-300 underline-color-black rounded-t-xl">
         {/* SVG for diagonal cut */}
         <svg 
           className="absolute bottom-0 left-0 w-full text-black" 
@@ -67,8 +67,8 @@ export const EmployeeSummary = ({
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center px-6">
           <div className="text-white z-10">
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-black">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
+            <h1 className="text-2xl sm:text-3xl font-bold flex mt-2 items-center gap-3 text-black">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 shadow-md rounded-xl p-1" viewBox="0 0 20 20" fill="--accenture-purple">
                 <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
               </svg>  
