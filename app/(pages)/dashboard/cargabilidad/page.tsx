@@ -229,10 +229,13 @@ const PersonalLoadPage = () => {
           totalUsedHours={totalUsedHours}
           availableHours={availableHours}
           totalHoursPerWeek={employee.totalHoursPerWeek}
-          projects={projects} // Pasamos los proyectos al componente
+          projects={projects.map(project => ({
+            ...project,
+            color: project.color || PROJECT_COLORS[0], // Ensure color is always defined
+          }))} // Pasamos los proyectos al componente
         />
         
-        <div className="bg-white rounded-xl shadow-md mb-6">
+        <div className="bg-white rounded-xl shadow-md mt-10 mb-6 border border-gray-100">
           {/* Actualizamos el componente Tabs para incluir la pestaña de historial */}
           <div className="border-b border-gray-200">
             <nav className="flex">
