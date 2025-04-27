@@ -55,34 +55,32 @@ export const EmployeeSummary = ({
   }, []);
 
   return (
-    <div className={`bg-white rounded-xl shadow-md overflow-hidden mb-6 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`bg-white border border-gray-100  rounded-xl shadow-md overflow-hidden mb-6 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       {/* Header with slanted purple background */}
-      <div className="relative bg-gradient-to-r from-purple-600 to-purple-800 pt-6 pb-10">
+      <div className="h-20 relative border-b border-gray-300 underline-color-black rounded-t-xl">
         {/* SVG for diagonal cut */}
         <svg 
-          className="absolute bottom-0 left-0 w-full text-white" 
+          className="absolute bottom-0 left-0 w-full text-black" 
           viewBox="0 0 1200 120" 
           preserveAspectRatio="none"
-        >
-          
-        </svg>
+        />
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center px-6">
           <div className="text-white z-10">
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-black">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
               </svg>  
               Mi Cargabilidad
             </h1>
-            <p className="mt-1 opacity-90 text-white">{name} - {role}</p>
+            <p className="mt-1 opacity-90 text-black">{name} - {role}</p>
           </div>
 
           {/* CircularProgress positioned to overlap the wave */}
           <div className="absolute right-6 md:right-10 top-16 md:top-4 z-10">
             <div className="bg-white rounded-full p-1 shadow-lg">
-              <CircularProgress value={totalLoad} size="medium" />
+              <CircularProgress value={totalLoad} size="small" />
             </div>
           </div>
         </div>
