@@ -101,11 +101,11 @@ export function CargabilidadCard(props: CargabilidadProps) {
   return (
     <section className="relative bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       {/* decorativos */}
-      <div className="absolute -top-10 -left-10 w-48 h-48 bg-violet-200 rounded-full blur-xl opacity-30 pointer-events-none" />
+      {/* <div className="absolute -top-10 -left-10 w-48 h-48 bg-violet-200 rounded-full blur-xl opacity-30 pointer-events-none" />
       <div className="absolute -bottom-16 right-0 w-60 h-60 bg-violet-300 rounded-full blur-2xl opacity-20 pointer-events-none" />
-
+ */}
       {/* HEADER */}
-      <header className="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 py-4 border-b border-gray-200">
+      <header className="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 py-2 border-b border-gray-200">
         <div className="flex items-center gap-3">
           <span className="w-11 h-11 rounded-full bg-indigo-100 flex items-center justify-center">
             <Activity size={20} className="text-indigo-600" />
@@ -120,6 +120,11 @@ export function CargabilidadCard(props: CargabilidadProps) {
 
         {/* UTIL DONUT + ASIGNACIÓN */}
         <div className={`flex items-center gap-6 mt-4 md:mt-0 `}>
+          <div className="text-center">
+            <p className={`text-sm font-medium ${utilColor(utilization)}`}>
+              {utilLabel(utilization)}
+            </p>
+          </div>
           <div className={`relative w-[80px] h-[80px] ${utilBgColor(utilization)} rounded-full flex items-center justify-center`}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -148,14 +153,9 @@ export function CargabilidadCard(props: CargabilidadProps) {
               {utilization}%
             </span>
           </div>
-          <div className="text-center">
-            <p className={`text-sm font-medium ${utilColor(utilization)}`}>
-              {utilLabel(utilization)}
-            </p>
-          </div>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-indigo-600 text-sm hover:underline"
+            className="absolute top-18 right-100 text-indigo-600 text-sm hover:underline"
           >
             {expanded ? "Contraer" : "Detalles"}
           </button>
@@ -164,7 +164,7 @@ export function CargabilidadCard(props: CargabilidadProps) {
 
       {/* BARRA FINO O AMPLIADA */}
       {expanded ? (
-        <div className="relative z-10 overflow-visible pb-2">
+        <div className="relative z-10 overflow-visible">
             <p className="absolute left-6 -top-5 z-20 text-xs text-gray-500">
               Asignado: {assignedHours}h / {totalHours}h
             </p>
@@ -226,84 +226,7 @@ export function CargabilidadCard(props: CargabilidadProps) {
       )}
 
       {/* DETALLES */}
-      {expanded && (
-        <div className="relative z-10 px-6 pb-6 space-y-4">
-          {/* Asignación total */}
-
-          {/* Alerta si está sobrecargado */}
-          {utilization > 90 && (
-            <div className="bg-yellow-50 border border-yellow-100 text-yellow-800 text-sm rounded-lg p-3 flex gap-2 items-center">
-              <AlertTriangle size={16} className="shrink-0" />
-              Cargabilidad alta. Considere redistribuir las horas.
-            </div>
-          )}
-
-          {/* Resumen grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Semana */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar size={16} className="text-gray-500" /> Distribución semanal
-              </div>
-              <div className="h-24 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={dailyHours}
-                    margin={{ top: 2, right: 0, left: 0, bottom: 0 }}
-                  >
-                    <Bar
-                      dataKey="hours"
-                      fill="#6366F1"
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <XAxis dataKey="day" hide />
-                    <YAxis hide domain={[0, totalHours / 5]} />
-                    <ReTooltip cursor={{ fill: "transparent" }} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <ul className="flex justify-between text-xs text-gray-500 px-1">
-                {dailyHours.map((d) => (
-                  <li key={d.day}>{d.day}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Proyectos */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Users size={16} className="text-gray-500" /> Proyectos ({projects.length})
-              </div>
-              <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
-                {projects.map((p) => {
-                  const h = projectHours(p);
-                  const raw = isRawColor(p.color);
-                  return (
-                    <div key={p.name} className="flex justify-between text-sm">
-                      <div className="flex items-center gap-2 truncate">
-                        {raw ? (
-                          <span
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: p.color }}
-                          />
-                        ) : (
-                          <span className={`w-2 h-2 rounded-full ${p.color}`} />
-                        )}
-                        <span className="truncate max-w-[120px]">{p.name}</span>
-                      </div>
-                      <span className="font-medium">{h}h</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between text-xs text-gray-500 border-t pt-1">
-                <span>Libre</span>
-                <span>{available}h</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </section>
   );
 }

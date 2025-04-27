@@ -214,7 +214,7 @@ const PersonalLoadPage = () => {
   const AvailableHoursRatio = availableHours / employee.totalHoursPerWeek;
 
   return (
-    <main className="min-h-screen p-4 sm:p-6 md:p-10">
+    <main className="min-h-screen sm:p-5 md:p-4">
       <div className="max-w-6xl mx-auto">
         {/* Sistema de Alarma de cargabildad */}
 
@@ -235,15 +235,15 @@ const PersonalLoadPage = () => {
           }))} // Pasamos los proyectos al componente
         />
         
-        <div className="bg-white rounded-xl shadow-md mt-10 mb-6 border border-gray-100">
+        <div className="bg-white rounded-xl mt-3 mb-6 ">
           {/* Actualizamos el componente Tabs para incluir la pestaña de historial */}
           <div className="border-b border-gray-200">
-            <nav className="flex">
+            <nav className="flex gap-4 px-6 ">
               <button
                 onClick={() => setActiveTab('dashboard')}
                 className={`px-4 py-3 font-medium text-sm ${
                   activeTab === 'dashboard'
-                    ? 'border-b-2 border-indigo-600 text-indigo-600'
+                    ? 'border-b-2 border-pruple-600 text-purple-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -253,7 +253,7 @@ const PersonalLoadPage = () => {
                 onClick={() => setActiveTab('history')}
                 className={`px-4 py-3 font-medium text-sm ${
                   activeTab === 'history'
-                    ? 'border-b-2 border-indigo-600 text-indigo-600'
+                    ? 'border-b-2 border-pruple-600 text-purple-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -262,7 +262,7 @@ const PersonalLoadPage = () => {
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="mt-5 p-6 shadow-md border border-gray-200 rounded-lg">
             {activeTab === 'dashboard' ? (
               <DashboardTab
                 projects={projects}
