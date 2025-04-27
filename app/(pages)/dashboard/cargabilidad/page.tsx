@@ -19,7 +19,7 @@ export const PROJECT_COLORS = [
   'bg-red-500',
 ];
 
-interface Project {
+export interface Project {
   name: string;
   load: number;
   deadline?: string;
@@ -39,8 +39,8 @@ interface HistoryEntry {
 
 const PersonalLoadPage = () => {
   const [projects, setProjects] = useState<Project[]>([
-    { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hoursPerWeek: 20, color: PROJECT_COLORS[0] },
-    { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 12, color: PROJECT_COLORS[1] },
+    { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hoursPerWeek: 10, color: PROJECT_COLORS[0] },
+    { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 10, color: PROJECT_COLORS[1] },
   ]);
 
   // Añadimos 'history' a las opciones de pestañas
