@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useState } from 'react';
@@ -66,22 +68,18 @@ export const HistoryTab = ({ historyData, maxWeeklyHours }: Props) => {
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Timeframe selector */}
-      <div className="lg:col-span-3 flex justify-end">
-        <div className="inline-flex rounded-md shadow-sm">
+      {/* Enhanced timeframe selector */}
+      <div className="lg:col-span-3 flex justify-end mb-2">
+        <div className="p-1 bg-gray-50 inline-flex rounded-lg shadow-sm border border-gray-100">
           {(['1m', '3m', '6m', '1y'] as const).map((option) => (
             <button
               key={option}
               onClick={() => setTimeframe(option)}
-              className={`px-4 py-2 text-sm font-medium ${
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
                 timeframe === option
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              } ${
-                option === '1m' ? 'rounded-l-md' : ''
-              } ${
-                option === '1y' ? 'rounded-r-md' : ''
-              } border border-gray-300`}
+                  ? 'bg-white text-[#A100FF] shadow-sm border border-gray-200'
+                  : 'bg-transparent text-gray-600 hover:bg-white/50 hover:text-[#A100FF]'
+              }`}
             >
               {option === '1m' ? '1 Mes' : option === '3m' ? '3 Meses' : option === '6m' ? '6 Meses' : '1 Año'}
             </button>
@@ -89,11 +87,13 @@ export const HistoryTab = ({ historyData, maxWeeklyHours }: Props) => {
         </div>
       </div>
       
-      {/* Main historical chart */}
-      <div className="lg:col-span-3 bg-white rounded-xl border border-gray-100 p-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <FiTrendingUp className="text-indigo-600" />
-          Historial de Carga Laboral
+      {/* Main historical chart - enhanced */}
+      <div className="lg:col-span-3 bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
+        <h3 className="font-medium mb-4 inline-flex items-center gap-2 text-gray-800 pb-1 border-b border-gray-100 w-full">
+          <div className="w-6 h-6 rounded-md bg-[#10B98108] flex items-center justify-center">
+            <FiTrendingUp className="text-[#10B981]" />
+          </div>
+          Evolución de Carga Laboral
         </h3>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
@@ -101,77 +101,96 @@ export const HistoryTab = ({ historyData, maxWeeklyHours }: Props) => {
               data={filteredData}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+              <XAxis dataKey="week" tick={{fontSize: 12}} stroke="#9CA3AF" />
+              <YAxis tick={{fontSize: 12}} stroke="#9CA3AF" />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '0.375rem',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                  border: '1px solid #E5E7EB'
+                }}
+              />
+              <Legend 
+                wrapperStyle={{
+                  paddingTop: 20
+                }}
+              />
               <Line 
                 type="monotone" 
                 dataKey="totalHours" 
                 name="Horas Totales" 
-                stroke="#4F46E5" 
+                stroke="#A100FF" 
                 strokeWidth={2}
-                activeDot={{ r: 8 }}
+                dot={{ stroke: '#A100FF', strokeWidth: 2, r: 3, fill: 'white' }}
+                activeDot={{ r: 6, stroke: '#A100FF', strokeWidth: 1, fill: '#A100FF' }}
               />
               <Line 
                 type="monotone" 
-                dataKey={entry => maxWeeklyHours - entry.availableHours} 
+                dataKey={entry => maxWeeklyHours} 
                 name="Capacidad Máxima" 
                 stroke="#D1D5DB" 
                 strokeDasharray="5 5"
+                dot={false}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
       
-      {/* Statistics cards */}
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <FiClock className="text-indigo-600" />
+      {/* Statistics cards - enhanced */}
+      <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
+        <h3 className="font-medium mb-4 inline-flex items-center gap-2 text-gray-800 pb-1 border-b border-gray-100 w-full">
+          <div className="w-6 h-6 rounded-md bg-[#A100FF08] flex items-center justify-center">
+            <FiClock className="text-[#A100FF]" />
+          </div>
           Promedio Semanal
         </h3>
         <div className="flex flex-col items-center">
-          <div className="text-4xl font-bold text-indigo-600">
+          <div className="text-4xl font-bold text-[#A100FF]">
             {averageWeeklyHours.toFixed(1)}h
           </div>
           <div className="text-gray-500 mt-2">
             {averageUtilization.toFixed(1)}% de capacidad
           </div>
-          <div className="w-full mt-4 bg-gray-200 rounded-full h-2.5">
+          <div className="w-full mt-4 bg-gray-200 rounded-full h-2.5 overflow-hidden">
             <div 
-              className="bg-indigo-600 h-2.5 rounded-full" 
+              className="bg-[#A100FF] h-2.5 rounded-full transition-all duration-500" 
               style={{ width: `${Math.min(100, averageUtilization)}%` }}
             ></div>
           </div>
         </div>
       </div>
       
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <FiActivity className="text-indigo-600" />
+      <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
+        <h3 className="font-medium mb-4 inline-flex items-center gap-2 text-gray-800 pb-1 border-b border-gray-100 w-full">
+          <div className="w-6 h-6 rounded-md bg-[#F43F5E08] flex items-center justify-center">
+            <FiActivity className="text-[#F43F5E]" />
+          </div>
           Pico de Carga
         </h3>
         <div className="flex flex-col items-center">
-          <div className="text-4xl font-bold text-rose-600">
+          <div className="text-4xl font-bold text-[#F43F5E]">
             {peakUtilization.toFixed(1)}%
           </div>
           <div className="text-gray-500 mt-2">
             Semana del {peakWeek}
           </div>
-          <div className="w-full mt-4 bg-gray-200 rounded-full h-2.5">
+          <div className="w-full mt-4 bg-gray-200 rounded-full h-2.5 overflow-hidden">
             <div 
-              className={`h-2.5 rounded-full ${peakUtilization > 100 ? 'bg-rose-600' : 'bg-amber-500'}`}
+              className={`h-2.5 rounded-full transition-all duration-500 ${peakUtilization > 100 ? 'bg-[#F43F5E]' : 'bg-amber-500'}`}
               style={{ width: `${Math.min(100, peakUtilization)}%` }}
             ></div>
           </div>
         </div>
       </div>
       
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <FiCalendar className="text-indigo-600" />
+      <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
+        <h3 className="font-medium mb-4 inline-flex items-center gap-2 text-gray-800 pb-1 border-b border-gray-100 w-full">
+          <div className="w-6 h-6 rounded-md bg-[#F97316] flex items-center justify-center bg-opacity-10">
+            <FiCalendar className="text-[#F97316]" />
+          </div>
           Semanas Sobrecargadas
         </h3>
         <div className="flex flex-col items-center">
@@ -181,19 +200,21 @@ export const HistoryTab = ({ historyData, maxWeeklyHours }: Props) => {
           <div className="text-gray-500 mt-2">
             de {filteredData.length} semanas
           </div>
-          <div className="w-full mt-4 bg-gray-200 rounded-full h-2.5">
+          <div className="w-full mt-4 bg-gray-200 rounded-full h-2.5 overflow-hidden">
             <div 
-              className="bg-amber-500 h-2.5 rounded-full" 
+              className="bg-amber-500 h-2.5 rounded-full transition-all duration-500" 
               style={{ width: `${(overloadedWeeks / filteredData.length) * 100}%` }}
             ></div>
           </div>
         </div>
       </div>
       
-      {/* Project trends */}
-      <div className="lg:col-span-3 bg-white rounded-xl border border-gray-100 p-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <FiTrendingUp className="text-indigo-600" />
+      {/* Project trends - enhanced */}
+      <div className="lg:col-span-3 bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
+        <h3 className="font-medium mb-4 inline-flex items-center gap-2 text-gray-800 pb-1 border-b border-gray-100 w-full">
+          <div className="w-6 h-6 rounded-md bg-[#6366F108] flex items-center justify-center">
+            <FiTrendingUp className="text-[#6366F1]" />
+          </div>
           Tendencias por Proyecto
         </h3>
         <div className="h-72">
@@ -202,18 +223,32 @@ export const HistoryTab = ({ historyData, maxWeeklyHours }: Props) => {
               data={projectTrends}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+              <XAxis dataKey="week" tick={{fontSize: 12}} stroke="#9CA3AF" />
+              <YAxis tick={{fontSize: 12}} stroke="#9CA3AF" />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '0.375rem',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                  border: '1px solid #E5E7EB'
+                }}
+              />
+              <Legend 
+                wrapperStyle={{
+                  paddingTop: 20
+                }}
+              />
               {projectNames.map((name, index) => (
                 <Line
                   key={name}
                   type="monotone"
                   dataKey={name}
+                  name={name}
                   stroke={colorPalette[index % colorPalette.length]}
                   strokeWidth={2}
+                  dot={{ stroke: colorPalette[index % colorPalette.length], strokeWidth: 2, r: 3, fill: 'white' }}
+                  activeDot={{ r: 6, stroke: colorPalette[index % colorPalette.length], strokeWidth: 1, fill: colorPalette[index % colorPalette.length] }}
                 />
               ))}
             </LineChart>

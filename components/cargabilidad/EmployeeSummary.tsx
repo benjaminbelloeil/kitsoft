@@ -1,17 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-} from 'recharts';
-import { Calendar, Users, Activity, AlertTriangle } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { Activity } from 'lucide-react';
 
 // -----------------------------------------------------------------------------
 // TYPES
@@ -82,7 +73,6 @@ export function CargabilidadCard(props: CargabilidadProps) {
     position,
     totalHours,
     assignedHours,
-    dailyHours,
     projects,
   } = ({ ...dummyProps, ...props } as Required<CargabilidadProps>);
 
@@ -91,20 +81,20 @@ export function CargabilidadCard(props: CargabilidadProps) {
   const available = Math.max(totalHours - assignedHours, 0);
 
   return (
-    <section className="relative bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+    <section className="relative bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
       {/* HEADER (toggle expand/collapse) */}
       <header
         onClick={() => setExpanded(!expanded)}
         className={`relative z-10 flex items-center justify-between px-6 ${
           expanded ? 'py-6' : 'py-4'
-        } border-b border-gray-100 bg-violet-50/60 cursor-pointer transition-all duration-300`}
+        } border-b border-gray-100 bg-white cursor-pointer transition-all duration-300`}
       >
         <div className="flex items-center gap-3">
-          <span className="w-11 h-11 rounded-full bg-indigo-100 flex items-center justify-center">
-            <Activity size={20} className="text-indigo-600" />
+          <span className="w-11 h-11 rounded-lg bg-[#A100FF10] flex items-center justify-center">
+            <Activity size={20} className="text-[#A100FF]" />
           </span>
           <div>
-            <h1 className="text-xl font-bold text-violet-800">Mi Cargabilidad</h1>
+            <h1 className="text-xl font-medium text-black">Mi Cargabilidad</h1>
             <p className="text-sm text-gray-600">
               {name} — {position}
             </p>
@@ -115,7 +105,7 @@ export function CargabilidadCard(props: CargabilidadProps) {
             {utilLabel(utilization)}
           </p>
           <div
-            className={`relative w-20 h-20 ${utilBgColor(utilization)} rounded-full flex items-center justify-center`}
+            className={`relative w-20 h-20 ${utilBgColor(utilization)} rounded-full flex items-center justify-center shadow-sm border border-gray-100`}
           >
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -143,11 +133,11 @@ export function CargabilidadCard(props: CargabilidadProps) {
 
       {/* EXPANDED BAR */}
       {expanded ? (
-        <div className="relative z-10 px-6 py-4 overflow-visible">
+        <div className="relative z-10 px-6 py-4 overflow-visible bg-gray-50">
           <p className="absolute left-6 -top-5 text-xs text-gray-500">
             Asignado: {assignedHours}h / {totalHours}h
           </p>
-          <div className="h-6 w-full flex overflow-hidden rounded-lg transition-all duration-300">
+          <div className="h-6 w-full flex overflow-hidden rounded-lg shadow-sm transition-all duration-300">
             {projects.map((p) => {
               const h = projectHours(p);
               const w = `${pct(h, totalHours)}%`;
@@ -157,8 +147,8 @@ export function CargabilidadCard(props: CargabilidadProps) {
                   style={{ width: w, backgroundColor: p.color }}
                   className="flex items-center justify-center"
                 >
-                  <span className="text-[10px] font-semibold text-white">
-                    {pct(h, totalHours).toFixed(0)}%
+                  <span className="text-[10px] font-semibold text-white truncate">
+                    {p.name} ({pct(h, totalHours).toFixed(0)}%)
                   </span>
                 </div>
               ) : (
@@ -167,8 +157,8 @@ export function CargabilidadCard(props: CargabilidadProps) {
                   className={`${p.color} flex items-center justify-center`}
                   style={{ width: w }}
                 >
-                  <span className="text-[10px] font-semibold text-white">
-                    {pct(h, totalHours).toFixed(0)}%
+                  <span className="text-[10px] font-semibold text-white truncate">
+                    {p.name} ({pct(h, totalHours).toFixed(0)}%)
                   </span>
                 </div>
               );
@@ -179,7 +169,7 @@ export function CargabilidadCard(props: CargabilidadProps) {
                 className="flex items-center justify-center"
               >
                 <span className="text-[10px] font-semibold text-gray-700">
-                  {pct(available, totalHours).toFixed(0)}%
+                  Disponible ({pct(available, totalHours).toFixed(0)}%)
                 </span>
               </div>
             )}
@@ -187,7 +177,7 @@ export function CargabilidadCard(props: CargabilidadProps) {
         </div>
       ) : (
         /* COLLAPSED FOOTER */
-        <footer className="relative z-10 flex h-1 w-full transition-all duration-300">
+        <footer className="relative z-10 flex h-2 w-full transition-all duration-300">
           {projects.map((p) => {
             const h = projectHours(p);
             const w = `${pct(h, totalHours)}%`;

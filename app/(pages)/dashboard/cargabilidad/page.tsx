@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useState } from 'react';
-import { ProjectCard } from '@/components/cargabilidad/ProjectCard';
+import { useState, useEffect } from 'react';
 import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
-import { HistoryTab } from '@/components/cargabilidad/RecordTab'; // Importamos el nuevo componente
-import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
+import { HistoryTab } from '@/components/cargabilidad/RecordTab';
 import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
-import { Tabs } from '@/components/cargabilidad/Tabs';
+import { FiBarChart2 } from 'react-icons/fi';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import CargabilidadSkeleton from '@/components/cargabilidad/CargabilidadSkeleton';
 
 export const PROJECT_COLORS = [
   'bg-purple-500',
@@ -213,56 +214,205 @@ const PersonalLoadPage = () => {
 
   const AvailableHoursRatio = availableHours / employee.totalHoursPerWeek;
 
-  return (
-    <main className="min-h-screen sm:p-5 md:p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Sistema de Alarma de cargabildad */}
+  const utilLabel = (u: number) =>
+    u >= 90 ? 'Sobrecargado' : u >= 70 ? 'Nivel óptimo' : 'Baja ocupación';
+  
+  const utilColor = (u: number) =>
+    u >= 90 ? 'text-rose-600' : u >= 70 ? 'text-emerald-600' : 'text-amber-600';
+  
+  const utilBgColor = (u: number) =>
+    u >= 90
+      ? 'bg-rose-200/30 border border-rose-200/50'
+      : u >= 70
+      ? 'bg-emerald-200/30 border border-emerald-200/50'
+      : 'bg-amber-200/30 border border-amber-200/50';
+  
+  const utilBarColor = (u: number) =>
+    u >= 90 ? '#F43F5E' : u >= 70 ? '#10B981' : '#F59E0B';
 
-        {/* <LoadAlert totalLoad={totalLoad} /> */}
+  const [loading, setLoading] = useState(true);
+
+  // Use effect to simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // If loading, show skeleton
+  if (loading) {
+    return <CargabilidadSkeleton />;
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50 py-6">
+      {/* Header card with purple icon */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row gap-6 justify-between items-center">
+              <div className="flex items-center">
+                <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
+                  <FiBarChart2 size={24} className="text-[#A100FF]" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-black">
+                    Mi Cargabilidad
+                  </h1>
+                  <p className="text-gray-600 mt-2 max-w-2xl">
+                    Visualiza y gestiona tu cargabilidad por proyectos. Equilibra tus horas de trabajo para un rendimiento óptimo.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-6">
+                <p className={`text-sm font-medium ${utilColor(totalLoad)}`}>
+                  {utilLabel(totalLoad)}
+                </p>
+                <div
+                  className={`relative w-20 h-20 ${utilBgColor(totalLoad)} rounded-full flex items-center justify-center shadow-sm border border-gray-100`}
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[{ value: totalLoad }, { value: 100 - totalLoad }]}
+                        dataKey="value"
+                        startAngle={90}
+                        endAngle={-270}
+                        innerRadius={22}
+                        outerRadius={30}
+                        stroke="transparent"
+                        cornerRadius={4}
+                      >
+                        <Cell fill={utilBarColor(totalLoad)} />
+                        <Cell fill="#E5E7EB" />
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <span className="absolute inset-0 flex items-center justify-center text-md font-bold">
+                    {Math.round(totalLoad)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Show alert only if overloaded */}
+        {AvailableHoursRatio < 0 && <LoadAlert totalLoad={totalLoad} />}
         
-        {/* Tarjetas de Proyectos */}
-        {/* Resumen de Cargabilidad de Empleado */}
-        <EmployeeSummary
-          name={employee.name}
-          role={employee.role}
-          totalLoad={totalLoad}
-          totalUsedHours={totalUsedHours}
-          availableHours={availableHours}
-          totalHoursPerWeek={employee.totalHoursPerWeek}
-          projects={projects.map(project => ({
-            ...project,
-            color: project.color || PROJECT_COLORS[0], // Ensure color is always defined
-          }))} // Pasamos los proyectos al componente
-        />
+        {/* Redesigned weekly stats summary card - no header, more visual approach */}
+        <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300">
+          <div className="p-4">
+            {/* Progress bar visualization of weekly hours */}
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1">
+                  <div className="h-2.5 w-2.5 rounded-full bg-[#A100FF]"></div>
+                  <span className="text-sm font-medium text-gray-700">Distribución Semanal</span>
+                </div>
+                <span className="text-sm text-gray-500">{totalUsedHours}h / {employee.totalHoursPerWeek}h</span>
+              </div>
+              
+              <div className="h-8 w-full flex overflow-hidden rounded-lg shadow-sm">
+                {projects.map((project) => {
+                  const w = `${(project.hoursPerWeek / employee.totalHoursPerWeek) * 100}%`;
+                  return (
+                    <div
+                      key={project.name}
+                      className={`${project.color} flex items-center justify-center relative group`}
+                      style={{ width: w }}
+                    >
+                      <span className="text-[10px] font-semibold text-white truncate px-2">
+                        {project.hoursPerWeek}h
+                      </span>
+                      <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                        {project.name}: {project.hoursPerWeek}h
+                      </div>
+                    </div>
+                  );
+                })}
+                {availableHours > 0 && (
+                  <div
+                    style={{ width: `${(availableHours / employee.totalHoursPerWeek) * 100}%` }}
+                    className="bg-gray-200 flex items-center justify-center relative group"
+                  >
+                    <span className="text-[10px] font-semibold text-gray-700 truncate px-2">
+                      {availableHours}h
+                    </span>
+                    <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                      Disponible: {availableHours}h
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Status pills row */}
+            <div className="flex flex-wrap items-center mt-4 gap-2">
+              <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs ${
+                availableHours < 0 
+                  ? 'bg-red-50 text-red-700 border border-red-100' 
+                  : availableHours < 8 
+                    ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                    : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+              }`}>
+                <span className="font-medium mr-1">
+                  {availableHours < 0 
+                    ? `Sobrecarga: ${Math.abs(availableHours)}h` 
+                    : `Disponible: ${availableHours}h`}
+                </span>
+              </div>
+              
+              {projects.map((project) => (
+                <div key={project.name} className="inline-flex items-center gap-1.5 bg-white rounded-full px-2.5 py-1 border border-gray-100 shadow-sm">
+                  <div className={`w-2 h-2 rounded-full ${project.color}`}></div>
+                  <span className="text-xs font-medium text-gray-700">{project.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
         
-        <div className="bg-white rounded-xl mt-3 mb-6 ">
-          {/* Actualizamos el componente Tabs para incluir la pestaña de historial */}
-          <div className="border-b border-gray-200">
-            <nav className="flex gap-4 px-6 ">
-              <button
-                onClick={() => setActiveTab('dashboard')}
-                className={`px-4 py-3 font-medium text-sm ${
-                  activeTab === 'dashboard'
-                    ? 'border-b-2 border-pruple-600 text-purple-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={() => setActiveTab('history')}
-                className={`px-4 py-3 font-medium text-sm ${
-                  activeTab === 'history'
-                    ? 'border-b-2 border-pruple-600 text-purple-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Historial
-              </button>
-            </nav>
+        {/* Improved tabs with more visual appeal - removed surrounding borders */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+          {/* Updated tabs with cleaner styling - no surrounding borders */}
+          <div className="flex px-4 pt-4 gap-2 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
+                ${activeTab === 'dashboard'
+                  ? 'text-[#A100FF] bg-white'
+                  : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
+                }
+              `}
+            >
+              <span>Dashboard</span>
+              {activeTab === 'dashboard' && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"></span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
+                ${activeTab === 'history'
+                  ? 'text-[#A100FF] bg-white'
+                  : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
+                }
+              `}
+            >
+              <span>Historial</span>
+              {activeTab === 'history' && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"></span>
+              )}
+            </button>
           </div>
 
-          <div className="mt-5 p-6 shadow-md border border-gray-200 rounded-lg">
+          <div className="p-6">
             {activeTab === 'dashboard' ? (
               <DashboardTab
                 projects={projects}
@@ -271,11 +421,11 @@ const PersonalLoadPage = () => {
                 totalHoursPerWeek={employee.totalHoursPerWeek}
               />
             ) : activeTab === 'history' ? (
-              <HistoryTab  
+              <HistoryTab
                 historyData={historyData}
                 maxWeeklyHours={employee.totalHoursPerWeek}
               />
-            ) : null} 
+            ) : null}
           </div>
         </div>
       </div>
