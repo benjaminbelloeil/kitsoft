@@ -30,10 +30,10 @@ export default function ProjectsSection({
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="p-6 border-b border-gray-100 flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900 flex items-center">
-          <Briefcase className="w-5 h-5 mr-2 text-indigo-600" />
+          <Briefcase className="w-5 h-5 mr-2 text-[#A100FF]" />
           Mis Proyectos
         </h2>
-        <Link href="/dashboard/proyectos" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center">
+        <Link href="/dashboard/proyectos" className="text-sm font-medium text-[#A100FF] hover:text-[#8A00FF] flex items-center">
           Ver todos <ChevronRight className="w-4 h-4 ml-1" />
         </Link>
       </div>

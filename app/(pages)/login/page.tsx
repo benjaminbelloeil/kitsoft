@@ -29,6 +29,11 @@ export default function LoginPage() {
     }
   };
 
+  // Define Accenture gradient style
+  const accentureGradientStyle = {
+    background: "linear-gradient(135deg, #A100FF 0%, #7F00FF 100%)",
+  };
+
   return (
     <div className="h-screen flex bg-white overflow-hidden">
       {/* Left side - Login Form */}
@@ -44,7 +49,10 @@ export default function LoginPage() {
       </div>
       
       {/* Right side - Purple card with updated content for project management */}
-      <div className="hidden md:block w-1/2 h-full accenture-gradient">
+      <div 
+        className="hidden md:block w-1/2 h-full" 
+        style={accentureGradientStyle}
+      >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

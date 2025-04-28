@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -20,7 +19,8 @@ export default function FeedbackPage() {
   const [selectedRecipient, setSelectedRecipient] = useState("");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [category, setCategory] = useState("");
+  // Change category from string to string array to support multiple selections
+  const [categories, setCategories] = useState<string[]>([]);
   const [message, setMessage] = useState("");
 
   // Calculate rating average from data
@@ -32,18 +32,27 @@ export default function FeedbackPage() {
     console.log({
       recipient: selectedRecipient,
       rating,
-      category,
+      categories, // Updated to use multiple categories
       message
     });
     
     // Reset form
     setSelectedRecipient("");
     setRating(0);
-    setCategory("");
+    setCategories([]); // Clear categories array
     setMessage("");
     
     // Show success notification (you could add a toast component here)
     alert("Retroalimentación enviada con éxito!");
+  };
+
+  // Toggle category selection - new function
+  const toggleCategory = (category: string) => {
+    if (categories.includes(category)) {
+      setCategories(categories.filter(cat => cat !== category));
+    } else {
+      setCategories([...categories, category]);
+    }
   };
 
   // Convert feedback stats to expected format with icons
@@ -149,22 +158,56 @@ export default function FeedbackPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-6">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page title with decorative elements */}
-        <div className="flex items-center mb-6">
-          <div className="h-6 w-1.5 bg-indigo-600 rounded-full mr-3"></div>
-          <h1 className="text-2xl font-bold text-gray-900">Retroalimentación</h1>
+      {/* New header card spanning the full width */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#A100FF10] to-transparent rounded-full -mt-32 -mr-32"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-[#A100FF10] to-transparent rounded-full -mb-16 -ml-16"></div>
+          
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row gap-6 justify-between">
+              <div>
+                <h1 className="text-2xl font-bold flex items-center">
+                  <div className="h-7 w-7 bg-[#A100FF] rounded-full flex items-center justify-center mr-3">
+                    <Star className="h-4 w-4 text-white" />
+                  </div>
+                  Plataforma de Retroalimentación
+                </h1>
+                <p className="text-gray-600 mt-2 max-w-2xl">
+                  Este espacio permite compartir valoraciones con tu equipo para promover el crecimiento profesional. El feedback constructivo es clave para mejorar nuestro trabajo conjunto en Accenture.
+                </p>
+              </div>
+              
+              <div className="flex flex-col items-end">
+                <div className="bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+                  <p className="text-sm text-gray-600">Último periodo evaluado</p>
+                  <p className="text-lg font-bold text-gray-900">Q1 2023</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-[#A100FF20] text-[#A100FF] font-medium">
+                      Promedio: {avgRating}
+                    </span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700 font-medium">
+                      Participación: 92%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        {/* Stats row with improved styling */}
+      </div>
+      
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Stats row with more consistent styling */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {formattedStats.map((stat, index) => (
             <div 
               key={index} 
-              className="bg-white rounded-lg p-3.5 shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all"
+              className="bg-white rounded-lg p-3.5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all"
             >
               <div className="flex justify-between items-center mb-1.5">
-                <div className={`${stat.bgGradient} p-2 rounded-md shadow-sm`}>
+                <div className="bg-[#A100FF] p-2 rounded-md shadow-sm">
                   {stat.icon}
                 </div>
                 <div className="flex items-center">
@@ -193,10 +236,10 @@ export default function FeedbackPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4">
           {/* Left column: Send feedback form */}
           <div className="lg:col-span-7">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-50 to-transparent p-3.5 border-b border-gray-100">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 h-full overflow-hidden">
+              <div className="p-3.5 border-b border-gray-100">
                 <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                  <span className="h-5 w-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                  <span className="h-5 w-5 bg-[#A100FF] rounded-full flex items-center justify-center">
                     <Send className="h-3 w-3 text-white" />
                   </span>
                   Enviar retroalimentación
@@ -204,10 +247,10 @@ export default function FeedbackPage() {
               </div>
               
               <form onSubmit={handleSubmitFeedback} className="p-4 flex flex-col">
-                {/* Improved recipient selector with active states */}
+                {/* Recipient selector with better styling */}
                 <div className="mb-4">
                   <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
-                    <span className="h-2 w-2 bg-indigo-400 mr-1.5 rounded-full"></span>
+                    <span className="h-2 w-2 bg-[#A100FF] mr-1.5 rounded-full"></span>
                     Seleccionar destinatario:
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -217,12 +260,12 @@ export default function FeedbackPage() {
                         onClick={() => setSelectedRecipient(recipient.id)}
                         className={`flex items-center p-2 rounded-md border ${
                           selectedRecipient === recipient.id
-                            ? "border-indigo-500 bg-indigo-50 ring-1 ring-indigo-300" 
-                            : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+                            ? "border-[#A100FF] bg-[#A100FF08]" 
+                            : "border-gray-200 hover:border-[#A100FF80] hover:bg-[#A100FF05]"
                         } cursor-pointer transition-all`}
                       >
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden border border-gray-200">
-                          <User className="h-4 w-4 text-indigo-600" />
+                        <div className="h-8 w-8 rounded-full bg-[#A100FF10] flex items-center justify-center overflow-hidden border border-gray-200">
+                          <User className="h-4 w-4 text-[#A100FF]" />
                         </div>
                         <div className="ml-2 overflow-hidden">
                           <p className="text-xs font-medium text-gray-800 truncate">{recipient.name}</p>
@@ -234,13 +277,13 @@ export default function FeedbackPage() {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  {/* Rating box */}
+                  {/* Rating box with consistent purple */}
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
-                      <span className="h-2 w-2 bg-amber-400 mr-1.5 rounded-full"></span>
+                      <span className="h-2 w-2 bg-[#A100FF] mr-1.5 rounded-full"></span>
                       Valoración:
                     </label>
-                    <div className="flex flex-col h-[65px] p-2.5 bg-gradient-to-r from-gray-50 to-white rounded-md border border-gray-200 shadow-inner">
+                    <div className="flex flex-col h-[65px] p-2.5 bg-[#A100FF05] rounded-md border border-gray-200 shadow-inner">
                       {/* Stars container */}
                       <div className="flex justify-center items-center flex-grow">
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -248,7 +291,7 @@ export default function FeedbackPage() {
                             key={star}
                             className={`h-5 w-5 mx-1.5 cursor-pointer transition-all ${
                               (hoverRating || rating) >= star 
-                                ? "text-amber-400 fill-amber-400 scale-110" 
+                                ? "text-[#A100FF] fill-[#A100FF] scale-110" 
                                 : "text-gray-300"
                             }`}
                             onMouseEnter={() => setHoverRating(star)}
@@ -267,62 +310,56 @@ export default function FeedbackPage() {
                     </div>
                   </div>
                   
-                  {/* Category selector - using only Tailwind */}
+                  {/* Category selector with consistent purple */}
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
-                      <span className="h-2 w-2 bg-emerald-400 mr-1.5 rounded-full"></span>
-                      Categoría:
+                      <span className="h-2 w-2 bg-[#A100FF] mr-1.5 rounded-full"></span>
+                      Categoría: <span className="ml-1 text-xs text-gray-500 font-normal">(múltiple)</span>
                     </label>
-                    <div className="flex flex-col h-[65px] p-2.5 bg-gradient-to-r from-gray-50 to-white rounded-md border border-gray-200 shadow-inner">
-                      {/* Category buttons container */}
-                      <div className="flex flex-wrap gap-1.5 overflow-y-auto max-h-[30px] content-start">
+                    <div className="flex flex-col h-[65px] p-2.5 bg-[#A100FF05] rounded-md border border-gray-200 shadow-inner">
+                      <div className="flex flex-wrap gap-1.5 content-start">
                         {["Colaboración", "Calidad", "Cumplimiento", "Comunicación"].map((cat) => (
                           <button
                             type="button"
                             key={cat}
                             className={`px-2.5 py-0.5 text-xs rounded-full whitespace-nowrap outline-none focus:outline-none focus:ring-0 transition-all ${
-                              category === cat
-                                ? "bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm" 
-                                : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                              categories.includes(cat)
+                                ? "bg-[#A100FF15] text-[#A100FF] border border-[#A100FF40]" 
+                                : "bg-white text-gray-700 border border-gray-200 hover:bg-[#A100FF05]"
                             }`}
-                            onClick={() => setCategory(cat)}
+                            onClick={() => toggleCategory(cat)}
                           >
                             {cat}
                           </button>
                         ))}
                       </div>
-                      
-                      {/* Category text */}
-                      <div className="text-center text-xs font-medium text-gray-500 pt-1 mt-auto">
-                        {!category && 'Selecciona una categoría'}
-                      </div>
                     </div>
                   </div>
                 </div>
                 
-                {/* Enhanced message area with fixed height */}
+                {/* Message area with consistent styling */}
                 <div className="mb-5">
                   <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
-                    <span className="h-2 w-2 bg-blue-400 mr-1.5 rounded-full"></span>
+                    <span className="h-2 w-2 bg-[#A100FF] mr-1.5 rounded-full"></span>
                     Mensaje:
                   </label>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className="w-full h-[100px] rounded-md border border-gray-200 p-3 text-sm 
-                              focus:border-indigo-400 focus:ring-1 focus:ring-indigo-300 resize-none
-                              shadow-inner bg-gradient-to-r from-gray-50 to-white"
+                              focus:border-[#A100FF40] focus:ring-1 focus:ring-[#A100FF20] resize-none
+                              shadow-inner bg-[#A100FF05]"
                     placeholder="Escribe tu retroalimentación detallada aquí..."
                   ></textarea>
                 </div>
                 
-                {/* Submit button */}
+                {/* Submit button with consistent purple */}
                 <button
                   type="submit"
-                  disabled={!selectedRecipient || !rating || !category || !message}
+                  disabled={!selectedRecipient || !rating || categories.length === 0 || !message}
                   className={`w-full py-2.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
-                    selectedRecipient && rating && category && message
-                      ? "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-md transform hover:-translate-y-0.5" 
+                    selectedRecipient && rating && categories.length > 0 && message
+                      ? "bg-[#A100FF] hover:bg-[#8A00FF] shadow-md" 
                       : "bg-gray-200 cursor-not-allowed"
                   }`}
                   style={{color: 'white'}}
@@ -334,12 +371,12 @@ export default function FeedbackPage() {
             </div>
           </div>
           
-          {/* Right column: Competency evolution chart */}
+          {/* Right column: Competency chart with consistent styling */}
           <div className="lg:col-span-5">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-50 to-transparent p-3.5 border-b border-gray-100 flex justify-between items-center">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 h-full overflow-hidden flex flex-col">
+              <div className="p-3.5 border-b border-gray-100 flex justify-between items-center">
                 <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                  <span className="h-5 w-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                  <span className="h-5 w-5 bg-[#A100FF] rounded-full flex items-center justify-center">
                     <Award className="h-3 w-3 text-white" />
                   </span>
                   Evolución de competencias
@@ -353,8 +390,8 @@ export default function FeedbackPage() {
                         (period === '3M' && selectedPeriod === '3m') ||
                         (period === '6M' && selectedPeriod === '6m') ||
                         (period === '12M' && selectedPeriod === '12m')
-                          ? 'bg-indigo-600 text-white' 
-                          : 'text-gray-700 hover:bg-gray-100'
+                          ? 'bg-[#A100FF] text-white' 
+                          : 'text-gray-700 hover:bg-[#A100FF15] hover:text-[#A100FF]'
                       }`}
                       onClick={() => setSelectedPeriod(period.toLowerCase() as any)}
                     >
@@ -364,11 +401,11 @@ export default function FeedbackPage() {
                 </div>
               </div>
               
-              {/* Enhanced radar chart with more visual appeal */}
-              <div className="flex-grow flex items-center justify-center py-4">
-                <div className="relative h-[180px] w-[180px]">
+              {/* Radar chart with consistent styling */}
+              <div className="flex-grow flex items-center justify-center p-4 bg-[#A100FF02]">
+                <div className="relative h-[250px] w-[250px]">
                   <svg width="100%" height="100%" viewBox="0 0 100 100" className="absolute inset-0">
-                    {/* Improved grid lines with gradient */}
+                    {/* Grid circles */}
                     {[1, 2, 3, 4, 5].map((level) => (
                       <circle 
                         key={level}
@@ -382,7 +419,7 @@ export default function FeedbackPage() {
                       />
                     ))}
                     
-                    {/* Axis lines with enhanced styling */}
+                    {/* Axis lines */}
                     {skillRatings.map((_, i) => {
                       const angle = (i / skillRatings.length) * 2 * Math.PI - Math.PI / 2;
                       return (
@@ -398,7 +435,7 @@ export default function FeedbackPage() {
                       );
                     })}
                     
-                    {/* Enhanced data polygon with better gradient */}
+                    {/* Data polygon */}
                     <polygon
                       points={
                         skillRatings.map((skill, i) => {
@@ -407,24 +444,12 @@ export default function FeedbackPage() {
                           return `${50 + radius * Math.cos(angle)},${50 + radius * Math.sin(angle)}`;
                         }).join(' ')
                       }
-                      fill="url(#skillGradient)"
-                      stroke="url(#lineGradient)"
+                      fill="rgba(161, 0, 255, 0.10)"
+                      stroke="#A100FF"
                       strokeWidth="1.5"
                     />
                     
-                    {/* Enhanced gradients */}
-                    <defs>
-                      <linearGradient id="skillGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="rgba(79, 70, 229, 0.25)" />
-                        <stop offset="100%" stopColor="rgba(59, 130, 246, 0.15)" />
-                      </linearGradient>
-                      <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#4F46E5" />
-                        <stop offset="100%" stopColor="#3B82F6" />
-                      </linearGradient>
-                    </defs>
-                    
-                    {/* Enhanced data points with glow effect */}
+                    {/* Data points */}
                     {skillRatings.map((skill, i) => {
                       const angle = (i / skillRatings.length) * 2 * Math.PI - Math.PI / 2;
                       const radius = (skill.value / 5) * 40;
@@ -434,17 +459,16 @@ export default function FeedbackPage() {
                             cx={50 + radius * Math.cos(angle)}
                             cy={50 + radius * Math.sin(angle)}
                             r="2"
-                            fill="#4338ca"
+                            fill="#A100FF"
                             stroke="#ffffff"
                             strokeWidth="1.5"
-                            filter="url(#glow)"
                           />
-                          {/* Skill value label with better positioning */}
+                          {/* Skill value label */}
                           <text
                             x={50 + (radius + 3) * Math.cos(angle)}
                             y={50 + (radius + 3) * Math.sin(angle)}
                             fontSize="4"
-                            fill="#4338ca"
+                            fill="#666666"
                             fontWeight="bold"
                             textAnchor="middle"
                             dominantBaseline="middle"
@@ -455,24 +479,14 @@ export default function FeedbackPage() {
                       );
                     })}
                     
-                    {/* Glow filter for data points */}
-                    <defs>
-                      <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-                        <feGaussianBlur stdDeviation="1" result="blur" />
-                        <feFlood floodColor="#4338ca" floodOpacity="0.3" result="color" />
-                        <feComposite in="color" in2="blur" operator="in" result="shadowBlur" />
-                        <feComposite in="SourceGraphic" in2="shadowBlur" operator="over" />
-                      </filter>
-                    </defs>
-                    
-                    {/* Central point with glow */}
-                    <circle cx="50" cy="50" r="2.5" fill="#4338ca" filter="url(#glow)" />
+                    {/* Central point */}
+                    <circle cx="50" cy="50" r="2.5" fill="#A100FF" />
                   </svg>
                   
-                  {/* Improved skill labels with better bg */}
+                  {/* Skill labels */}
                   {skillRatings.map((skill, i) => {
                     const angle = (i / skillRatings.length) * 2 * Math.PI - Math.PI / 2;
-                    const radius = 48; // Position labels closer to the edge
+                    const radius = 48;
                     const x = 50 + radius * Math.cos(angle);
                     const y = 50 + radius * Math.sin(angle);
                     
@@ -492,28 +506,28 @@ export default function FeedbackPage() {
                     );
                   })}
                   
-                  {/* Enhanced center score */}
+                  {/* Center score */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full w-14 h-14 flex flex-col items-center justify-center shadow-lg">
-                      <div className="text-xl font-bold text-white leading-none mt-0.5">{avgRating}</div>
-                      <div className="text-[7px] uppercase tracking-wider text-indigo-100">Promedio</div>
+                    <div className="bg-[#A100FF] rounded-full w-16 h-16 flex flex-col items-center justify-center shadow-lg">
+                      <div className="text-2xl font-bold text-white leading-none mt-0.5">{avgRating}</div>
+                      <div className="text-[8px] uppercase tracking-wider text-white opacity-80">Promedio</div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              {/* Enhanced bottom summary bar */}
-              <div className="border-t border-gray-100 p-3 bg-gradient-to-r from-gray-50 to-white">
-                <div className="flex justify-between items-center">
+              {/* Bottom summary bar with consistent styling */}
+              <div className="border-t border-gray-100 p-3 bg-[#A100FF05] mt-auto">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <div className="text-xs text-gray-600 flex items-center gap-1.5">
-                    <span className="inline-block w-2 h-2 bg-indigo-500 rounded-full"></span>
+                    <span className="inline-block w-2 h-2 bg-[#A100FF] rounded-full"></span>
                     <span className="font-medium">{feedbackItems.length}</span> evaluaciones
                   </div>
-                  <div className="flex gap-1.5">
-                    <span className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium border border-green-100">
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="bg-white text-[#A100FF] text-xs px-2 py-0.5 rounded-full font-medium border border-[#A100FF20]">
                       Fortaleza: Calidad
                     </span>
-                    <span className="bg-amber-50 text-amber-700 text-xs px-2 py-0.5 rounded-full font-medium border border-amber-100">
+                    <span className="bg-white text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium border border-gray-200">
                       Mejora: Cumplimiento
                     </span>
                   </div>
@@ -523,16 +537,16 @@ export default function FeedbackPage() {
           </div>
         </div>
         
-        {/* Feedback list */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="flex items-center justify-between p-3.5 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-transparent">
+        {/* Feedback list with consistent styling */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          <div className="flex items-center justify-between p-3.5 border-b border-gray-100">
             <h3 className="font-medium text-gray-800 flex items-center gap-2">
-              <span className="h-5 w-5 bg-indigo-500 rounded-full flex items-center justify-center">
+              <span className="h-5 w-5 bg-[#A100FF] rounded-full flex items-center justify-center">
                 <Star className="h-3 w-3 text-white" />
               </span>
               Retroalimentación recibida
             </h3>
-            <button className="text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-white px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-colors border border-indigo-100 shadow-sm">
+            <button className="text-xs font-medium text-[#A100FF] hover:text-[#8A00FF] bg-[#A100FF05] px-3 py-1.5 rounded-md hover:bg-[#A100FF10] transition-colors border border-[#A100FF20] shadow-sm">
               Ver historial completo
             </button>
           </div>
@@ -544,10 +558,10 @@ export default function FeedbackPage() {
                 className="p-3 hover:bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all group"
               >
                 <div className="flex justify-between items-start mb-2">
-                  {/* Enhanced user icon */}
+                  {/* User icon */}
                   <div className="flex items-center">
-                    <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200 shadow-sm overflow-hidden">
-                      <User className="h-4.5 w-4.5 text-indigo-600" />
+                    <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 shadow-sm overflow-hidden">
+                      <User className="h-4.5 w-4.5 text-gray-600" />
                     </div>
                     <div className="ml-2">
                       <div className="text-sm font-medium text-gray-900">{item.from.name}</div>
@@ -555,44 +569,42 @@ export default function FeedbackPage() {
                     </div>
                   </div>
                   
-                  {/* Enhanced rating display */}
-                  <div className="flex items-center bg-amber-50 rounded-md px-2 py-1 border border-amber-100 shadow-sm">
+                  {/* Rating display - simplified */}
+                  <div className="flex items-center bg-gray-100 rounded-md px-2 py-1 border border-gray-200 shadow-sm">
                     {[...Array(5)].map((_, i) => (
                       <Star 
                         key={i}
                         className={`h-3 w-3 ${
                           i < Math.floor(item.rating) 
-                            ? "text-amber-400 fill-amber-400" 
-                            : i < item.rating 
-                              ? "text-amber-400 fill-amber-400 opacity-50" 
-                              : "text-gray-300"
+                            ? "text-[#A100FF] fill-[#A100FF]" 
+                            : "text-gray-300"
                         }`}
                       />
                     ))}
-                    <span className="text-xs font-medium ml-1 text-amber-800">
+                    <span className="text-xs font-medium ml-1 text-gray-700">
                       {item.rating.toFixed(1)}
                     </span>
                   </div>
                 </div>
                 
-                {/* Category tags with pure Tailwind */}
+                {/* Category tags - simplified */}
                 <div className="flex flex-wrap gap-1.5 mb-2.5">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-50 text-indigo-800 border border-indigo-100 shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-700 border border-gray-200 shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
                     {item.category}
                   </span>
                   {item.project && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-100 shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-700 border border-gray-200 shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
                       {item.project}
                     </span>
                   )}
                 </div>
                 
-                {/* Message with better presentation */}
-                <div className="bg-gradient-to-r from-gray-50 to-white rounded-md p-3 border border-gray-100 shadow-inner relative">
+                {/* Message - simplified */}
+                <div className="bg-gray-50 rounded-md p-3 border border-gray-200 shadow-inner relative">
                   <p className="text-xs text-gray-600 line-clamp-3">{item.message}</p>
                   
                   {item.message.length > 150 && (
-                    <button className="absolute bottom-1.5 right-1.5 text-[10px] font-medium text-indigo-600 hover:text-indigo-800 bg-white px-2 py-0.5 rounded-full border border-indigo-100 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="absolute bottom-1.5 right-1.5 text-[10px] font-medium text-[#A100FF] hover:text-[#8A00FF] bg-white px-2 py-0.5 rounded-full border border-gray-200 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
                       Leer más
                     </button>
                   )}
@@ -601,9 +613,9 @@ export default function FeedbackPage() {
             ))}
           </div>
           
-          {/* Enhanced footer */}
-          <div className="p-3 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-white flex justify-center">
-            <button className="text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-white px-4 py-2 rounded-md border border-indigo-100 hover:border-indigo-300 shadow-sm transition-all flex items-center gap-1.5 hover:shadow">
+          {/* Footer with consistent styling */}
+          <div className="p-3 border-t border-gray-100 bg-[#A100FF05] flex justify-center">
+            <button className="text-xs font-medium text-[#A100FF] hover:text-[#8A00FF] bg-white px-4 py-2 rounded-md border border-[#A100FF20] hover:border-[#A100FF40] shadow-sm transition-all flex items-center gap-1.5 hover:shadow">
               <span>Ver todas las retroalimentaciones</span>
               <svg className="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
