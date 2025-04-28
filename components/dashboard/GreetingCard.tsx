@@ -32,26 +32,14 @@ export default function GreetingCard({
     <div className="max-w-[1920px] mx-auto mb-10 px-4">
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
         
-        {/* Content with overlay decorations */}
+        {/* Content with fewer, larger decorative elements */}
         <div className="relative px-6 py-8">
-          {/* Enhanced decorative circles/bubbles with increased visibility */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#A100FF20] to-transparent rounded-full -mt-32 -mr-32"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-indigo-200 to-transparent rounded-full -mb-10 -ml-10"></div>
+          {/* Reduced number of bubbles but made them larger and more impactful */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#A100FF15] to-transparent rounded-full -mt-48 -mr-48"></div>
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-[#A100FF10] to-transparent rounded-full -mb-40 -ml-40"></div>
           
-          {/* Existing decorative bubbles with increased visibility */}
-          <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-gradient-to-tr from-[#A100FF15] to-transparent rounded-full"></div>
-          <div className="absolute bottom-1/4 right-1/3 w-24 h-24 bg-gradient-to-bl from-indigo-100 to-transparent rounded-full opacity-80"></div>
-          <div className="absolute top-3/4 left-1/4 w-12 h-12 bg-gradient-to-br from-[#A100FF25] to-transparent rounded-full"></div>
-          <div className="absolute top-1/2 left-1/3 w-8 h-8 bg-gradient-to-tl from-blue-100 to-transparent rounded-full"></div>
-          <div className="absolute bottom-1/2 right-[20%] w-10 h-10 bg-gradient-to-br from-purple-100 to-transparent rounded-full"></div>
-          
-          {/* Additional new bubbles with better visibility */}
-          <div className="absolute top-10 left-[15%] w-20 h-20 bg-gradient-to-br from-[#7B68EE30] to-transparent rounded-full"></div>
-          <div className="absolute bottom-16 right-16 w-16 h-16 bg-gradient-to-tl from-[#A100FF20] to-transparent rounded-full"></div>
-          <div className="absolute top-[40%] right-[10%] w-12 h-12 bg-gradient-to-bl from-[#5D3FD325] to-transparent rounded-full"></div>
-          <div className="absolute bottom-[30%] left-[20%] w-14 h-14 bg-gradient-to-tr from-[#9370DB25] to-transparent rounded-full"></div>
-          <div className="absolute top-[70%] right-[25%] w-8 h-8 bg-gradient-to-br from-[#483D8B20] to-transparent rounded-full animate-pulse"></div>
-          <div className="absolute top-[25%] left-[40%] w-10 h-10 bg-gradient-to-tl from-[#6A5ACD20] to-transparent rounded-full"></div>
+          {/* One medium sized bubble in a contrasting position */}
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-br from-[#7B68EE15] to-transparent rounded-full"></div>
           
           <div className="relative z-10">
             {/* Animated greeting with better icon styling */}
