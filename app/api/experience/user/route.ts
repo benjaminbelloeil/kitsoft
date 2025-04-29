@@ -51,24 +51,45 @@ export async function GET(request: NextRequest) {
       experiences.map(async (exp) => {
         // Get the skills for this experience
         try {
-          const expSkills = await supabase
+          // First, get the relation between experiences and skills
+          const { data: expSkillsRelations, error: relError } = await supabase
             .from('experiencias_habilidades')
-            .select(`
-              id_habilidad,
-              nivel_experiencia,
-              habilidades (
-                id_habilidad,
-                titulo
-              )
-            `)
+            .select('id_habilidad, nivel_experiencia')
             .eq('id_experiencia', exp.id_experiencia);
-            
-          // Transform skills to the format expected by the UI
-          const skills = expSkills.data ? expSkills.data.map(skillRecord => ({
-            id_habilidad: skillRecord.id_habilidad,
-            nivel_experiencia: skillRecord.nivel_experiencia,
-            titulo: skillRecord.habilidades && skillRecord.habilidades[0] ? skillRecord.habilidades[0].titulo : 'Unnamed skill'
-          })) : [];
+          
+          if (relError || !expSkillsRelations) {
+            console.error(`Error fetching skill relations for experience ${exp.id_experiencia}:`, relError);
+            return {
+              ...exp,
+              habilidades: []
+            };
+          }
+          
+          // Now fetch the actual skill data for each skill ID
+          const skills = await Promise.all(
+            expSkillsRelations.map(async (relation) => {
+              const { data: skillData, error: skillError } = await supabase
+                .from('habilidades')
+                .select('titulo')
+                .eq('id_habilidad', relation.id_habilidad)
+                .single();
+              
+              if (skillError || !skillData) {
+                console.error(`Error fetching skill ${relation.id_habilidad}:`, skillError);
+                return {
+                  id_habilidad: relation.id_habilidad,
+                  nivel_experiencia: relation.nivel_experiencia,
+                  titulo: 'Unnamed skill'
+                };
+              }
+              
+              return {
+                id_habilidad: relation.id_habilidad,
+                nivel_experiencia: relation.nivel_experiencia,
+                titulo: skillData.titulo
+              };
+            })
+          );
           
           return {
             ...exp,
