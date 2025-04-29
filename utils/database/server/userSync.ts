@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient as createServerClient } from '@/utils/supabase/server';
 import { adminClient } from '@/utils/supabase/server-admin';
 import { Usuario } from '@/interfaces/user';
