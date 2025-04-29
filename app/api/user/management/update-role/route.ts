@@ -55,11 +55,23 @@ export async function POST(request: Request) {
       );
     }
 
+    // First get the user's most recent role to use as the previous role
+    const { data: previousRoleData, error: prevRoleError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_nivel_actual')
+      .eq('id_usuario', userId)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+
+    const previousRoleId = previousRoleData?.id_nivel_actual || null;
+
     // Create a new role entry with current timestamp
     const timestamp = new Date().toISOString();
     const id_historial = randomUUID(); // Generate UUID for primary key
     
     // Insert new record into usuarios_niveles with the updated role
+    // and the previous role ID (if one exists)
     const { data, error } = await supabase
       .from('usuarios_niveles')
       .insert([
@@ -67,6 +79,7 @@ export async function POST(request: Request) {
           id_historial, 
           id_usuario: userId,
           id_nivel_actual: roleId,
+          id_nivel_previo: previousRoleId, // Set the previous role ID
           fecha_cambio: timestamp 
         }
       ])
