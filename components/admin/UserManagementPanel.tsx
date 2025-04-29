@@ -69,6 +69,9 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         roles: roles // This will be empty initially, but updated after fetching roles
       }));
       localStorage.setItem(USER_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
+    } else {
+      // If no server users were provided, refresh from API
+      refreshData();
     }
     
     // Always fetch roles since they're needed for the role change functionality
@@ -121,6 +124,8 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         headers: {
           'Content-Type': 'application/json',
         },
+        // Add cache-busting query parameter
+        cache: 'no-store',
       });
       
       if (!res.ok) {
@@ -128,6 +133,8 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
       }
       
       const usersData = await res.json();
+      
+      console.log("Refreshed user data:", usersData);
       
       // Update the state and cache
       setUsers(usersData);
@@ -213,6 +220,11 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         
         // Update the local state
         updateUserRole(pendingRoleChange.userId, pendingRoleChange.roleId);
+        
+        // Refresh data to ensure we have the latest role information
+        setTimeout(() => {
+          refreshData();
+        }, 500);
       } catch (error) {
         console.error("Error changing role:", error);
         notifications.showError("Ocurrió un error al cambiar el rol");
@@ -237,6 +249,11 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         // Remove from local state
         removeUserFromState(userToDelete);
         notifications.showSuccess("Usuario eliminado con éxito");
+        
+        // Refresh data to ensure our list is up-to-date
+        setTimeout(() => {
+          refreshData();
+        }, 500);
       } else {
         notifications.showError(result.error || "Error al eliminar el usuario");
       }

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Create a Supabase client with server privileges
+    // Create a Supabase client
     const supabase = await createClient();
 
     // Check authentication - only admins should access this
@@ -24,7 +24,8 @@ export async function GET() {
       .limit(1)
       .single();
     
-    if (roleError || !userRole?.niveles?.numero === 1) {
+    // Fix the logical error in the condition
+    if (roleError || (userRole?.niveles?.numero !== 1)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

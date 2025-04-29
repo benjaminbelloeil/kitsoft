@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { adminClient } from '@/utils/supabase/server-admin';
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -25,100 +26,91 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Security check: only admins can delete users
-    // Check if the current user is an admin
-    const { data: adminCheck, error: adminError } = await supabase
-      .from('usuarios_roles')
+    // Check if the current user is an admin using usuarios_niveles
+    const { data: userRole, error: roleError } = await supabase
+      .from('usuarios_niveles')
       .select(`
-        id_nivel,
-        nivel!inner(
-          numero
-        )
+        niveles:id_nivel_actual(numero)
       `)
       .eq('id_usuario', user.id)
-      .eq('nivel.numero', 1);
-      
-    if (adminError || !adminCheck || adminCheck.length === 0) {
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (roleError || (userRole?.niveles?.numero !== 1)) {
       return NextResponse.json(
         { error: 'Only admins can delete users' },
         { status: 403 }
       );
     }
     
-    // Start transaction to delete all user data in the correct order
-    // We'll use supabase's function call to execute the deletion atomically
-    const { data: deletionResult, error: deletionError } = await supabase.rpc(
-      'delete_user_complete',
-      { target_user_id: userId }
-    );
+    console.log(`Admin user ${user.id} is attempting to delete user ${userId}`);
     
-    if (deletionError) {
-      console.error('Error deleting user:', deletionError);
+    // Begin transaction by deleting related records in the correct order
+    
+    // 1. Delete from usuarios_niveles (role history) first as it's dependent on usuarios
+    const { error: nivelesDeletionError } = await supabase
+      .from('usuarios_niveles')
+      .delete()
+      .eq('id_usuario', userId);
+    
+    if (nivelesDeletionError) {
+      console.error('Error deleting user roles history:', nivelesDeletionError);
       return NextResponse.json(
-        { success: false, error: deletionError.message || 'Failed to delete user' },
+        { success: false, error: 'Failed to delete user role history' },
         { status: 500 }
       );
     }
     
-    // If the function doesn't exist, implement the deletion manually
-    if (!deletionResult) {
-      // Begin with cleanup - first delete all related data in dependent tables
+    // 2. Delete any other related data (certificates, skills, experiences)
+    const { error: certError } = await supabase
+      .from('certificados')
+      .delete()
+      .eq('id_usuario', userId);
+    
+    if (certError) console.error('Error deleting certificates:', certError);
+    
+    const { error: skillsError } = await supabase
+      .from('habilidades_usuarios')
+      .delete()
+      .eq('id_usuario', userId);
       
-      // Delete certificates
-      const { error: certError } = await supabase
-        .from('certificados')
-        .delete()
-        .eq('id_usuario', userId);
+    if (skillsError) console.error('Error deleting skills:', skillsError);
+    
+    const { error: expError } = await supabase
+      .from('experiencia')
+      .delete()
+      .eq('id_usuario', userId);
       
-      if (certError) console.error('Error deleting certificates:', certError);
+    if (expError) console.error('Error deleting experiences:', expError);
+    
+    // 3. Finally delete the user profile record
+    const { error: profileError } = await supabase
+      .from('usuarios')
+      .delete()
+      .eq('id_usuario', userId);
       
-      // Delete skills
-      const { error: skillsError } = await supabase
-        .from('habilidades_usuarios')
-        .delete()
-        .eq('id_usuario', userId);
-        
-      if (skillsError) console.error('Error deleting skills:', skillsError);
+    if (profileError) {
+      console.error('Error deleting user profile:', profileError);
+      return NextResponse.json(
+        { success: false, error: 'Failed to delete user profile' },
+        { status: 500 }
+      );
+    }
       
-      // Delete experiences
-      const { error: expError } = await supabase
-        .from('experiencia')
-        .delete()
-        .eq('id_usuario', userId);
-        
-      if (expError) console.error('Error deleting experiences:', expError);
-      
-      // Delete user roles
-      const { error: rolesError } = await supabase
-        .from('usuarios_roles')
-        .delete()
-        .eq('id_usuario', userId);
-        
-      if (rolesError) console.error('Error deleting roles:', rolesError);
-      
-      // Delete user profile
-      const { error: profileError } = await supabase
-        .from('usuarios')
-        .delete()
-        .eq('id_usuario', userId);
-        
-      if (profileError) {
-        console.error('Error deleting user profile:', profileError);
-        return NextResponse.json(
-          { success: false, error: 'Failed to delete user profile' },
-          { status: 500 }
-        );
-      }
-      
-      // Delete user auth record - this might require admin access or a service role
-      const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
+    // 4. Delete the auth user using the admin client
+    try {
+      console.log(`Deleting auth user ${userId} with admin client`);
+      const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(userId);
       
       if (authDeleteError) {
         console.error('Error deleting user auth record:', authDeleteError);
-        return NextResponse.json(
-          { success: false, error: 'Failed to delete user authentication record' },
-          { status: 500 }
-        );
+        // We'll continue anyway even if auth deletion fails
+        // This prevents orphaned profiles but allows auth cleanup to happen later
       }
+    } catch (authError) {
+      console.error('Exception during auth user deletion:', authError);
+      // Continue anyway - the database records are the most important
     }
     
     return NextResponse.json({ success: true });

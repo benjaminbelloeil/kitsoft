@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 
 export async function POST(request: Request) {
   try {
@@ -33,7 +34,8 @@ export async function POST(request: Request) {
       .limit(1)
       .single();
     
-    if (roleError || !userRole?.niveles?.numero === 1) {
+    // Fix the logical error in the admin check
+    if (roleError || (userRole?.niveles?.numero !== 1)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -53,11 +55,14 @@ export async function POST(request: Request) {
 
     // Create a new role entry with current timestamp
     const timestamp = new Date().toISOString();
+    const id_historial = randomUUID(); // Generate UUID for primary key
     
+    // Insert new record into usuarios_niveles with the updated role
     const { data, error } = await supabase
       .from('usuarios_niveles')
       .insert([
         { 
+          id_historial, 
           id_usuario: userId,
           id_nivel_actual: roleId,
           fecha_cambio: timestamp 
