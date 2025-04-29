@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { getAllUsers } from "@/utils/database/server/userSync";
+import { getAllUsersWithRolesAndAuth } from "@/utils/database/server/userSync";
 import UserManagementPanel from "@/components/admin/UserManagementPanel";
 import SettingsPanel from "@/components/admin/SettingsPanel";
 import LogsPanel from "@/components/admin/LogsPanel";
@@ -34,8 +34,8 @@ export default async function AdminPage() {
     redirect("/dashboard");
   }
 
-  // Fetch all users from the database (server-side)
-  const users = await getAllUsers();
+  // Fetch all users with their roles and auth status from the database (server-side)
+  const users = await getAllUsersWithRolesAndAuth();
 
   return (
     <div className="container mx-auto p-4 sm:p-8">

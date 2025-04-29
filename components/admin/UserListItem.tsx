@@ -35,20 +35,20 @@ export default function UserListItem({
 
   // Get badge color based on role
   const getRoleBadgeStyle = (user: User) => {
-    if (!user.registered) return 'bg-gray-100 text-gray-800';
+    if (!user.registered || !user.hasLoggedIn) return 'bg-gray-100 text-gray-800';
     if (user.role?.numero === 1) return 'bg-purple-100 text-purple-800';
     return 'bg-blue-100 text-blue-800';
   };
   
   // Get role label text
   const getRoleLabel = (user: User) => {
-    if (!user.registered) return "Sin registrar";
-    return user.role?.titulo || "Sin rol"; // Change to show "Sin rol" if no role title exists
+    if (!user.registered || !user.hasLoggedIn) return "Sin registrar";
+    return user.role?.titulo || "Sin rol"; 
   };
 
   // Get the appropriate icon for the user's status
   const getRoleIcon = (user: User) => {
-    if (!user.registered) return <FiUserX className="mr-1.5" />;
+    if (!user.registered || !user.hasLoggedIn) return <FiUserX className="mr-1.5" />;
     return <FiUser className="mr-1.5" />;
   };
 
