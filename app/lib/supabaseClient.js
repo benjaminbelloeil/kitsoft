@@ -1,10 +1,18 @@
-// This file is kept for backward compatibility
-// Use the dedicated Supabase client utilities instead:
-// For client components: import { createClient } from '@/utils/supabase/client'
-// For server components: import { createClient } from '@/utils/supabase/server'
+// This file is kept for backwards compatibility
+// New code should use the client/server imports from utils/supabase/client or utils/supabase/server
+import { createClient } from '@/utils/supabase/client';
 
-import { createClient as createBrowserClient } from '@/utils/supabase/client';
+// Re-export the createClient function to maintain backward compatibility
+export default createClient;
 
-const supabase = createBrowserClient();
+/**
+ * DEPRECATED: This file is maintained for compatibility with existing code.
+ * For new code, please import directly from:
+ *   - Client-side: @/utils/supabase/client
+ *   - Server-side: @/utils/supabase/server
+ */
 
-export default supabase;
+/**
+ * Use process.env.SUPABASE_SERVICE_ROLE_KEY only in secure server contexts,
+ * never in client-side code or API routes without proper security checks.
+ */

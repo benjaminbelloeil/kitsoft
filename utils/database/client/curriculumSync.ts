@@ -1,136 +1,121 @@
-import { createClient } from '@/utils/supabase/client';
+import { File } from '@/interfaces';
 
+/**
+ * Uploads a user curriculum document and updates the database reference
+ * @param userId The user ID
+ * @param file The document file to upload
+ * @returns Success status and URL or error message
+ */
 const updateUserCurriculum = async (
   userId: string,
-  file?: File,
-  setStatus?: (msg: string) => void
-): Promise<{ success: boolean; error?: string }> => {
-  const supabase = createClient();
-
+  file: File
+): Promise<{ success: boolean; url?: string; error?: string }> => {
   try {
-    if (!userId) {
-      return { success: false, error: 'ID de usuario no proporcionado' };
+    // Create form data for the file upload
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', userId);
+
+    // Upload the file
+    const uploadResponse = await fetch('/api/curriculum/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json();
+      console.error('Curriculum upload failed:', errorData);
+      return { success: false, error: errorData.error || 'Failed to upload curriculum' };
     }
 
-    let finalUrl = null;
+    const uploadResult = await uploadResponse.json();
 
-    if (file) {
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      const maxSizeMB = 10;
+    // Update the database reference with the new URL
+    const updateResponse = await fetch('/api/curriculum/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        url: uploadResult.url,
+      }),
+    });
 
-      if (!allowedTypes.includes(file.type)) {
-        setStatus?.('Tipo de archivo no permitido. Solo se permiten PDF, DOC y DOCX.');
-        return { success: false, error: 'Tipo de archivo no permitido.' };
-      }
-
-      if (file.size > maxSizeMB * 1024 * 1024) {
-        setStatus?.('El archivo excede el tamaño máximo de 10MB.');
-        return { success: false, error: 'Tamaño de archivo excedido.' };
-      }
-
-      const fallbackExt = file.type.split('/').pop();
-      const extension = file.name.includes('.') ? file.name.split('.').pop() : fallbackExt;
-
-      if (!extension) {
-        setStatus?.('El archivo debe tener una extensión válida como .pdf o .docx.');
-        return { success: false, error: 'Extensión inválida.' };
-      }
-
-      const baseName = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : 'archivo';
-      const safeName = `${baseName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}.${extension}`;
-      const filePath = `Curriculum/${userId}-${safeName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('usuarios')
-        .upload(filePath, file, {
-          upsert: true,
-          cacheControl: '3600',
-        });
-
-      if (uploadError) {
-        setStatus?.(`Error al subir el archivo: ${uploadError.message}`);
-        return { success: false, error: uploadError.message };
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from('usuarios')
-        .getPublicUrl(filePath);
-
-      finalUrl = publicUrlData?.publicUrl ?? null;
+    if (!updateResponse.ok) {
+      const errorData = await updateResponse.json();
+      console.error('Curriculum database update failed:', errorData);
+      return { success: false, error: errorData.error || 'Failed to update curriculum in database' };
     }
 
-    const { error } = await supabase
-      .from('usuarios')
-      .update({ url_curriculum: finalUrl })
-      .eq('id_usuario', userId);
+    return { success: true, url: uploadResult.url };
+  } catch (error: any) {
+    console.error('Unexpected error in updateUserCurriculum:', error);
+    return { success: false, error: error.message || 'An unexpected error occurred' };
+  }
+};
 
-    if (error) {
-      console.error('Error actualizando el currículum:', error);
-      return { success: false, error: error.message };
+/**
+ * Deletes a user curriculum document and removes the database reference
+ * @param userId The user ID
+ * @param filename The filename to delete from storage
+ * @returns Success status or error message
+ */
+const deleteUserCurriculum = async (
+  userId: string,
+  filename: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const response = await fetch('/api/curriculum/delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        filename,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Curriculum deletion failed:', errorData);
+      return { success: false, error: errorData.error || 'Failed to delete curriculum' };
     }
 
     return { success: true };
-  } catch (err: any) {
-    console.error('Error inesperado en updateUserCurriculum:', err);
-    return { success: false, error: err.message || 'Error desconocido' };
+  } catch (error: any) {
+    console.error('Unexpected error in deleteUserCurriculum:', error);
+    return { success: false, error: error.message || 'An unexpected error occurred' };
   }
 };
 
-const deleteUserCurriculum = async (
-  userId: string,
-  filename: string,
-  setStatus?: (msg: string) => void
-): Promise<void> => {
-  const supabase = createClient();
-  const safeName = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-  const path = `Curriculum/${userId}-${safeName}`;
-
-  const { error: deleteError } = await supabase.storage.from('usuarios').remove([path]);
-
-  if (deleteError) {
-    setStatus?.('Error al eliminar el archivo del bucket');
-    return;
-  }
-
-  const { success, error } = await updateUserCurriculum(userId);
-
-  if (!success || error) {
-    setStatus?.('Error al actualizar la base de datos');
-  } else {
-    setStatus?.('Currículum eliminado.');
-  }
-};
-
-const getUserCurriculum = async (userId: string): Promise<File | null> => {
-  const supabase = createClient();
-
+/**
+ * Gets the curriculum URL for a specific user
+ * @param userId The user ID
+ * @returns The curriculum URL or null if not found
+ */
+const getUserCurriculum = async (userId: string): Promise<string | null> => {
   try {
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('url_curriculum')
-      .eq('id_usuario', userId)
-      .single();
+    const response = await fetch(`/api/curriculum/get?userId=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-    if (error) {
-      console.error('Error al obtener el URL del currículum:', error);
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Failed to get curriculum URL:', errorData);
       return null;
     }
 
-    if (!data?.url_curriculum) {
-      return null;
-    }
-
-    const parts = data.url_curriculum.split('/').pop()?.split('-') ?? [];
-    const filename = parts.slice(5).join('-') || 'curriculum.pdf';
-
-    const response = await fetch(data.url_curriculum);
-    const blob = await response.blob();
-
-    return new File([blob], filename, { type: blob.type });
-  } catch (err) {
-    console.error('Error al obtener el archivo del currículum:', err);
+    const data = await response.json();
+    return data.url;
+  } catch (error) {
+    console.error('Error fetching curriculum URL:', error);
     return null;
   }
 };
 
-export { deleteUserCurriculum, updateUserCurriculum, getUserCurriculum };
+export { updateUserCurriculum, deleteUserCurriculum, getUserCurriculum };

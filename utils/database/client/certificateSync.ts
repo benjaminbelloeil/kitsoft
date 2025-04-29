@@ -1,214 +1,244 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/utils/supabase/client';
-import { certificado, usuario_certificado } from '@/interfaces/certificate'; // Asegúrate que estén bien definidos en tu proyecto
+import { Certificate } from '@/interfaces/certificate';
 
-const supabase = createClient();
-
-const allowedTypes = ['application/pdf'];
-const maxSizeMB = 10;
-
-/** 1. Obtener todos los certificados */
-export const getAllCertificados = async (): Promise<certificado[]> => {
-  const { data, error } = await supabase
-    .from('certificados')
-    .select('*');
-
-  if (error) {
-    console.error('Error al obtener certificados:', error);
-    return [];
-  }
-
-  return data;
-};
-
-/** 2. Subir un registro tipo usuario_certificado */
-export const addUsuarioCertificado = async (
-  entry: usuario_certificado
-): Promise<{ success: boolean; error?: string }> => {
-  const { error } = await supabase
-    .from('usuarios_certificados')
-    .upsert([entry], { onConflict: 'id_certificado,id_usuario' });
-
-  if (error) {
-    console.error('Error al registrar certificado del usuario:', error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
-};
-
-/** 3. Obtener todos los certificados de un usuario */
-export const getCertificadosPorUsuario = async (
-  userId: string
-): Promise<usuario_certificado[]> => {
+/**
+ * Get all certificates for a specific user
+ */
+export async function getUserCertificates(userId: string): Promise<Certificate[]> {
+  const supabase = createClient();
+  
   try {
-    if (!userId || typeof userId !== 'string') {
-      console.warn("⚠️ ID de usuario no válido:", userId);
-      return [];
-    }
-
     const { data, error } = await supabase
       .from('usuarios_certificados')
-      .select('*')
-      .eq('id_usuario', userId);
-
+      .select(`
+        *,
+        certificados (
+          id_certificado,
+          nombre,
+          emisor,
+          descripcion
+        )
+      `)
+      .eq('id_usuario', userId)
+      .order('fecha_emision', { ascending: false });
+    
     if (error) {
-      throw new Error(JSON.stringify(error));
+      console.error('Error fetching user certificates:', error);
+      return [];
     }
-
-    return data;
-  } catch (err: any) {
-    console.error('Error al obtener certificados del usuario:', {
-      userId,
-      mensaje: err?.message ?? String(err),
-      errorString: JSON.stringify(err),
-      raw: err,
-    });
+    
+    // Transform the data to match the Certificate interface
+    return data ? data.map(item => ({
+      id_usuario_certificado: item.id_usuario_certificado,
+      id_certificado: item.id_certificado,
+      id_usuario: item.id_usuario,
+      fecha_emision: item.fecha_emision,
+      fecha_expiracion: item.fecha_expiracion,
+      url_certificado: item.url_certificado,
+      nombre: item.certificados ? item.certificados.nombre : '',
+      emisor: item.certificados ? item.certificados.emisor : '',
+      descripcion: item.certificados ? item.certificados.descripcion : ''
+    })) : [];
+  } catch (err) {
+    console.error('Exception in getUserCertificates:', err);
     return [];
   }
-};
+}
 
-/** 4. Subir archivo del certificado y retornar su URL */
-export const uploadCertificadoFile = async (
+/**
+ * Add a certificate to a user's profile
+ */
+export async function addUserCertificate(
   userId: string,
-  file: File,
-  setStatus?: (msg: string) => void
-): Promise<string | null> => {
+  certificateData: {
+    id_certificado: string;
+    fecha_emision: string;
+    fecha_expiracion?: string | null;
+    url_certificado?: string | null;
+  }
+): Promise<{ success: boolean; error?: string; id?: string }> {
   const supabase = createClient();
-
-  const allowedTypes = ['application/pdf'];
-  const maxSizeMB = 10;
-
-  if (!allowedTypes.includes(file.type)) {
-    setStatus?.('Tipo de archivo no permitido. Solo se permite PDF.');
-    return null;
-  }
-
-  if (file.size > maxSizeMB * 1024 * 1024) {
-    setStatus?.('El archivo excede el tamaño máximo de 10MB.');
-    return null;
-  }
-
-  const fallbackExt = file.type.split('/').pop();
-  const extension = file.name.includes('.') ? file.name.split('.').pop() : fallbackExt;
-
-  if (!extension) {
-    setStatus?.('El archivo debe tener una extensión válida como .pdf.');
-    return null;
-  }
-
-  const baseName = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : 'archivo';
-  const safeName = `${baseName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}.${extension}`;
-  const filePath = `Certificados/${userId}-${safeName}`;
-
-  console.log("Uploading file for user:", userId);
-  console.log("Sanitized file name:", safeName);
-  console.log("Uploading to path:", filePath);
-
-  const { error: uploadError } = await supabase.storage
-    .from('usuarios')
-    .upload(filePath, file, {
-      upsert: true,
-      cacheControl: '3600',
-    });
-
-  if (uploadError) {
-    console.error("Upload failed:", uploadError);
-    setStatus?.(`Error al subir el archivo: ${uploadError.message}`);
-    return null;
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from('usuarios')
-    .getPublicUrl(filePath);
-
-  return publicUrlData?.publicUrl ?? null;
-};
-
-/** 5. Obtener archivo desde la URL pública */
-export const getArchivoDesdeUrl = async (
-  url: string
-): Promise<File | null> => {
+  
   try {
-    if (!url || typeof url !== 'string') {
-      console.error("URL no válida o no proporcionada.");
-      return null;
+    // Generate a UUID for the new certificate association
+    const id_usuario_certificado = crypto.randomUUID();
+    
+    const { error } = await supabase
+      .from('usuarios_certificados')
+      .insert({
+        id_usuario_certificado,
+        id_certificado: certificateData.id_certificado,
+        id_usuario: userId,
+        fecha_emision: certificateData.fecha_emision,
+        fecha_expiracion: certificateData.fecha_expiracion || null,
+        url_certificado: certificateData.url_certificado || null
+      });
+    
+    if (error) {
+      console.error('Error adding certificate:', error);
+      return { success: false, error: error.message };
     }
-
-    const lastSegment = url.split('/').pop();
-    const filename = decodeURIComponent(lastSegment || 'certificado.pdf');
-
-    const response = await fetch(url);
-    const blob = await response.blob();
-
-    return new File([blob], filename, { type: blob.type });
-  } catch (err) {
-    console.error('Error al obtener archivo desde la URL:', err);
-    return null;
+    
+    return { success: true, id: id_usuario_certificado };
+  } catch (err: any) {
+    console.error('Exception in addUserCertificate:', err);
+    return { success: false, error: err.message || 'Error inesperado' };
   }
-};
+}
 
-/** 6. Obtener nombre del certificado desde su ID */
-export const getNombreCertificadoPorId = async (
-  id_certificado: string
-): Promise<string | null> => {
+/**
+ * Update an existing user certificate
+ */
+export async function updateUserCertificate(
+  certificateId: string,
+  userId: string,
+  certificateData: {
+    fecha_emision?: string;
+    fecha_expiracion?: string | null;
+    url_certificado?: string | null;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  try {
+    const { error } = await supabase
+      .from('usuarios_certificados')
+      .update(certificateData)
+      .eq('id_usuario_certificado', certificateId)
+      .eq('id_usuario', userId); // Extra security to ensure user owns this certificate
+    
+    if (error) {
+      console.error('Error updating certificate:', error);
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception in updateUserCertificate:', err);
+    return { success: false, error: err.message || 'Error inesperado' };
+  }
+}
+
+/**
+ * Delete a user certificate
+ */
+export async function deleteUserCertificate(
+  certificateId: string,
+  userId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  try {
+    // First check if there's a certificate file to delete from storage
+    const { data: certData } = await supabase
+      .from('usuarios_certificados')
+      .select('url_certificado')
+      .eq('id_usuario_certificado', certificateId)
+      .eq('id_usuario', userId)
+      .single();
+    
+    // Delete the file if it exists
+    if (certData?.url_certificado) {
+      try {
+        const filePath = certData.url_certificado.split('/').pop();
+        if (filePath) {
+          await supabase.storage
+            .from('certificados')
+            .remove([`${userId}/${filePath}`]);
+        }
+      } catch (fileErr) {
+        console.error('Error deleting certificate file:', fileErr);
+        // Continue with database deletion even if file deletion fails
+      }
+    }
+    
+    // Delete from database
+    const { error } = await supabase
+      .from('usuarios_certificados')
+      .delete()
+      .eq('id_usuario_certificado', certificateId)
+      .eq('id_usuario', userId);
+    
+    if (error) {
+      console.error('Error deleting certificate:', error);
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception in deleteUserCertificate:', err);
+    return { success: false, error: err.message || 'Error inesperado' };
+  }
+}
+
+/**
+ * Get all available certificate types
+ */
+export async function getAllCertificateTypes(): Promise<any[]> {
+  const supabase = createClient();
+  
   try {
     const { data, error } = await supabase
       .from('certificados')
-      .select('curso')
-      .eq('id_certificado', id_certificado)
-      .single();
-
+      .select('*')
+      .order('nombre');
+    
     if (error) {
-      console.error('Error al obtener el nombre del certificado:', error);
-      return null;
+      console.error('Error fetching certificate types:', error);
+      return [];
     }
-
-    return data?.curso ?? null;
+    
+    return data || [];
   } catch (err) {
-    console.error('Error inesperado en getNombreCertificadoPorId:', err);
-    return null;
+    console.error('Exception in getAllCertificateTypes:', err);
+    return [];
   }
-};
-/** 7. Eliminar certificado y su archivo en el bucket */
-export const deleteUsuarioCertificado = async (
-  entry: usuario_certificado
-): Promise<{ success: boolean; error?: string }> => {
+}
+
+/**
+ * Upload a certificate file and get a URL
+ */
+export async function uploadCertificateFile(
+  userId: string, 
+  file: File,
+  setStatus?: (message: string) => void
+): Promise<{ success: boolean; url?: string; error?: string }> {
   const supabase = createClient();
-
+  
   try {
-    if (!entry.url_archivo) {
-      console.error('No se proporcionó la URL del archivo para eliminar.');
-      return { success: false, error: 'URL del archivo no disponible.' };
+    if (!file) {
+      return { success: false, error: 'No se proporcionó ningún archivo' };
     }
-
-    // 1. Eliminar archivo del bucket
-    const parts = entry.url_archivo.split('/');
-    const bucketFilePath = parts.slice(parts.indexOf('usuarios') + 1).join('/');
-
-    const { error: deleteFileError } = await supabase.storage
-      .from('usuarios')
-      .remove([bucketFilePath]);
-
-    if (deleteFileError) {
-      console.error('Error al eliminar archivo del bucket:', deleteFileError);
-      return { success: false, error: 'No se pudo eliminar el archivo del bucket' };
+    
+    setStatus?.('Subiendo certificado...');
+    
+    // Create a safe filename
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const path = `${userId}/${Date.now()}-${safeName}`;
+    
+    // Upload to storage
+    const { data, error } = await supabase.storage
+      .from('certificados')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+      
+    if (error) {
+      console.error('Error uploading certificate file:', error);
+      return { success: false, error: error.message };
     }
-
-    // 2. Eliminar registro en la tabla usuarios_certificados
-    const { error: deleteRowError } = await supabase
-      .from('usuarios_certificados')
-      .delete()
-      .match({ id_certificado: entry.id_certificado, id_usuario: entry.id_usuario });
-
-    if (deleteRowError) {
-      console.error('Error al eliminar certificado del usuario:', deleteRowError);
-      return { success: false, error: 'No se pudo eliminar el registro de la base de datos' };
-    }
-
-    return { success: true };
-  } catch (err) {
-    console.error('Error inesperado al eliminar certificado:', err);
-    return { success: false, error: 'Error inesperado al eliminar certificado' };
+    
+    // Get the public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('certificados')
+      .getPublicUrl(data.path);
+    
+    setStatus?.('Archivo subido correctamente');
+    return { success: true, url: publicUrl };
+  } catch (err: any) {
+    console.error('Error inesperado en uploadCertificateFile:', err);
+    return { success: false, error: err.message || 'Error desconocido' };
   }
-};
+}
