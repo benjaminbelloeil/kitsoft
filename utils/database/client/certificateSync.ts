@@ -7,7 +7,10 @@ const supabase = createClient();
 const allowedTypes = ['application/pdf'];
 const maxSizeMB = 10;
 
-/** 1. Obtener todos los certificados */
+/**
+ * Obtiene todos los certificados disponibles en la base de datos.
+ * @returns Una promesa que resuelve un arreglo de objetos certificado.
+ */
 export const getAllCertificados = async (): Promise<certificado[]> => {
   const { data, error } = await supabase
     .from('certificados')
@@ -21,7 +24,11 @@ export const getAllCertificados = async (): Promise<certificado[]> => {
   return data;
 };
 
-/** 2. Subir un registro tipo usuario_certificado */
+/**
+ * Inserta o actualiza un registro de usuario_certificado en la base de datos.
+ * @param entry Objeto usuario_certificado a insertar o actualizar.
+ * @returns Una promesa que resuelve un objeto indicando éxito o error.
+ */
 export const addUsuarioCertificado = async (
   entry: usuario_certificado
 ): Promise<{ success: boolean; error?: string }> => {
@@ -37,13 +44,17 @@ export const addUsuarioCertificado = async (
   return { success: true };
 };
 
-/** 3. Obtener todos los certificados de un usuario */
+/**
+ * Obtiene todos los certificados asociados a un usuario específico.
+ * @param userId ID del usuario para filtrar los certificados.
+ * @returns Una promesa que resuelve un arreglo de usuario_certificado.
+ */
 export const getCertificadosPorUsuario = async (
   userId: string
 ): Promise<usuario_certificado[]> => {
   try {
-    if (!userId || typeof userId !== 'string') {
-      console.warn("⚠️ ID de usuario no válido:", userId);
+    if (!userId || typeof userId !== 'string' || userId.length !== 36) {
+      console.warn("⚠️ ID de usuario inválido, no haciendo consulta:", userId);
       return [];
     }
 
@@ -52,13 +63,14 @@ export const getCertificadosPorUsuario = async (
       .select('*')
       .eq('id_usuario', userId);
 
-    if (error) {
-      throw new Error(JSON.stringify(error));
+    if (error && (error.message || error.code)) {
+      console.error('Error real de Supabase al obtener certificados:', error);
+      return [];
     }
 
-    return data;
+    return data ?? [];
   } catch (err: any) {
-    console.error('Error al obtener certificados del usuario:', {
+    console.error('Error inesperado en getCertificadosPorUsuario:', {
       userId,
       mensaje: err?.message ?? String(err),
       errorString: JSON.stringify(err),
@@ -68,7 +80,13 @@ export const getCertificadosPorUsuario = async (
   }
 };
 
-/** 4. Subir archivo del certificado y retornar su URL */
+/**
+ * Sube un archivo de certificado para un usuario y retorna su URL pública.
+ * @param userId ID del usuario al que pertenece el certificado.
+ * @param file Archivo a subir.
+ * @param setStatus Función opcional para actualizar el estado o mensajes.
+ * @returns Una promesa que resuelve la URL pública del archivo o null si falla.
+ */
 export const uploadCertificadoFile = async (
   userId: string,
   file: File,
@@ -125,7 +143,11 @@ export const uploadCertificadoFile = async (
   return publicUrlData?.publicUrl ?? null;
 };
 
-/** 5. Obtener archivo desde la URL pública */
+/**
+ * Descarga un archivo desde una URL pública y lo retorna como un objeto File.
+ * @param url URL pública del archivo a descargar.
+ * @returns Una promesa que resuelve un objeto File o null si falla.
+ */
 export const getArchivoDesdeUrl = async (
   url: string
 ): Promise<File | null> => {
@@ -148,7 +170,11 @@ export const getArchivoDesdeUrl = async (
   }
 };
 
-/** 6. Obtener nombre del certificado desde su ID */
+/**
+ * Obtiene el nombre del certificado (curso) a partir de su ID.
+ * @param id_certificado ID del certificado a buscar.
+ * @returns Una promesa que resuelve el nombre del curso o null si no se encuentra.
+ */
 export const getNombreCertificadoPorId = async (
   id_certificado: string
 ): Promise<string | null> => {
@@ -170,7 +196,12 @@ export const getNombreCertificadoPorId = async (
     return null;
   }
 };
-/** 7. Eliminar certificado y su archivo en el bucket */
+
+/**
+ * Elimina un certificado y su archivo asociado en el bucket de almacenamiento.
+ * @param entry Objeto usuario_certificado que contiene la información para eliminar.
+ * @returns Una promesa que resuelve un objeto indicando éxito o error.
+ */
 export const deleteUsuarioCertificado = async (
   entry: usuario_certificado
 ): Promise<{ success: boolean; error?: string }> => {
