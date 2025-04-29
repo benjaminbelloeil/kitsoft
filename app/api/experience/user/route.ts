@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
           const skills = expSkills.data ? expSkills.data.map(skillRecord => ({
             id_habilidad: skillRecord.id_habilidad,
             nivel_experiencia: skillRecord.nivel_experiencia,
-            titulo: skillRecord.habilidades ? skillRecord.habilidades.titulo : 'Unnamed skill'
+            titulo: skillRecord.habilidades && skillRecord.habilidades[0] ? skillRecord.habilidades[0].titulo : 'Unnamed skill'
           })) : [];
           
           return {

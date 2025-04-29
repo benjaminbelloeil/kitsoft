@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
     
     // Map the data to our interface - ensure defaults for all fields
     const profileData: UserProfile = {
+      id_usuario: userData.id_usuario,
       ID_Usuario: userData.id_usuario,
       Nombre: userData.nombre || '',
       Apellido: userData.apellido || '',

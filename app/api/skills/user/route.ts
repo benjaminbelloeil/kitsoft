@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       id_habilidad: item.id_habilidad,
       id_usuario: item.id_usuario,
       nivel_experiencia: item.nivel_experiencia,
-      titulo: item.habilidades?.titulo || 'Unknown skill'
+      titulo: item.habilidades?.[0]?.titulo || 'Unknown skill'
     })) || [];
     
     return NextResponse.json(transformedData);
