@@ -26,6 +26,11 @@ export async function getUserCertificates(userId: string): Promise<Certificate[]
 }
 
 /**
+ * Get certificates for a user - alias for compatibility
+ */
+export const getCertificadosPorUsuario = getUserCertificates;
+
+/**
  * Add a certificate to a user's profile
  */
 export async function addUserCertificate(
@@ -59,6 +64,11 @@ export async function addUserCertificate(
     return { success: false, error: err.message || 'Error inesperado' };
   }
 }
+
+/**
+ * Add a user certificate - alias for compatibility
+ */
+export const addUsuarioCertificado = addUserCertificate;
 
 /**
  * Update an existing user certificate
@@ -124,6 +134,11 @@ export async function deleteUserCertificate(
 }
 
 /**
+ * Delete user certificate - alias for compatibility
+ */
+export const deleteUsuarioCertificado = deleteUserCertificate;
+
+/**
  * Get all available certificate types
  */
 export async function getAllCertificateTypes(): Promise<any[]> {
@@ -146,6 +161,11 @@ export async function getAllCertificateTypes(): Promise<any[]> {
     return [];
   }
 }
+
+/**
+ * Get all certificates - alias for compatibility 
+ */
+export const getAllCertificados = getAllCertificateTypes;
 
 /**
  * Upload a certificate file and get a URL
@@ -185,3 +205,59 @@ export async function uploadCertificateFile(
     return { success: false, error: err.message || 'Error desconocido' };
   }
 }
+
+/**
+ * Upload certificate file - alias for compatibility
+ */
+export const uploadCertificadoFile = uploadCertificateFile;
+
+/**
+ * Get file from URL - needed for file display
+ */
+export async function getFileFromUrl(url: string): Promise<Blob | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Error fetching file: ${response.statusText}`);
+    }
+    return await response.blob();
+  } catch (error) {
+    console.error('Error in getFileFromUrl:', error);
+    return null;
+  }
+}
+
+/**
+ * Get file from URL - alias for compatibility
+ */
+export const getArchivoDesdeUrl = getFileFromUrl;
+
+/**
+ * Get certificate name by ID
+ */
+export async function getCertificateNameById(certificateId: string): Promise<string> {
+  try {
+    const res = await fetch(`/api/certificate/name?id=${encodeURIComponent(certificateId)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error fetching certificate name:', await res.text());
+      return 'Certificado';
+    }
+
+    const data = await res.json();
+    return data.name || 'Certificado';
+  } catch (err) {
+    console.error('Exception in getCertificateNameById:', err);
+    return 'Certificado';
+  }
+}
+
+/**
+ * Get certificate name by ID - alias for compatibility
+ */
+export const getNombreCertificadoPorId = getCertificateNameById;

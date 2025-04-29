@@ -48,7 +48,21 @@ export async function DELETE(request: NextRequest) {
     
     // Begin transaction by deleting related records in the correct order
     
-    // 1. Delete from usuarios_niveles (role history) first as it's dependent on usuarios
+    // 1. Delete from correos (email table) first since it has a foreign key constraint
+    const { error: correosError } = await supabase
+      .from('correos')
+      .delete()
+      .eq('id_usuario', userId);
+    
+    if (correosError) {
+      console.error('Error deleting user emails:', correosError);
+      return NextResponse.json(
+        { success: false, error: 'Failed to delete user emails' },
+        { status: 500 }
+      );
+    }
+    
+    // 2. Delete from usuarios_niveles (role history)
     const { error: nivelesDeletionError } = await supabase
       .from('usuarios_niveles')
       .delete()
@@ -62,29 +76,50 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    // 2. Delete any other related data (certificates, skills, experiences)
-    const { error: certError } = await supabase
-      .from('certificados')
-      .delete()
-      .eq('id_usuario', userId);
+    // 3. Delete certificates - check the correct column name first
+    try {
+      // Try with id_usuario column
+      const { error: certError } = await supabase
+        .from('certificados_usuarios')  // Using the correct join table name
+        .delete()
+        .eq('id_usuario', userId);
+        
+      if (certError) {
+        console.error('Error deleting certificates:', certError);
+      }
+    } catch (certErr) {
+      console.error('Exception when deleting certificates:', certErr);
+    }
     
-    if (certError) console.error('Error deleting certificates:', certError);
+    // 4. Delete skills - check for correct table name
+    try {
+      const { error: skillsError } = await supabase
+        .from('habilidades_usuario')  // Using the correct table name (singular)
+        .delete()
+        .eq('id_usuario', userId);
+        
+      if (skillsError) {
+        console.error('Error deleting skills:', skillsError);
+      }
+    } catch (skillsErr) {
+      console.error('Exception when deleting skills:', skillsErr);
+    }
     
-    const { error: skillsError } = await supabase
-      .from('habilidades_usuarios')
-      .delete()
-      .eq('id_usuario', userId);
-      
-    if (skillsError) console.error('Error deleting skills:', skillsError);
+    // 5. Delete experiences 
+    try {
+      const { error: expError } = await supabase
+        .from('experiencia')
+        .delete()
+        .eq('id_usuario', userId);
+        
+      if (expError) {
+        console.error('Error deleting experiences:', expError);
+      }
+    } catch (expErr) {
+      console.error('Exception when deleting experiences:', expErr);
+    }
     
-    const { error: expError } = await supabase
-      .from('experiencia')
-      .delete()
-      .eq('id_usuario', userId);
-      
-    if (expError) console.error('Error deleting experiences:', expError);
-    
-    // 3. Finally delete the user profile record
+    // 6. Finally delete the user profile record
     const { error: profileError } = await supabase
       .from('usuarios')
       .delete()
@@ -93,12 +128,12 @@ export async function DELETE(request: NextRequest) {
     if (profileError) {
       console.error('Error deleting user profile:', profileError);
       return NextResponse.json(
-        { success: false, error: 'Failed to delete user profile' },
+        { success: false, error: 'Failed to delete user profile: ' + profileError.message },
         { status: 500 }
       );
     }
       
-    // 4. Delete the auth user using the admin client
+    // 7. Delete the auth user using the admin client
     try {
       console.log(`Deleting auth user ${userId} with admin client`);
       const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(userId);
