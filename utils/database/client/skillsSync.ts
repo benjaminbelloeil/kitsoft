@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@/utils/supabase/client';
 
 export interface SkillData {
   id_habilidad: string;
@@ -24,20 +23,20 @@ export interface ExperienceSkill {
  * Get all available skills from the database
  */
 export async function getAllSkills(): Promise<SkillData[]> {
-  const supabase = createClient();
-  
   try {
-    const { data, error } = await supabase
-      .from('habilidades')
-      .select('*')
-      .order('titulo');
-    
-    if (error) {
-      console.error('Error fetching skills:', error);
+    const res = await fetch('/api/skills/all', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error fetching skills:', await res.text());
       return [];
     }
-    
-    return data || [];
+
+    return await res.json();
   } catch (err) {
     console.error('Exception in getAllSkills:', err);
     return [];
@@ -48,22 +47,20 @@ export async function getAllSkills(): Promise<SkillData[]> {
  * Search for skills that match a query string
  */
 export async function searchSkills(query: string): Promise<SkillData[]> {
-  const supabase = createClient();
-  
   try {
-    const { data, error } = await supabase
-      .from('habilidades')
-      .select('*')
-      .ilike('titulo', `%${query}%`)
-      .order('titulo')
-      .limit(10);
-    
-    if (error) {
-      console.error('Error searching skills:', error);
+    const res = await fetch(`/api/skills/search?query=${encodeURIComponent(query)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error searching skills:', await res.text());
       return [];
     }
-    
-    return data || [];
+
+    return await res.json();
   } catch (err) {
     console.error('Exception in searchSkills:', err);
     return [];
@@ -74,33 +71,20 @@ export async function searchSkills(query: string): Promise<SkillData[]> {
  * Get all skills for a specific user
  */
 export async function getUserSkills(userId: string): Promise<UserSkill[]> {
-  const supabase = createClient();
-  
   try {
-    // Join usuarios_habilidades with habilidades to get the skill title
-    const { data, error } = await supabase
-      .from('usuarios_habilidades')
-      .select(`
-        *,
-        habilidades (
-          id_habilidad,
-          titulo
-        )
-      `)
-      .eq('id_usuario', userId);
-    
-    if (error) {
-      console.error('Error fetching user skills:', error);
+    const res = await fetch(`/api/skills/user?userId=${encodeURIComponent(userId)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error fetching user skills:', await res.text());
       return [];
     }
-    
-    // Transform data to include skill titles directly
-    return data ? data.map(item => ({
-      id_habilidad: item.id_habilidad,
-      id_usuario: item.id_usuario,
-      nivel_experiencia: item.nivel_experiencia,
-      titulo: item.habilidades ? item.habilidades.titulo : undefined
-    })) : [];
+
+    return await res.json();
   } catch (err) {
     console.error('Exception in getUserSkills:', err);
     return [];
@@ -111,32 +95,20 @@ export async function getUserSkills(userId: string): Promise<UserSkill[]> {
  * Get all skills for a specific experience
  */
 export async function getExperienceSkills(experienceId: string): Promise<ExperienceSkill[]> {
-  const supabase = createClient();
-  
   try {
-    const { data, error } = await supabase
-      .from('experiencias_habilidades')
-      .select(`
-        *,
-        habilidades (
-          id_habilidad,
-          titulo
-        )
-      `)
-      .eq('id_experiencia', experienceId);
-    
-    if (error) {
-      console.error('Error fetching experience skills:', error);
+    const res = await fetch(`/api/skills/experience?experienceId=${encodeURIComponent(experienceId)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error fetching experience skills:', await res.text());
       return [];
     }
-    
-    // Transform data to include skill titles directly
-    return data ? data.map(item => ({
-      id_habilidad: item.id_habilidad,
-      id_experiencia: item.id_experiencia,
-      nivel_experiencia: item.nivel_experiencia,
-      titulo: item.habilidades ? item.habilidades.titulo : undefined
-    })) : [];
+
+    return await res.json();
   } catch (err) {
     console.error('Exception in getExperienceSkills:', err);
     return [];
@@ -152,65 +124,31 @@ export async function addSkillToExperience(
   userId: string, 
   level: number
 ): Promise<{ success: boolean; error?: string; skillId?: string }> {
-  const supabase = createClient();
-  
   try {
-    // First check if the skill exists
-    let skillId: string;
-    
-    const { data: existingSkill } = await supabase
-      .from('habilidades')
-      .select('id_habilidad')
-      .ilike('titulo', skillName)
-      .limit(1);
-    
-    if (existingSkill && existingSkill.length > 0) {
-      skillId = existingSkill[0].id_habilidad;
-    } else {
-      // Create the skill if it doesn't exist
-      skillId = crypto.randomUUID();
-      const { error: createError } = await supabase
-        .from('habilidades')
-        .insert({
-          id_habilidad: skillId,
-          titulo: skillName
-        });
-      
-      if (createError) {
-        console.error('Error creating skill:', createError);
-        return { success: false, error: createError.message };
-      }
+    const res = await fetch('/api/skills/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        skillName,
+        experienceId,
+        userId,
+        level
+      }),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('Error adding skill to experience:', errorText);
+      return { success: false, error: errorText };
     }
-    
-    // Add the skill to the experience
-    const { error: expSkillError } = await supabase
-      .from('experiencias_habilidades')
-      .upsert({
-        id_habilidad: skillId,
-        id_experiencia: experienceId,
-        nivel_experiencia: level
-      });
-    
-    if (expSkillError) {
-      console.error('Error adding skill to experience:', expSkillError);
-      return { success: false, error: expSkillError.message };
-    }
-    
-    // Also add/update the skill for the user
-    const { error: userSkillError } = await supabase
-      .from('usuarios_habilidades')
-      .upsert({
-        id_habilidad: skillId,
-        id_usuario: userId,
-        nivel_experiencia: level
-      });
-    
-    if (userSkillError) {
-      console.error('Error adding skill to user:', userSkillError);
-      // Don't return error here, as the main operation (adding to experience) succeeded
-    }
-    
-    return { success: true, skillId };
+
+    const data = await res.json();
+    return { 
+      success: true, 
+      skillId: data.skillId 
+    };
   } catch (err: any) {
     console.error('Exception in addSkillToExperience:', err);
     return { success: false, error: err.message || 'Error inesperado' };
@@ -225,44 +163,25 @@ export async function removeSkillFromExperience(
   experienceId: string,
   userId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = createClient();
-  
   try {
-    // First delete from experiencias_habilidades
-    const { error } = await supabase
-      .from('experiencias_habilidades')
-      .delete()
-      .eq('id_habilidad', skillId)
-      .eq('id_experiencia', experienceId);
-    
-    if (error) {
-      console.error('Error removing skill from experience:', error);
-      return { success: false, error: error.message };
+    const res = await fetch('/api/skills/remove', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        skillId,
+        experienceId,
+        userId
+      }),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('Error removing skill from experience:', errorText);
+      return { success: false, error: errorText };
     }
-    
-    // Check if the skill is still used in any other experience
-    const { data: stillUsed, error: checkError } = await supabase
-      .from('experiencias_habilidades')
-      .select('id_experiencia')
-      .eq('id_habilidad', skillId);
-    
-    if (checkError) {
-      console.error('Error checking if skill is still used:', checkError);
-    }
-    
-    // If skill is no longer used in any experience, remove from user skills too
-    if (!stillUsed || stillUsed.length === 0) {
-      const { error: removeError } = await supabase
-        .from('usuarios_habilidades')
-        .delete()
-        .eq('id_habilidad', skillId)
-        .eq('id_usuario', userId);
-      
-      if (removeError) {
-        console.error('Error removing skill from user:', removeError);
-      }
-    }
-    
+
     return { success: true };
   } catch (err: any) {
     console.error('Exception in removeSkillFromExperience:', err);
@@ -279,32 +198,26 @@ export async function updateSkillLevel(
   userId: string,
   level: number
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = createClient();
-  
   try {
-    // Update skill in experience
-    const { error: expError } = await supabase
-      .from('experiencias_habilidades')
-      .update({ nivel_experiencia: level })
-      .eq('id_habilidad', skillId)
-      .eq('id_experiencia', experienceId);
-    
-    if (expError) {
-      console.error('Error updating experience skill level:', expError);
-      return { success: false, error: expError.message };
+    const res = await fetch('/api/skills/update-level', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        skillId,
+        experienceId,
+        userId,
+        level
+      }),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('Error updating skill level:', errorText);
+      return { success: false, error: errorText };
     }
-    
-    // Also update the user's skill level
-    const { error: userError } = await supabase
-      .from('usuarios_habilidades')
-      .update({ nivel_experiencia: level })
-      .eq('id_habilidad', skillId)
-      .eq('id_usuario', userId);
-    
-    if (userError) {
-      console.error('Error updating user skill level:', userError);
-    }
-    
+
     return { success: true };
   } catch (err: any) {
     console.error('Exception in updateSkillLevel:', err);

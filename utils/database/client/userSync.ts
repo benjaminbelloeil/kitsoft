@@ -1,4 +1,3 @@
-import { createClient } from '@/utils/supabase/client';
 import { Usuario } from '@/interfaces/user';
 
 /**
@@ -7,19 +6,24 @@ import { Usuario } from '@/interfaces/user';
  * @returns The user profile or null
  */
 export async function getUserProfile(userId: string): Promise<Usuario | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('usuarios')
-    .select('*')
-    .eq('id_usuario', userId)
-    .single();
-  
-  if (error || !data) {
-    console.error('Error fetching user profile:', error);
+  try {
+    const res = await fetch(`/api/user/profile?userId=${encodeURIComponent(userId)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error fetching user profile:', await res.text());
+      return null;
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error('Exception in getUserProfile:', err);
     return null;
   }
-  
-  return data as Usuario;
 }
 
 /**
@@ -33,18 +37,25 @@ export async function updateUserProfile(
   userId: string, 
   userData: Partial<Omit<Usuario, 'ID_Usuario'>>
 ): Promise<boolean> {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from('usuarios')
-    .update(userData)
-    .eq('id_usuario', userId);
-  
-  if (error) {
-    console.error('Error updating user profile:', error);
+  try {
+    const res = await fetch('/api/user/profile/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, userData }),
+    });
+
+    if (!res.ok) {
+      console.error('Error updating user profile:', await res.text());
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Exception in updateUserProfile:', err);
     return false;
   }
-  
-  return true;
 }
 
 /**
@@ -52,32 +63,25 @@ export async function updateUserProfile(
  * This should rarely be needed as the database trigger handles this automatically
  */
 export async function ensureUserExists(userId: string): Promise<boolean> {
-  const supabase = createClient();
-  
-  // First check if user already exists
-  const { data: existingUser } = await supabase
-    .from('usuarios')
-    .select('id_usuario')
-    .eq('id_usuario', userId)
-    .single();
-  
-  if (existingUser) {
-    return true; // User already exists
-  }
-  
-  // If not, create the user
-  const { error } = await supabase
-    .from('usuarios')
-    .insert({
-      id_usuario: userId
+  try {
+    const res = await fetch('/api/user/ensure', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
     });
-  
-  if (error) {
-    console.error('Error creating user profile:', error);
+
+    if (!res.ok) {
+      console.error('Error ensuring user exists:', await res.text());
+      return false;
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error('Exception in ensureUserExists:', err);
     return false;
   }
-  
-  return true;
 }
 
 /**
@@ -85,19 +89,19 @@ export async function ensureUserExists(userId: string): Promise<boolean> {
  * This can be used to synchronize user email from auth to profile
  */
 export async function syncUserAuthDetails(): Promise<boolean> {
-  const supabase = createClient();
-  
   try {
-    // Get user data from auth
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !userData.user) {
-      console.error('Error fetching auth user:', userError);
+    const res = await fetch('/api/user/sync-auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error syncing user auth details:', await res.text());
       return false;
     }
-    
-    // We don't need to update any fields since we removed created_at and updated_at
-    // This function could be used later if we need to sync other fields
+
     return true;
   } catch (err) {
     console.error('Error in syncUserAuthDetails:', err);
@@ -110,17 +114,21 @@ export async function syncUserAuthDetails(): Promise<boolean> {
  * @returns The user's email or null if not authenticated
  */
 export async function getAuthUserEmail(): Promise<string | null> {
-  const supabase = createClient();
-  
   try {
-    const { data, error } = await supabase.auth.getUser();
-    
-    if (error || !data.user) {
-      console.error('Error fetching auth user:', error);
+    const res = await fetch('/api/user/email', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error fetching auth user email:', await res.text());
       return null;
     }
-    
-    return data.user.email || null;
+
+    const data = await res.json();
+    return data.email;
   } catch (err) {
     console.error('Error in getAuthUserEmail:', err);
     return null;
@@ -132,16 +140,22 @@ export async function getAuthUserEmail(): Promise<string | null> {
  * Use this in client components
  */
 export async function getAllUsersClient(): Promise<Usuario[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('usuarios')
-    .select('*')
-    .order('id_usuario');
-  
-  if (error) {
-    console.error('Error fetching users:', error);
+  try {
+    const res = await fetch('/api/user/all', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error('Error fetching all users:', await res.text());
+      return [];
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getAllUsersClient:', err);
     return [];
   }
-  
-  return data as Usuario[];
 }
