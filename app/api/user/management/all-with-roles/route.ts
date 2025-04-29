@@ -1,89 +1,90 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Get authenticated user
+    // Create a Supabase client with admin privileges
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    // Check authentication - only admins should access this
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized access' },
-        { status: 401 }
-      );
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Check if the current user is an admin
-    const { data: adminCheck, error: adminError } = await supabase
-      .from('usuarios_roles')
+    // Check if the user is an admin
+    const { data: userRole, error: roleError } = await supabase
+      .from('usuarios_niveles')
       .select(`
-        id_nivel,
-        nivel!inner(
-          numero
-        )
+        niveles:id_nivel_actual(numero)
       `)
       .eq('id_usuario', user.id)
-      .eq('nivel.numero', 1);
-      
-    if (adminError || !adminCheck || adminCheck.length === 0) {
-      return NextResponse.json(
-        { error: 'Only admins can view all users' },
-        { status: 403 }
-      );
-    }
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
     
-    // Get all users with their roles
-    const { data: users, error: usersError } = await supabase
+    if (roleError || !userRole?.niveles?.numero === 1) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Get all users with their current role
+    const { data: users, error } = await supabase
       .from('usuarios')
       .select(`
         id_usuario,
         nombre,
         apellido,
         titulo,
+        email,
         url_avatar,
-        auth_usuarios!inner (
-          email,
-          last_sign_in_at
-        ),
-        usuarios_roles (
-          nivel (
-            id_nivel,
-            numero,
-            titulo
-          )
-        )
+        auth_registered:registered,
+        last_login
       `);
-      
-    if (usersError) {
-      console.error('Error fetching users:', usersError);
-      return NextResponse.json(
-        { error: 'Error fetching users' },
-        { status: 500 }
-      );
-    }
     
-    // Format data to match the expected User interface
-    // Format data to match the expected User interface
-    const formattedUsers = users.map(user => ({
-      id_usuario: user.id_usuario,
-      nombre: user.nombre,
-      apellido: user.apellido,
-      titulo: user.titulo,
-      email: user.auth_usuarios?.[0]?.email,
-      url_avatar: user.url_avatar,
-      registered: true,
-      role: user.usuarios_roles?.[0]?.nivel || null,
-      lastLogin: user.auth_usuarios?.[0]?.last_sign_in_at || null,
-      hasLoggedIn: !!user.auth_usuarios?.[0]?.last_sign_in_at
-    }));
-    return NextResponse.json(formattedUsers);
-  } catch (error) {
-    console.error('Unexpected error in get all users API:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    if (error) {
+      console.error('Error fetching users:', error);
+      return NextResponse.json({ error: 'Error fetching users' }, { status: 500 });
+    }
+
+    // For each user, get their most recent role
+    const usersWithRoles = await Promise.all(
+      users.map(async (user) => {
+        // Get user's current role
+        const { data: userNivel, error: nivelError } = await supabase
+          .from('usuarios_niveles')
+          .select(`
+            niveles:id_nivel_actual(id_nivel, numero, titulo)
+          `)
+          .eq('id_usuario', user.id_usuario)
+          .order('fecha_cambio', { ascending: false })
+          .limit(1)
+          .single();
+        
+        // Check if user is registered (has any auth data)
+        const { data: authData, error: authError } = await supabase
+          .from('auth.users')
+          .select('id, email, last_sign_in_at')
+          .eq('id', user.id_usuario)
+          .maybeSingle();
+        
+        const role = userNivel?.niveles;
+        const registered = !!user.auth_registered || !!authData;
+        const lastLogin = authData?.last_sign_in_at || null;
+        
+        return {
+          ...user,
+          registered,
+          role,
+          lastLogin,
+          hasLoggedIn: !!lastLogin
+        };
+      })
     );
+    
+    return NextResponse.json(usersWithRoles);
+  } catch (error) {
+    console.error('Error in GET /api/user/management/all-with-roles:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

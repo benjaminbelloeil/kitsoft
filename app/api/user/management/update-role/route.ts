@@ -1,83 +1,87 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    // Get authenticated user
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized access' },
-        { status: 401 }
-      );
-    }
-    
-    // Get the request body
     const { userId, roleId } = await request.json();
-    
+
     if (!userId || !roleId) {
       return NextResponse.json(
-        { error: 'Missing required parameters' },
+        { error: 'Missing required fields: userId and roleId are required' },
         { status: 400 }
       );
     }
+
+    // Create a Supabase client
+    const supabase = await createClient();
+
+    // Check authentication - only admins should access this
+    const { data: { user } } = await supabase.auth.getUser();
     
-    // Check if the current user is an admin
-    const { data: adminCheck, error: adminError } = await supabase
-      .from('usuarios_roles')
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    // Check if the user is an admin
+    const { data: userRole, error: roleError } = await supabase
+      .from('usuarios_niveles')
       .select(`
-        id_nivel,
-        nivel!inner(
-          numero
-        )
+        niveles:id_nivel_actual(numero)
       `)
       .eq('id_usuario', user.id)
-      .eq('nivel.numero', 1);
-      
-    if (adminError || !adminCheck || adminCheck.length === 0) {
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (roleError || !userRole?.niveles?.numero === 1) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Get role details to ensure it exists
+    const { data: roleData, error: roleCheckError } = await supabase
+      .from('niveles')
+      .select('id_nivel, numero')
+      .eq('id_nivel', roleId)
+      .single();
+    
+    if (roleCheckError || !roleData) {
       return NextResponse.json(
-        { error: 'Only admins can update user roles' },
-        { status: 403 }
+        { error: 'Invalid role ID provided' },
+        { status: 400 }
       );
     }
+
+    // Create a new role entry with current timestamp
+    const timestamp = new Date().toISOString();
     
-    // Delete all existing roles for this user first
-    const { error: deleteError } = await supabase
-      .from('usuarios_roles')
-      .delete()
-      .eq('id_usuario', userId);
-      
-    if (deleteError) {
-      console.error('Error deleting existing roles:', deleteError);
+    const { data, error } = await supabase
+      .from('usuarios_niveles')
+      .insert([
+        { 
+          id_usuario: userId,
+          id_nivel_actual: roleId,
+          fecha_cambio: timestamp 
+        }
+      ])
+      .select();
+
+    if (error) {
+      console.error('Error updating user role:', error);
       return NextResponse.json(
-        { error: 'Error deleting existing roles' },
+        { error: 'Failed to update user role', details: error.message },
         { status: 500 }
       );
     }
-    
-    // Assign the new role
-    const { error: assignError } = await supabase
-      .from('usuarios_roles')
-      .insert({
-        id_usuario: userId,
-        id_nivel: roleId
-      });
-      
-    if (assignError) {
-      console.error('Error assigning new role:', assignError);
-      return NextResponse.json(
-        { error: 'Error assigning new role' },
-        { status: 500 }
-      );
-    }
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Unexpected error in update user role API:', error);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'User role updated successfully',
+      roleNumber: roleData.numero
+    });
+  } catch (error: any) {
+    console.error('Error in POST /api/user/management/update-role:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal Server Error', details: error.message },
       { status: 500 }
     );
   }

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
@@ -10,30 +12,28 @@ import {
   FiUserX
 } from "react-icons/fi";
 import { 
-  getAllUsersWithRoles, 
   getAllRoles,
   User,
   UserRole,
-  deleteUser,
-  cleanupDuplicateEntries
+  deleteUser
 } from "@/utils/database/client/userManagementSync";
-import { changeUserRole } from "@/utils/database/client/userRoleSync";
 import UserList from "./UserList";
 import { useNotificationState } from "@/components/ui/toast-notification";
 import RoleChangeModal from "./modals/RoleChangeModal";
 import DeleteUserModal from "./modals/DeleteUserModal";
-import supabase from "@/app/lib/supabaseClient";
 
 // Cache key for user management data
 const USER_MANAGEMENT_DATA_KEY = 'user_management_data';
 const USER_MANAGEMENT_TIMESTAMP_KEY = 'user_management_timestamp';
-// Extending the freshness threshold to avoid unnecessary refreshes
-const DATA_FRESHNESS_THRESHOLD = 30 * 60 * 1000; // 30 minutes instead of 5
 
-export default function UserManagementPanel() {
-  const [users, setUsers] = useState<User[]>([]);
+interface UserManagementPanelProps {
+  serverUsers?: User[];
+}
+
+export default function UserManagementPanel({ serverUsers = [] }: UserManagementPanelProps) {
+  const [users, setUsers] = useState<User[]>(serverUsers);
   const [roles, setRoles] = useState<UserRole[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(serverUsers.length === 0);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -45,8 +45,6 @@ export default function UserManagementPanel() {
   const [pendingRoleChange, setPendingRoleChange] = useState<{userId: string, roleId: string} | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [userToDeleteName, setUserToDeleteName] = useState<string>("");
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [visibilityChanged, setVisibilityChanged] = useState(false);
 
   // Dropdown animation variants
   const dropdownVariants = {
@@ -59,121 +57,44 @@ export default function UserManagementPanel() {
     }
   };
 
-  // Handle visibility change events
+  // Initialize with server data and fetch roles
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Only mark that visibility changed, don't trigger loading state
-        setVisibilityChanged(true);
-      }
-    };
-
-    // Add event listener
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    if (serverUsers.length > 0) {
+      setUsers(serverUsers);
+      setLoading(false);
+      
+      // Cache the server data
+      localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
+        users: serverUsers,
+        roles: roles // This will be empty initially, but updated after fetching roles
+      }));
+      localStorage.setItem(USER_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
+    }
     
-    // Remove event listener on cleanup
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
-  // Load data with enhanced caching mechanism
-  useEffect(() => {
-    // Skip if not initial load and not coming back from visibility change
-    if (!isInitialLoad && !visibilityChanged) return;
-    
-    const loadData = async () => {
+    // Always fetch roles since they're needed for the role change functionality
+    const fetchRoles = async () => {
       try {
-        // Check if we have cached data and if it's still fresh
+        const rolesData = await getAllRoles();
+        setRoles(rolesData);
+        
+        // Update the cache with roles
         const cachedData = localStorage.getItem(USER_MANAGEMENT_DATA_KEY);
-        const timestamp = localStorage.getItem(USER_MANAGEMENT_TIMESTAMP_KEY);
-        const isFresh = timestamp && (Date.now() - parseInt(timestamp, 10)) < DATA_FRESHNESS_THRESHOLD;
-        
-        // Coming back from another tab - use cached data without showing loading state
-        if (visibilityChanged && cachedData && isFresh) {
-          setVisibilityChanged(false);
-          const parsedData = JSON.parse(cachedData);
-          // Only update state if we have data - don't show loading indicators
-          if (parsedData.users && parsedData.roles) {
-            setUsers(parsedData.users);
-            setRoles(parsedData.roles);
-          }
-          return;
-        }
-        
-        // Initial load with cached data - use it but don't show loading state
-        if (isInitialLoad && cachedData && isFresh) {
-          const parsedData = JSON.parse(cachedData);
-          setUsers(parsedData.users || []);
-          setRoles(parsedData.roles || []);
-          setLoading(false);
-          setIsInitialLoad(false);
-          setVisibilityChanged(false);
-          return;
-        }
-        
-        // No fresh cached data - show loading state and fetch new data
-        if (!cachedData || !isFresh) {
-          if (isInitialLoad) {
-            setLoading(true);
-          }
-          
-          // First attempt to clean up duplicate entries for all users
-          if (isInitialLoad) {
-            try {
-              // Get all users and cleanup potential duplicates
-              const { data: allUsers } = await supabase
-                .from('usuarios')
-                .select('id_usuario')
-                .order('id_usuario');
-                
-              if (allUsers && allUsers.length > 0) {
-                console.log(`Attempting to clean up duplicates for ${allUsers.length} users`);
-                
-                // Process in batches to avoid timeouts
-                const batchSize = 5;
-                for (let i = 0; i < allUsers.length; i += batchSize) {
-                  const batch = allUsers.slice(i, i + batchSize);
-                  await Promise.all(batch.map(user => cleanupDuplicateEntries(user.id_usuario)));
-                }
-              }
-            } catch (cleanupError) {
-              console.error("Error during duplicate cleanup:", cleanupError);
-              // Continue with loading even if cleanup fails
-            }
-          }
-          
-          // Fetch fresh data
-          const [usersData, rolesData] = await Promise.all([
-            getAllUsersWithRoles(),
-            getAllRoles()
-          ]);
-          
-          // Cache the new data in localStorage for better persistence
+        if (cachedData) {
+          const parsedCache = JSON.parse(cachedData);
           localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
-            users: usersData,
+            ...parsedCache,
             roles: rolesData
           }));
-          localStorage.setItem(USER_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
-          
-          // Update state
-          setUsers(usersData);
-          setRoles(rolesData);
-          setLoading(false);
         }
       } catch (error) {
-        console.error("Error loading user management data:", error);
-        setLoading(false);
-      } finally {
-        setIsInitialLoad(false);
-        setVisibilityChanged(false);
+        console.error("Error fetching roles:", error);
       }
     };
     
-    loadData();
-  }, [isInitialLoad, visibilityChanged]);
+    fetchRoles();
+  }, [serverUsers]);
 
-  // Update cache function - use localStorage instead of sessionStorage
+  // Update cache function
   const updateCache = (updatedUsers: User[]) => {
     try {
       const currentCache = localStorage.getItem(USER_MANAGEMENT_DATA_KEY);
@@ -189,25 +110,28 @@ export default function UserManagementPanel() {
     }
   };
 
-  // Add a more robust refresh function
+  // Refresh data via API
   const refreshData = async () => {
     setIsRefreshing(true);
     
     try {
-      const [usersData, rolesData] = await Promise.all([
-        getAllUsersWithRoles(),
-        getAllRoles()
-      ]);
+      // Fetch updated users through API
+      const res = await fetch('/api/user/management/all-with-roles', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
-      // Update cache with fresh data using localStorage
-      localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
-        users: usersData,
-        roles: rolesData
-      }));
-      localStorage.setItem(USER_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
+      if (!res.ok) {
+        throw new Error('Failed to refresh user data');
+      }
       
+      const usersData = await res.json();
+      
+      // Update the state and cache
       setUsers(usersData);
-      setRoles(rolesData);
+      updateCache(usersData);
     } catch (error) {
       console.error("Error refreshing user data:", error);
       notifications.showError("Error al actualizar los datos de usuarios");
@@ -260,44 +184,54 @@ export default function UserManagementPanel() {
     updateCache(updatedUsers);
   };
 
-  // New function to handle role change
+  // Handle role change using API
   const handleRoleChange = async () => {
     if (pendingRoleChange) {
       try {
-        // Get the role number from the selected role
-        const selectedRole = roles.find(role => role.id_nivel === pendingRoleChange.roleId);
-        if (!selectedRole) return;
+        // Call API to update the role
+        const res = await fetch('/api/user/management/update-role', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: pendingRoleChange.userId,
+            roleId: pendingRoleChange.roleId
+          }),
+        });
 
-        // Call the database function to change the user's role
-        const success = await changeUserRole(pendingRoleChange.userId, selectedRole.numero);
-        
-        if (success) {
-          notifications.showSuccess(`El usuario ahora tiene rol de ${selectedRole.titulo}`);
-          
-          // Update the local state
-          updateUserRole(pendingRoleChange.userId, pendingRoleChange.roleId);
-        } else {
-          notifications.showError("No se pudo actualizar el rol del usuario");
+        if (!res.ok) {
+          throw new Error('Failed to update role');
         }
+
+        // Find the role details
+        const selectedRole = roles.find(role => role.id_nivel === pendingRoleChange.roleId);
+        
+        notifications.showSuccess(
+          selectedRole ? `El usuario ahora tiene rol de ${selectedRole.titulo}` : "Rol actualizado con éxito"
+        );
+        
+        // Update the local state
+        updateUserRole(pendingRoleChange.userId, pendingRoleChange.roleId);
       } catch (error) {
         console.error("Error changing role:", error);
         notifications.showError("Ocurrió un error al cambiar el rol");
+      } finally {
+        // Close modal and clean up
+        setShowConfirmModal(false);
+        setPendingRoleChange(null);
       }
-      
-      // Close modal and clean up
-      setShowConfirmModal(false);
-      setPendingRoleChange(null);
     }
   };
 
-  // Handle the actual user deletion process
+  // Handle user deletion using API
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     
     setIsDeleting(true);
     
     try {
-      const result = await deleteUser(userToDelete);
+      const result = await deleteUser(userToDelete); // This function now uses API
       
       if (result.success) {
         // Remove from local state
@@ -320,7 +254,8 @@ export default function UserManagementPanel() {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100"
+      className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100 admin-content-panel"
+      id="admin-panel-users"
     >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex items-center text-purple-800">

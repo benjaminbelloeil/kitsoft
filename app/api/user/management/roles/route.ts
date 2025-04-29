@@ -1,59 +1,47 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Get authenticated user
+    // Create a Supabase client with server privileges
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    // Check authentication - only admins should access this
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized access' },
-        { status: 401 }
-      );
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Check if the current user is an admin
-    const { data: adminCheck, error: adminError } = await supabase
-      .from('usuarios_roles')
+    // Check if the user is an admin
+    const { data: userRole, error: roleError } = await supabase
+      .from('usuarios_niveles')
       .select(`
-        id_nivel,
-        nivel!inner(
-          numero
-        )
+        niveles:id_nivel_actual(numero)
       `)
       .eq('id_usuario', user.id)
-      .eq('nivel.numero', 1);
-      
-    if (adminError || !adminCheck || adminCheck.length === 0) {
-      return NextResponse.json(
-        { error: 'Only admins can view roles' },
-        { status: 403 }
-      );
-    }
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
     
+    if (roleError || !userRole?.niveles?.numero === 1) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     // Get all roles
-    const { data: roles, error: rolesError } = await supabase
-      .from('nivel')
-      .select('*')
+    const { data: roles, error } = await supabase
+      .from('niveles')
+      .select('id_nivel, numero, titulo')
       .order('numero');
-      
-    if (rolesError) {
-      console.error('Error fetching roles:', rolesError);
-      return NextResponse.json(
-        { error: 'Error fetching roles' },
-        { status: 500 }
-      );
+    
+    if (error) {
+      console.error('Error fetching roles:', error);
+      return NextResponse.json({ error: 'Error fetching roles' }, { status: 500 });
     }
     
-    return NextResponse.json(roles || []);
+    return NextResponse.json(roles);
   } catch (error) {
-    console.error('Unexpected error in get all roles API:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error in GET /api/user/management/roles:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
