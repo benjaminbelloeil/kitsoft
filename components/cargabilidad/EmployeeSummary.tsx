@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< Updated upstream
 import React, { useState } from "react";
 import {
   PieChart,
@@ -15,6 +16,15 @@ import {
 import { Calendar, Users, Activity, AlertTriangle } from "lucide-react";
 import { color } from "framer-motion";
 
+=======
+import React, { useState } from 'react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer} from 'recharts';
+import { FiBarChart2 } from 'react-icons/fi';
+import { availableHours, totalLoad } from '@/app/(pages)/dashboard/cargabilidad/page';
+import { Calendar, Users, Activity, AlertTriangle } from 'lucide-react';
+import { ProgressCircle, CircularProgress, ColorRange } from '../ui/CircularProgress';
+import { dummyProjects } from '@/app/(pages)/dashboard/cargabilidad/page';
+>>>>>>> Stashed changes
 // -----------------------------------------------------------------------------
 // TYPES
 // -----------------------------------------------------------------------------
@@ -43,10 +53,14 @@ const dummyDaily = [
   { day: "J", hours: 8 },
   { day: "V", hours: 3 },
 ];
+<<<<<<< Updated upstream
 const dummyProjects: ProjectInfo[] = [
   { name: "Expediente Alfa", hours: 20, color: "#6366F1" },
   { name: "Delta Zero", hours: 12, color: "#60A5FA" },
 ];
+=======
+
+>>>>>>> Stashed changes
 const dummyProps: Required<CargabilidadProps> = {
   name: "Carlos Rodríguez",
   position: "Desarrollador Full Stack",
@@ -91,13 +105,18 @@ export function CargabilidadCard(props: CargabilidadProps) {
     totalHours,
     assignedHours,
     dailyHours,
+<<<<<<< Updated upstream
     projects,
   } = { ...dummyProps, ...props } as Required<CargabilidadProps>;
+=======
+  } = ({ ...dummyProps, ...props } as Required<CargabilidadProps>);
+>>>>>>> Stashed changes
 
   const [expanded, setExpanded] = useState(false);
   const utilization = Math.round(pct(assignedHours, totalHours));
   const available = Math.max(totalHours - assignedHours, 0);
 
+<<<<<<< Updated upstream
   return (
     <section className="relative bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       {/* decorativos */}
@@ -170,6 +189,56 @@ export function CargabilidadCard(props: CargabilidadProps) {
             </p>
           <div className="h-6 overflow-hidden flex">
             {projects.map((p) => {
+=======
+  const ChargabilityColorRange: ColorRange[] = [
+    { threshold: 90, color: 'emerald' },
+    { threshold: 70, color: 'blue' },
+    { threshold: 0, color: 'red' },
+  ];
+
+  return (
+    <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      {/* HEADER (toggle expand/collapse) */}
+      <div className="bg-white rounded-xl shadow-md border border-gray-100 pt-6 px-6 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row gap-6 pb-6 justify-between items-center">
+          <div className="flex items-center">
+            <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
+              <FiBarChart2 size={24} className="text-[#A100FF]" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-black">
+                Mi Cargabilidad
+              </h1>
+              <p className="text-gray-600 mt-2 max-w-2xl">
+                Visualiza y gestiona tu cargabilidad por proyectos. Equilibra tus horas de trabajo para un rendimiento óptimo.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-6">
+            <p className={`text-sm font-medium ${utilColor(totalLoad)}`}>
+              {utilLabel(totalLoad)}
+            </p>
+            <div
+              className={`relative w-20 h-20 ${utilBgColor(totalLoad)} rounded-full flex items-center justify-center shadow-sm border border-gray-100`}
+            >
+              <CircularProgress 
+                value={utilization}
+                size="small"
+                colorRanges={ChargabilityColorRange}
+              />
+            </div>
+          </div>
+        </div>
+        {/* EXPANDED BAR */}
+      
+        <div className="relative z-10  overflow-visible">
+          <p className="absolute left-6 -top-5 text-xs text-gray-500">
+            Asignado: {assignedHours}h / {totalHours}h
+          </p>
+          <div className="h-6 w-full flex overflow-hidden rounded-lg transition-all duration-300">
+            {dummyProjects.map((p) => {
+>>>>>>> Stashed changes
               const h = projectHours(p);
               const width = `${pct(h, totalHours)}%`;
               const raw = isRawColor(p.color);
@@ -207,6 +276,7 @@ export function CargabilidadCard(props: CargabilidadProps) {
             )}
           </div>
         </div>
+<<<<<<< Updated upstream
       ) : (
         <footer className="relative z-10 flex h-1 w-full">
           {projects.map((p) => {
@@ -304,10 +374,16 @@ export function CargabilidadCard(props: CargabilidadProps) {
           </div>
         </div>
       )}
+=======
+      
+      </div>
+
+      
+>>>>>>> Stashed changes
     </section>
   );
 }
 
 // alias para compatibilidad
 export const EmployeeSummary = CargabilidadCard;
-export default CargabilidadCard;
+export default EmployeeSummary;

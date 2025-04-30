@@ -6,7 +6,14 @@ import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
 import { HistoryTab } from '@/components/cargabilidad/RecordTab'; // Importamos el nuevo componente
 import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
 import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
+<<<<<<< Updated upstream
 import { Tabs } from '@/components/cargabilidad/Tabs';
+=======
+import { FiBarChart2 } from 'react-icons/fi';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import CargabilidadSkeleton from '@/components/cargabilidad/CargabilidadSkeleton';
+import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
+>>>>>>> Stashed changes
 
 export const PROJECT_COLORS = [
   'bg-purple-500',
@@ -23,7 +30,7 @@ interface Project {
   name: string;
   load: number;
   deadline?: string;
-  hoursPerWeek: number;
+  hours: number;
   color?: string; // Color del proyecto, opcional
 }
 
@@ -36,26 +43,39 @@ interface HistoryEntry {
     hours: number;
   }[];
 }
+const dummyProjects = [
+  { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hours: 10, color: PROJECT_COLORS[0] },
+  { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hours: 10, color: PROJECT_COLORS[1] },
+  { name: 'Omega UX', load: 20, deadline: '2025-07-15', hours: 10, color: PROJECT_COLORS[2] },  
+]
+
+/* const [projects, setProjects] = useState<Project[]>([
+  { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hours: 10, color: PROJECT_COLORS[0] },
+  { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hours: 10, color: PROJECT_COLORS[1] },
+]); */
+
+const employee = {
+  name: "Carlos Rodríguez",
+  role: "Desarrollador Full Stack",
+  totalHoursPerWeek: 40
+};
+
+const totalUsedHours = dummyProjects.reduce((sum, p) => sum + p.hours, 0);
+const availableHours = employee.totalHoursPerWeek - totalUsedHours;
+const totalLoad = Math.min(100, (totalUsedHours / employee.totalHoursPerWeek) * 100);
+const weeklyLoad = [45, 60, 78, 65, 70, 30, 20];
 
 const PersonalLoadPage = () => {
+<<<<<<< Updated upstream
   const [projects, setProjects] = useState<Project[]>([
     { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hoursPerWeek: 20, color: PROJECT_COLORS[0] },
     { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 12, color: PROJECT_COLORS[1] },
   ]);
 
+=======
+>>>>>>> Stashed changes
   // Añadimos 'history' a las opciones de pestañas
   const [activeTab, setActiveTab] = useState<'dashboard' | 'history'>('dashboard');
-
-  const employee = {
-    name: "Carlos Rodríguez",
-    role: "Desarrollador Full Stack",
-    totalHoursPerWeek: 40
-  };
-
-  const totalUsedHours = projects.reduce((sum, p) => sum + p.hoursPerWeek, 0);
-  const availableHours = employee.totalHoursPerWeek - totalUsedHours;
-  const totalLoad = Math.min(100, (totalUsedHours / employee.totalHoursPerWeek) * 100);
-  const weeklyLoad = [45, 60, 78, 65, 70, 30, 20];
 
   // Datos de historial de ejemplo para el componente HistoryTab
   const historyData: HistoryEntry[] = [
@@ -214,6 +234,7 @@ const PersonalLoadPage = () => {
   const AvailableHoursRatio = availableHours / employee.totalHoursPerWeek;
 
   return (
+<<<<<<< Updated upstream
     <main className="min-h-screen p-4 sm:p-6 md:p-10">
       <div className="max-w-6xl mx-auto">
         {/* Sistema de Alarma de cargabildad */}
@@ -234,6 +255,139 @@ const PersonalLoadPage = () => {
             color: project.color || PROJECT_COLORS[0], // Ensure color is always defined
           }))} // Pasamos los proyectos al componente
         />
+=======
+    <main className="min-h-screen bg-gray-50 py-6">
+      {/* Header card with purple icon */}
+      <EmployeeSummary/>
+      {/* <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row gap-6 justify-between items-center">
+              <div className="flex items-center">
+                <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
+                  <FiBarChart2 size={24} className="text-[#A100FF]" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-black">
+                    Mi Cargabilidad
+                  </h1>
+                  <p className="text-gray-600 mt-2 max-w-2xl">
+                    Visualiza y gestiona tu cargabilidad por proyectos. Equilibra tus horas de trabajo para un rendimiento óptimo.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-6">
+                <p className={`text-sm font-medium ${utilColor(totalLoad)}`}>
+                  {utilLabel(totalLoad)}
+                </p>
+                <div
+                  className={`relative w-20 h-20 ${utilBgColor(totalLoad)} rounded-full flex items-center justify-center shadow-sm border border-gray-100`}
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[{ value: totalLoad }, { value: 100 - totalLoad }]}
+                        dataKey="value"
+                        startAngle={90}
+                        endAngle={-270}
+                        innerRadius={22}
+                        outerRadius={30}
+                        stroke="none"
+                        cornerRadius={3}
+                        paddingAngle={0}
+                      >
+                        <Cell fill={utilBarColor(totalLoad)} />
+                        <Cell fill="#E5E7EB" />
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <span className="absolute inset-0 flex items-center justify-center text-md font-bold">
+                    {Math.round(totalLoad)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      Redesigned weekly stats summary card - no header, more visual approach
+        <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300">
+          <div className="p-4">
+            Progress bar visualization of weekly hours
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1">
+                  <div className="h-2.5 w-2.5 rounded-full bg-[#A100FF]"></div>
+                  <span className="text-sm font-medium text-gray-700">Distribución Semanal</span>
+                </div>
+                <span className="text-sm text-gray-500">{totalUsedHours}h / {employee.totalHoursPerWeek}h</span>
+              </div>
+              
+              <div className="h-8 w-full flex overflow-hidden rounded-lg shadow-sm">
+                {projects.map((project) => {
+                  const w = `${(project.hours / employee.totalHoursPerWeek) * 100}%`;
+                  return (
+                    <div
+                      key={project.name}
+                      className={`${project.color} flex items-center justify-center relative group`}
+                      style={{ width: w }}
+                    >
+                      <span className="text-[10px] font-semibold text-white truncate px-2">
+                        {project.hours}h
+                      </span>
+                      <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                        {project.name}: {project.hours}h
+                      </div>
+                    </div>
+                  );
+                })}
+                {availableHours > 0 && (
+                  <div
+                    style={{ width: `${(availableHours / employee.totalHoursPerWeek) * 100}%` }}
+                    className="bg-gray-200 flex items-center justify-center relative group"
+                  >
+                    <span className="text-[10px] font-semibold text-gray-700 truncate px-2">
+                      {availableHours}h
+                    </span>
+                    <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                      Disponible: {availableHours}h
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            Status pills row
+            <div className="flex flex-wrap items-center mt-4 gap-2">
+              <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs ${
+                availableHours < 0 
+                  ? 'bg-red-50 text-red-700 border border-red-100' 
+                  : availableHours < 8 
+                    ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                    : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+              }`}>
+                <span className="font-medium mr-1">
+                  {availableHours < 0 
+                    ? `Sobrecarga: ${Math.abs(availableHours)}h` 
+                    : `Disponible: ${availableHours}h`}
+                </span>
+              </div>
+              
+              {projects.map((project) => (
+                <div key={project.name} className="inline-flex items-center gap-1.5 bg-white rounded-full px-2.5 py-1 border border-gray-100 shadow-sm">
+                  <div className={`w-2 h-2 rounded-full ${project.color}`}></div>
+                  <span className="text-xs font-medium text-gray-700">{project.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div> */}
+
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Show alert only if overloaded */}
+        {AvailableHoursRatio < 0 && <LoadAlert totalLoad={totalLoad} />}
+>>>>>>> Stashed changes
         
         <div className="bg-white rounded-xl shadow-md mt-10 mb-6 border border-gray-100">
           {/* Actualizamos el componente Tabs para incluir la pestaña de historial */}
@@ -265,7 +419,7 @@ const PersonalLoadPage = () => {
           <div className="p-6">
             {activeTab === 'dashboard' ? (
               <DashboardTab
-                projects={projects}
+                projects={dummyProjects}
                 weeklyLoad={weeklyLoad}
                 availableHours={availableHours}
                 totalHoursPerWeek={employee.totalHoursPerWeek}
@@ -283,4 +437,5 @@ const PersonalLoadPage = () => {
   );
 };
 
+export {availableHours, totalLoad, employee, dummyProjects}; 
 export default PersonalLoadPage;
