@@ -2,13 +2,8 @@
 
 import { WeeklyLoadChart } from './WeeklyLoadChart';
 import { LinearProgress } from './LinearProgress';
-<<<<<<< Updated upstream
-import { CircularProgress } from './CircularProgress';
-import { FiBarChart2, FiPieChart, FiCalendar } from 'react-icons/fi';
-=======
 import { CircularProgress } from '../ui/CircularProgress';
 import { FiBarChart2, FiPieChart, FiCalendar, FiActivity } from 'react-icons/fi';
->>>>>>> Stashed changes
 
 interface Project {
   name: string;
