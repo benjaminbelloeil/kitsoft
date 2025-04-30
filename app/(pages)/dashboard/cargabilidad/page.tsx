@@ -4,16 +4,11 @@ import { useState } from 'react';
 import { ProjectCard } from '@/components/cargabilidad/ProjectCard';
 import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
 import { HistoryTab } from '@/components/cargabilidad/RecordTab'; // Importamos el nuevo componente
-import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
 import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
-<<<<<<< Updated upstream
-import { Tabs } from '@/components/cargabilidad/Tabs';
-=======
 import { FiBarChart2 } from 'react-icons/fi';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import CargabilidadSkeleton from '@/components/cargabilidad/CargabilidadSkeleton';
 import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
->>>>>>> Stashed changes
 
 export const PROJECT_COLORS = [
   'bg-purple-500',
@@ -66,14 +61,6 @@ const totalLoad = Math.min(100, (totalUsedHours / employee.totalHoursPerWeek) * 
 const weeklyLoad = [45, 60, 78, 65, 70, 30, 20];
 
 const PersonalLoadPage = () => {
-<<<<<<< Updated upstream
-  const [projects, setProjects] = useState<Project[]>([
-    { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hoursPerWeek: 20, color: PROJECT_COLORS[0] },
-    { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 12, color: PROJECT_COLORS[1] },
-  ]);
-
-=======
->>>>>>> Stashed changes
   // Añadimos 'history' a las opciones de pestañas
   const [activeTab, setActiveTab] = useState<'dashboard' | 'history'>('dashboard');
 
@@ -234,28 +221,6 @@ const PersonalLoadPage = () => {
   const AvailableHoursRatio = availableHours / employee.totalHoursPerWeek;
 
   return (
-<<<<<<< Updated upstream
-    <main className="min-h-screen p-4 sm:p-6 md:p-10">
-      <div className="max-w-6xl mx-auto">
-        {/* Sistema de Alarma de cargabildad */}
-
-        {/* <LoadAlert totalLoad={totalLoad} /> */}
-        
-        {/* Tarjetas de Proyectos */}
-        {/* Resumen de Cargabilidad de Empleado */}
-        <EmployeeSummary
-          name={employee.name}
-          role={employee.role}
-          totalLoad={totalLoad}
-          totalUsedHours={totalUsedHours}
-          availableHours={availableHours}
-          totalHoursPerWeek={employee.totalHoursPerWeek}
-          projects={projects.map(project => ({
-            ...project,
-            color: project.color || PROJECT_COLORS[0], // Ensure color is always defined
-          }))} // Pasamos los proyectos al componente
-        />
-=======
     <main className="min-h-screen bg-gray-50 py-6">
       {/* Header card with purple icon */}
       <EmployeeSummary/>
@@ -387,7 +352,6 @@ const PersonalLoadPage = () => {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Show alert only if overloaded */}
         {AvailableHoursRatio < 0 && <LoadAlert totalLoad={totalLoad} />}
->>>>>>> Stashed changes
         
         <div className="bg-white rounded-xl shadow-md mt-10 mb-6 border border-gray-100">
           {/* Actualizamos el componente Tabs para incluir la pestaña de historial */}
