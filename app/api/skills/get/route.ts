@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Retrieve user skills with join to get skill names
     const { data: skills, error } = await supabase
-      .from('habilidades_usuarios')
+      .from('usuarios_habilidades')
       .select(`
         id,
         id_usuario,

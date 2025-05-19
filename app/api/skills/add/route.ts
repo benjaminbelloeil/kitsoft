@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     
     // Check if the skill already exists for this user
     const { data: existingSkill, error: checkError } = await supabase
-      .from('habilidades_usuarios')
+      .from('usuarios_habilidades')
       .select('*')
       .eq('id_usuario', userId)
       .eq('id_habilidad', skillId)
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     // If the skill already exists, update it instead of adding a new one
     if (existingSkill) {
       const { error: updateError } = await supabase
-        .from('habilidades_usuarios')
+        .from('usuarios_habilidades')
         .update({ nivel: level })
         .eq('id_usuario', userId)
         .eq('id_habilidad', skillId);
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     
     // Insert the new skill
     const { error: insertError } = await supabase
-      .from('habilidades_usuarios')
+      .from('usuarios_habilidades')
       .insert({
         id_usuario: userId,
         id_habilidad: skillId,

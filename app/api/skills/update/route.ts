@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest) {
     
     // Update the skill level
     const { error } = await supabase
-      .from('habilidades_usuarios')
+      .from('usuarios_habilidades')
       .update({ nivel: level })
       .eq('id_usuario', userId)
       .eq('id_habilidad', skillId);
