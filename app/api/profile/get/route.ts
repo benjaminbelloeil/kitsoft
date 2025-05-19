@@ -28,8 +28,6 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    console.log(`Fetching profile for user ID: ${userId}`);
-    
     // Get the main user data with error handling
     const { data: userData, error: userError } = await supabase
       .from('usuarios')
@@ -44,8 +42,6 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
-    
-    console.log(`Found user data:`, userData);
     
     // Get related data - switched to the singular table names
     const addressPromise = supabase
@@ -115,7 +111,6 @@ export async function GET(request: NextRequest) {
       } : undefined
     };
     
-    console.log(`Returning profile data:`, profileData);
     return NextResponse.json(profileData);
   } catch (error) {
     console.error('Unexpected error in profile get API:', error);

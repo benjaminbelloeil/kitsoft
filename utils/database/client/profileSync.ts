@@ -7,7 +7,6 @@ import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
  */
 export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{success: boolean, error?: string}> {
   try {
-    console.log("Starting profile save with: ", JSON.stringify(profileData, null, 2));
     
     // Basic validation
     if (!profileData.ID_Usuario) {
@@ -41,7 +40,6 @@ export async function saveUserProfile(profileData: UserProfileUpdate): Promise<{
  */
 export async function getUserCompleteProfile(userId: string): Promise<UserProfile | null> {
   try {
-    console.log(`Fetching profile for user ID: ${userId}`);
     
     // Send the request to the API
     const res = await fetch(`/api/profile/get?userId=${encodeURIComponent(userId)}`, {
