@@ -95,29 +95,30 @@ export default function ProjectsHeader({
   const { totalTasks, completedTasks, completionRate, pendingTasks, averageCarga } = metrics;
 
   return (
-    <div className="mb-6">
+    <div className="max-w-[1400px] mx-auto py-6  px-4 sm:px-6 lg:px-8 mb-8">
       {/* Sección superior del header */}
-      <div className="bg-[#A100FF] rounded-t-xl p-4 md:p-6 text-white flex flex-col md:flex-row justify-between items-center">
+      <div className="bg-gray-10 shadow-md border border-gray-100 rounded-t-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center">
+        {/* Icono PlaceHolder */}
         <div className="flex items-center mb-4 md:mb-0">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3">
+          <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#A100FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Proyectos Activos</h1>
-            <p className="text-sm opacity-90 text-white">Resumen de métricas</p>
+            <h1 className="text-xl font-bold text-black">Proyectos Activos</h1>
+            <p className="text-sm opacity-90 text-black">Resumen de métricas</p>
           </div>
         </div>
-
+        {/* Usuario + progreso */}
         <div className="flex items-center">
-          <span className="mr-4 text-lg font-medium text-white">{userName}</span>
+          <span className="mr-4 text-lg font-medium text-black">{userName}</span>
           <div className="relative w-16 h-16">
             <svg className="w-16 h-16" viewBox="0 0 100 100">
               <circle 
                 cx="50" cy="50" r="45" 
                 fill="none" 
-                stroke="rgba(255,255,255,0.2)" 
+                stroke="rgba(78, 78, 78, 0.2)" 
                 strokeWidth="10"
               />
               <circle 
@@ -129,7 +130,7 @@ export default function ProjectsHeader({
                 strokeLinecap="round"
               />
             </svg>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg font-bold text-white">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg font-bold text-black">
               {completionRate}%
             </div>
           </div>
