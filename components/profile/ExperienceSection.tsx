@@ -289,7 +289,9 @@ export default function ExperienceSection({ initialExperiences, loading = false,
         // Update or add skills for the experience
         if (newExperience.skills) {
           for (const skill of newExperience.skills) {
-            if (skill.id) {
+            // Check if this skill is already linked to the experience
+            const isLinkedToExperience = existingSkills.some(existingSkill => existingSkill.id === skill.id);
+            if (skill.id && isLinkedToExperience) {
               // Update existing skill level
               await updateSkillLevel(
                 skill.id,
@@ -298,16 +300,14 @@ export default function ExperienceSection({ initialExperiences, loading = false,
                 skill.level
               );
             } else {
-              // Add new skill
+              // Add new skill to experience (even if it exists in habilidades)
               const response = await addSkillToExperience(
                 skill.name,
                 editingExperienceId,
                 userId,
                 skill.level
               );
-              
               if (response.success && response.skillId) {
-                // Update the skill ID for future reference
                 skill.id = response.skillId;
               }
             }
