@@ -64,9 +64,6 @@ export async function POST(request: Request) {
       .limit(1)
       .single();
 
-    // Log the existing record for debugging
-    console.log('Existing record:', JSON.stringify(existingRecord, null, 2));
-
     const timestamp = new Date().toISOString();
     
     if (existingRecord) {
@@ -77,7 +74,6 @@ export async function POST(request: Request) {
       if (!currentRoleId) {
         console.warn(`Warning: User ${userId} has no current role set, setting id_nivel_previo to null`);
       } else if (currentRoleId === roleId) {
-        console.log(`User ${userId} already has role ${roleId}, no change needed`);
         return NextResponse.json({ 
           success: true, 
           message: 'No role change needed, user already has this role',
@@ -85,8 +81,6 @@ export async function POST(request: Request) {
         });
       }
 
-      console.log(`Updating user ${userId} role: id_nivel_previo=${currentRoleId}, id_nivel_actual=${roleId}`);
-      
       // If a record exists, update it instead of creating a new one
       const { data: updateData, error: updateError } = await supabase
         .from('usuarios_niveles')
@@ -105,13 +99,9 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-      
-      console.log('Updated record:', JSON.stringify(updateData, null, 2));
     } else {
       // If no record exists, create a new one (should be rare)
       const id_historial = randomUUID();
-      
-      console.log(`Creating new role record for user ${userId}: id_nivel_actual=${roleId}`);
       
       const { data: insertData, error: insertError } = await supabase
         .from('usuarios_niveles')
@@ -133,8 +123,6 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-      
-      console.log('Inserted record:', JSON.stringify(insertData, null, 2));
     }
 
     return NextResponse.json({ 

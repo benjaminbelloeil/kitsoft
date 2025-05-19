@@ -36,8 +36,6 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    console.log("Starting profile save with: ", JSON.stringify(profileData, null, 2));
-    
     // Prepare user data with lowercase field names
     const userData = {
       id_usuario: profileData.ID_Usuario,
@@ -48,8 +46,6 @@ export async function POST(request: NextRequest) {
       url_avatar: profileData.URL_Avatar || null // Changed from 'placeholder-avatar.png' to null
     };
     
-    console.log("Attempting to upsert to usuarios table with data:", userData);
-    
     // Insert or update the user record
     const { data: upsertData, error: userError } = await supabase
       .from('usuarios')
@@ -57,8 +53,6 @@ export async function POST(request: NextRequest) {
       .select();
     
     if (userError) {
-      console.error('Error saving user:', userError);
-      
       // Try to create the user using the Postgres function instead
       try {
         const { data: fnData, error: fnError } = await supabase
@@ -72,24 +66,18 @@ export async function POST(request: NextRequest) {
           });
         
         if (fnError) {
-          console.error('Error using function save_user_profile:', fnError);
           return NextResponse.json(
             { error: `Error al guardar usuario: ${fnError.message || 'Error desconocido'}` },
             { status: 500 }
           );
         }
-        
-        console.log('User created using function:', fnData);
       } catch (fnCatchError: any) {
-        console.error('Exception using save_user_profile function:', fnCatchError);
         return NextResponse.json(
           { error: `Error al guardar usuario: ${userError.message || 'Error desconocido'}` },
           { status: 500 }
         );
       }
-    } else {
-      console.log('User upserted successfully:', upsertData);
-    }
+    } 
     
     // Process address if provided
     if (profileData.direccion && profileData.direccion.Pais) {
@@ -101,8 +89,6 @@ export async function POST(request: NextRequest) {
         id_usuario: profileData.ID_Usuario,
         tipo: ''
       };
-      
-      console.log("Saving address data:", direccionData);
       
       // First try to get existing address
       const { data: existingAddress } = await supabase
@@ -122,12 +108,8 @@ export async function POST(request: NextRequest) {
       
       if (addressError) {
         console.error('Error saving address:', addressError);
-      } else {
-        console.log('Address saved successfully');
       }
-    } else {
-      console.log('No address data provided or incomplete');
-    }
+    } 
     
     // Process phone if provided
     if (profileData.telefono && profileData.telefono.Numero) {
@@ -158,12 +140,8 @@ export async function POST(request: NextRequest) {
       
       if (phoneError) {
         console.error('Error saving phone:', phoneError);
-      } else {
-        console.log('Phone saved successfully');
       }
-    } else {
-      console.log('No phone data provided or incomplete');
-    }
+    } 
     
     // Process email if provided (only for new users)
     if (profileData.correo?.Correo) {

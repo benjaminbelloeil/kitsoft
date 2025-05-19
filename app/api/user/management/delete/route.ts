@@ -44,8 +44,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    console.log(`Admin user ${user.id} is attempting to delete user ${userId}`);
-    
     // Begin transaction by deleting related records in the correct order
     
     // 1. Delete from correos (email table) first since it has a foreign key constraint
@@ -135,7 +133,6 @@ export async function DELETE(request: NextRequest) {
       
     // 7. Delete the auth user using the admin client
     try {
-      console.log(`Deleting auth user ${userId} with admin client`);
       const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(userId);
       
       if (authDeleteError) {

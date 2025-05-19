@@ -134,8 +134,6 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
       
       const usersData = await res.json();
       
-      console.log("Refreshed user data:", usersData);
-      
       // Update the state and cache
       setUsers(usersData);
       updateCache(usersData);

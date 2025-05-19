@@ -135,7 +135,6 @@ export default function ExperienceSection({ initialExperiences, loading = false,
             
             const fetchedExperiences = await getUserExperiences(user.id);
             if (fetchedExperiences && fetchedExperiences.length > 0) {
-              console.log("Fetched experiences:", fetchedExperiences);
               
               const formattedExperiences = fetchedExperiences.map(exp => {
                 // Map the skills correctly from the DB format
