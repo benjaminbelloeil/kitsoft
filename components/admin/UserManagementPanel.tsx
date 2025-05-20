@@ -12,14 +12,14 @@ import {
   FiUserX
 } from "react-icons/fi";
 import { 
-  getAllRoles,
+  getAllLevels,
   User,
   UserRole,
   deleteUser
 } from "@/utils/database/client/userManagementSync";
 import UserList from "./UserList";
 import { useNotificationState } from "@/components/ui/toast-notification";
-import RoleChangeModal from "./modals/RoleChangeModal";
+import LevelChangeModal from "./modals/LevelChangeModal";
 import DeleteUserModal from "./modals/DeleteUserModal";
 
 // Cache key for user management data
@@ -42,7 +42,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const notifications = useNotificationState();
-  const [pendingRoleChange, setPendingRoleChange] = useState<{userId: string, roleId: string} | null>(null);
+  const [pendingLevelChange, setPendingLevelChange] = useState<{userId: string, levelId: string} | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [userToDeleteName, setUserToDeleteName] = useState<string>("");
 
@@ -57,7 +57,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
     }
   };
 
-  // Initialize with server data and fetch roles
+  // Initialize with server data and fetch levels
   useEffect(() => {
     if (serverUsers.length > 0) {
       setUsers(serverUsers);
@@ -66,7 +66,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
       // Cache the server data
       localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
         users: serverUsers,
-        roles: roles // This will be empty initially, but updated after fetching roles
+        roles: roles // This will be empty initially, but updated after fetching levels
       }));
       localStorage.setItem(USER_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
     } else {
@@ -74,27 +74,27 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
       refreshData();
     }
     
-    // Always fetch roles since they're needed for the role change functionality
-    const fetchRoles = async () => {
+    // Always fetch levels since they're needed for the level change functionality
+    const fetchLevels = async () => {
       try {
-        const rolesData = await getAllRoles();
-        setRoles(rolesData);
+        const levelsData = await getAllLevels();
+        setRoles(levelsData);
         
-        // Update the cache with roles
+        // Update the cache with levels
         const cachedData = localStorage.getItem(USER_MANAGEMENT_DATA_KEY);
         if (cachedData) {
           const parsedCache = JSON.parse(cachedData);
           localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
             ...parsedCache,
-            roles: rolesData
+            roles: levelsData
           }));
         }
       } catch (error) {
-        console.error("Error fetching roles:", error);
+        console.error("Error fetching levels:", error);
       }
     };
     
-    fetchRoles();
+    fetchLevels();
   }, [serverUsers]);
 
   // Update cache function
@@ -145,9 +145,9 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
     }
   };
 
-  // Handler for confirming role change
-  const handleConfirmRoleChange = (userId: string, roleId: string) => {
-    setPendingRoleChange({ userId, roleId });
+  // Handler for confirming level change
+  const handleConfirmLevelChange = (userId: string, levelId: string) => {
+    setPendingLevelChange({ userId, levelId });
     setShowConfirmModal(true);
   };
 
@@ -163,16 +163,16 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
     setShowDeleteModal(true);
   };
 
-  // Update users state after role change
-  const updateUserRole = (userId: string, roleId: string) => {
-    const newRole = roles.find(r => r.id_nivel === roleId);
+  // Update users state after level change
+  const updateUserLevel = (userId: string, levelId: string) => {
+    const newLevel = roles.find(r => r.id_nivel === levelId);
     
     const updatedUsers = users.map(user => {
       if (user.id_usuario === userId) {
         return {
           ...user,
           registered: true,
-          role: newRole || user.role
+          role: newLevel || user.role
         };
       }
       return user;
@@ -189,47 +189,47 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
     updateCache(updatedUsers);
   };
 
-  // Handle role change using API
-  const handleRoleChange = async () => {
-    if (pendingRoleChange) {
+  // Handle level change using API
+  const handleLevelChange = async () => {
+    if (pendingLevelChange) {
       try {
-        // Call API to update the role
-        const res = await fetch('/api/user/management/update-role', {
+        // Call API to update the level
+        const res = await fetch('/api/user/management/update-level', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: pendingRoleChange.userId,
-            roleId: pendingRoleChange.roleId
+            userId: pendingLevelChange.userId,
+            levelId: pendingLevelChange.levelId
           }),
         });
 
         if (!res.ok) {
-          throw new Error('Failed to update role');
+          throw new Error('Failed to update level');
         }
 
-        // Find the role details
-        const selectedRole = roles.find(role => role.id_nivel === pendingRoleChange.roleId);
+        // Find the level details
+        const selectedLevel = roles.find(level => level.id_nivel === pendingLevelChange.levelId);
         
         notifications.showSuccess(
-          selectedRole ? `El usuario ahora tiene rol de ${selectedRole.titulo}` : "Rol actualizado con éxito"
+          selectedLevel ? `El usuario ahora tiene nivel de ${selectedLevel.titulo}` : "Nivel actualizado con éxito"
         );
         
         // Update the local state
-        updateUserRole(pendingRoleChange.userId, pendingRoleChange.roleId);
+        updateUserLevel(pendingLevelChange.userId, pendingLevelChange.levelId);
         
-        // Refresh data to ensure we have the latest role information
+        // Refresh data to ensure we have the latest level information
         setTimeout(() => {
           refreshData();
         }, 500);
       } catch (error) {
-        console.error("Error changing role:", error);
-        notifications.showError("Ocurrió un error al cambiar el rol");
+        console.error("Error changing level:", error);
+        notifications.showError("Ocurrió un error al cambiar el nivel");
       } finally {
         // Close modal and clean up
         setShowConfirmModal(false);
-        setPendingRoleChange(null);
+        setPendingLevelChange(null);
       }
     }
   };
@@ -395,15 +395,15 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         loading={loading}
         search={search}
         filter={filter}
-        onConfirmRoleChange={handleConfirmRoleChange}
+        onConfirmRoleChange={handleConfirmLevelChange}
         onConfirmDelete={handleConfirmDelete}
       />
 
-      {/* Role Change Modal */}
-      <RoleChangeModal 
+      {/* Level Change Modal */}
+      <LevelChangeModal 
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleRoleChange}
+        onConfirm={handleLevelChange}
       />
 
       {/* Delete User Modal */}

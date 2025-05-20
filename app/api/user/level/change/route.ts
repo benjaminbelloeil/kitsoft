@@ -15,16 +15,17 @@ export async function POST(request: NextRequest) {
     }
     
     // Get the request body
-    const { userId } = await request.json();
+    const { userId, newLevelNumber } = await request.json();
     
-    if (!userId) {
+    if (!userId || newLevelNumber === undefined) {
       return NextResponse.json(
-        { error: 'User ID is required' },
+        { error: 'Missing required parameters' },
         { status: 400 }
       );
     }
     
-    // Security check: normal users can only reset their own roles
+    // Security check: normal users can't change levels
+    // Only admins can change levels
     if (userId !== user.id) {
       // Check if the current user is an admin
       const { data: adminCheck, error: adminError } = await supabase
@@ -40,60 +41,60 @@ export async function POST(request: NextRequest) {
         
       if (adminError || !adminCheck || adminCheck.length === 0) {
         return NextResponse.json(
-          { error: 'Only admins can reset other users\' roles' },
+          { error: 'Only admins can change user levels' },
           { status: 403 }
         );
       }
     }
     
-    // First, get the ID of the staff role
-    const { data: staffRole, error: staffError } = await supabase
+    // Get the level ID for the new level number
+    const { data: levelData, error: levelError } = await supabase
       .from('nivel')
       .select('id_nivel')
-      .eq('numero', 0)
+      .eq('numero', newLevelNumber)
       .single();
       
-    if (staffError || !staffRole) {
-      console.error('Error finding staff role:', staffError);
+    if (levelError || !levelData) {
+      console.error('Error finding level:', levelError);
       return NextResponse.json(
-        { error: 'Error finding staff role' },
-        { status: 500 }
+        { error: 'Invalid level number' },
+        { status: 400 }
       );
     }
     
-    // Delete all existing roles for this user
+    // Delete all existing levels for this user first
     const { error: deleteError } = await supabase
       .from('usuarios_roles')
       .delete()
       .eq('id_usuario', userId);
       
     if (deleteError) {
-      console.error('Error deleting existing roles:', deleteError);
+      console.error('Error deleting existing levels:', deleteError);
       return NextResponse.json(
-        { error: 'Error deleting existing roles' },
+        { error: 'Error deleting existing levels' },
         { status: 500 }
       );
     }
     
-    // Assign the staff role to the user
+    // Assign the new level
     const { error: assignError } = await supabase
       .from('usuarios_roles')
       .insert({
         id_usuario: userId,
-        id_nivel: staffRole.id_nivel
+        id_nivel: levelData.id_nivel
       });
       
     if (assignError) {
-      console.error('Error assigning staff role:', assignError);
+      console.error('Error assigning new level:', assignError);
       return NextResponse.json(
-        { error: 'Error assigning staff role' },
+        { error: 'Error assigning new level' },
         { status: 500 }
       );
     }
     
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Unexpected error in reset user role API:', error);
+    console.error('Unexpected error in change level API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

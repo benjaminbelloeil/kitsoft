@@ -1,13 +1,13 @@
 import { FiAlertCircle } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface RoleChangeModalProps {
+interface LevelChangeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-export default function RoleChangeModal({ isOpen, onClose, onConfirm }: RoleChangeModalProps) {
+export default function LevelChangeModal({ isOpen, onClose, onConfirm }: LevelChangeModalProps) {
   // Modal animation variants
   const modalBackdropVariants = {
     hidden: { opacity: 0 },
@@ -52,10 +52,10 @@ export default function RoleChangeModal({ isOpen, onClose, onConfirm }: RoleChan
               <div className="mr-4 p-2 rounded-full bg-purple-100">
                 <FiAlertCircle className="text-purple-600" size={24} />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">Confirmar cambio de rol</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Confirmar cambio de nivel</h3>
             </div>
             <p className="text-gray-600 mb-6 pl-12">
-              ¿Estás seguro que deseas cambiar el rol de este usuario? 
+              ¿Estás seguro que deseas cambiar el nivel de este usuario? 
               Este cambio modificará los permisos del usuario en el sistema.
             </p>
             <div className="flex justify-end space-x-3 mt-4">

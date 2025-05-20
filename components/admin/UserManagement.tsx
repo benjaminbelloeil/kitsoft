@@ -5,8 +5,8 @@
 import { useState, useEffect } from 'react';
 import { 
   getAllUsersWithRoles, 
-  getAllRoles, 
-  updateUserRole 
+  getAllLevels, 
+  updateUserLevel 
 } from '@/utils/database/client/userManagementSync';
 import { 
   useNotificationState, 
@@ -49,13 +49,13 @@ export default function UserManagement() {
     async function loadData() {
       setLoading(true);
       
-      const [usersData, rolesData] = await Promise.all([
+      const [usersData, levelsData] = await Promise.all([
         getAllUsersWithRoles(),
-        getAllRoles()
+        getAllLevels()
       ]);
       
       setUsers(usersData);
-      setRoles(rolesData);
+      setRoles(levelsData);
       setLoading(false);
     }
     
@@ -72,10 +72,10 @@ export default function UserManagement() {
            user.role?.titulo?.toLowerCase().includes(searchTerm);
   });
 
-  // Start editing a user's role
-  const startEditing = (userId: string, currentRoleId?: string) => {
+  // Start editing a user's level
+  const startEditing = (userId: string, currentLevelId?: string) => {
     setEditingUser(userId);
-    setSelectedRole(currentRoleId || null);
+    setSelectedRole(currentLevelId || null);
   };
 
   // Cancel editing
@@ -84,35 +84,35 @@ export default function UserManagement() {
     setSelectedRole(null);
   };
 
-  // Save the role change
+  // Save the level change
   const saveRoleChange = async (userId: string) => {
     if (!selectedRole) return;
     
     try {
-      const result = await updateUserRole(userId, selectedRole);
+      const result = await updateUserLevel(userId, selectedRole);
       
       if (result.success) {
-        notifications.showSuccess('Rol actualizado con éxito');
+        notifications.showSuccess('Nivel actualizado con éxito');
         
         // Update the local state
         setUsers(prevUsers => 
           prevUsers.map(user => {
             if (user.id_usuario === userId) {
-              const newRole = roles.find(r => r.id_nivel === selectedRole);
+              const newLevel = roles.find(r => r.id_nivel === selectedRole);
               return {
                 ...user,
-                role: newRole
+                role: newLevel
               };
             }
             return user;
           })
         );
       } else {
-        notifications.showError(`Error al actualizar rol: ${result.error}`);
+        notifications.showError(`Error al actualizar nivel: ${result.error}`);
       }
     } catch (err) {
-      notifications.showError('Error al actualizar rol');
-      console.error('Error updating role:', err);
+      notifications.showError('Error al actualizar nivel');
+      console.error('Error updating level:', err);
     }
     
     // Reset editing state

@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Get user role with admin information
-    const { data: roles, error } = await supabase
+    // Get user level with admin information
+    const { data: levels, error } = await supabase
       .from('usuarios_roles')
       .select(`
         id_nivel,
@@ -44,9 +44,9 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Check if any of the roles have admin privileges (role number 1)
-    const isAdmin = (roles || []).some(role => 
-      role.nivel && role.nivel.numero === 1
+    // Check if any of the levels have admin privileges (level number 1)
+    const isAdmin = (levels || []).some(level => 
+      level.nivel && level.nivel.numero === 1
     );
     
     return NextResponse.json({ isAdmin });

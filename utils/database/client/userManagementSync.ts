@@ -49,9 +49,9 @@ export async function getAllUsersWithRoles(): Promise<User[]> {
 }
 
 /**
- * Get all available roles
+ * Get all available levels
  */
-export async function getAllRoles(): Promise<UserRole[]> {
+export async function getAllLevels(): Promise<UserRole[]> {
   try {
     const res = await fetch('/api/user/management/roles', {
       method: 'GET',
@@ -61,43 +61,43 @@ export async function getAllRoles(): Promise<UserRole[]> {
     });
 
     if (!res.ok) {
-      console.error('Error fetching roles:', await res.text());
+      console.error('Error fetching levels:', await res.text());
       return [];
     }
 
     return await res.json();
   } catch (err) {
-    console.error('Exception in getAllRoles:', err);
+    console.error('Exception in getAllLevels:', err);
     return [];
   }
 }
 
 /**
- * Update a user's role - completely replaces the previous implementation
- * to fix issues with role changes not persisting
+ * Update a user's level - completely replaces the previous implementation
+ * to fix issues with level changes not persisting
  */
-export async function updateUserRole(
+export async function updateUserLevel(
   userId: string, 
-  roleId: string
+  levelId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log(`Updating role for user ${userId} to ${roleId}`);
+    console.log(`Updating level for user ${userId} to ${levelId}`);
     
-    const res = await fetch('/api/user/management/update-role', {
+    const res = await fetch('/api/user/management/update-level', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId, roleId }),
+      body: JSON.stringify({ userId, levelId }),
     });
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error('Error updating user role:', errorText);
+      console.error('Error updating user level:', errorText);
       return { success: false, error: errorText };
     }
 
-    console.log(`Successfully updated role for user ${userId}`);
+    console.log(`Successfully updated level for user ${userId}`);
     return { success: true };
   } catch (err: any) {
     console.error('Exception in updateUserRole:', err);

@@ -25,72 +25,72 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Security check: normal users can only ensure roles for themselves
+    // Security check: normal users can only ensure levels for themselves
     if (userId !== user.id) {
-      // TODO: Add admin check here when implementing admin roles
+      // TODO: Add admin check here when implementing admin levels
       return NextResponse.json(
-        { error: 'You can only manage your own roles' },
+        { error: 'You can only manage your own levels' },
         { status: 403 }
       );
     }
     
-    // First get all role entries for this user to check if any exist
-    const { data: existingRoles, error: rolesError } = await supabase
+    // First get all level entries for this user to check if any exist
+    const { data: existingLevels, error: levelsError } = await supabase
       .from('usuarios_roles')
       .select('id_nivel, nivel(numero)')
       .eq('id_usuario', userId);
       
-    if (rolesError) {
-      console.error('Error checking user roles:', rolesError);
+    if (levelsError) {
+      console.error('Error checking user levels:', levelsError);
       return NextResponse.json(
-        { error: 'Error checking user roles' },
+        { error: 'Error checking user levels' },
         { status: 500 }
       );
     }
     
-    // If user already has roles, return the role number of the first one
-    // In a proper implementation, we might need to handle multiple roles or role priority
-    if (existingRoles && existingRoles.length > 0) {
-      const roleNumber = existingRoles[0].nivel?.numero || 0;
-      return NextResponse.json({ roleNumber });
+    // If user already has levels, return the level number of the first one
+    // In a proper implementation, we might need to handle multiple levels or level priority
+    if (existingLevels && existingLevels.length > 0) {
+      const levelNumber = existingLevels[0].nivel?.numero || 0;
+      return NextResponse.json({ levelNumber });
     }
     
-    // If no role exists, assign the default role (staff = 0)
-    // First get the ID of the staff role
-    const { data: staffRole, error: staffError } = await supabase
+    // If no level exists, assign the default level (staff = 0)
+    // First get the ID of the staff level
+    const { data: staffLevel, error: staffError } = await supabase
       .from('nivel')
       .select('id_nivel')
       .eq('numero', 0)
       .single();
       
-    if (staffError || !staffRole) {
-      console.error('Error finding staff role:', staffError);
+    if (staffError || !staffLevel) {
+      console.error('Error finding staff level:', staffError);
       return NextResponse.json(
-        { error: 'Error finding default role' },
+        { error: 'Error finding default level' },
         { status: 500 }
       );
     }
     
-    // Assign the staff role to the user
+    // Assign the staff level to the user
     const { error: assignError } = await supabase
       .from('usuarios_roles')
       .insert({
         id_usuario: userId,
-        id_nivel: staffRole.id_nivel
+        id_nivel: staffLevel.id_nivel
       });
       
     if (assignError) {
-      console.error('Error assigning default role:', assignError);
+      console.error('Error assigning default level:', assignError);
       return NextResponse.json(
-        { error: 'Error assigning default role' },
+        { error: 'Error assigning default level' },
         { status: 500 }
       );
     }
     
-    // Return the default role number
-    return NextResponse.json({ roleNumber: 0 });
+    // Return the default level number
+    return NextResponse.json({ levelNumber: 0 });
   } catch (error) {
-    console.error('Unexpected error in ensure user role API:', error);
+    console.error('Unexpected error in ensure user level API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
