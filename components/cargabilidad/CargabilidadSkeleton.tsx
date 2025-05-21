@@ -66,7 +66,10 @@ export default function CargabilidadSkeleton() {
                     <div className="h-40 flex items-end gap-1">
                       {[...Array(7)].map((_, i) => (
                         <div key={i} className="flex-1 flex flex-col items-center">
-                          <div className="w-full bg-gray-200 rounded-t-sm" style={{ height: `${Math.random() * 80 + 20}%` }}></div>
+                          <div
+                            className="w-full chart-bar"
+                            style={{ '--bar-height': Math.random() * 80 + 20 } as React.CSSProperties}
+                          ></div>
                           <div className="h-3 w-3 bg-gray-200 rounded mt-2"></div>
                         </div>
                       ))}

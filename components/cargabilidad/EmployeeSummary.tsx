@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Activity } from 'lucide-react';
-
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer} from 'recharts';
+import { FiBarChart2 } from 'react-icons/fi';
+import { availableHours, totalLoad } from '@/app/(pages)/dashboard/cargabilidad/page';
+import { Calendar, Users, Activity, AlertTriangle } from 'lucide-react';
+import { ProgressCircle, CircularProgress, ColorRange } from '../ui/CircularProgress';
+import { dummyProjects } from '@/app/(pages)/dashboard/cargabilidad/page';
 // -----------------------------------------------------------------------------
 // TYPES
 // -----------------------------------------------------------------------------
@@ -11,7 +14,7 @@ export interface ProjectInfo {
   name: string;
   hours?: number;
   hoursPerWeek?: number;
-  color: string;
+  color: string; // hex / rgb / clase Tailwind
 }
 export interface CargabilidadProps {
   name?: string;
@@ -26,19 +29,15 @@ export interface CargabilidadProps {
 // DUMMY DATA
 // -----------------------------------------------------------------------------
 const dummyDaily = [
-  { day: 'L', hours: 8 },
-  { day: 'M', hours: 6 },
-  { day: 'X', hours: 7 },
-  { day: 'J', hours: 8 },
-  { day: 'V', hours: 3 },
-];
-const dummyProjects: ProjectInfo[] = [
-  { name: 'Expediente Alfa', hours: 10, color: '#6366F1' },
-  { name: 'Delta Zero', hours: 15, color: '#60A5FA' },
+  { day: "L", hours: 8 },
+  { day: "M", hours: 6 },
+  { day: "X", hours: 7 },
+  { day: "J", hours: 8 },
+  { day: "V", hours: 3 },
 ];
 const dummyProps: Required<CargabilidadProps> = {
-  name: 'Carlos Rodríguez',
-  position: 'Desarrollador Full Stack',
+  name: "Carlos Rodríguez",
+  position: "Desarrollador Full Stack",
   totalHours: 40,
   assignedHours: dummyProjects.reduce((sum, p) => sum + (p.hours ?? 0), 0),
   dailyHours: dummyDaily,
@@ -48,153 +47,137 @@ const dummyProps: Required<CargabilidadProps> = {
 // -----------------------------------------------------------------------------
 // HELPERS
 // -----------------------------------------------------------------------------
+
+// asignador de colores 
+const colorMap = {
+  red: "bg-red-50/2 border border-red-100/20",
+  green: "bg-emerald-500/10 border border-green-100/20",
+  yellow: "bg-yellow-50/2 border border-yellow-100/20",
+};
+
 const pct = (v: number, t: number) => (t <= 0 ? 0 : (v / t) * 100);
 const utilLabel = (u: number) =>
-  u >= 90 ? 'Sobrecargado' : u >= 70 ? 'Óptimo' : 'Capacidad disponible';
+  u >= 90 ? "Sobrecargado" : u >= 70 ? "Óptimo" : "Capacidad disponible";
 const utilColor = (u: number) =>
-  u >= 90 ? 'text-emerald-600' : u >= 70 ? 'text-indigo-600' : 'text-red-600';
-const utilBgColor = (u: number) =>
-  u >= 90
-    ? 'bg-emerald-200/30 border border-emerald-200/50'
-    : u >= 70
-    ? 'bg-indigo-200/30 border border-indigo-200/50'
-    : 'bg-red-200/30 border border-red-200/50';
-const utilBarColor = (u: number) =>
-  u >= 90 ? '#10B981' : u >= 70 ? '#221fcf' : '#EF4444';
-const isRawColor = (c?: string) => !!c && (c.startsWith('#') || c.startsWith('rgb'));
+  u >= 90 ? "text-red-600" : u >= 70 ? "text-green-600" : "text-yellow-600";
+const isRawColor = (c?: string) =>
+  !!c && (c.startsWith("#") || c.startsWith("rgb"));
 const projectHours = (p: ProjectInfo) => p.hours ?? p.hoursPerWeek ?? 0;
+const utilBgColor = (u: number) =>
+  u >= 90 ? "bg-red-50/2 border border-red-100/20" : u >= 70 ? "bg-green-500/10 border border-green-100/20" : "bg-yellow-50/2 border border-yellow-100/20";
+const utilBarColor = (u: number) =>
+  u >= 90 ? "red-500" : u >= 70 ? "#10B981" : "yellow-500";
 
 // -----------------------------------------------------------------------------
 // COMPONENT
 // -----------------------------------------------------------------------------
 export function CargabilidadCard(props: CargabilidadProps) {
+  // fallback a dummy
   const {
     name,
     position,
     totalHours,
     assignedHours,
-    projects,
+    dailyHours,
   } = ({ ...dummyProps, ...props } as Required<CargabilidadProps>);
 
   const [expanded, setExpanded] = useState(false);
   const utilization = Math.round(pct(assignedHours, totalHours));
   const available = Math.max(totalHours - assignedHours, 0);
 
-  return (
-    <section className="relative bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
-      {/* HEADER (toggle expand/collapse) */}
-      <header
-        onClick={() => setExpanded(!expanded)}
-        className={`relative z-10 flex items-center justify-between px-6 ${
-          expanded ? 'py-6' : 'py-4'
-        } border-b border-gray-100 bg-white cursor-pointer transition-all duration-300`}
-      >
-        <div className="flex items-center gap-3">
-          <span className="w-11 h-11 rounded-lg bg-[#A100FF10] flex items-center justify-center">
-            <Activity size={20} className="text-[#A100FF]" />
-          </span>
-          <div>
-            <h1 className="text-xl font-medium text-black">Mi Cargabilidad</h1>
-            <p className="text-sm text-gray-600">
-              {name} — {position}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-6">
-          <p className={`text-sm font-medium ${utilColor(utilization)}`}>
-            {utilLabel(utilization)}
-          </p>
-          <div
-            className={`relative w-20 h-20 ${utilBgColor(utilization)} rounded-full flex items-center justify-center shadow-sm border border-gray-100`}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={[{ value: utilization }, { value: 100 - utilization }]}
-                  dataKey="value"
-                  startAngle={90}
-                  endAngle={-270}
-                  innerRadius={22}
-                  outerRadius={30}
-                  stroke="transparent"
-                  cornerRadius={4}
-                >
-                  <Cell fill={utilBarColor(utilization)} />
-                  <Cell fill="#E5E7EB" />
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <span className="absolute inset-0 flex items-center justify-center text-md font-bold">
-              {utilization}%
-            </span>
-          </div>
-        </div>
-      </header>
+  const ChargabilityColorRange: ColorRange[] = [
+    { threshold: 90, color: 'emerald' },
+    { threshold: 70, color: 'blue' },
+    { threshold: 0, color: 'red' },
+  ];
 
-      {/* EXPANDED BAR */}
-      {expanded ? (
-        <div className="relative z-10 px-6 py-4 overflow-visible bg-gray-50">
+  return (
+    <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      {/* HEADER (toggle expand/collapse) */}
+      <div className="bg-white rounded-xl shadow-md border border-gray-100 pt-6 px-6 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row gap-6 pb-6 justify-between items-center">
+          <div className="flex items-center">
+            <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
+              <FiBarChart2 size={24} className="text-[#A100FF]" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-black">
+                Mi Cargabilidad
+              </h1>
+              <p className="text-gray-600 mt-2 max-w-2xl">
+                Visualiza y gestiona tu cargabilidad por proyectos. Equilibra tus horas de trabajo para un rendimiento óptimo.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-6">
+            <p className={`text-sm font-medium ${utilColor(totalLoad)}`}>
+              {utilLabel(totalLoad)}
+            </p>
+            <div
+              className={`relative w-20 h-20 ${utilBgColor(totalLoad)} rounded-full flex items-center justify-center shadow-sm border border-gray-100`}
+            >
+              <CircularProgress 
+                value={utilization}
+                size="small"
+                colorRanges={ChargabilityColorRange}
+              />
+            </div>
+          </div>
+        </div>
+        {/* EXPANDED BAR */}
+      
+        <div className="relative z-10  overflow-visible">
           <p className="absolute left-6 -top-5 text-xs text-gray-500">
             Asignado: {assignedHours}h / {totalHours}h
           </p>
-          <div className="h-6 w-full flex overflow-hidden rounded-lg shadow-sm transition-all duration-300">
-            {projects.map((p) => {
+          <div className="h-6 w-full flex overflow-hidden rounded-lg transition-all duration-300">
+            {dummyProjects.map((p) => {
               const h = projectHours(p);
-              const w = `${pct(h, totalHours)}%`;
-              return isRawColor(p.color) ? (
+              const width = `${pct(h, totalHours)}%`;
+              const raw = isRawColor(p.color);
+              return raw ? (
                 <div
                   key={p.name}
-                  style={{ width: w, backgroundColor: p.color }}
-                  className="flex items-center justify-center"
+                  style={{ width, backgroundColor: p.color }}
+                  className="relative flex items-center justify-center"
                 >
-                  <span className="text-[10px] font-semibold text-white truncate">
-                    {p.name} ({pct(h, totalHours).toFixed(0)}%)
+                  <span className="text-[10px] font-semibold text-white">
+                    {pct(h, totalHours).toFixed(0)}%
                   </span>
                 </div>
               ) : (
                 <div
                   key={p.name}
-                  className={`${p.color} flex items-center justify-center`}
-                  style={{ width: w }}
+                  className={`${p.color} relative flex items-center justify-center`}
+                  style={{ width }}
                 >
-                  <span className="text-[10px] font-semibold text-white truncate">
-                    {p.name} ({pct(h, totalHours).toFixed(0)}%)
+                  <span className="text-[10px] font-semibold text-white">
+                    {pct(h, totalHours).toFixed(0)}%
                   </span>
                 </div>
               );
             })}
             {available > 0 && (
               <div
-                style={{ width: `${pct(available, totalHours)}%`, backgroundColor: '#E5E7EB' }}
-                className="flex items-center justify-center"
+                style={{ width: `${pct(available, totalHours)}%`, backgroundColor: "#E5E7EB" }}
+                className="relative flex items-center justify-center"
               >
                 <span className="text-[10px] font-semibold text-gray-700">
-                  Disponible ({pct(available, totalHours).toFixed(0)}%)
+                  {pct(available, totalHours).toFixed(0)}%
                 </span>
               </div>
             )}
           </div>
         </div>
-      ) : (
-        /* COLLAPSED FOOTER */
-        <footer className="relative z-10 flex h-2 w-full transition-all duration-300">
-          {projects.map((p) => {
-            const h = projectHours(p);
-            const w = `${pct(h, totalHours)}%`;
-            return isRawColor(p.color) ? (
-              <div key={p.name} style={{ width: w, backgroundColor: p.color }} />
-            ) : (
-              <div key={p.name} className={p.color} style={{ width: w }} />
-            );
-          })}
-          {available > 0 && (
-            <div style={{ width: `${pct(available, totalHours)}%`, backgroundColor: '#E5E7EB' }} />
-          )}
-        </footer>
-      )}
+      
+      </div>
+
+      
     </section>
   );
 }
 
+// alias para compatibilidad
 export const EmployeeSummary = CargabilidadCard;
-export default CargabilidadCard;
+export default EmployeeSummary;

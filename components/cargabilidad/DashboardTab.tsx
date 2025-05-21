@@ -2,14 +2,15 @@
 
 import { WeeklyLoadChart } from './WeeklyLoadChart';
 import { LinearProgress } from './LinearProgress';
-import { CircularProgress } from './CircularProgress';
+import { CircularProgress } from '../ui/CircularProgress';
 import { FiBarChart2, FiPieChart, FiCalendar, FiActivity } from 'react-icons/fi';
 
 interface Project {
   name: string;
   load: number;
   deadline?: string;
-  hoursPerWeek: number;
+  hours?: number;
+  color?: string;
 }
 
 interface Props {

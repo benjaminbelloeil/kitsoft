@@ -3,11 +3,12 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
-import { HistoryTab } from '@/components/cargabilidad/RecordTab';
+import { HistoryTab } from '@/components/cargabilidad/RecordTab'; // Importamos el nuevo componente
 import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
 import { FiBarChart2 } from 'react-icons/fi';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import CargabilidadSkeleton from '@/components/cargabilidad/CargabilidadSkeleton';
+import { EmployeeSummary } from '@/components/cargabilidad/EmployeeSummary';
 
 export const PROJECT_COLORS = [
   'bg-purple-500',
@@ -24,7 +25,7 @@ export interface Project {
   name: string;
   load: number;
   deadline?: string;
-  hoursPerWeek: number;
+  hours: number;
   color?: string; // Color del proyecto, opcional
 }
 
@@ -37,26 +38,31 @@ interface HistoryEntry {
     hours: number;
   }[];
 }
+const dummyProjects = [
+  { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hours: 10, color: PROJECT_COLORS[0] },
+  { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hours: 10, color: PROJECT_COLORS[1] },
+  { name: 'Omega UX', load: 20, deadline: '2025-07-15', hours: 10, color: PROJECT_COLORS[2] },  
+]
+
+/* const [projects, setProjects] = useState<Project[]>([
+  { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hours: 10, color: PROJECT_COLORS[0] },
+  { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hours: 10, color: PROJECT_COLORS[1] },
+]); */
+
+const employee = {
+  name: "Carlos Rodríguez",
+  role: "Desarrollador Full Stack",
+  totalHoursPerWeek: 40
+};
+
+const totalUsedHours = dummyProjects.reduce((sum, p) => sum + p.hours, 0);
+const availableHours = employee.totalHoursPerWeek - totalUsedHours;
+const totalLoad = Math.min(100, (totalUsedHours / employee.totalHoursPerWeek) * 100);
+const weeklyLoad = [45, 60, 78, 65, 70, 30, 20];
 
 const PersonalLoadPage = () => {
-  const [projects, setProjects] = useState<Project[]>([
-    { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hoursPerWeek: 10, color: PROJECT_COLORS[0] },
-    { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 10, color: PROJECT_COLORS[1] },
-  ]);
-
   // Añadimos 'history' a las opciones de pestañas
   const [activeTab, setActiveTab] = useState<'dashboard' | 'history'>('dashboard');
-
-  const employee = {
-    name: "Carlos Rodríguez",
-    role: "Desarrollador Full Stack",
-    totalHoursPerWeek: 40
-  };
-
-  const totalUsedHours = projects.reduce((sum, p) => sum + p.hoursPerWeek, 0);
-  const availableHours = employee.totalHoursPerWeek - totalUsedHours;
-  const totalLoad = Math.min(100, (totalUsedHours / employee.totalHoursPerWeek) * 100);
-  const weeklyLoad = [45, 60, 78, 65, 70, 30, 20];
 
   // Datos de historial de ejemplo para el componente HistoryTab
   const historyData: HistoryEntry[] = [
@@ -249,7 +255,8 @@ const PersonalLoadPage = () => {
   return (
     <main className="min-h-screen bg-gray-50 py-6">
       {/* Header card with purple icon */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <EmployeeSummary/>
+      {/* <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row gap-6 justify-between items-center">
@@ -283,8 +290,9 @@ const PersonalLoadPage = () => {
                         endAngle={-270}
                         innerRadius={22}
                         outerRadius={30}
-                        stroke="transparent"
-                        cornerRadius={4}
+                        stroke="none"
+                        cornerRadius={3}
+                        paddingAngle={0}
                       >
                         <Cell fill={utilBarColor(totalLoad)} />
                         <Cell fill="#E5E7EB" />
@@ -300,15 +308,10 @@ const PersonalLoadPage = () => {
           </div>
         </div>
       </div>
-
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Show alert only if overloaded */}
-        {AvailableHoursRatio < 0 && <LoadAlert totalLoad={totalLoad} />}
-        
-        {/* Redesigned weekly stats summary card - no header, more visual approach */}
+      Redesigned weekly stats summary card - no header, more visual approach
         <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300">
           <div className="p-4">
-            {/* Progress bar visualization of weekly hours */}
+            Progress bar visualization of weekly hours
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-1">
@@ -320,7 +323,7 @@ const PersonalLoadPage = () => {
               
               <div className="h-8 w-full flex overflow-hidden rounded-lg shadow-sm">
                 {projects.map((project) => {
-                  const w = `${(project.hoursPerWeek / employee.totalHoursPerWeek) * 100}%`;
+                  const w = `${(project.hours / employee.totalHoursPerWeek) * 100}%`;
                   return (
                     <div
                       key={project.name}
@@ -328,10 +331,10 @@ const PersonalLoadPage = () => {
                       style={{ width: w }}
                     >
                       <span className="text-[10px] font-semibold text-white truncate px-2">
-                        {project.hoursPerWeek}h
+                        {project.hours}h
                       </span>
                       <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                        {project.name}: {project.hoursPerWeek}h
+                        {project.name}: {project.hours}h
                       </div>
                     </div>
                   );
@@ -352,7 +355,7 @@ const PersonalLoadPage = () => {
               </div>
             </div>
             
-            {/* Status pills row */}
+            Status pills row
             <div className="flex flex-wrap items-center mt-4 gap-2">
               <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs ${
                 availableHours < 0 
@@ -376,46 +379,43 @@ const PersonalLoadPage = () => {
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
+
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Show alert only if overloaded */}
+        {AvailableHoursRatio < 0 && <LoadAlert totalLoad={totalLoad} />}
         
-        {/* Improved tabs with more visual appeal - removed surrounding borders */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
-          {/* Updated tabs with cleaner styling - no surrounding borders */}
-          <div className="flex px-4 pt-4 gap-2 border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
-                ${activeTab === 'dashboard'
-                  ? 'text-[#A100FF] bg-white'
-                  : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
-                }
-              `}
-            >
-              <span>Dashboard</span>
-              {activeTab === 'dashboard' && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"></span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
-                ${activeTab === 'history'
-                  ? 'text-[#A100FF] bg-white'
-                  : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
-                }
-              `}
-            >
-              <span>Historial</span>
-              {activeTab === 'history' && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"></span>
-              )}
-            </button>
+        <div className="bg-white rounded-xl shadow-md mt-10 mb-6 border border-gray-100">
+          {/* Actualizamos el componente Tabs para incluir la pestaña de historial */}
+          <div className="border-b border-gray-200">
+            <nav className="flex">
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`px-4 py-3 font-medium text-sm ${
+                  activeTab === 'dashboard'
+                    ? 'border-b-2 border-indigo-600 text-indigo-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`px-4 py-3 font-medium text-sm ${
+                  activeTab === 'history'
+                    ? 'border-b-2 border-indigo-600 text-indigo-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Historial
+              </button>
+            </nav>
           </div>
 
           <div className="p-6">
             {activeTab === 'dashboard' ? (
               <DashboardTab
-                projects={projects}
+                projects={dummyProjects}
                 weeklyLoad={weeklyLoad}
                 availableHours={availableHours}
                 totalHoursPerWeek={employee.totalHoursPerWeek}
@@ -433,4 +433,5 @@ const PersonalLoadPage = () => {
   );
 };
 
+export {availableHours, totalLoad, employee, dummyProjects}; 
 export default PersonalLoadPage;

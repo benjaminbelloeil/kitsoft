@@ -140,22 +140,16 @@ export async function getAuthUserEmail(): Promise<string | null> {
  * Use this in client components
  */
 export async function getAllUsersClient(): Promise<Usuario[]> {
-  try {
-    const res = await fetch('/api/user/all', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!res.ok) {
-      console.error('Error fetching all users:', await res.text());
-      return [];
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.error('Error in getAllUsersClient:', err);
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('usuarios')
+    .select('*')
+    .order('id_usuario');
+  
+  if (error) {
+    console.error('Error fetching users:', error);
     return [];
   }
+  
+  return data as Usuario[];
 }

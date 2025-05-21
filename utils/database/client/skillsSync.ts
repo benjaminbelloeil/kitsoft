@@ -23,20 +23,20 @@ export interface ExperienceSkill {
  * Get all available skills from the database
  */
 export async function getAllSkills(): Promise<SkillData[]> {
+  const supabase = createClient();
+  
   try {
-    const res = await fetch('/api/skills/all', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!res.ok) {
-      console.error('Error fetching skills:', await res.text());
+    const { data, error } = await supabase
+      .from('habilidades')
+      .select('*')
+      .order('titulo');
+    
+    if (error) {
+      console.error('Error fetching skills:', error);
       return [];
     }
-
-    return await res.json();
+    
+    return data || [];
   } catch (err) {
     console.error('Exception in getAllSkills:', err);
     return [];

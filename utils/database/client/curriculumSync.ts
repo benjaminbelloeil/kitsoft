@@ -1,3 +1,5 @@
+import { createClient } from '@/utils/supabase/client';
+
 const updateUserCurriculum = async (
   userId: string,
   file?: File,
@@ -11,28 +13,58 @@ const updateUserCurriculum = async (
     let finalUrl = null;
 
     if (file) {
-      // Create a FormData object to handle file upload
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('userId', userId);
-      
-      setStatus?.('Subiendo currículum...');
-      
-      // Use fetch API to upload the file
-      const uploadRes = await fetch('/api/curriculum/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!uploadRes.ok) {
-        const error = await uploadRes.text();
-        setStatus?.('Error al subir el archivo');
-        console.error('Error uploading curriculum:', error);
-        return { success: false, error: 'Error al subir el archivo' };
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const maxSizeMB = 10;
+
+      if (!allowedTypes.includes(file.type)) {
+        setStatus?.('Tipo de archivo no permitido. Solo se permiten PDF, DOC y DOCX.');
+        return { success: false, error: 'Tipo de archivo no permitido.' };
       }
-      
-      const uploadData = await uploadRes.json();
-      finalUrl = uploadData.url;
+
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        setStatus?.('El archivo excede el tamaño máximo de 10MB.');
+        return { success: false, error: 'Tamaño de archivo excedido.' };
+      }
+
+      const fallbackExt = file.type.split('/').pop();
+      const extension = file.name.includes('.') ? file.name.split('.').pop() : fallbackExt;
+
+      if (!extension) {
+        setStatus?.('El archivo debe tener una extensión válida como .pdf o .docx.');
+        return { success: false, error: 'Extensión inválida.' };
+      }
+
+      const baseName = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : 'archivo';
+      const safeName = `${baseName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}.${extension}`;
+      const filePath = `Curriculum/${userId}-${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('usuarios')
+        .upload(filePath, file, {
+          upsert: true,
+          cacheControl: '3600',
+        });
+
+      if (uploadError) {
+        setStatus?.(`Error al subir el archivo: ${uploadError.message}`);
+        return { success: false, error: uploadError.message };
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('usuarios')
+        .getPublicUrl(filePath);
+
+      finalUrl = publicUrlData?.publicUrl ?? null;
+    }
+
+    const { error } = await supabase
+      .from('usuarios')
+      .update({ url_curriculum: finalUrl })
+      .eq('id_usuario', userId);
+
+    if (error) {
+      console.error('Error actualizando el currículum:', error);
+      return { success: false, error: error.message };
     }
 
     setStatus?.('Actualizando perfil...');
@@ -67,37 +99,23 @@ const deleteUserCurriculum = async (
   filename: string,
   setStatus?: (msg: string) => void
 ): Promise<void> => {
-  try {
-    const safeName = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-    
-    setStatus?.('Eliminando currículum...');
-    
-    // Use fetch API to delete the file
-    const deleteRes = await fetch('/api/curriculum/delete', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId, filename: safeName }),
-    });
+  const supabase = createClient();
+  const safeName = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  const path = `Curriculum/${userId}-${safeName}`;
 
-    if (!deleteRes.ok) {
-      setStatus?.('Error al eliminar el archivo');
-      console.error('Error deleting curriculum:', await deleteRes.text());
-      return;
-    }
+  const { error: deleteError } = await supabase.storage.from('usuarios').remove([path]);
 
-    // Update the user's curriculum URL in the database
-    const { success, error } = await updateUserCurriculum(userId);
+  if (deleteError) {
+    setStatus?.('Error al eliminar el archivo del bucket');
+    return;
+  }
 
-    if (!success || error) {
-      setStatus?.('Error al actualizar la base de datos');
-    } else {
-      setStatus?.('Currículum eliminado.');
-    }
-  } catch (err) {
-    console.error('Error inesperado en deleteUserCurriculum:', err);
-    setStatus?.('Error inesperado al eliminar el currículum');
+  const { success, error } = await updateUserCurriculum(userId);
+
+  if (!success || error) {
+    setStatus?.('Error al actualizar la base de datos');
+  } else {
+    setStatus?.('Currículum eliminado.');
   }
 };
 
@@ -122,7 +140,7 @@ const getUserCurriculum = async (userId: string): Promise<File | null> => {
       return null;
     }
 
-    const parts = data.url.split('/').pop()?.split('-') ?? [];
+    const parts = data.url_curriculum.split('/').pop()?.split('-') ?? [];
     const filename = parts.slice(5).join('-') || 'curriculum.pdf';
 
     const response = await fetch(data.url);

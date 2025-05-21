@@ -35,20 +35,20 @@ export default function UserListItem({
 
   // Get badge color based on role
   const getRoleBadgeStyle = (user: User) => {
-    if (!user.registered || !user.hasLoggedIn) return 'bg-gray-100 text-gray-800';
+    if (!user.registered) return 'bg-gray-100 text-gray-800';
     if (user.role?.numero === 1) return 'bg-purple-100 text-purple-800';
     return 'bg-blue-100 text-blue-800';
   };
   
   // Get role label text
   const getRoleLabel = (user: User) => {
-    if (!user.registered || !user.hasLoggedIn) return "Sin registrar";
-    return user.role?.titulo || "Sin rol"; 
+    if (!user.registered) return "Sin registrar";
+    return user.role?.titulo || "Empleado"; 
   };
 
   // Get the appropriate icon for the user's status
   const getRoleIcon = (user: User) => {
-    if (!user.registered || !user.hasLoggedIn) return <FiUserX className="mr-1.5" />;
+    if (!user.registered) return <FiUserX className="mr-1.5" />;
     return <FiUser className="mr-1.5" />;
   };
 
@@ -72,9 +72,6 @@ export default function UserListItem({
   };
 
   const lastLoginDate = formatLastLogin(user.lastLogin);
-  
-  // Determine if the user email exists
-  const hasEmail = user.email && user.email.trim() !== '';
 
   return (
     <motion.div 
@@ -104,7 +101,7 @@ export default function UserListItem({
           
           {/* Email display */}
           <div className="flex items-center text-sm text-gray-500 truncate">
-            {hasEmail ? (
+            {user.email ? (
               <>
                 <FiMail className="mr-1 text-gray-400" size={14} />
                 <span>{user.email}</span>

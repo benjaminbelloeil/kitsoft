@@ -69,7 +69,7 @@ export default function TasksSection({
         <div className="mt-6 text-center">
           <Link 
             href="/dashboard/tasks" 
-            className="inline-flex items-center text-sm font-medium text-[#A100FF] hover:text-[#8A00FF]"
+            className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800"
           >
             Ver todas mis tareas
             <ChevronRight className="w-4 h-4 ml-1" />

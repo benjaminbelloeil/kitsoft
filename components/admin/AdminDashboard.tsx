@@ -1,7 +1,6 @@
-"use client";
-
 import { FiDatabase, FiActivity } from "react-icons/fi";
 
+// No more loading logic in this component, it's now handled at the page level
 export default function AdminDashboard() {
   return (
     <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">

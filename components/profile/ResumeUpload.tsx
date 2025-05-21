@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiDownload, FiTrash2, FiFileText, FiUpload, FiFile, FiPlus } from 'react-icons/fi';
+import { FiDownload, FiTrash2, FiFileText, FiUpload } from 'react-icons/fi';
 import { getUserCurriculum, updateUserCurriculum, deleteUserCurriculum } from '@/utils/database/client/curriculumSync';
 import { UseNotification } from "@/components/ui/toast-notification";
 import { SkeletonResume } from "./SkeletonProfile";
@@ -21,6 +21,7 @@ const downloadFile = (file: File) => {
   URL.revokeObjectURL(link.href);
 };
 
+
 export default function ResumeUpload({ userId, notificationState, loading = false, className = '' }: ResumeUploadProps) {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   console.log('ResumeUpload component mounted with userId:', userId);
@@ -32,9 +33,17 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
       const file = await getUserCurriculum(userId);
       if (file) {
         setResumeFile(file);
+    if (!userId || userId === 'user-id') return;
+
+    const fetchCurriculum = async () => {
+      const file = await getUserCurriculum(userId);
+      if (file) {
+        setResumeFile(file);
       }
     };
+    };
 
+    fetchCurriculum();
     fetchCurriculum();
   }, [userId]);
 
@@ -78,7 +87,9 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
     <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full ${className}`}>
       <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
         <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
-          <FiFile className="h-5 w-5 text-[#A100FF]" />
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#A100FF]" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+          </svg>
         </span>
         Currículum
       </h2>
@@ -86,7 +97,7 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
       <div className="space-y-4 flex-grow flex flex-col">
         <div className="flex-grow">
           {resumeFile ? (
-            <div className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF30] bg-white shadow-sm mb-4">
+            <div className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF20] bg-white shadow-sm mb-4">
               <div className="flex items-center">
                 <FiFileText className="text-[#A100FF] mr-2 flex-shrink-0" size={18} />
                 <div className="truncate max-w-[200px]">
@@ -132,34 +143,29 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
             </div>
           ) : (
             <div className="flex-grow flex items-center justify-center mb-4">
-              <div className="text-center p-8">
-                <div className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-2">
-                  <FiFile className="h-6 w-6 text-[#A100FF]" />
-                </div>
-                <p className="text-gray-500 text-sm">No hay currículum subido</p>
-              </div>
+              <p className="text-center text-gray-500 text-sm italic">No hay currículum subido</p>
             </div>
           )}
         </div>
 
         <div className="border-2 border-dashed border-[#A100FF20] rounded-lg p-4 text-center hover:bg-[#A100FF05] transition-colors duration-200 mt-auto">
-          <label htmlFor="file-upload" className="cursor-pointer block py-4">
-            <div className="flex items-center justify-center">
-              <div className="bg-[#A100FF10] rounded-full p-2 mr-3 hover:scale-110 hover:bg-[#A100FF15] transition-all duration-300">
-                {resumeFile ? (
-                  <FiUpload size={18} className="text-[#A100FF]" />
-                ) : (
-                  <FiPlus size={18} className="text-[#A100FF]" />
-                )}
-              </div>
-              <div className="text-center">
-                <span className="block text-sm font-medium text-[#A100FF]">
-                  {resumeFile ? 'Actualizar currículum' : 'Subir currículum'}
-                </span>
-                <span className="text-xs text-gray-500 mt-1 block">
-                  {resumeFile ? 'El archivo actual será reemplazado' : 'PDF, DOC, DOCX hasta 10MB'}
-                </span>
-              </div>
+          <label htmlFor="file-upload" className="cursor-pointer block py-2">
+            <div className="flex flex-col items-center">
+              {resumeFile ? (
+                <>
+                  <FiUpload size={16} className="text-[#A100FF] mb-1" />
+                  <span className="text-sm font-medium text-[#A100FF]">Actualizar currículum</span>
+                  <span className="text-xs text-gray-500 mt-1">El archivo actual será reemplazado</span>
+                </>
+              ) : (
+                <>
+                  <svg className="h-5 w-5 text-[#A100FF] mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium text-[#A100FF]">Subir currículum</span>
+                  <span className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX hasta 10MB</span>
+                </>
+              )}
             </div>
             <input 
               id="file-upload" 
