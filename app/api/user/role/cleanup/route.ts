@@ -49,7 +49,6 @@ export async function POST(request: NextRequest) {
     
     // If we have more than one role, keep only the most privileged one
     if (roles && roles.length > 1) {
-      console.log(`Found ${roles.length} roles for user ${userId}, cleaning up...`);
       
       // First, get all role IDs with their privilege level
       const roleIds = roles.map(r => r.id_nivel);

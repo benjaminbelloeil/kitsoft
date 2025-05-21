@@ -24,7 +24,6 @@ const downloadFile = (file: File) => {
 
 export default function ResumeUpload({ userId, notificationState, loading = false, className = '' }: ResumeUploadProps) {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  console.log('ResumeUpload component mounted with userId:', userId);
   
   useEffect(() => {
     if (!userId || userId === 'user-id') return;

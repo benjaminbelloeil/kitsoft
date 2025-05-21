@@ -7,7 +7,8 @@ import {
   getProjectsByStatus,
   calculateProjectProgress,
 } from '@/app/lib/data';
-import ArchivedProjectsHeader from '@/components/ui/archivedprojectsheader';
+import ArchivedProjectsHeader from '@/components/proyectos/archivados/archivedprojectsheader';
+import ArchivedProjectsSkeleton from '@/components/proyectos/archivados/ArchivedPSkeleton';
 
 export default function ArchivedProjectsPage() {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
@@ -51,6 +52,18 @@ export default function ArchivedProjectsPage() {
       default: return 'bg-[#A100FF]';
     }
   };
+
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500); // Simula un retraso de 1.5 segundo
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <ArchivedProjectsSkeleton/>
+  }
 
   return (
     <div className="min-h-screen bg-white p-6">

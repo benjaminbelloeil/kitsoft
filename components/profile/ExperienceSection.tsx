@@ -264,7 +264,93 @@ export default function ExperienceSection({ initialExperiences, loading = false,
     if (onSkillsChanged) {
       onSkillsChanged(newSkillsList);
     }
-  };
+  }, [onSkillsChanged]);
+
+  // Fetch user ID and experiences on component mount only
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (isFetchingExperiences || hasFetchedExperiences.current) return;
+      
+      setIsFetchingExperiences(true);
+      
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          setUserId(user.id);
+          
+          // If we have a user ID, check cache first before fetching from DB
+          if (user.id) {
+            if (experiencesCache[user.id]) {
+              // Use cached experiences if available
+              const cachedExperiences = experiencesCache[user.id];
+              setExperiences(cachedExperiences);
+              updateGlobalSkills(cachedExperiences);
+              hasFetchedExperiences.current = true;
+              return;
+            }
+            
+            const fetchedExperiences = await getUserExperiences(user.id);
+            if (fetchedExperiences && fetchedExperiences.length > 0) {
+              
+              const formattedExperiences = fetchedExperiences.map(exp => {
+                // Map the skills correctly from the DB format
+                const mappedSkills = Array.isArray(exp.habilidades) 
+                  ? exp.habilidades.map((skill: any) => ({
+                      id: skill.id_habilidad,
+                      name: skill.titulo || '',
+                      level: skill.nivel_experiencia || 1
+                    })) 
+                  : [];
+                
+                return {
+                  id: exp.id_experiencia,
+                  company: exp.compañia,
+                  position: exp.posicion,
+                  startDate: exp.fecha_inicio,
+                  endDate: exp.fecha_fin,
+                  description: exp.descripcion,
+                  isCurrentPosition: exp.fecha_fin === null,
+                  skills: mappedSkills
+                };
+              });
+              
+              // Store in cache for future reference
+              experiencesCache[user.id] = formattedExperiences;
+              
+              setExperiences(formattedExperiences);
+              updateGlobalSkills(formattedExperiences);
+            }
+            
+            hasFetchedExperiences.current = true;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user experiences:", error);
+      } finally {
+        setIsFetchingExperiences(false);
+      }
+    };
+    
+    fetchUserId();
+    
+    // We're using useRef to ensure this only runs once on mount,
+    // so we can safely disable the exhaustive deps warning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Effect to handle form height calculation
+  useEffect(() => {
+    if (isAddingExperience && formRef.current) {
+      setTimeout(() => {
+        if (formRef.current) {
+          const height = formRef.current.offsetHeight;
+          setFormHeight(height);
+        }
+      }, 50);
+    }
+  }, [isAddingExperience]);
 
   // Handle adding a new experience
   const handleAddExperience = async () => {
@@ -345,7 +431,9 @@ export default function ExperienceSection({ initialExperiences, loading = false,
         if (newExperience.skills) {
           // First, ensure all new skills are added with correct levels
           for (const skill of newExperience.skills) {
-            if (skill.id) {
+            // Check if this skill is already linked to the experience
+            const isLinkedToExperience = existingSkills.some(existingSkill => existingSkill.id === skill.id);
+            if (skill.id && isLinkedToExperience) {
               // Update existing skill level
               await updateSkillLevel(
                 skill.id,
@@ -354,13 +442,16 @@ export default function ExperienceSection({ initialExperiences, loading = false,
                 skill.level
               );
             } else {
-              // Add new skill
-              await addSkillToExperience(
+              // Add new skill to experience (even if it exists in habilidades)
+              const response = await addSkillToExperience(
                 skill.name,
                 editingExperienceId,
                 userId,
                 skill.level
               );
+              if (response.success && response.skillId) {
+                skill.id = response.skillId;
+              }
             }
           }
         }

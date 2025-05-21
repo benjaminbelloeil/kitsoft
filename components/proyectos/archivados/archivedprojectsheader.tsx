@@ -49,23 +49,23 @@ export default function ArchivedProjectsHeader({
   return (
     <div className="mb-6">
       {/* Header principal */}
-      <div className="bg-[#A100FF] rounded-t-xl p-4 md:p-6 text-white">
+      <div className="bg-white border border-gray-50 shadow-md rounded-t-xl p-4 md:p-6 text-white">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#A100FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-              </svg>
-            </div>
+            <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#A100FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Proyectos Archivados</h1>
-              <p className="text-sm opacity-90 text-white">Historial de proyectos</p>
+              <h1 className="text-xl font-bold text-black">Proyectos Archivados</h1>
+              <p className="text-sm opacity-90 text-black">Historial de proyectos</p>
             </div>
           </div>
 
           <div className="flex items-center">
-            <span className="text-lg font-medium mr-3 text-white">{userName}</span>
-            <div className="bg-white px-4 py-2 rounded-md">
+            <span className="text-lg font-medium mr-3 text-black">{userName}</span>
+            <div className="bg-gray-50 border border-gray-100 px-4 py-2 rounded-md">
               <span className="text-lg font-semibold text-gray-800">{archivedCount} proyecto{archivedCount !== 1 ? 's' : ''}</span>
             </div>
           </div>

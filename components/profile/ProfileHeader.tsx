@@ -130,8 +130,6 @@ export default function ProfileHeader({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log("Form submission - Current form data:", formData);
-    
     // Ensure IDs exist for new records and match database schema
     const dataToSubmit = {
       // Main user data - matches Usuarios table
@@ -175,7 +173,6 @@ export default function ProfileHeader({
       } : undefined
     };
     
-    console.log("Submitting profile data:", dataToSubmit);
     onProfileUpdate(dataToSubmit);
     setIsEditing(false);
     setPreviewImage(null);
@@ -208,7 +205,6 @@ export default function ProfileHeader({
             ...prev, 
             URL_Avatar: result.url || null 
           }));
-          console.log("Avatar uploaded successfully:", result.url);
         } else {
           console.error("Avatar upload failed:", result.error);
           // Optionally show an error message to the user

@@ -194,18 +194,23 @@ export default function UserManagementPanel() {
     setIsRefreshing(true);
     
     try {
-      const [usersData, rolesData] = await Promise.all([
-        getAllUsersWithRoles(),
-        getAllRoles()
-      ]);
+      // Fetch updated users through API
+      const res = await fetch('/api/user/management/all-with-roles', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Add cache-busting query parameter
+        cache: 'no-store',
+      });
       
-      // Update cache with fresh data using localStorage
-      localStorage.setItem(USER_MANAGEMENT_DATA_KEY, JSON.stringify({
-        users: usersData,
-        roles: rolesData
-      }));
-      localStorage.setItem(USER_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
+      if (!res.ok) {
+        throw new Error('Failed to refresh user data');
+      }
       
+      const usersData = await res.json();
+      
+      // Update the state and cache
       setUsers(usersData);
       setRoles(rolesData);
     } catch (error) {

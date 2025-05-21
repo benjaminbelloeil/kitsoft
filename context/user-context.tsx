@@ -51,8 +51,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         .limit(1)
         .maybeSingle();
       
-      console.log("User role data:", userNivel);
-      
       if (error || !userNivel || !userNivel.niveles) {
         console.error("Error fetching user role:", error);
         setUserRole(null);

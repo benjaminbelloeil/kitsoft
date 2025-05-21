@@ -354,7 +354,7 @@ const ExperienceEditForm = ({
             {showSkillLevelSelect && selectedSkill && (
               <div className="mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
                 <p className="text-sm font-medium text-gray-700 mb-3">
-                  Selecciona tu nivel de experiencia para <span className="text-[#A100FF] font-semibold">{selectedSkill.name}</span>:
+                  Selecciona tu nivel de experiencia para <span className="text-gray-700 font-semibold">{selectedSkill.name}</span>:
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
