@@ -656,13 +656,55 @@ export default function CursosPage() {
       />
       
       {/* Certificates Section */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-6">
+      <div className="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+        <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-bold flex items-center">
             <Award className="mr-2 text-purple-600" size={20} />
             Mis Certificaciones
           </h2>
-          <div className="flex space-x-4">
+          
+          <div className="flex space-x-6">
+            <div className="relative flex-grow max-w-xl">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                placeholder="Buscar certificaciones..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex space-x-2 items-center">
+              <Filter className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              <label htmlFor="category-select" className="sr-only">Filtrar por categoría</label>
+              <select
+                id="category-select"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="border border-gray-300 rounded-md text-sm p-2 bg-white"
+                aria-label="Filtrar por categoría"
+              >
+                <option value="">Todas las categorías</option>
+                {categories.map((category, index) => (
+                  <option key={index} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+              <div className="flex space-x-2 items-center">
+              <label htmlFor="sort-select" className="text-sm text-gray-500">Ordenar por:</label>
+              <select
+                id="sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="border border-gray-300 rounded-md text-sm p-2 bg-white"
+                aria-label="Ordenar por"
+              >
+                <option value="date">Fecha</option>
+                <option value="name">Nombre</option>
+              </select>
+            </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode('grid')}
@@ -689,50 +731,12 @@ export default function CursosPage() {
         </div>
         
         {/* Filters and Search */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6 flex flex-wrap gap-4 items-center">
-          <div className="relative flex-grow max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-              placeholder="Buscar certificaciones..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        <div className=" flex flex-wrap gap-4 items-center mb-6 border-b border-gray-200 p-2 pb-4">
           
-          <div className="flex space-x-2 items-center">
-            <Filter className="h-5 w-5 text-gray-400" aria-hidden="true" />
-            <label htmlFor="category-select" className="sr-only">Filtrar por categoría</label>
-            <select
-              id="category-select"
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="border border-gray-300 rounded-md text-sm p-2 bg-white"
-              aria-label="Filtrar por categoría"
-            >
-              <option value="">Todas las categorías</option>
-              {categories.map((category, index) => (
-                <option key={index} value={category}>{category}</option>
-              ))}
-            </select>
-          </div>
           
-          <div className="flex space-x-2 items-center">
-            <label htmlFor="sort-select" className="text-sm text-gray-500">Ordenar por:</label>
-            <select
-              id="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="border border-gray-300 rounded-md text-sm p-2 bg-white"
-              aria-label="Ordenar por"
-            >
-              <option value="date">Fecha</option>
-              <option value="name">Nombre</option>
-            </select>
-          </div>
+          
+          
+          
         </div>
         
         {/* Certificates List */}
