@@ -15,9 +15,8 @@ export default function ProyectosSkeleton() {
                             <div className="bg-gray-200 h-4 w-20 rounded" />
                         </div>
                     </div>
-                    {/* Usuario + progreso placeholder */}
+                    {/* Progreso placeholder */}
                     <div className="flex items-center">
-                        <div className="bg-gray-200 h-4 w-24 rounded mr-4" />
                         <div className="relative">
                             <div className="bg-gray-200 rounded-full h-16 w-16" />
                             {/* Si quieres, puedes añadir un círculo interior más pequeño */}
@@ -74,14 +73,17 @@ export default function ProyectosSkeleton() {
                             </div>
                             <div className="p-5">
                                 <div className="h-4 w-48 bg-gray-200 rounded mb-6" />
+                                {/* Project card skeleton */}
                                 <div className="relative w-full h-24 flex flex-col justify-center">
-                                    <div className="absolute left-0 w-16 h-16">
-                                        <div className="w-16 h-16 bg-gray-200 rounded-full" />
-                                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-10 bg-gray-100 rounded" />
-                                    </div>
-                                    <div className="ml-20">
-                                        <div className="h-4 w-24 bg-gray-100 rounded mb-1" />
-                                        <div className="h-4 w-16 bg-gray-200 rounded" />
+                                    <div className="flex justify-between items-center gap-4">
+                                        <div>
+                                            <div className="h-4 w-32 bg-gray-100 rounded mb-1"></div>
+                                            <div className="h-6 w-20 bg-gray-200 rounded"></div>
+                                        </div>
+                                        <div>
+                                            <div className="h-4 w-32 bg-gray-100 rounded mb-1"></div>
+                                            <div className="h-6 w-28 bg-gray-200 rounded"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

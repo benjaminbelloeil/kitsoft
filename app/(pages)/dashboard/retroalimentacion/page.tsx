@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -278,7 +279,7 @@ export default function FeedbackPage() {
               <form onSubmit={handleSubmitFeedback} className="p-4 flex flex-col">
                 {/* Recipient selector with updated colors */}
                 <div className="mb-4">
-                  <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                  <label className="block text-xs font-medium text-gray-700 mb-2 items-center">
                     <span className="h-2 w-2 bg-[#3B82F6] mr-1.5 rounded-full"></span>
                     Seleccionar destinatario:
                   </label>
@@ -308,7 +309,7 @@ export default function FeedbackPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   {/* Rating box with yellow stars but white background */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                    <label className="block text-xs font-medium text-gray-700 mb-2 items-center">
                       <span className="h-2 w-2 bg-[#F59E0B] mr-1.5 rounded-full"></span>
                       Valoración:
                     </label>
@@ -341,7 +342,7 @@ export default function FeedbackPage() {
                   
                   {/* Improved category selector with better containment of tags */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                    <label className="block text-xs font-medium text-gray-700 mb-2 items-center">
                       <span className="h-2 w-2 bg-[#10B981] mr-1.5 rounded-full"></span>
                       Categoría: <span className="ml-1 text-xs text-gray-500 font-normal">(múltiple)</span>
                     </label>
@@ -381,7 +382,7 @@ export default function FeedbackPage() {
                 
                 {/* Message area with updated colors */}
                 <div className="mb-5">
-                  <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                  <label className="block text-xs font-medium text-gray-700 mb-2 items-center">
                     <span className="h-2 w-2 bg-[#6366F1] mr-1.5 rounded-full"></span>
                     Mensaje:
                   </label>

@@ -2,25 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { getProjectsByStatus } from '@/app/lib/data';
+import { FiFolder, FiGrid, FiList } from 'react-icons/fi';
 
 interface ProjectsHeaderProps {
-  userName?: string;
   viewMode?: 'grid' | 'list';
   onViewModeChange?: (mode: 'grid' | 'list') => void;
 }
 
 export default function ProjectsHeader({ 
-  userName = "Nombre de usuario", 
   viewMode = 'grid',
   onViewModeChange
 }: ProjectsHeaderProps) {
   // Estados para las métricas
   const [metrics, setMetrics] = useState({
-    totalTasks: 0,
-    completedTasks: 0,
-    completionRate: 0,
-    pendingTasks: 0,
-    averageCarga: 0
+    totalProjects: 0,
+    nearEndDate: 0
   });
   
   // Cargar datos al inicializar el componente
@@ -32,155 +28,87 @@ export default function ProjectsHeader({
   const calculateMetrics = () => {
     const activeProjects = getProjectsByStatus('active');
     
-    // Valores iniciales
-    let totalTasks = 0;
-    let completedTasks = 0;
-    let pendingTasks = 0;
-    let totalCarga = 0;
-    
-    // Obtener la fecha actual y la de una semana después
+    // Obtener la fecha actual y la de 30 días en adelante
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const nextWeek = new Date(today);
-    nextWeek.setDate(today.getDate() + 7);
+    const endingSoon = new Date(today);
+    endingSoon.setDate(today.getDate() + 30);
+    
+    // Calcular métricas
+    let projectsEndingSoon = 0;
     
     // Procesar cada proyecto
     activeProjects.forEach(project => {
-      // Conteo de tareas
-      if (project.tasks && Array.isArray(project.tasks)) {
-        const projectTasks = project.tasks;
-        totalTasks += projectTasks.length;
-        
-        // Tareas completadas
-        const completed = projectTasks.filter(t => t.completed).length;
-        completedTasks += completed;
-        
-        // Tareas pendientes que vencen pronto
-        const pendingCloseTasks = projectTasks.filter(task => {
-          if (task.completed) return false;
-          
-          const dueDate = new Date(task.dueDate);
-          return dueDate >= today && dueDate <= nextWeek;
-        });
-        
-        pendingTasks += pendingCloseTasks.length;
-      }
-      
-      // Cargabilidad
-      if (typeof project.cargabilidad === 'number') {
-        totalCarga += project.cargabilidad;
+      // Proyectos que terminan pronto
+      if (project.endDate) {
+        const endDate = new Date(project.endDate);
+        if (endDate >= today && endDate <= endingSoon) {
+          projectsEndingSoon++;
+        }
       }
     });
     
-    // Calcular porcentajes y promedios
-    const completionRate = totalTasks > 0 
-      ? Math.round((completedTasks / totalTasks) * 100) 
-      : 0;
-      
-    const averageCarga = activeProjects.length > 0 
-      ? Math.round(totalCarga / activeProjects.length) 
-      : 0;
-    
     // Actualizar el estado con todas las métricas
     setMetrics({
-      totalTasks,
-      completedTasks,
-      completionRate,
-      pendingTasks,
-      averageCarga
+      totalProjects: activeProjects.length,
+      nearEndDate: projectsEndingSoon
     });
   };
   
   // Desestructurar métricas para facilitar su uso
-  const { totalTasks, completedTasks, completionRate, pendingTasks, averageCarga } = metrics;
+  const { totalProjects } = metrics;
 
   return (
-    <div className="max-w-[1400px] mx-auto py-6  px-4 sm:px-6 lg:px-8 mb-8">
-      {/* Sección superior del header */}
-      <div className="bg-gray-10 shadow-md border border-gray-100 rounded-t-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center">
-        {/* Icono PlaceHolder */}
-        <div className="flex items-center mb-4 md:mb-0">
-          <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#A100FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-black">Proyectos Activos</h1>
-            <p className="text-sm opacity-90 text-black">Resumen de métricas</p>
-          </div>
-        </div>
-        {/* Usuario + progreso */}
-        <div className="flex items-center">
-          <span className="mr-4 text-lg font-medium text-black">{userName}</span>
-          <div className="relative w-16 h-16">
-            <svg className="w-16 h-16" viewBox="0 0 100 100">
-              <circle 
-                cx="50" cy="50" r="45" 
-                fill="none" 
-                stroke="rgba(78, 78, 78, 0.2)" 
-                strokeWidth="10"
-              />
-              <circle 
-                cx="50" cy="50" r="45" 
-                fill="none" 
-                stroke="#00E676" 
-                strokeWidth="10"
-                strokeDasharray={`${2 * Math.PI * 45 * completionRate / 100} ${2 * Math.PI * 45 * (100 - completionRate) / 100}`}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg font-bold text-black">
-              {completionRate}%
+    <div className="max-w-[1400px] mx-auto py-6 px-4 sm:px-6 lg:px-8 mb-8">
+      {/* Header card with white background and simpler styling - matching retroalimentacion */}
+      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row gap-6 justify-between">
+            <div className="flex items-center">
+              <div className="bg-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
+                <FiFolder className="h-6 w-6 text-[#A100FF]" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-black">
+                  Proyectos
+                  <span className="ml-2 px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full inline-flex items-center">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                    {totalProjects} Activos
+                  </span>
+                </h1>
+                <p className="text-gray-600 mt-2 max-w-2xl">
+                  Portal centralizado para empleados donde pueden ver y gestionar sus proyectos asignados, revisar detalles e interactuar con su equipo.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Sección inferior con métricas */}
-      <div className="bg-white rounded-b-xl shadow-md p-4 flex flex-col md:flex-row justify-between border-t border-gray-100">
-        <div className="mb-4 md:mb-0">
-          <p className="text-gray-500 text-sm mb-1">Tareas Completadas</p>
-          <div className="flex items-center">
-            <span className="text-xl font-bold mr-2">{completedTasks}/{totalTasks}</span>
-            <span className="text-sm bg-gray-100 text-gray-800 px-2 py-0.5 rounded-md">
-              {completionRate}%
-            </span>
-          </div>
-        </div>
-        
-        <div className="mb-4 md:mb-0">
-          <p className="text-gray-500 text-sm mb-1">Vencimientos próximos</p>
-          <span className="text-xl font-bold">{pendingTasks} tarea{pendingTasks !== 1 ? 's' : ''}</span>
-        </div>
-        
-        <div className="mb-4 md:mb-0">
-          <p className="text-gray-500 text-sm mb-1">Cargabilidad media</p>
-          <span className="text-xl font-bold">{averageCarga}%</span>
-        </div>
-        
-        <div className="flex justify-end items-center">
-          <div className="flex rounded-md overflow-hidden">
-            <button 
-              onClick={() => onViewModeChange && onViewModeChange('grid')}
-              className={`flex items-center px-3 py-1.5 ${
-                viewMode === 'grid' ? 'bg-[#A100FF] text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-            </button>
-            <button 
-              onClick={() => onViewModeChange && onViewModeChange('list')}
-              className={`flex items-center px-3 py-1.5 ${
-                viewMode === 'list' ? 'bg-[#A100FF] text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            
+            <div className="flex items-center">
+              {/* View mode buttons with updated styling */}
+              <div className="flex bg-gray-100 p-1 rounded-lg">
+                <button 
+                  onClick={() => onViewModeChange && onViewModeChange('grid')}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === 'grid' 
+                      ? 'bg-white text-[#A100FF] shadow-sm' 
+                      : 'text-gray-500 hover:bg-gray-200'
+                  }`}
+                  aria-label="Vista en cuadrícula"
+                >
+                  <FiGrid className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={() => onViewModeChange && onViewModeChange('list')}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === 'list' 
+                      ? 'bg-white text-[#A100FF] shadow-sm' 
+                      : 'text-gray-500 hover:bg-gray-200'
+                  }`}
+                  aria-label="Vista en lista"
+                >
+                  <FiList className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
