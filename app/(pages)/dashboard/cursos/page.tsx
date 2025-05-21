@@ -18,8 +18,10 @@ import {
   Info
 } from 'lucide-react';
 import PathSkeleton from "@/components/cursos/PathSkeleton";
+import CertificateItem from '@/components/cursos/CertificateItem';
+import 
 
-// CSS styles (merged from page.css)
+// CSS styles 
 const styles = `
   /* Styles for the progress bar */
   .progress-bar-fill {
@@ -190,227 +192,6 @@ const coursesData = [
   }
 ];
 
-// Certificate detail component for the modal
-const CertificateDetail = ({ certificate, course }: { certificate: any, course: any }) => {
-  return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-indigo-50">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center">
-          <Award className="text-purple-600 mr-2" size={20} />
-          <h3 className="font-semibold text-lg">Certificación</h3>
-        </div>
-        <img 
-          src="/api/placeholder/80/30" 
-          alt="Accenture Logo" 
-          className="h-6" 
-        />
-      </div>
-      
-      <h4 className="font-bold text-lg mb-1">{course.title}</h4>
-      <p className="text-gray-600 text-sm mb-4">{course.category}</p>
-      
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="text-gray-500">ID Credencial:</p>
-          <p className="font-medium">{certificate.credentialID}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Fecha Emisión:</p>
-          <p className="font-medium">{new Date(certificate.issueDate).toLocaleDateString()}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Válido Hasta:</p>
-          <p className="font-medium">{new Date(certificate.validUntil).toLocaleDateString()}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Estado:</p>
-          <p className="font-medium text-green-600">Activo</p>
-        </div>
-      </div>
-      
-      <div className="mt-4 text-center">
-        <button className="text-purple-600 font-medium text-sm hover:text-purple-800 flex items-center justify-center w-full">
-          <Star className="mr-1" size={16} /> Ver Credencial Completa
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Course detail modal component
-const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => void }) => {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h2 className="text-2xl font-bold">{course.title}</h2>
-              <p className="text-gray-600">{course.description}</p>
-            </div>
-            <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
-                title="Cerrar"
-                aria-label="Cerrar"
-            >
-              <X size={24} />
-            </button>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-6">
-              <div>
-                <h3 className="font-semibold text-lg mb-3">Información del Curso</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500">Categoría:</p>
-                    <p className="font-medium">{course.category}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Ruta Relacionada:</p>
-                    <p className="font-medium">{course.relatedPath}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Fecha Completado:</p>
-                    <p className="font-medium">{new Date(course.completionDate).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold text-lg mb-3">Módulos del Curso</h3>
-                <div className="space-y-3">
-                  {course.modules.map((module: { name: string; completed: boolean }, idx: number) => (
-                    <div key={idx} className="flex items-center">
-                      <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-green-100 text-green-600">
-                        <Check size={16} />
-                      </div>
-                      <div className="ml-3 flex-grow">
-                        <div className="text-sm font-medium">{module.name}</div>
-                        <div className="text-xs text-green-600">Completado</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            <div>
-              {course.certificate && (
-                <CertificateDetail 
-                  certificate={course.certificate} 
-                  course={course} 
-                />
-              )}
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end">
-          <button
-            onClick={onClose}
-            className="bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 mr-3"
-          >
-            Cerrar
-          </button>
-          <button className="bg-purple-600 rounded-md px-4 py-2 text-sm font-medium text-white hover:bg-purple-700">
-            Descargar Certificado
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Certificate item component
-const CertificateItem = ({ course, onClick, viewMode }: { course: any, onClick: (course: any) => void, viewMode: string }) => {
-  if (viewMode === 'grid') {
-    return (
-      <div 
-        className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-        onClick={() => onClick(course)}
-      >
-        <div className="h-36 bg-gradient-to-r from-purple-100 to-indigo-100 flex items-center justify-center">
-          <div className="relative">
-            <img src={course.imgUrl} alt={course.title} className="h-24 w-24 object-cover rounded-lg" />
-            <div className="absolute -bottom-2 -right-2 bg-purple-600 rounded-full p-1">
-              <Award className="text-white" size={16} />
-            </div>
-          </div>
-        </div>
-        <div className="p-4">
-          <div className="flex justify-between items-start">
-            <h3 className="font-semibold text-lg mb-1 line-clamp-2">{course.title}</h3>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              <Check className="mr-1" size={12} /> Certificado
-            </span>
-          </div>
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{course.description}</p>
-          
-          <div className="text-xs text-gray-600 mb-2">
-            <div className="flex items-center">
-              <Calendar className="mr-1" size={12} />
-              <span>Emitido: {new Date(course.certificate.issueDate).toLocaleDateString()}</span>
-            </div>
-            <div className="flex items-center mt-1">
-              <Info className="mr-1" size={12} />
-              <span>ID: {course.certificate.credentialID}</span>
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center mt-3 text-sm">
-            <span className="text-gray-500">{course.category}</span>
-            <span className="text-purple-600 font-medium flex items-center">
-              Ver Certificado <ChevronRight className="ml-1" size={16} />
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  } else {
-    return (
-      <div 
-        className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-        onClick={() => onClick(course)}
-      >
-        <div className="p-4 flex">
-          <div className="flex-shrink-0 flex items-center justify-center bg-gradient-to-r from-purple-100 to-indigo-100 h-20 w-20 rounded-md relative">
-            <img src={course.imgUrl} alt={course.title} className="h-14 w-14 object-cover rounded" />
-            <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-1">
-              <Award className="text-white" size={12} />
-            </div>
-          </div>
-          <div className="ml-4 flex-grow">
-            <div className="flex justify-between items-start">
-              <h3 className="font-semibold text-lg mb-1">{course.title}</h3>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                <Check className="mr-1" size={12} /> Certificado
-              </span>
-            </div>
-            <p className="text-gray-600 text-sm mb-2">{course.description}</p>
-            <div className="flex flex-wrap gap-x-4 text-xs text-gray-600">
-              <div className="flex items-center">
-                <Calendar className="mr-1" size={12} />
-                <span>Emitido: {new Date(course.certificate.issueDate).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center">
-                <Info className="mr-1" size={12} />
-                <span>ID: {course.certificate.credentialID}</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col justify-between items-end ml-4 text-sm">
-            <span className="text-gray-500">{course.category}</span>
-            <span className="text-purple-600 font-medium flex items-center">
-              Ver Certificado <ChevronRight className="ml-1" size={16} />
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-};
 
 // Career path visualization component
 const CareerPathVisualizer = ({ 
@@ -655,8 +436,11 @@ export default function CursosPage() {
           </div>
           <div className='text-left px-4 '>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Mis Certificaciones Profesionales
+              Mi Trayectoria y Certificaciones
             </h1>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Explora tu progreso en las rutas de carrera y gestiona tus certificaciones profesionales en Accenture.
+            </p>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Visualiza y gestiona tus certificaciones y trayectoria profesional en Accenture
             </p>
@@ -673,25 +457,14 @@ export default function CursosPage() {
       
       {/* Certificates Section */}
       <div className="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-2 border-b border-gray-200 p-2">
           <h2 className="text-xl font-bold flex items-center">
             <Award className="mr-2 text-purple-600" size={20} />
-            Mis Certificaciones
+            Mis Cursos Completados y Certificaciones
           </h2>
           
           <div className="flex space-x-6">
-            <div className="relative flex-grow max-w-xl">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                placeholder="Buscar certificaciones..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+            
             <div className="flex space-x-2 items-center">
               <Filter className="h-5 w-5 text-gray-400" aria-hidden="true" />
               <label htmlFor="category-select" className="sr-only">Filtrar por categoría</label>
@@ -747,12 +520,19 @@ export default function CursosPage() {
         </div>
         
         {/* Filters and Search */}
-        <div className=" flex flex-wrap gap-4 items-center mb-6 border-b border-gray-200 p-2 pb-4">
-          
-          
-          
-          
-          
+        <div className=" flex flex-wrap gap-4 items-center mb-6 p-2 w-full pb-4">
+          <div className="relative flex-grow w-xl ">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                placeholder="Buscar certificaciones..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
         </div>
         
         {/* Certificates List */}
