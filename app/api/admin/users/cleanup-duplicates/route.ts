@@ -27,23 +27,29 @@ export async function POST(request: NextRequest) {
     
     // Security check: users can only clean up their own entries unless they're admin
     if (userId !== user.id) {
-      // Check if the current user is an admin
-      const { data: adminCheck, error: adminError } = await supabase
-        .from('usuarios_roles')
-        .select(`
-          id_nivel,
-          nivel!inner(
-            numero
-          )
-        `)
+      // Check if the current user is an admin - first get their current level ID
+      const { data: userNivelesRecord, error: nivelesRecordError } = await supabase
+        .from('usuarios_niveles')
+        .select('id_nivel_actual')
         .eq('id_usuario', user.id)
-        .eq('nivel.numero', 1);
+        .order('fecha_cambio', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (nivelesRecordError || !userNivelesRecord) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      }
+      
+      // Get the level details to check if admin
+      const { data: nivelData, error: nivelError } = await supabase
+        .from('niveles')
+        .select('numero')
+        .eq('id_nivel', userNivelesRecord.id_nivel_actual)
+        .single();
         
-      if (adminError || !adminCheck || adminCheck.length === 0) {
-        return NextResponse.json(
-          { error: 'Only admins can clean up other users' },
-          { status: 403 }
-        );
+      // Check if the user is admin (level number 1)
+      if (nivelError || nivelData?.numero !== 1) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
       }
     }
     

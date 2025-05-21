@@ -24,11 +24,34 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Security check: normal users can only clean up their own levels
-    if (userId !== user.id) {
-      // TODO: Add admin check here when implementing admin levels
+    // Security check: only admins can clean up users' levels
+    // Check if the current user is an admin - first get the current level ID
+    const { data: userNivelesRecord, error: nivelesRecordError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_nivel_actual')
+      .eq('id_usuario', user.id)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (nivelesRecordError || !userNivelesRecord) {
       return NextResponse.json(
-        { error: 'You can only manage your own levels' },
+        { error: 'Only admins can clean up user levels' },
+        { status: 403 }
+      );
+    }
+    
+    // Get the level details to check if admin
+    const { data: nivelData, error: nivelError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userNivelesRecord.id_nivel_actual)
+      .single();
+      
+    // Check if the user is admin (level number 1)
+    if (nivelError || nivelData?.numero !== 1) {
+      return NextResponse.json(
+        { error: 'Only admins can clean up user levels' },
         { status: 403 }
       );
     }
@@ -53,7 +76,7 @@ export async function POST(request: NextRequest) {
       const levelIds = levels.map(r => r.id_nivel);
       
       const { data: levelDetails, error: detailError } = await supabase
-        .from('nivel')
+        .from('niveles')
         .select('id_nivel, numero')
         .in('id_nivel', levelIds);
         
@@ -101,7 +124,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Unexpected error in cleanup user levels API:', error);
+    console.error('Unexpected error in level cleanup API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

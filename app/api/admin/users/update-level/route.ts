@@ -167,7 +167,7 @@ export async function POST(request: Request) {
       levelNumber: levelData.numero
     });
   } catch (error: any) {
-    console.error('Error in POST /api/user/management/update-level:', error);
+    console.error('Error in POST /api/admin/users/update-level:', error);
     return NextResponse.json(
       { error: 'Internal Server Error', details: error.message },
       { status: 500 }

@@ -124,7 +124,7 @@ export async function GET() {
     
     return NextResponse.json(usersWithRoles);
   } catch (error) {
-    console.error('Error in GET /api/user/management/all-with-roles:', error);
+    console.error('Error in GET /api/admin/users/list:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

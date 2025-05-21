@@ -51,7 +51,7 @@ export async function GET() {
     
     return NextResponse.json(levels);
   } catch (error) {
-    console.error('Error in GET /api/user/management/levels:', error);
+    console.error('Error in GET /api/admin/levels/list:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -194,7 +194,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
     if (pendingLevelChange) {
       try {
         // Call API to update the level
-        const res = await fetch('/api/user/management/update-level', {
+        const res = await fetch('/api/admin/users/update-level', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -29,7 +29,7 @@ export interface UserRole {
  */
 export async function getAllUsersWithRoles(): Promise<User[]> {
   try {
-    const res = await fetch('/api/user/management/all-with-roles', {
+    const res = await fetch('/api/admin/users/list', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ export async function getAllUsersWithRoles(): Promise<User[]> {
  */
 export async function getAllLevels(): Promise<UserRole[]> {
   try {
-    const res = await fetch('/api/user/management/levels', {
+    const res = await fetch('/api/admin/levels/list', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export async function updateUserLevel(
   try {
     console.log(`Updating level for user ${userId} to ${levelId}`);
     
-    const res = await fetch('/api/user/management/update-level', {
+    const res = await fetch('/api/admin/users/update-level', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export async function cleanupDuplicateEntries(userId: string): Promise<boolean> 
   try {
     console.log(`Cleaning up potential duplicate entries for user ${userId}`);
     
-    const res = await fetch('/api/user/management/cleanup-duplicates', {
+    const res = await fetch('/api/admin/users/cleanup-duplicates', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ export async function deleteUser(userId: string): Promise<{ success: boolean; er
   try {
     console.log(`Starting complete deletion of user: ${userId}`);
 
-    const res = await fetch('/api/user/management/delete', {
+    const res = await fetch('/api/admin/users/delete', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

@@ -56,7 +56,7 @@ export async function ensureUserHasLevel(userId: string): Promise<{ success: boo
  */
 export async function checkUserIsAdmin(userId: string): Promise<boolean> {
   try {
-    const res = await fetch(`/api/user/level/admin-check?userId=${encodeURIComponent(userId)}`, {
+    const res = await fetch(`/api/admin/auth/check?userId=${encodeURIComponent(userId)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export function resetLevelCheckState() {
  */
 export async function cleanupUserLevels(userId: string): Promise<boolean> {
   try {
-    const res = await fetch('/api/user/level/cleanup', {
+    const res = await fetch('/api/admin/maintenance/cleanup-levels', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ export async function cleanupUserLevels(userId: string): Promise<boolean> {
  */
 export async function resetUserLevel(userId: string): Promise<boolean> {
   try {
-    const res = await fetch('/api/user/level/reset', {
+    const res = await fetch('/api/admin/users/reset-level', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export async function changeUserLevel(userId: string, newLevelNumber: number): P
   try {
     console.log(`Changing level for user ${userId} to level number ${newLevelNumber}`);
     
-    const res = await fetch('/api/user/level/change', {
+    const res = await fetch('/api/admin/users/change-level', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

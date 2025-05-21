@@ -25,39 +25,36 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Security check: normal users can't change levels
-    // Only admins can change levels
-    if (userId !== user.id) {
-      // Check if the current user is an admin - first get the current level ID
-      const { data: userNivelesRecord, error: nivelesRecordError } = await supabase
-        .from('usuarios_niveles')
-        .select('id_nivel_actual')
-        .eq('id_usuario', user.id)
-        .order('fecha_cambio', { ascending: false })
-        .limit(1)
-        .single();
+    // Security check: only admins can change user levels
+    // Check if the current user is an admin - first get the current level ID
+    const { data: userNivelesRecord, error: nivelesRecordError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_nivel_actual')
+      .eq('id_usuario', user.id)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (nivelesRecordError || !userNivelesRecord) {
+      return NextResponse.json(
+        { error: 'Only admins can change user levels' },
+        { status: 403 }
+      );
+    }
+    
+    // Get the level details to check if admin
+    const { data: nivelData, error: nivelError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userNivelesRecord.id_nivel_actual)
+      .single();
       
-      if (nivelesRecordError || !userNivelesRecord) {
-        return NextResponse.json(
-          { error: 'Only admins can change user levels' },
-          { status: 403 }
-        );
-      }
-      
-      // Get the level details to check if admin
-      const { data: nivelData, error: nivelError } = await supabase
-        .from('niveles')
-        .select('numero')
-        .eq('id_nivel', userNivelesRecord.id_nivel_actual)
-        .single();
-        
-      // Check if the user is admin (level number 1)
-      if (nivelError || nivelData?.numero !== 1) {
-        return NextResponse.json(
-          { error: 'Only admins can change user levels' },
-          { status: 403 }
-        );
-      }
+    // Check if the user is admin (level number 1)
+    if (nivelError || nivelData?.numero !== 1) {
+      return NextResponse.json(
+        { error: 'Only admins can change user levels' },
+        { status: 403 }
+      );
     }
     
     // Get the level ID for the new level number
@@ -137,6 +134,29 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         );
       }
+    }
+    
+    // Also update usuarios_roles for backward compatibility
+    const { error: deleteRoleError } = await supabase
+      .from('usuarios_roles')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (deleteRoleError) {
+      console.error('Error deleting old roles:', deleteRoleError);
+    }
+    
+    const { error: insertRoleError } = await supabase
+      .from('usuarios_roles')
+      .insert([
+        {
+          id_usuario: userId,
+          id_nivel: levelData.id_nivel
+        }
+      ]);
+      
+    if (insertRoleError) {
+      console.error('Error inserting new role:', insertRoleError);
     }
     
     return NextResponse.json({ success: true });
