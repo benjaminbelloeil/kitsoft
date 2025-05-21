@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(nivelData);
   } catch (error) {
-    console.error('Error fetching user role:', error);
+    console.error('Error fetching user level:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

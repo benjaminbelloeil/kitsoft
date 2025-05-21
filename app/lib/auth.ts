@@ -62,6 +62,32 @@ export async function isAdmin(): Promise<boolean> {
 }
 
 /**
+ * Check if the current user has project lead privileges (level 3)
+ */
+export async function isProjectLead(): Promise<boolean> {
+  try {
+    const response = await fetch('/api/user/level/is-project-lead', {
+      cache: 'no-store',
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to check project lead status:', await response.text());
+      return false;
+    }
+    
+    const { isProjectLead } = await response.json();
+    return isProjectLead;
+  } catch (error) {
+    console.error('Error checking project lead status:', error);
+    return false;
+  }
+}
+
+/**
  * Sign the user out
  */
 export async function signOut() {

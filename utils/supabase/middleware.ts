@@ -66,6 +66,38 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
+  // Check for project lead access if user is trying to access project lead pages
+  if (user && request.nextUrl.pathname.startsWith('/dashboard/projects')) {
+    try {
+      // Use the API endpoint to check if user is project lead
+      const apiUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/user/level/is-project-lead`;
+      const response = await fetch(apiUrl, {
+        headers: { 
+          'Authorization': `Bearer ${await supabase.auth.getSession().then(res => res.data.session?.access_token || '')}` 
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to verify project lead status');
+      }
+      
+      const { isProjectLead } = await response.json();
+      
+      if (!isProjectLead) {
+        console.log('Non-project-lead user tried to access projects page:', user.id);
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = '/dashboard';
+        return NextResponse.redirect(redirectUrl);
+      }
+    } catch (error) {
+      console.error('Error checking project lead status in middleware:', error);
+      // For safety, if we can't verify status, redirect to dashboard
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/dashboard';
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   return response
 }
 

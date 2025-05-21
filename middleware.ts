@@ -64,18 +64,28 @@ export async function middleware(request: NextRequest) {
   if (user && request.nextUrl.pathname.startsWith('/dashboard/admin')) {
     try {
       // Use the API endpoint to check if user is admin
-      const apiUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/user/level/is-admin`;
-      const response = await fetch(apiUrl, {
-        headers: { 
-          'Authorization': `Bearer ${await supabase.auth.getSession().then(res => res.data.session?.access_token || '')}` 
-        }
-      });
+      // Use a relative URL to avoid issues with NEXT_PUBLIC_SITE_URL
+      console.log('Middleware: User trying to access admin page:', user.id);
+      // Get admin status directly from the database - more reliable in middleware
+      const { data: userLevelData } = await supabase
+        .from('usuarios_niveles')
+        .select('id_nivel_actual')
+        .eq('id_usuario', user.id)
+        .order('fecha_cambio', { ascending: false })
+        .limit(1)
+        .single();
       
-      if (!response.ok) {
-        throw new Error('Failed to verify admin status');
+      if (!userLevelData) {
+        throw new Error('User level not found');
       }
       
-      const { isAdmin } = await response.json();
+      const { data: levelDetails } = await supabase
+        .from('niveles')
+        .select('numero')
+        .eq('id_nivel', userLevelData.id_nivel_actual)
+        .single();
+      
+      const isAdmin = levelDetails?.numero === 1;
       
       if (!isAdmin) {
         console.log('Non-admin user tried to access admin page:', user.id);

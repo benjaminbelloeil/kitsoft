@@ -13,8 +13,9 @@ type UserRole = {
 type UserContextType = {
   userRole: UserRole | null;
   isAdmin: boolean;
+  isProjectLead: boolean; // Added project lead check
   isLoading: boolean;
-  refreshUserRole: () => Promise<void>;
+  refreshUserRole: () => Promise<void>;  // Keep the name for backward compatibility
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -22,11 +23,12 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isProjectLead, setIsProjectLead] = useState(false); // Added state for project lead
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
   
-  // Define fetchUserRole with supabase as a parameter to avoid dependency issues
-  const fetchUserRole = async () => {
+  // Define fetchUserLevel with supabase as a parameter to avoid dependency issues
+  const fetchUserLevel = async () => {
     try {
       setIsLoading(true);
       
@@ -36,66 +38,84 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (!user) {
         setUserRole(null);
         setIsAdmin(false);
+        setIsProjectLead(false);
         setIsLoading(false);
         return;
       }
       
-      // Get the user's role via API
-      const roleResponse = await fetch('/api/user/level/get-role', {
+      // Get the user's level via API
+      const levelResponse = await fetch('/api/user/level/get-level', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
       
-      if (!roleResponse.ok) {
-        console.error("Error fetching user role:", await roleResponse.text());
+      if (!levelResponse.ok) {
+        console.error("Error fetching user level:", await levelResponse.text());
         setUserRole(null);
         setIsAdmin(false);
+        setIsProjectLead(false);
       } else {
-        const roleData = await roleResponse.json();
-        setUserRole(roleData as UserRole);
+        const levelData = await levelResponse.json();
+        setUserRole(levelData as UserRole);
         
         // Explicitly check if user is admin (nivel.numero === 1)
-        if (roleData && roleData.numero === 1) {
-          console.log("User is ADMIN with role number:", roleData.numero);
+        if (levelData && levelData.numero === 1) {
+          console.log("User is ADMIN with level number:", levelData.numero);
           setIsAdmin(true);
-        } else {
-          console.log("User is NOT admin with role number:", roleData?.numero);
+          setIsProjectLead(false);
+        } 
+        // Check if user is project lead (nivel.numero === 3)
+        else if (levelData && levelData.numero === 3) {
+          console.log("User is PROJECT LEAD with level number:", levelData.numero);
           setIsAdmin(false);
+          setIsProjectLead(true);
+        } 
+        else {
+          console.log("User is regular user with level number:", levelData?.numero);
+          setIsAdmin(false);
+          setIsProjectLead(false);
         }
       }
     } catch (error) {
       console.error("Error in fetchUserRole:", error);
       setUserRole(null);
       setIsAdmin(false);
+      setIsProjectLead(false);
     } finally {
       setIsLoading(false);
     }
   };
   
-  const refreshUserRole = async () => {
-    await memoizedFetchUserRole();
+  const refreshUserLevel = async () => {
+    await memoizedFetchUserLevel();
   };
   
   // Use useCallback to prevent infinite loop with useEffect dependency
-  const memoizedFetchUserRole = useCallback(fetchUserRole, [supabase]);
+  const memoizedFetchUserLevel = useCallback(fetchUserLevel, [supabase]);
   
   useEffect(() => {
-    memoizedFetchUserRole();
+    memoizedFetchUserLevel();
     
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      memoizedFetchUserRole();
+      memoizedFetchUserLevel();
     });
     
     return () => {
       subscription.unsubscribe();
     };
-  }, [memoizedFetchUserRole, supabase.auth]);
+  }, [memoizedFetchUserLevel, supabase.auth]);
   
   return (
-    <UserContext.Provider value={{ userRole, isAdmin, isLoading, refreshUserRole }}>
+    <UserContext.Provider value={{ 
+      userRole, 
+      isAdmin, 
+      isProjectLead,
+      isLoading, 
+      refreshUserRole: refreshUserLevel 
+    }}>
       {children}
     </UserContext.Provider>
   );
