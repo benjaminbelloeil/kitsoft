@@ -53,7 +53,7 @@ export async function getAllUsersWithRoles(): Promise<User[]> {
  */
 export async function getAllLevels(): Promise<UserRole[]> {
   try {
-    const res = await fetch('/api/user/management/roles', {
+    const res = await fetch('/api/user/management/levels', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

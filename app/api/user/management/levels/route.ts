@@ -14,7 +14,7 @@ export async function GET() {
     }
     
     // Check if the user is an admin
-    const { data: userRole, error: roleError } = await supabase
+    const { data: userLevel, error: levelError } = await supabase
       .from('usuarios_niveles')
       .select(`
         niveles:id_nivel_actual(numero)
@@ -25,24 +25,24 @@ export async function GET() {
       .single();
     
     // Fix the logical error in the condition
-    if (roleError || (userRole?.niveles?.numero !== 1)) {
+    if (levelError || (userLevel?.niveles?.numero !== 1)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // Get all roles
-    const { data: roles, error } = await supabase
+    // Get all levels
+    const { data: levels, error } = await supabase
       .from('niveles')
       .select('id_nivel, numero, titulo')
       .order('numero');
     
     if (error) {
-      console.error('Error fetching roles:', error);
-      return NextResponse.json({ error: 'Error fetching roles' }, { status: 500 });
+      console.error('Error fetching levels:', error);
+      return NextResponse.json({ error: 'Error fetching levels' }, { status: 500 });
     }
     
-    return NextResponse.json(roles);
+    return NextResponse.json(levels);
   } catch (error) {
-    console.error('Error in GET /api/user/management/roles:', error);
+    console.error('Error in GET /api/user/management/levels:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
