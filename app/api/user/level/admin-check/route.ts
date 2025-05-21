@@ -26,28 +26,47 @@ export async function GET(request: NextRequest) {
     }
     
     // Get user level with admin information
-    const { data: levels, error } = await supabase
-      .from('usuarios_roles')
-      .select(`
-        id_nivel,
-        nivel!inner(
-          numero
-        )
-      `)
-      .eq('id_usuario', userId);
+    // Get the latest level from usuarios_niveles
+    const { data: userLevelRecord, error: levelError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_nivel_actual')
+      .eq('id_usuario', userId)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
       
-    if (error) {
-      console.error('Error checking admin status:', error);
+    if (levelError) {
+      console.error('Error checking admin status:', levelError);
       return NextResponse.json(
         { error: 'Error checking admin status' },
         { status: 500 }
       );
     }
     
-    // Check if any of the levels have admin privileges (level number 1)
-    const isAdmin = (levels || []).some(level => 
-      level.nivel && level.nivel.numero === 1
-    );
+    // If user has no level, they're not an admin
+    if (!userLevelRecord) {
+      return NextResponse.json({ isAdmin: false });
+    }
+    
+    // Now check if this level has numero = 1 (admin)
+    const { data: levelDetails, error: levelDetailsError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userLevelRecord.id_nivel_actual)
+      .single();
+    
+    if (levelDetailsError) {
+      console.error('Error fetching level details:', levelDetailsError);
+      return NextResponse.json(
+        { error: 'Error checking admin status' },
+        { status: 500 }
+      );
+    }
+    
+    console.log('User level data:', levelDetails); // For debugging
+    
+    // Check if the level has admin privileges (level number 1)
+    const isAdmin = levelDetails.numero === 1;
     
     return NextResponse.json({ isAdmin });
   } catch (error) {

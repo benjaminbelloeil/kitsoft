@@ -13,19 +13,28 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Check if the user is an admin
-    const { data: userLevel, error: levelError } = await supabase
+    // Check if the user is an admin - first get their current level ID
+    const { data: userNivelesRecord, error: nivelesRecordError } = await supabase
       .from('usuarios_niveles')
-      .select(`
-        niveles:id_nivel_actual(numero)
-      `)
+      .select('id_nivel_actual')
       .eq('id_usuario', user.id)
       .order('fecha_cambio', { ascending: false })
       .limit(1)
       .single();
     
-    // Fix the logical error in the condition
-    if (levelError || (userLevel?.niveles?.numero !== 1)) {
+    if (nivelesRecordError || !userNivelesRecord) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+    
+    // Get the level details to check if admin
+    const { data: nivelData, error: nivelError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userNivelesRecord.id_nivel_actual)
+      .single();
+      
+    // Check if the user is admin (level number 1)
+    if (nivelError || nivelData?.numero !== 1) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

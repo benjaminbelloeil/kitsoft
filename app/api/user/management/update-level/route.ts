@@ -25,19 +25,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Check if the user is an admin
-    const { data: userLevel, error: levelError } = await supabase
+    // Check if user is admin - first get their current level ID
+    const { data: userLevelData, error: userLevelError } = await supabase
       .from('usuarios_niveles')
-      .select(`
-        niveles:id_nivel_actual(numero)
-      `)
+      .select('id_nivel_actual')
       .eq('id_usuario', user.id)
       .order('fecha_cambio', { ascending: false })
       .limit(1)
       .single();
-    
-    // Fix the logical error in the admin check
-    if (levelError || (userLevel?.niveles?.numero !== 1)) {
+
+    if (userLevelError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Now get the level details to check if admin
+    const { data: adminLevel, error: adminLevelError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userLevelData.id_nivel_actual)
+      .single();
+
+    if (adminLevelError || adminLevel.numero !== 1) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -66,6 +74,7 @@ export async function POST(request: Request) {
 
     const timestamp = new Date().toISOString();
     
+    // Update usuarios_niveles table
     if (existingRecord) {
       // Store the current level ID to use as previous level
       const currentLevelId = existingRecord.id_nivel_actual;
@@ -123,6 +132,33 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
+    }
+
+    // IMPORTANT: Also update the usuarios_roles table to maintain consistency
+    // First, delete any existing roles for this user
+    const { error: deleteError } = await supabase
+      .from('usuarios_roles')
+      .delete()
+      .eq('id_usuario', userId);
+
+    if (deleteError) {
+      console.error('Warning: Failed to delete existing user roles:', deleteError);
+      // Continue execution - don't fail the whole operation
+    }
+
+    // Then insert the new role
+    const { error: insertRoleError } = await supabase
+      .from('usuarios_roles')
+      .insert([
+        {
+          id_usuario: userId,
+          id_nivel: levelId
+        }
+      ]);
+
+    if (insertRoleError) {
+      console.error('Warning: Failed to insert new user role:', insertRoleError);
+      // Continue execution - don't fail the whole operation
     }
 
     return NextResponse.json({ 

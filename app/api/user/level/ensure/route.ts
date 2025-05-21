@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { randomUUID } from 'crypto';
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,31 +35,39 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // First get all level entries for this user to check if any exist
-    const { data: existingLevels, error: levelsError } = await supabase
-      .from('usuarios_roles')
-      .select('id_nivel, nivel(numero)')
-      .eq('id_usuario', userId);
+    // Check if the user already has an entry in usuarios_niveles
+    const { data: existingNivel, error: nivelError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_nivel_actual')
+      .eq('id_usuario', userId)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
       
-    if (levelsError) {
-      console.error('Error checking user levels:', levelsError);
-      return NextResponse.json(
-        { error: 'Error checking user levels' },
-        { status: 500 }
-      );
-    }
-    
-    // If user already has levels, return the level number of the first one
-    // In a proper implementation, we might need to handle multiple levels or level priority
-    if (existingLevels && existingLevels.length > 0) {
-      const levelNumber = existingLevels[0].nivel?.numero || 0;
-      return NextResponse.json({ levelNumber });
+    // If user already has a level assigned, get the level information
+    if (!nivelError && existingNivel) {
+      // Get the level details
+      const { data: levelDetail, error: levelError } = await supabase
+        .from('niveles')
+        .select('numero')
+        .eq('id_nivel', existingNivel.id_nivel_actual)
+        .single();
+        
+      if (levelError) {
+        console.error('Error fetching level details:', levelError);
+        return NextResponse.json(
+          { error: 'Error fetching level details' },
+          { status: 500 }
+        );
+      }
+      
+      return NextResponse.json({ levelNumber: levelDetail.numero });
     }
     
     // If no level exists, assign the default level (staff = 0)
     // First get the ID of the staff level
     const { data: staffLevel, error: staffError } = await supabase
-      .from('nivel')
+      .from('niveles')
       .select('id_nivel')
       .eq('numero', 0)
       .single();
@@ -71,16 +80,24 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Assign the staff level to the user
-    const { error: assignError } = await supabase
-      .from('usuarios_roles')
-      .insert({
-        id_usuario: userId,
-        id_nivel: staffLevel.id_nivel
-      });
+    // Create a new entry in usuarios_niveles
+    const timestamp = new Date().toISOString();
+    const id_historial = randomUUID();
+    
+    const { error: insertError } = await supabase
+      .from('usuarios_niveles')
+      .insert([
+        { 
+          id_historial,
+          id_usuario: userId,
+          id_nivel_actual: staffLevel.id_nivel,
+          id_nivel_previo: null,
+          fecha_cambio: timestamp 
+        }
+      ]);
       
-    if (assignError) {
-      console.error('Error assigning default level:', assignError);
+    if (insertError) {
+      console.error('Error assigning default level:', insertError);
       return NextResponse.json(
         { error: 'Error assigning default level' },
         { status: 500 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createClient } from '@/utils/supabase/server';
 import { adminClient } from '@/utils/supabase/server-admin';
 import { NextResponse } from 'next/server';
@@ -15,19 +14,28 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Check if the user is an admin
-    const { data: userRole, error: roleError } = await supabase
+    // Check if the user is an admin - first get their current level ID
+    const { data: userNivelesRecord, error: nivelesRecordError } = await supabase
       .from('usuarios_niveles')
-      .select(`
-        niveles:id_nivel_actual(numero)
-      `)
+      .select('id_nivel_actual')
       .eq('id_usuario', user.id)
       .order('fecha_cambio', { ascending: false })
       .limit(1)
       .single();
     
-    // Fix the logical error in the admin check
-    if (roleError || (userRole?.niveles?.numero !== 1)) {
+    if (nivelesRecordError || !userNivelesRecord) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+    
+    // Get the level details to check if admin
+    const { data: nivelData, error: nivelError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userNivelesRecord.id_nivel_actual)
+      .single();
+      
+    // Check if the user is admin (level number 1)
+    if (nivelError || nivelData?.numero !== 1) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -72,23 +80,36 @@ export async function GET() {
     // For each user, get their most recent role from usuarios_niveles
     const usersWithRoles = await Promise.all(
       users.map(async (user) => {
-        // Get user's current role from usuarios_niveles
-        const { data: userNivel, error: nivelError } = await supabase
+        // Get user's current role ID from usuarios_niveles
+        const { data: userNivelesRecord, error: nivelesRecordError } = await supabase
           .from('usuarios_niveles')
-          .select(`
-            niveles:id_nivel_actual(id_nivel, numero, titulo)
-          `)
+          .select('id_nivel_actual')
           .eq('id_usuario', user.id_usuario)
           .order('fecha_cambio', { ascending: false })
           .limit(1)
           .single();
+        
+        // Initialize role as null
+        let role = null;
+        
+        // If we have a nivel record, get the actual level details
+        if (userNivelesRecord && !nivelesRecordError) {
+          const { data: nivelData, error: nivelError } = await supabase
+            .from('niveles')
+            .select('id_nivel, numero, titulo')
+            .eq('id_nivel', userNivelesRecord.id_nivel_actual)
+            .single();
+            
+          if (!nivelError && nivelData) {
+            role = nivelData;
+          }
+        }
         
         // Get auth data from our map
         const authData = authUserMap.get(user.id_usuario);
         const email = authData?.email || null;
         const lastLogin = authData?.lastSignIn || null;
         const registered = !!authData?.email;
-        const role = userNivel?.niveles || null;
         
         return {
           ...user,
