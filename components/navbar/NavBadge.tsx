@@ -2,7 +2,7 @@ import { useUser } from "@/context/user-context";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function NavBadge() {
-  const { isAdmin, isProjectManager, userRole, isLoading } = useUser();
+  const { isAdmin, isProjectManager, isProjectLead, userRole, isLoading } = useUser();
   
   // Show skeleton loader while loading
   if (isLoading) {
@@ -30,14 +30,19 @@ export default function NavBadge() {
         <div className={`w-2 h-2 rounded-full ${
           isAdmin ? 'bg-[#A100FF]' : 
           isProjectManager ? 'bg-orange-500' : 
+          isProjectLead ? 'bg-blue-500' :
           'bg-green-500'
         } mr-2`}></div>
         <p className="text-sm font-medium">
           {isAdmin 
             ? "Administrador" 
             : isProjectManager
-              ? "Gerente de Proyectos"
-              : (userRole.titulo || "Staff")
+              ? "Project Manager"
+              : isProjectLead
+                ? "Project Lead"
+                : userRole.numero === 2
+                  ? "People Lead"
+                  : "Empleado"
           }
         </p>
         
@@ -53,9 +58,21 @@ export default function NavBadge() {
           </span>
         )}
         
-        {!isAdmin && !isProjectManager && userRole.numero === 0 && (
+        {isProjectLead && (
           <span className="ml-auto text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
-            Nuevo
+            Project Lead
+          </span>
+        )}
+        
+        {!isAdmin && !isProjectManager && !isProjectLead && userRole.numero === 2 && (
+          <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded-full">
+            People Lead
+          </span>
+        )}
+
+        {!isAdmin && !isProjectManager && !isProjectLead && userRole.numero === 0 && (
+          <span className="ml-auto text-xs px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full">
+            Empleado
           </span>
         )}
       </div>
