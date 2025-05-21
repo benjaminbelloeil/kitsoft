@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   Info
 } from 'lucide-react';
+import PathSkeleton from "@/components/cursos/PathSkeleton";
 
 // CSS styles (merged from page.css)
 const styles = `
@@ -626,7 +627,22 @@ export default function CursosPage() {
   const closeModal = () => {
     setSelectedCourse(null);
   };
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // Simulate loading delay
+    return () => clearTimeout(timer);
+  }, []);
   
+  if (isLoading) {
+    return (
+      <PathSkeleton />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <style jsx global>{styles}</style>
