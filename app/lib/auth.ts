@@ -38,26 +38,27 @@ export async function isAuthenticated(): Promise<boolean> {
  * Check if the current user has admin privileges
  */
 export async function isAdmin(): Promise<boolean> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
+  // Use the API endpoint instead of direct database access
+  try {
+    const response = await fetch('/api/user/level/is-admin', {
+      cache: 'no-store',
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to check admin status:', await response.text());
+      return false;
+    }
+    
+    const { isAdmin } = await response.json();
+    return isAdmin;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
     return false;
   }
-  
-  // Get user's role from usuarios_niveles
-  const { data } = await supabase
-    .from('usuarios_niveles')
-    .select(`
-      niveles:id_nivel_actual(numero)
-    `)
-    .eq('id_usuario', user.id)
-    .order('fecha_cambio', { ascending: false })
-    .limit(1)
-    .single();
-  
-  // Admin is role number 1
-  return data?.niveles?.[0]?.numero === 1;
 }
 
 /**

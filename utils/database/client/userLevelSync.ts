@@ -56,7 +56,7 @@ export async function ensureUserHasLevel(userId: string): Promise<{ success: boo
  */
 export async function checkUserIsAdmin(userId: string): Promise<boolean> {
   try {
-    const res = await fetch(`/api/admin/auth/check?userId=${encodeURIComponent(userId)}`, {
+    const res = await fetch(`/api/user/level/is-admin?userId=${encodeURIComponent(userId)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

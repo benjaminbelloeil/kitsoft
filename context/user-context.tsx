@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from "react";
 import { createClient } from '@/utils/supabase/client';
 
 type UserRole = {
@@ -25,6 +25,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
   
+  // Define fetchUserRole with supabase as a parameter to avoid dependency issues
   const fetchUserRole = async () => {
     try {
       setIsLoading(true);
@@ -39,25 +40,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return;
       }
       
-      // Get the user's current role from usuarios_niveles
-      const { data: userNivel, error } = await supabase
-        .from('usuarios_niveles')
-        .select(`
-          id_nivel_actual,
-          niveles:id_nivel_actual(id_nivel, numero, titulo, descripcion)
-        `)
-        .eq('id_usuario', user.id)
-        .order('fecha_cambio', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Get the user's role via API
+      const roleResponse = await fetch('/api/user/level/get-role', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
-      if (error || !userNivel || !userNivel.niveles) {
-        console.error("Error fetching user role:", error);
+      if (!roleResponse.ok) {
+        console.error("Error fetching user role:", await roleResponse.text());
         setUserRole(null);
         setIsAdmin(false);
       } else {
-        // Handle niveles as the correct type - it appears to be an array in the response
-        const roleData = Array.isArray(userNivel.niveles) ? userNivel.niveles[0] : userNivel.niveles;
+        const roleData = await roleResponse.json();
         setUserRole(roleData as UserRole);
         
         // Explicitly check if user is admin (nivel.numero === 1)
@@ -79,21 +75,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
   
   const refreshUserRole = async () => {
-    await fetchUserRole();
+    await memoizedFetchUserRole();
   };
   
+  // Use useCallback to prevent infinite loop with useEffect dependency
+  const memoizedFetchUserRole = useCallback(fetchUserRole, [supabase]);
+  
   useEffect(() => {
-    fetchUserRole();
+    memoizedFetchUserRole();
     
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      fetchUserRole();
+      memoizedFetchUserRole();
     });
     
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [memoizedFetchUserRole, supabase.auth]);
   
   return (
     <UserContext.Provider value={{ userRole, isAdmin, isLoading, refreshUserRole }}>
