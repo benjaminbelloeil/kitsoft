@@ -119,7 +119,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
     
     try {
       // Fetch updated users through API
-      const res = await fetch('/api/user/management/all-with-roles', {
+      const res = await fetch('/api/admin/users/list', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
