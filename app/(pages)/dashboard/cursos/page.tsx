@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import PathSkeleton from "@/components/cursos/PathSkeleton";
 import CertificateItem from '@/components/cursos/CertificateItem';
-import 
+import CourseDetailModal from '@/components/cursos/CourseDetailModal';
 
 // CSS styles 
 const styles = `
