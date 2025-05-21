@@ -17,7 +17,28 @@ import {
   ChevronLeft,
   Info
 } from 'lucide-react';
-import './page.css';
+
+// CSS styles (merged from page.css)
+const styles = `
+  /* Styles for the progress bar */
+  .progress-bar-fill {
+    /* The width will still be set dynamically via inline style */
+    height: 0.5rem;
+    transition: width 0.3s ease;
+  }
+
+  /* Define different percentage widths as classes */
+  .progress-10 { width: 10%; }
+  .progress-20 { width: 20%; }
+  .progress-30 { width: 30%; }
+  .progress-40 { width: 40%; }
+  .progress-50 { width: 50%; }
+  .progress-60 { width: 60%; }
+  .progress-70 { width: 70%; }
+  .progress-80 { width: 80%; }
+  .progress-90 { width: 90%; }
+  .progress-100 { width: 100%; }
+`;
 
 // Mock data for career paths
 const careerPaths = [
@@ -168,43 +189,8 @@ const coursesData = [
   }
 ];
 
-// Component for displaying status badges
-const StatusBadge = ({ status }: { status: string }) => {
-  if (status === 'completed') {
-    return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        <Check className="mr-1" size={12} /> Completado
-      </span>
-    );
-  } else if (status === 'in-progress') {
-    return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-        <Clock className="mr-1" size={12} /> En Progreso
-      </span>
-    );
-  } else {
-    return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-        <Star className="mr-1" size={12} /> Pendiente
-      </span>
-    );
-  }
-};
-
-// Progress bar component
-const ProgressBar = ({ percentage }: { percentage: number }) => {
-  return (
-    <div className="w-full bg-gray-200 rounded-full h-2">
-      <div 
-        className={`bg-gradient-to-r from-purple-500 to-indigo-600 h-2 rounded-full progress-bar-fill`} 
-        style={{ width: `${percentage}%` }}
-      ></div>
-    </div>
-  );
-};
-
-// Certificate card component
-const CertificateCard = ({ certificate, course }: { certificate: any, course: any }) => {
+// Certificate detail component for the modal
+const CertificateDetail = ({ certificate, course }: { certificate: any, course: any }) => {
   return (
     <div className="border border-gray-200 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-indigo-50">
       <div className="flex justify-between items-start mb-4">
@@ -274,44 +260,6 @@ const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => vo
           <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-semibold text-lg">Progreso del Curso</h3>
-                  <StatusBadge status={course.status} />
-                </div>
-                <ProgressBar percentage={course.progress} />
-                <div className="mt-2 flex justify-between text-sm text-gray-600">
-                  <span>{course.progress}% Completado</span>
-                  {course.status === 'in-progress' && (
-                    <span className="flex items-center">
-                      <Calendar className="mr-1" size={14} />
-                      Fecha límite: {new Date(course.dueDate).toLocaleDateString()}
-                    </span>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold text-lg mb-3">Módulos del Curso</h3>
-                <div className="space-y-3">
-                  {course.modules.map((module: { name: string; completed: boolean }, idx: number) => (
-                    <div key={idx} className="flex items-center">
-                      <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${module.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-                        {module.completed ? <Check size={16} /> : (idx + 1)}
-                      </div>
-                      <div className="ml-3 flex-grow">
-                        <div className="text-sm font-medium">{module.name}</div>
-                        {module.completed ? (
-                          <div className="text-xs text-green-600">Completado</div>
-                        ) : (
-                          <div className="text-xs text-gray-500">Pendiente</div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
                 <h3 className="font-semibold text-lg mb-3">Información del Curso</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -322,31 +270,37 @@ const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => vo
                     <p className="text-gray-500">Ruta Relacionada:</p>
                     <p className="font-medium">{course.relatedPath}</p>
                   </div>
-                  {course.status === 'completed' && (
-                    <div>
-                      <p className="text-gray-500">Fecha Completado:</p>
-                      <p className="font-medium">{new Date(course.completionDate).toLocaleDateString()}</p>
+                  <div>
+                    <p className="text-gray-500">Fecha Completado:</p>
+                    <p className="font-medium">{new Date(course.completionDate).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold text-lg mb-3">Módulos del Curso</h3>
+                <div className="space-y-3">
+                  {course.modules.map((module: { name: string; completed: boolean }, idx: number) => (
+                    <div key={idx} className="flex items-center">
+                      <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-green-100 text-green-600">
+                        <Check size={16} />
+                      </div>
+                      <div className="ml-3 flex-grow">
+                        <div className="text-sm font-medium">{module.name}</div>
+                        <div className="text-xs text-green-600">Completado</div>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
             
             <div>
-              {course.certificate ? (
-                <CertificateCard 
+              {course.certificate && (
+                <CertificateDetail 
                   certificate={course.certificate} 
                   course={course} 
                 />
-              ) : (
-                <div className="border border-gray-200 rounded-lg p-4 h-full flex flex-col justify-center items-center text-center bg-gray-50">
-                  <Award className="text-gray-400 mb-3" size={32} />
-                  <h3 className="font-semibold text-lg mb-1">Certificación Pendiente</h3>
-                  <p className="text-gray-500 text-sm mb-4">Completa este curso para obtener tu certificación.</p>
-                  {course.status === 'in-progress' && (
-                    <p className="text-sm font-medium text-purple-600">{course.progress}% completado</p>
-                  )}
-                </div>
               )}
             </div>
           </div>
@@ -359,19 +313,17 @@ const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => vo
           >
             Cerrar
           </button>
-          {course.status === 'in-progress' && (
-            <button className="bg-purple-600 rounded-md px-4 py-2 text-sm font-medium text-white hover:bg-purple-700">
-              Continuar Curso
-            </button>
-          )}
+          <button className="bg-purple-600 rounded-md px-4 py-2 text-sm font-medium text-white hover:bg-purple-700">
+            Descargar Certificado
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-// Course card component
-const CourseCard = ({ course, onClick, viewMode }: { course: any, onClick: (course: any) => void, viewMode: string }) => {
+// Certificate item component
+const CertificateItem = ({ course, onClick, viewMode }: { course: any, onClick: (course: any) => void, viewMode: string }) => {
   if (viewMode === 'grid') {
     return (
       <div 
@@ -379,25 +331,37 @@ const CourseCard = ({ course, onClick, viewMode }: { course: any, onClick: (cour
         onClick={() => onClick(course)}
       >
         <div className="h-36 bg-gradient-to-r from-purple-100 to-indigo-100 flex items-center justify-center">
-          <img src={course.imgUrl} alt={course.title} className="h-24 w-24 object-cover rounded-lg" />
+          <div className="relative">
+            <img src={course.imgUrl} alt={course.title} className="h-24 w-24 object-cover rounded-lg" />
+            <div className="absolute -bottom-2 -right-2 bg-purple-600 rounded-full p-1">
+              <Award className="text-white" size={16} />
+            </div>
+          </div>
         </div>
         <div className="p-4">
           <div className="flex justify-between items-start">
             <h3 className="font-semibold text-lg mb-1 line-clamp-2">{course.title}</h3>
-            <StatusBadge status={course.status} />
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <Check className="mr-1" size={12} /> Certificado
+            </span>
           </div>
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">{course.description}</p>
-          <div className="mb-2">
-            <div className="flex justify-between text-xs text-gray-600 mb-1">
-              <span>Progreso</span>
-              <span>{course.progress}%</span>
+          
+          <div className="text-xs text-gray-600 mb-2">
+            <div className="flex items-center">
+              <Calendar className="mr-1" size={12} />
+              <span>Emitido: {new Date(course.certificate.issueDate).toLocaleDateString()}</span>
             </div>
-            <ProgressBar percentage={course.progress} />
+            <div className="flex items-center mt-1">
+              <Info className="mr-1" size={12} />
+              <span>ID: {course.certificate.credentialID}</span>
+            </div>
           </div>
+          
           <div className="flex justify-between items-center mt-3 text-sm">
             <span className="text-gray-500">{course.category}</span>
             <span className="text-purple-600 font-medium flex items-center">
-              Ver Detalles <ChevronRight className="ml-1" size={16} />
+              Ver Certificado <ChevronRight className="ml-1" size={16} />
             </span>
           </div>
         </div>
@@ -410,27 +374,35 @@ const CourseCard = ({ course, onClick, viewMode }: { course: any, onClick: (cour
         onClick={() => onClick(course)}
       >
         <div className="p-4 flex">
-          <div className="flex-shrink-0 flex items-center justify-center bg-gradient-to-r from-purple-100 to-indigo-100 h-20 w-20 rounded-md">
+          <div className="flex-shrink-0 flex items-center justify-center bg-gradient-to-r from-purple-100 to-indigo-100 h-20 w-20 rounded-md relative">
             <img src={course.imgUrl} alt={course.title} className="h-14 w-14 object-cover rounded" />
+            <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-1">
+              <Award className="text-white" size={12} />
+            </div>
           </div>
           <div className="ml-4 flex-grow">
             <div className="flex justify-between items-start">
               <h3 className="font-semibold text-lg mb-1">{course.title}</h3>
-              <StatusBadge status={course.status} />
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <Check className="mr-1" size={12} /> Certificado
+              </span>
             </div>
             <p className="text-gray-600 text-sm mb-2">{course.description}</p>
-            <div className="mb-1">
-              <div className="flex justify-between text-xs text-gray-600 mb-1">
-                <span>Progreso</span>
-                <span>{course.progress}%</span>
+            <div className="flex flex-wrap gap-x-4 text-xs text-gray-600">
+              <div className="flex items-center">
+                <Calendar className="mr-1" size={12} />
+                <span>Emitido: {new Date(course.certificate.issueDate).toLocaleDateString()}</span>
               </div>
-              <ProgressBar percentage={course.progress} />
+              <div className="flex items-center">
+                <Info className="mr-1" size={12} />
+                <span>ID: {course.certificate.credentialID}</span>
+              </div>
             </div>
           </div>
           <div className="flex flex-col justify-between items-end ml-4 text-sm">
             <span className="text-gray-500">{course.category}</span>
             <span className="text-purple-600 font-medium flex items-center">
-              Ver Detalles <ChevronRight className="ml-1" size={16} />
+              Ver Certificado <ChevronRight className="ml-1" size={16} />
             </span>
           </div>
         </div>
@@ -606,9 +578,10 @@ export default function CursosPage() {
   const [activePath, setActivePath] = useState(1);
   const [filterCategory, setFilterCategory] = useState('');
   
-  // Filter courses based on status
-  const inProgressCourses = coursesData.filter(course => course.status === 'in-progress');
-  const completedCourses = coursesData.filter(course => course.status === 'completed');
+  // Get only completed courses with certificates
+  const completedCourses = coursesData.filter(course => 
+    course.status === 'completed' && course.certificate
+  );
   
   // Apply filters and sorting
   const filterAndSortCourses = (courses: any[]) => {
@@ -632,18 +605,10 @@ export default function CursosPage() {
     // Apply sorting
     if (sortBy === 'date') {
       filteredCourses.sort((a: any, b: any) => {
-        if (a.status === 'in-progress' && b.status === 'in-progress') {
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        } else if (a.status === 'completed' && b.status === 'completed') {
-          return new Date(b.completionDate).getTime() - new Date(a.completionDate).getTime();
-        } else {
-          return a.status === 'in-progress' ? -1 : 1;
-        }
+        return new Date(b.certificate.issueDate).getTime() - new Date(a.certificate.issueDate).getTime();
       });
     } else if (sortBy === 'name') {
       filteredCourses.sort((a: any, b: any) => a.title.localeCompare(b.title));
-    } else if (sortBy === 'progress') {
-      filteredCourses.sort((a: any, b: any) => b.progress - a.progress);
     }
     
     return filteredCourses;
@@ -664,19 +629,20 @@ export default function CursosPage() {
   
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      <style jsx global>{styles}</style>
       <div className="page-header mb-8 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
         <div className="flex item-center p-2">
           <div className="flex items-center justify-center mb-3">
             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <BookOpen className="h-6 w-6 text-purple-600" />
+              <Award className="h-6 w-6 text-purple-600" />
             </div>
           </div>
           <div className='text-left px-4 '>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Mi Desarrollo Profesional
+              Mis Certificaciones Profesionales
             </h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Visualiza y gestiona tu trayectoria profesional y aprendizaje en Accenture
+              Visualiza y gestiona tus certificaciones y trayectoria profesional en Accenture
             </p>
           </div>
         </div>
@@ -689,12 +655,12 @@ export default function CursosPage() {
         onPathChange={setActivePath} 
       />
       
-      {/* Courses Section */}
+      {/* Certificates Section */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold flex items-center">
-            <BookOpen className="mr-2 text-purple-600" size={20} />
-            Mis Cursos y Certificaciones
+            <Award className="mr-2 text-purple-600" size={20} />
+            Mis Certificaciones
           </h2>
           <div className="flex space-x-4">
             <div className="flex items-center space-x-2">
@@ -731,7 +697,7 @@ export default function CursosPage() {
             <input
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-              placeholder="Buscar cursos..."
+              placeholder="Buscar certificaciones..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -765,48 +731,15 @@ export default function CursosPage() {
             >
               <option value="date">Fecha</option>
               <option value="name">Nombre</option>
-              <option value="progress">Progreso</option>
             </select>
           </div>
         </div>
         
-        {/* In Progress Courses */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Clock className="text-blue-600 mr-2" size={20} />
-            Cursos en Progreso
-          </h3>
-          
-          <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
-            {filterAndSortCourses(inProgressCourses).map(course => (
-              <CourseCard 
-                key={course.id} 
-                course={course} 
-                onClick={handleCourseClick}
-                viewMode={viewMode}
-              />
-            ))}
-            
-            {filterAndSortCourses(inProgressCourses).length === 0 && (
-              <div className="col-span-full text-center bg-gray-50 rounded-lg p-8">
-                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <h3 className="text-lg font-medium text-gray-500 mb-1">No hay cursos en progreso</h3>
-                <p className="text-gray-500">No se encontraron cursos en progreso con los filtros actuales.</p>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Completed Courses */}
+        {/* Certificates List */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Check className="text-green-600 mr-2" size={20} />
-            Cursos Completados
-          </h3>
-          
           <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
             {filterAndSortCourses(completedCourses).map(course => (
-              <CourseCard 
+              <CertificateItem 
                 key={course.id} 
                 course={course} 
                 onClick={handleCourseClick}
@@ -817,8 +750,8 @@ export default function CursosPage() {
             {filterAndSortCourses(completedCourses).length === 0 && (
               <div className="col-span-full text-center bg-gray-50 rounded-lg p-8">
                 <Award className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <h3 className="text-lg font-medium text-gray-500 mb-1">No hay cursos completados</h3>
-                <p className="text-gray-500">No se encontraron cursos completados con los filtros actuales.</p>
+                <h3 className="text-lg font-medium text-gray-500 mb-1">No hay certificaciones</h3>
+                <p className="text-gray-500">No se encontraron certificaciones con los filtros actuales.</p>
               </div>
             )}
           </div>
