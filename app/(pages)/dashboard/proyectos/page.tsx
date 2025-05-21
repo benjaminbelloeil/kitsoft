@@ -78,44 +78,12 @@ export default function ProjectsPage() {
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header Card */}
-        <div className="bg-white rounded-xl shadow-md mb-6 p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#A100FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold">Proyectos Activos</h1>
-            </div>
-          ) : (
-            
-            <div className="flex space-x-2">
-              <button 
-                onClick={() => setViewMode('grid')}
-                className={`flex items-center px-3 py-1.5 rounded-md ${
-                  viewMode === 'grid' ? 'bg-[#A100FF] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                Grid
-              </button>
-              <button 
-                onClick={() => setViewMode('list')}
-                className={`flex items-center px-3 py-1.5 rounded-md ${
-                  viewMode === 'list' ? 'bg-[#A100FF] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                Lista
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Header simplificado con botones de cambio de vista integrados */}
+        <ProjectsHeader 
+          userName={userData.name} 
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Content Section */}
         {activeProjects.length === 0 ? (
