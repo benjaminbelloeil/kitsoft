@@ -88,6 +88,32 @@ export async function isProjectLead(): Promise<boolean> {
 }
 
 /**
+ * Check if the current user has project manager privileges (level 4)
+ */
+export async function isProjectManager(): Promise<boolean> {
+  try {
+    const response = await fetch('/api/user/level/is-project-manager', {
+      cache: 'no-store',
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to check project manager status:', await response.text());
+      return false;
+    }
+    
+    const { isProjectManager } = await response.json();
+    return isProjectManager;
+  } catch (error) {
+    console.error('Error checking project manager status:', error);
+    return false;
+  }
+}
+
+/**
  * Sign the user out
  */
 export async function signOut() {

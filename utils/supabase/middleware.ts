@@ -138,6 +138,42 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  // Check for project manager access if user is trying to access project manager pages
+  if (user && request.nextUrl.pathname.startsWith('/dashboard/management')) {
+    try {
+      console.log('Middleware: User trying to access project manager page:', user.id);
+      // Use the API endpoint to check if user is project manager with absolute URL constructed from request
+      const origin = request.nextUrl.origin; // Get the origin (protocol + hostname + port)
+      const apiUrl = `${origin}/api/user/level/is-project-manager`;
+      console.log('Middleware: Calling project manager check API at:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        headers: { 
+          'Authorization': `Bearer ${await supabase.auth.getSession().then(res => res.data.session?.access_token || '')}` 
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to verify project manager status');
+      }
+      
+      const { isProjectManager } = await response.json();
+      
+      if (!isProjectManager) {
+        console.log('Non-project-manager user tried to access management page:', user.id);
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = '/dashboard';
+        return NextResponse.redirect(redirectUrl);
+      }
+    } catch (error) {
+      console.error('Error checking project manager status in middleware:', error);
+      // For safety, if we can't verify status, redirect to dashboard
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/dashboard';
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   return response
 }
 

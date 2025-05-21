@@ -13,7 +13,8 @@ type UserRole = {
 type UserContextType = {
   userRole: UserRole | null;
   isAdmin: boolean;
-  isProjectLead: boolean; // Added project lead check
+  isProjectLead: boolean;
+  isProjectManager: boolean; // Added project manager check
   isLoading: boolean;
   refreshUserRole: () => Promise<void>;  // Keep the name for backward compatibility
 };
@@ -23,7 +24,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isProjectLead, setIsProjectLead] = useState(false); // Added state for project lead
+  const [isProjectLead, setIsProjectLead] = useState(false);
+  const [isProjectManager, setIsProjectManager] = useState(false); // Added state for project manager
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
   
@@ -39,6 +41,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUserRole(null);
         setIsAdmin(false);
         setIsProjectLead(false);
+        setIsProjectManager(false); // Reset project manager state
         setIsLoading(false);
         return;
       }
@@ -56,6 +59,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUserRole(null);
         setIsAdmin(false);
         setIsProjectLead(false);
+        setIsProjectManager(false); // Reset project manager state
       } else {
         const levelData = await levelResponse.json();
         setUserRole(levelData as UserRole);
@@ -65,17 +69,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
           console.log("User is ADMIN with level number:", levelData.numero);
           setIsAdmin(true);
           setIsProjectLead(false);
+          setIsProjectManager(false);
         } 
         // Check if user is project lead (nivel.numero === 3)
         else if (levelData && levelData.numero === 3) {
           console.log("User is PROJECT LEAD with level number:", levelData.numero);
           setIsAdmin(false);
           setIsProjectLead(true);
+          setIsProjectManager(false);
+        } 
+        // Check if user is project manager (nivel.numero === 4)
+        else if (levelData && levelData.numero === 4) {
+          console.log("User is PROJECT MANAGER with level number:", levelData.numero);
+          setIsAdmin(false);
+          setIsProjectLead(false);
+          setIsProjectManager(true);
         } 
         else {
           console.log("User is regular user with level number:", levelData?.numero);
           setIsAdmin(false);
           setIsProjectLead(false);
+          setIsProjectManager(false);
         }
       }
     } catch (error) {
@@ -83,6 +97,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setUserRole(null);
       setIsAdmin(false);
       setIsProjectLead(false);
+      setIsProjectManager(false);
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +128,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       userRole, 
       isAdmin, 
       isProjectLead,
+      isProjectManager,
       isLoading, 
       refreshUserRole: refreshUserLevel 
     }}>
