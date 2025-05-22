@@ -95,7 +95,7 @@ export default function ProjectsHeader({
   const { totalTasks, completedTasks, completionRate, pendingTasks, averageCarga } = metrics;
 
   return (
-    <div className="max-w-[1400px] mx-auto py-6  px-4 sm:px-6 lg:px-8 mb-8">
+    <div className="max-w-[1400px] mx-auto  mb-8">
       {/* Sección superior del header */}
       <div className="bg-gray-10 shadow-md border border-gray-100 rounded-t-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center">
         {/* Icono PlaceHolder */}

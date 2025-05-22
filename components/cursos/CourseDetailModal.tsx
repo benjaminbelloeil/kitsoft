@@ -1,191 +1,139 @@
-import { useRef, useEffect } from 'react';
-import StatusBadge from './StatusBadge';
-import ProgressBar from './ProgressBar';
-import { colorClasses } from './CourseUtils';
+import React from 'react';
+import { Award, Star, X, Check } from 'lucide-react';
 
-interface CourseDetailModalProps {
-  course: any;
-  onClose: () => void;
-}
 
-export default function CourseDetailModal({ course, onClose }: CourseDetailModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [onClose]);
 
-  if (!course) return null;
-  
-  const courseColor = colorClasses[course.category as keyof typeof colorClasses] || colorClasses.accenture;
-  const progress = course.status === 'in-progress' ? calculateProgress(course) : 100;
-  
+//Certifiaction Detail on Modal
+const CertificateDetail = ({ certificate, course }: { certificate: any, course: any }) => {
   return (
-    
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div 
-        ref={modalRef}
-        className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-      >
-        {/* Encabezado */}
-        <div className={`${courseColor.bg} p-4 sm:p-6 text-white relative`}>
-          <button 
-            onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:text-gray-200 focus:outline-none"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <h2 className="text-2xl font-bold mb-1">{course.name}</h2>
-          <p className="text-lg opacity-90">{course.issuer}</p>
+    <div className="border border-gray-200 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-indigo-50">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center">
+          <Award className="text-purple-600 mr-2" size={20} />
+          <h3 className="font-semibold text-lg">Certificación</h3>
         </div>
-        
-        {/* Contenido */}
-        <div className="p-4 sm:p-6">
-          {/* Estado y Progreso */}
-          <div className="mb-6">
-            <div className="flex flex-wrap items-center gap-4 mb-4">
+        <img 
+          src="/api/placeholder/80/30" 
+          alt="Accenture Logo" 
+          className="h-6" 
+        />
+      </div>
+      
+      <h4 className="font-bold text-lg mb-1">{course.title}</h4>
+      <p className="text-gray-600 text-sm mb-4">{course.category}</p>
+      
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p className="text-gray-500">ID Credencial:</p>
+          <p className="font-medium">{certificate.credentialID}</p>
+        </div>
+        <div>
+          <p className="text-gray-500">Fecha Emisión:</p>
+          <p className="font-medium">{new Date(certificate.issueDate).toLocaleDateString()}</p>
+        </div>
+        <div>
+          <p className="text-gray-500">Válido Hasta:</p>
+          <p className="font-medium">{new Date(certificate.validUntil).toLocaleDateString()}</p>
+        </div>
+        <div>
+          <p className="text-gray-500">Estado:</p>
+          <p className="font-medium text-green-600">Activo</p>
+        </div>
+      </div>
+      
+      <div className="mt-4 text-center">
+        <button className="text-purple-600 font-medium text-sm hover:text-purple-800 flex items-center justify-center w-full">
+          <Star className="mr-1" size={16} /> Ver Credencial Completa
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Course detail modal component
+const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => void }) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-2xl font-bold">{course.title}</h2>
+              <p className="text-gray-600">{course.description}</p>
+            </div>
+            <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600"
+                title="Cerrar"
+                aria-label="Cerrar"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          
+          <div className="grid md:grid-cols-4 gap-6">
+            <div className="md:col-span-2 space-y-6">
               <div>
-                <StatusBadge status={course.status} />
+                <h3 className="font-semibold text-lg mb-3">Información del Curso</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Categoría:</p>
+                    <p className="font-medium">{course.category}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Ruta Relacionada:</p>
+                    <p className="font-medium">{course.relatedPath}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Fecha Completado:</p>
+                    <p className="font-medium">{new Date(course.completionDate).toLocaleDateString()}</p>
+                  </div>
+                </div>
               </div>
               
-              {course.status === 'completed' && course.completionDate && (
-                <span className="text-sm text-gray-600">
-                  Completado: {new Date(course.completionDate).toLocaleDateString('es-ES')}
-                </span>
-              )}
-              
-              {course.expirationDate && (
-                <span className="text-sm text-gray-600">
-                  Vence: {new Date(course.expirationDate).toLocaleDateString('es-ES')}
-                </span>
-              )}
-              
-              {!course.expirationDate && course.status === 'completed' && (
-                <span className="text-sm text-gray-600">
-                  No expira
-                </span>
-              )}
-            </div>
-            
-            {course.status === 'in-progress' && (
-              <ProgressBar
-                progress={progress}
-                category={course.category}
-                colorClass={courseColor.bg}
-                showLabel={true} 
-              />
-            )}
-          </div>
-          
-          {/* Descripción */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">Descripción</h3>
-            <p className="text-gray-700">{course.description}</p>
-          </div>
-          
-          {/* Credenciales si es completado */}
-          {course.status === 'completed' && course.credentialID && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Credenciales</h3>
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="mb-2">
-                  <span className="text-sm font-medium text-gray-500">ID de Credencial:</span>
-                  <span className="ml-2 text-gray-900">{course.credentialID}</span>
+              <div>
+                <h3 className="font-semibold text-lg mb-3">Módulos del Curso</h3>
+                <div className="space-y-3">
+                  {course.modules.map((module: { name: string; completed: boolean }, idx: number) => (
+                    <div key={idx} className="flex items-center">
+                      <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-green-100 text-green-600">
+                        <Check size={16} />
+                      </div>
+                      <div className="ml-3 flex-grow">
+                        <div className="text-sm font-medium">{module.name}</div>
+                        <div className="text-xs text-green-600">Completado</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          )}
-          
-          {/* Módulos si está en progreso */}
-          {course.status === 'in-progress' && course.modules && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">Módulos</h3>
-              <div className="space-y-3">
-                {course.modules.map((module: any) => (
-                  <div key={module.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        {module.completed ? (
-                          <div className={`${courseColor.bg} rounded-full h-5 w-5 flex items-center justify-center mr-3`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        ) : (
-                          <div className="rounded-full h-5 w-5 border-2 border-gray-300 mr-3"></div>
-                        )}
-                        <h4 className="text-base font-medium">{module.name}</h4>
-                      </div>
-                      <span className={`text-sm ${module.completed ? 'text-green-600' : 'text-gray-500'}`}>
-                        {module.completed ? 'Completado' : 'Pendiente'}
-                      </span>
-                    </div>
-                    {module.description && (
-                      <p className="text-sm text-gray-600 mt-2 ml-8">{module.description}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+            
+            <div className="md:col-span-2">
+                {course.certificate && (
+                  <CertificateDetail 
+                    certificate={course.certificate} 
+                    course={course} 
+                  />
+                )}
             </div>
-          )}
-          
-          {/* Habilidades */}
-          {course.skills && course.skills.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Habilidades</h3>
-              <div className="flex flex-wrap gap-2">
-                {course.skills.map((skill: string, index: number) => (
-                  <span 
-                    key={index} 
-                    className={`${courseColor.border} bg-white border rounded-full px-3 py-1 text-sm`}
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          </div>
         </div>
         
-        {/* Acciones */}
-        <div className="border-t border-gray-200 p-4 sm:p-6 flex justify-end">
-          {course.status === 'completed' && course.credentialURL && (
-            <a 
-              href="./cursos"
-              target="_blank" 
-              rel="noopener noreferrer"
-              className={`${courseColor.bg} text-white px-4 py-2 rounded-lg shadow-sm hover:opacity-90 mr-3`}
-            >
-              Verificar Certificado
-            </a>
-          )}
-          <button 
+        <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end">
+          <button
             onClick={onClose}
-            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50"
+            className="bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 mr-3"
           >
             Cerrar
+          </button>
+          <button className="bg-purple-600 rounded-md px-4 py-2 text-sm font-medium text-white hover:bg-purple-700">
+            Descargar Certificado
           </button>
         </div>
       </div>
     </div>
   );
-}
+};
 
-// Función auxiliar para calcular el progreso
-function calculateProgress(course: any) {
-  if (course.modules) {
-    const completedModules = course.modules.filter((m: any) => m.completed).length;
-    return Math.round((completedModules / course.modules.length) * 100);
-  }
-  return 0;
-}
+export default CourseDetailModal;
