@@ -1,17 +1,20 @@
-export interface Project {
-  ID_Proyecto?: string;
-  name: string;
-  cargabilidad: number;
-  color: string;
-  ID_Usuario?: string;
-  Fecha_Inicio?: string;
-  Fecha_Fin?: string | null;
-  Descripcion?: string;
-  Rol?: string;
-  Cliente?: string;
-  Tecnologias?: string[];
+export interface Client {
+  id_cliente: string;
+  nombre: string;
+  direccion: string | null;
+  telefono: string | null;
+  correo: string | null;
+  url_logo: string | null;
 }
 
-export interface CargabilidadSectionProps {
-  projects: Project[];
+export interface Project {
+  id_proyecto: string;
+  titulo: string;
+  descripcion: string | null;
+  id_cliente: string;
+  fecha_inicio: string;
+  fecha_fin: string | null;
+  activo: boolean;
+  horas_totales: number;
+  cliente?: string; // For UI display - will be populated from a separate API call or state
 }

@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { Client } from '@/components/proyectos/manager/types';
+import { Client } from '@/interfaces/project';
 
 interface ClientDetailsProps {
   client: Client;

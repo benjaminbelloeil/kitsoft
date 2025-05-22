@@ -15,7 +15,7 @@ import {
 } from 'react-icons/fi';
 import ArchiveProjectModal from '@/components/proyectos/manager/ArchiveProjectModal';
 import { motion } from 'framer-motion';
-import { Client, Project } from './types';
+import { Client, Project } from '@/interfaces/project';
 import ClientDetails from './ClientDetails';
 
 interface ProjectFormProps {

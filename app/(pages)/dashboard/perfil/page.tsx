@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { userData } from "@/app/lib/data"; // Keep this import for other sections
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
-import { Project } from '@/interfaces/project';
 import { createClient } from '@/utils/supabase/client';
 import { saveUserProfile, getUserCompleteProfile } from '@/utils/database/client/profileSync';
 import { NotificationContainer, useNotificationState } from "@/components/ui/toast-notification";
@@ -23,9 +22,8 @@ export default function ProfilePage() {
     Apellido: "",
     Titulo: "",
     Bio: "",
-    URL_Avatar: "placeholder-avatar.png",
+    URL_Avatar: "",
     // Keep other dummy data for the rest of the components
-    projects: userData.projects as Project[],
     skills: userData.skills ? userData.skills.map(skill => ({ 
       Nombre: skill, 
       Nivel: 3, 

@@ -7,7 +7,7 @@ import {
   FiInfo 
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import { Project } from '@/components/proyectos/manager/types';
+import { Project } from '@/interfaces/project';
 import { useState } from 'react';
 import ArchiveProjectModal from '@/components/proyectos/manager/ArchiveProjectModal';
 
