@@ -139,7 +139,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Check for project manager access if user is trying to access project manager pages
-  if (user && request.nextUrl.pathname.startsWith('/dashboard/management')) {
+  if (user && (request.nextUrl.pathname.startsWith('/dashboard/proyectos/manager') || 
+               request.nextUrl.pathname.startsWith('/dashboard/management'))) {
     try {
       console.log('Middleware: User trying to access project manager page:', user.id);
       // Use the API endpoint to check if user is project manager with absolute URL constructed from request
