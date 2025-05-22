@@ -36,7 +36,7 @@ export const navLinks: NavItem[] = [
     ]
   },
   {
-    name: "Cursos",
+    name: "Trayectoria",
     icon: "certificates",
     href: "/dashboard/cursos",
     hasDropdown: false

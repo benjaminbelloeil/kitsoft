@@ -8,7 +8,7 @@ const PathSkeleton: React.FC = () => {
       <div className="mb-8 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
         <div className="flex items-center p-2">
           <div className="flex items-center justify-center mb-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <Award className="h-6 w-6 text-purple-200" />
             </div>
           </div>
