@@ -93,14 +93,20 @@ export default function ProjectList({
     >
       {/* Projects List Display */}
       <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col h-full">
-        <div className="border-b border-gray-100 p-4 bg-gradient-to-r from-gray-50 to-gray-100">
-          <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-            <FiUsers className="mr-2 text-[#A100FF]" />
-            Lista de Proyectos
-          </h3>
-          <p className="text-sm text-gray-500">
-            Mostrando {filteredProjects.length} de {projects.length} proyectos
-          </p>
+        <div className="border-b border-gray-100 p-6">
+          <div className="flex items-center mb-0">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] rounded-full flex items-center justify-center mr-4 shadow-lg border border-[#A100FF20]">
+              <FiUsers className="w-5 h-5 text-[#A100FF]" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">
+                Lista de Proyectos
+              </h2>
+              <p className="text-sm text-gray-500">
+                Mostrando {filteredProjects.length} de {projects.length} proyectos
+              </p>
+            </div>
+          </div>
         </div>
         <div className="overflow-y-auto max-h-[600px] scrollbar-thin scrollbar-thumb-[#A100FF20] scrollbar-track-gray-50">
           <table className="min-w-full divide-y divide-gray-200">
