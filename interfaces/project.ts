@@ -7,6 +7,32 @@ export interface Client {
   url_logo: string | null;
 }
 
+export interface User {
+  id_usuario: string;
+  nombre: string;
+  apellido: string | null;
+  email: string;
+  foto_url: string | null;
+  activo: boolean;
+}
+
+export interface Role {
+  id_rol: string;
+  nombre: string;
+  descripcion: string | null;
+}
+
+export interface ProjectUser {
+  id_usuario_proyecto: string;
+  id_usuario: string;
+  id_proyecto: string;
+  id_rol: string;
+  titulo?: string;
+  horas: number;
+  nombre?: string; // User name for display
+  apellido?: string; // User last name for display
+}
+
 export interface Project {
   id_proyecto: string;
   titulo: string;
@@ -17,4 +43,6 @@ export interface Project {
   activo: boolean;
   horas_totales: number;
   cliente?: string; // For UI display - will be populated from a separate API call or state
+  usuarios?: ProjectUser[]; // Assigned users
+  roles?: Role[]; // Available roles for this project
 }

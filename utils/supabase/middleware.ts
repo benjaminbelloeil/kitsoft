@@ -103,7 +103,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Check for project lead access if user is trying to access project lead pages
-  if (user && request.nextUrl.pathname.startsWith('/dashboard/projects')) {
+  if (user && request.nextUrl.pathname.startsWith('/dashboard/proyectos/lead')) {
     try {
       console.log('Middleware: User trying to access project lead page:', user.id);
       // Use the API endpoint to check if user is project lead with absolute URL constructed from request
