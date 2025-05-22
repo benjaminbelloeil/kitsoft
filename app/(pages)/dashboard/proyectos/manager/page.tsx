@@ -8,7 +8,7 @@ import ProjectManagerSkeleton from '@/components/proyectos/manager/ProjectManage
 import ProjectForm from '@/components/proyectos/manager/ProjectForm';
 import ProjectList from '@/components/proyectos/manager/ProjectList';
 import { useNotifications } from '@/context/notification-context';
-import { Client, Project } from '@/components/proyectos/manager/types';
+import { Client, Project } from '@/interfaces/project';
 
 export default function ProjectManagementPage() {
   // State management
