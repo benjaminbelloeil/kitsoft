@@ -1,5 +1,6 @@
+// filepath: /Users/benjaminbelloeil/Desktop/Career/Programs/kitsoft/app/(pages)/dashboard/proyectos/manager/page.tsx
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -17,13 +18,24 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiFileText,
-  FiAlertCircle
+  FiAlertCircle,
+  FiLoader
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProjectManagerHeader from '@/components/proyectos/manager/ProjectManagerHeader';
 import ProjectManagerSkeleton from '@/components/proyectos/manager/ProjectManagerSkeleton';
+import { useNotifications } from '@/context/notification-context';
 
-// Define types for the project data
+// Define types for the project and client data
+interface Client {
+  id_cliente: string;
+  nombre: string;
+  direccion: string | null;
+  telefono: string | null;
+  correo: string | null;
+  url_logo: string | null;
+}
+
 interface Project {
   id_proyecto: string;
   titulo: string;
@@ -41,9 +53,13 @@ export default function ProjectManagementPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [clients, setClients] = useState<any[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
+  const { setNotifications } = useNotifications();
   const formRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   
@@ -67,15 +83,17 @@ export default function ProjectManagementPage() {
         const projectsData = await projectsResponse.json();
         
         // Fetch clients for dropdown selection
-        const clientsResponse = await fetch('/api/clientes');
+        const clientsResponse = await fetch('/api/clients');
         const clientsData = await clientsResponse.json();
+        
+        console.log('Clients data fetched:', clientsData); // Debug - check if clients are loaded
         
         setProjects(projectsData);
         setClients(clientsData);
         
         // Map client names to projects for display
         const enhancedProjects = projectsData.map((project: Project) => {
-          const client = clientsData.find((c: any) => c.id_cliente === project.id_cliente);
+          const client = clientsData.find((c: Client) => c.id_cliente === project.id_cliente);
           return {
             ...project,
             cliente: client?.nombre || 'Cliente Desconocido'
@@ -142,6 +160,7 @@ export default function ProjectManagementPage() {
   // Handle create project form submission
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsCreating(true);
     
     try {
       const response = await fetch('/api/manager/proyectos', {
@@ -160,7 +179,7 @@ export default function ProjectManagementPage() {
       const newProject = await response.json();
       
       // Add client name for display
-      const client = clients.find((c: any) => c.id_cliente === newProject.id_cliente);
+      const client = clients.find((c: Client) => c.id_cliente === newProject.id_cliente);
       newProject.cliente = client?.nombre || 'Cliente Desconocido';
       
       // Update projects list with new project
@@ -169,11 +188,35 @@ export default function ProjectManagementPage() {
       // Reset form for new entries
       resetForm();
       
-      // Display success notification to user
-      alert('Proyecto creado con éxito');
+      // Display success notification using notification context
+      setNotifications(prev => [
+        {
+          id: Date.now().toString(),
+          title: 'Proyecto creado',
+          message: `Proyecto "${newProject.titulo}" creado con éxito`,
+          date: new Date(),
+          read: false,
+          type: 'project'
+        },
+        ...prev
+      ]);
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Error creating project. Please try again.');
+      
+      // Display error notification using notification context
+      setNotifications(prev => [
+        {
+          id: Date.now().toString(),
+          title: 'Error',
+          message: `Error al crear el proyecto: ${error instanceof Error ? error.message : 'Intente nuevamente'}`,
+          date: new Date(),
+          read: false,
+          type: 'project'
+        },
+        ...prev
+      ]);
+    } finally {
+      setIsCreating(false);
     }
   };
   
@@ -182,6 +225,7 @@ export default function ProjectManagementPage() {
     e.preventDefault();
     
     if (!selectedProject) return;
+    setIsUpdating(true);
     
     try {
       const response = await fetch(`/api/manager/proyectos/${selectedProject.id_proyecto}`, {
@@ -200,7 +244,7 @@ export default function ProjectManagementPage() {
       const updatedProject = await response.json();
       
       // Add client name for display
-      const client = clients.find((c: any) => c.id_cliente === updatedProject.id_cliente);
+      const client = clients.find((c: Client) => c.id_cliente === updatedProject.id_cliente);
       updatedProject.cliente = client?.nombre || 'Cliente Desconocido';
       
       // Update projects list with the edited project
@@ -211,11 +255,35 @@ export default function ProjectManagementPage() {
       // Reset form and clear selection
       resetForm();
       
-      // Display success notification to user
-      alert('Proyecto actualizado con éxito');
+      // Display success notification using notification context
+      setNotifications(prev => [
+        {
+          id: Date.now().toString(),
+          title: 'Proyecto actualizado',
+          message: `Proyecto "${updatedProject.titulo}" actualizado con éxito`,
+          date: new Date(),
+          read: false,
+          type: 'project'
+        },
+        ...prev
+      ]);
     } catch (error) {
       console.error('Error updating project:', error);
-      alert('Error updating project. Please try again.');
+      
+      // Display error notification using notification context
+      setNotifications(prev => [
+        {
+          id: Date.now().toString(),
+          title: 'Error',
+          message: `Error al actualizar el proyecto: ${error instanceof Error ? error.message : 'Intente nuevamente'}`,
+          date: new Date(),
+          read: false,
+          type: 'project'
+        },
+        ...prev
+      ]);
+    } finally {
+      setIsUpdating(false);
     }
   };
   
@@ -224,6 +292,9 @@ export default function ProjectManagementPage() {
     if (!confirm('¿Estás seguro que deseas archivar este proyecto? Los proyectos archivados no aparecerán en la lista de proyectos activos.')) {
       return;
     }
+    
+    const projectToArchive = projects.find(p => p.id_proyecto === projectId);
+    setIsArchiving(true);
     
     try {
       const response = await fetch(`/api/manager/proyectos/${projectId}`, {
@@ -243,11 +314,35 @@ export default function ProjectManagementPage() {
         resetForm();
       }
       
-      // Display success notification to user
-      alert('Proyecto archivado con éxito');
+      // Display success notification using notification context
+      setNotifications(prev => [
+        {
+          id: Date.now().toString(),
+          title: 'Proyecto archivado',
+          message: `Proyecto "${projectToArchive?.titulo || 'seleccionado'}" archivado con éxito`,
+          date: new Date(),
+          read: false,
+          type: 'project'
+        },
+        ...prev
+      ]);
     } catch (error) {
       console.error('Error archiving project:', error);
-      alert('Error archiving project. Please try again.');
+      
+      // Display error notification using notification context
+      setNotifications(prev => [
+        {
+          id: Date.now().toString(),
+          title: 'Error',
+          message: `Error al archivar el proyecto: ${error instanceof Error ? error.message : 'Intente nuevamente'}`,
+          date: new Date(),
+          read: false,
+          type: 'project'
+        },
+        ...prev
+      ]);
+    } finally {
+      setIsArchiving(false);
     }
   };
   
@@ -350,25 +445,116 @@ export default function ProjectManagementPage() {
                 <div className="relative">
                   <label htmlFor="id_cliente" className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
                   <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A100FF]">
+                      <FiUsers className="h-4 w-4" />
+                    </div>
                     <select
                       id="id_cliente"
                       name="id_cliente"
                       value={formData.id_cliente}
                       onChange={handleInputChange}
                       required
-                      className="w-full appearance-none border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 bg-white focus:outline-none focus:ring-2 focus:ring-[#A100FF40] focus:border-[#A100FF] transition-all pr-10"
+                      className="w-full appearance-none border border-gray-300 rounded-lg shadow-sm py-2.5 pl-10 pr-10 bg-white focus:outline-none focus:ring-2 focus:ring-[#A100FF40] focus:border-[#A100FF] focus:bg-[#FCFAFF] transition-all text-gray-800 font-medium"
+                      style={{ 
+                        fontSize: '0.95rem',
+                        background: 'linear-gradient(to bottom, #ffffff, #f9f9f9)',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
+                      }}
                     >
-                      <option value="">Selecciona un cliente</option>
-                      {clients.map((client: any) => (
-                        <option key={client.id_cliente} value={client.id_cliente}>
+                      <option 
+                        value="" 
+                        disabled 
+                        className="text-gray-400"
+                        style={{
+                          background: 'white',
+                          padding: '8px',
+                          borderBottom: '1px solid #f0f0f0'
+                        }}
+                      >
+                        Selecciona un cliente
+                      </option>
+                      {clients && clients.length > 0 ? clients.map((client: Client) => (
+                        <option 
+                          key={client.id_cliente} 
+                          value={client.id_cliente}
+                          className="py-2 font-medium text-gray-800"
+                          style={{ 
+                            padding: '10px', 
+                            background: 'white',
+                            borderBottom: '1px solid #f0f0f0'
+                          }}
+                        >
                           {client.nombre}
                         </option>
-                      ))}
+                      )) : (
+                        <option value="" disabled>Cargando clientes...</option>
+                      )}
                     </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                      <FiChevronDown className="w-4 h-4" />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#A100FF]">
+                      <FiChevronDown className="w-5 h-5" />
                     </div>
                   </div>
+                  
+                  {/* Client information card - Fixed DOM nesting */}
+                  {formData.id_cliente && (
+                    <div className="mt-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm"
+                      style={{
+                        opacity: 1,
+                        transform: 'translateY(0)',
+                        transition: 'opacity 0.2s ease, transform 0.2s ease'
+                      }}
+                    >
+                      {(() => {
+                        const selectedClient = clients.find(c => c.id_cliente === formData.id_cliente);
+                        if (!selectedClient) return null;
+                        
+                        return (
+                          <div className="flex flex-col space-y-3">
+                            {/* Client logo - optimized for horizontal logos */}
+                            {selectedClient.url_logo ? (
+                              <div className="bg-white p-2 rounded-md border border-gray-100 shadow-sm w-full h-14 flex items-center justify-center overflow-hidden">
+                                <img 
+                                  src={selectedClient.url_logo} 
+                                  alt={selectedClient.nombre}
+                                  className="max-w-full max-h-12 object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-full h-12 bg-gray-100 rounded-md flex items-center justify-center text-lg font-medium text-gray-600">
+                                {selectedClient.nombre.charAt(0)}
+                              </div>
+                            )}
+                            
+                            {/* Client details */}
+                            <div className="flex flex-col space-y-2">                                
+                              <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
+                                {selectedClient.correo && (
+                                  <div className="flex items-center">
+                                    <span className="w-20 text-gray-500">Correo:</span>
+                                    <span className="font-medium">{selectedClient.correo}</span>
+                                  </div>
+                                )}
+                                
+                                {selectedClient.telefono && (
+                                  <div className="flex items-center">
+                                    <span className="w-20 text-gray-500">Teléfono:</span>
+                                    <span className="font-medium">{selectedClient.telefono}</span>
+                                  </div>
+                                )}
+                                
+                                {selectedClient.direccion && (
+                                  <div className="flex items-start">
+                                    <span className="w-20 text-gray-500">Dirección:</span>
+                                    <span className="font-medium">{selectedClient.direccion}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="relative">
@@ -467,48 +653,64 @@ export default function ProjectManagementPage() {
                 <div className="flex items-center justify-between pt-6 mt-2 border-t border-gray-200">
                   {isEditing ? (
                     <>
-                      <motion.button
+                      {/* Button replaced with regular button + CSS for animation */}
+                      <button
                         type="button"
                         onClick={resetForm}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors shadow-sm border border-gray-200"
+                        disabled={isUpdating || isArchiving}
+                        className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors shadow-sm border border-gray-200 disabled:opacity-70 disabled:cursor-not-allowed hover:scale-103 active:scale-97"
+                        style={{ transition: 'transform 0.2s ease, background-color 0.2s ease' }}
                       >
                         Cancelar
-                      </motion.button>
+                      </button>
                       <div className="flex space-x-3">
-                        <motion.button
+                        {/* Archive Button */}
+                        <button
                           type="button"
                           onClick={() => selectedProject && handleArchiveProject(selectedProject.id_proyecto)}
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          className="px-4 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2 shadow-sm border border-red-100"
+                          disabled={isUpdating || isArchiving}
+                          className="px-4 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2 shadow-sm border border-red-100 disabled:opacity-70 disabled:cursor-not-allowed hover:scale-103 active:scale-97"
+                          style={{ transition: 'transform 0.2s ease, background-color 0.2s ease' }}
                         >
-                          <FiTrash2 className="h-4 w-4" />
-                          <span>Archivar</span>
-                        </motion.button>
-                        <motion.button
+                          {isArchiving ? (
+                            <FiLoader className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <FiTrash2 className="h-4 w-4" />
+                          )}
+                          <span>{isArchiving ? 'Archivando...' : 'Archivar'}</span>
+                        </button>
+                        {/* Save Button */}
+                        <button
                           type="submit"
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          className="px-5 py-2.5 bg-[#A100FF] text-white rounded-lg hover:bg-[#8A00D4] transition-colors flex items-center gap-2 shadow-md"
+                          disabled={isUpdating || isArchiving}
+                          className="px-5 py-2.5 bg-[#A100FF] text-white rounded-lg hover:bg-[#8A00D4] transition-colors flex items-center gap-2 shadow-md disabled:opacity-70 disabled:cursor-not-allowed hover:scale-103 active:scale-97"
+                          style={{ transition: 'transform 0.2s ease, background-color 0.2s ease' }}
                         >
-                          <FiSave className="h-4 w-4" />
-                          <span>Guardar</span>
-                        </motion.button>
+                          {isUpdating ? (
+                            <FiLoader className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <FiSave className="h-4 w-4" />
+                          )}
+                          <span>{isUpdating ? 'Guardando...' : 'Guardar'}</span>
+                        </button>
                       </div>
                     </>
                   ) : (
                     <>
-                      <motion.button
+                      {/* Create Button */}
+                      <button
                         type="submit"
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="px-5 py-2.5 bg-[#A100FF] text-white rounded-lg hover:bg-[#8A00D4] transition-colors flex items-center gap-2 shadow-md ml-auto"
+                        disabled={isCreating}
+                        className="px-5 py-2.5 bg-[#A100FF] text-white rounded-lg hover:bg-[#8A00D4] transition-colors flex items-center gap-2 shadow-md ml-auto disabled:opacity-70 disabled:cursor-not-allowed hover:scale-103 active:scale-97"
+                        style={{ transition: 'transform 0.2s ease, background-color 0.2s ease' }}
                       >
-                        <FiPlus className="h-4 w-4" />
-                        <span>Crear Proyecto</span>
-                      </motion.button>
+                        {isCreating ? (
+                          <FiLoader className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <FiPlus className="h-4 w-4" />
+                        )}
+                        <span>{isCreating ? 'Creando...' : 'Crear Proyecto'}</span>
+                      </button>
                     </>
                   )}
                 </div>
@@ -529,38 +731,23 @@ export default function ProjectManagementPage() {
                   transition={{ duration: 0.3 }}
                   whileHover={{ boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}
                 >
-                  <motion.div 
-                    className="w-20 h-20 bg-gradient-to-br from-[#A100FF10] to-[#A100FF20] rounded-full flex items-center justify-center mb-6 border-2 border-[#A100FF20] shadow-lg"
-                    animate={{ 
-                      scale: [1, 1.05, 1],
-                      rotate: [0, -5, 0, 5, 0]
-                    }}
-                    transition={{ 
-                      duration: 3,
-                      repeat: Infinity,
-                      repeatType: "reverse"
-                    }}
+                  <div 
+                    className="w-20 h-20 bg-gradient-to-br from-[#A100FF10] to-[#A100FF20] rounded-full flex items-center justify-center mb-6 border-2 border-[#A100FF20] shadow-lg pulse-animation"
                   >
                     <FiInfo className="h-8 w-8 text-[#A100FF]" />
-                  </motion.div>
+                  </div>
                   
-                  <motion.h2 
+                  <h2 
                     className="text-2xl font-semibold mb-3 text-gray-800"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.3 }}
                   >
                     No hay proyectos
-                  </motion.h2>
+                  </h2>
                   
-                  <motion.p 
+                  <p 
                     className="text-gray-600 mb-8 max-w-md mx-auto"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4, duration: 0.3 }}
                   >
                     No se encontraron proyectos. Para comenzar, utiliza el formulario de la izquierda para crear un nuevo proyecto.
-                  </motion.p>
+                  </p>
                 </motion.div>
               ) : (
                 <motion.div
@@ -595,20 +782,20 @@ export default function ProjectManagementPage() {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-100">
                           {filteredProjects.map((project, index) => (
-                            <motion.tr 
+                            <tr 
                               key={project.id_proyecto} 
                               className={`cursor-pointer relative ${selectedProject?.id_proyecto === project.id_proyecto ? 'bg-[#F9F5FF]' : 'hover:bg-gray-50'}`}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.2, delay: index * 0.03 }}
-                              whileHover={{ backgroundColor: selectedProject?.id_proyecto === project.id_proyecto ? "#F0E6FF" : "#F9FAFB" }}
+                              style={{
+                                opacity: 1,
+                                transform: 'translateY(0px)',
+                                transition: `opacity 0.2s, transform 0.2s ${index * 0.03}s`
+                              }}
                             >
                               {/* Highlight for selected project */}
                               {selectedProject?.id_proyecto === project.id_proyecto && (
-                                <motion.div 
+                                <div 
                                   className="absolute left-0 top-0 h-full w-1 bg-[#A100FF]"
-                                  layoutId="selectedIndicator"
-                                />
+                                ></div>
                               )}
                               
                               <td 
@@ -650,40 +837,46 @@ export default function ProjectManagementPage() {
                                 className="px-6 py-4 whitespace-nowrap"
                                 onClick={() => handleSelectProject(project)}
                               >
-                                <motion.span 
-                                  whileHover={{ scale: 1.05 }}
-                                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                                {/* Replaced motion.span with regular span */}
+                                <span 
+                                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium hover:scale-105 ${
                                     project.activo 
                                       ? 'bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200 shadow-sm' 
                                       : 'bg-gradient-to-r from-gray-50 to-gray-100 text-gray-600 border border-gray-200 shadow-sm'
                                   }`}
+                                  style={{
+                                    transition: 'transform 0.2s ease',
+                                  }}
                                 >
                                   <span className={`w-2 h-2 rounded-full mr-1 ${project.activo ? 'bg-green-500' : 'bg-gray-400'}`}></span>
                                   {project.activo ? 'Activo' : 'Inactivo'}
-                                </motion.span>
+                                </span>
                               </td>
                               
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                 <div className="flex justify-end space-x-2">
-                                  <motion.button
+                                  {/* Replaced motion.button with regular buttons */}
+                                  <button
                                     onClick={() => handleSelectProject(project)}
-                                    className="p-2 rounded-full bg-[#A100FF10] hover:bg-[#A100FF20] transition-colors shadow-sm"
-                                    whileHover={{ scale: 1.1, rotate: 12 }}
-                                    whileTap={{ scale: 0.9 }}
+                                    className="p-2 rounded-full bg-[#A100FF10] hover:bg-[#A100FF20] transition-colors shadow-sm hover:scale-110 hover:rotate-12 active:scale-90"
+                                    style={{ 
+                                      transition: 'transform 0.2s ease, background-color 0.2s ease, rotate 0.2s ease' 
+                                    }}
                                   >
                                     <FiEdit className="h-4 w-4 text-[#A100FF]" />
-                                  </motion.button>
-                                  <motion.button
+                                  </button>
+                                  <button
                                     onClick={() => handleArchiveProject(project.id_proyecto)}
-                                    className="p-2 rounded-full bg-red-50 hover:bg-red-100 transition-colors shadow-sm"
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
+                                    className="p-2 rounded-full bg-red-50 hover:bg-red-100 transition-colors shadow-sm hover:scale-110 active:scale-90"
+                                    style={{ 
+                                      transition: 'transform 0.2s ease, background-color 0.2s ease' 
+                                    }}
                                   >
                                     <FiTrash2 className="h-4 w-4 text-red-500" />
-                                  </motion.button>
+                                  </button>
                                 </div>
                               </td>
-                            </motion.tr>
+                            </tr>
                           ))}
                         </tbody>
                       </table>
@@ -697,8 +890,6 @@ export default function ProjectManagementPage() {
           </div>
         </div>
       </div>
-      
-      {/* Project View/Edit modals removed as they're now part of the main UI */}
     </div>
   );
 }
