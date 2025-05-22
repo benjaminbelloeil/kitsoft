@@ -30,12 +30,8 @@ export default function ProjectManagerHeader({
                 <FiFolder className="h-6 w-6 text-[#A100FF]" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
+                <div>
                   <h1 className="text-2xl font-bold text-black">Gestión de Proyectos</h1>
-                  <span className="px-3 py-1 bg-gradient-to-r from-green-50 to-green-100 text-green-800 text-xs font-medium rounded-full inline-flex items-center border border-green-200 shadow-sm">
-                    <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                    {activeProjects} Activos
-                  </span>
                 </div>
                 <p className="text-gray-600 mt-2 max-w-2xl">
                   Administra todos los proyectos desde un solo lugar. Crea, edita y gestiona los proyectos del sistema.
@@ -54,9 +50,9 @@ export default function ProjectManagerHeader({
                   <span className="text-green-700">Activos:</span>
                   <span className="ml-1 font-semibold text-green-800">{activeProjects}</span>
                 </div>
-                <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 shadow-sm transition-all hover:shadow-md hover:border-gray-200">
-                  <span className="text-gray-500">Inactivos:</span>
-                  <span className="ml-1 font-semibold text-gray-600">{totalProjects - activeProjects}</span>
+                <div className="px-3 py-2 bg-red-50 rounded-md border border-red-100 shadow-sm transition-all hover:shadow-md hover:border-red-200">
+                  <span className="text-red-700">Inactivos:</span>
+                  <span className="ml-1 font-semibold text-red-800">{totalProjects - activeProjects}</span>
                 </div>
               </div>
               
