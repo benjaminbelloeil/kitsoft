@@ -9,6 +9,14 @@ import ProjectForm from '@/components/proyectos/manager/ProjectForm';
 import ProjectList from '@/components/proyectos/manager/ProjectList';
 import { useNotifications } from '@/context/notification-context';
 import { Client, Project } from '@/interfaces/project';
+import { 
+  fetchProjects, 
+  fetchClients, 
+  enhanceProjectsWithClientInfo, 
+  createProject, 
+  updateProject, 
+  archiveProject 
+} from '@/utils/database/client/projectManagerSync';
 
 export default function ProjectManagementPage() {
   // State management
@@ -40,28 +48,15 @@ export default function ProjectManagementPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch projects from our API
-        const projectsResponse = await fetch('/api/manager/proyectos');
-        const projectsData = await projectsResponse.json();
+        // Fetch projects and clients using our sync functions
+        const projectsData = await fetchProjects();
+        const clientsData = await fetchClients();
         
-        // Fetch clients for dropdown selection
-        const clientsResponse = await fetch('/api/manager/clients');
-        const clientsData = await clientsResponse.json();
-        
-        console.log('Clients data fetched:', clientsData); // Debug - check if clients are loaded
-        
-        setProjects(projectsData);
+        // Set clients for dropdown selection
         setClients(clientsData);
         
-        // Map client names to projects for display
-        const enhancedProjects = projectsData.map((project: Project) => {
-          const client = clientsData.find((c: Client) => c.id_cliente === project.id_cliente);
-          return {
-            ...project,
-            cliente: client?.nombre || 'Cliente Desconocido'
-          };
-        });
-        
+        // Enhance projects with client names and update state
+        const enhancedProjects = enhanceProjectsWithClientInfo(projectsData, clientsData);
         setProjects(enhancedProjects);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -125,20 +120,8 @@ export default function ProjectManagementPage() {
     setIsCreating(true);
     
     try {
-      const response = await fetch('/api/manager/proyectos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error creating project');
-      }
-      
-      const newProject = await response.json();
+      // Use the sync function to create the project
+      const newProject = await createProject(formData);
       
       // Add client name for display
       const client = clients.find((c: Client) => c.id_cliente === newProject.id_cliente);
@@ -190,20 +173,8 @@ export default function ProjectManagementPage() {
     setIsUpdating(true);
     
     try {
-      const response = await fetch(`/api/manager/proyectos/${selectedProject.id_proyecto}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error updating project');
-      }
-      
-      const updatedProject = await response.json();
+      // Use the sync function to update the project
+      const updatedProject = await updateProject(selectedProject.id_proyecto, formData);
       
       // Add client name for display
       const client = clients.find((c: Client) => c.id_cliente === updatedProject.id_cliente);
@@ -258,14 +229,8 @@ export default function ProjectManagementPage() {
     setIsArchiving(true);
     
     try {
-      const response = await fetch(`/api/manager/proyectos/${projectId}`, {
-        method: 'DELETE', // This actually just marks as inactive
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error archiving project');
-      }
+      // Use the sync function to archive the project
+      await archiveProject(projectId);
       
       // Update the project status to inactive instead of removing it
       setProjects(prev => prev.map(p => 
