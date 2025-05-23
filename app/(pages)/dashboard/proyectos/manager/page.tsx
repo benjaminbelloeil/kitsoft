@@ -45,7 +45,7 @@ export default function ProjectManagementPage() {
         const projectsData = await projectsResponse.json();
         
         // Fetch clients for dropdown selection
-        const clientsResponse = await fetch('/api/clients');
+        const clientsResponse = await fetch('/api/manager/clients');
         const clientsData = await clientsResponse.json();
         
         console.log('Clients data fetched:', clientsData); // Debug - check if clients are loaded
