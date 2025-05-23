@@ -8,14 +8,17 @@ import ProjectManagerSkeleton from '@/components/proyectos/manager/ProjectManage
 import ProjectForm from '@/components/proyectos/manager/ProjectForm';
 import ProjectList from '@/components/proyectos/manager/ProjectList';
 import { useNotifications } from '@/context/notification-context';
-import { Client, Project } from '@/interfaces/project';
+import { Client, Project, Role } from '@/interfaces/project';
 import { 
   fetchProjects, 
   fetchClients, 
   enhanceProjectsWithClientInfo, 
   createProject, 
   updateProject, 
-  archiveProject 
+  archiveProject,
+  fetchRoles,
+  fetchProjectRoles,
+  updateProjectRoles
 } from '@/utils/database/client/projectManagerSync';
 
 export default function ProjectManagementPage() {
@@ -29,6 +32,8 @@ export default function ProjectManagementPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const { setNotifications } = useNotifications();
   const formRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -48,15 +53,38 @@ export default function ProjectManagementPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch projects and clients using our sync functions
-        const projectsData = await fetchProjects();
-        const clientsData = await fetchClients();
+        // Fetch projects, clients, and roles using our sync functions
+        const [projectsData, clientsData, rolesData] = await Promise.all([
+          fetchProjects(),
+          fetchClients(),
+          fetchRoles()
+        ]);
         
-        // Set clients for dropdown selection
+        // Set clients and roles for dropdown selection
         setClients(clientsData);
+        setRoles(rolesData);
+        
+        // Fetch roles for each project
+        const projectsWithRoles = await Promise.all(
+          projectsData.map(async (project) => {
+            try {
+              const projectRoles = await fetchProjectRoles(project.id_proyecto);
+              return {
+                ...project,
+                roles: projectRoles
+              };
+            } catch (error) {
+              console.error(`Error fetching roles for project ${project.id_proyecto}:`, error);
+              return {
+                ...project,
+                roles: []
+              };
+            }
+          })
+        );
         
         // Enhance projects with client names and update state
-        const enhancedProjects = enhanceProjectsWithClientInfo(projectsData, clientsData);
+        const enhancedProjects = enhanceProjectsWithClientInfo(projectsWithRoles, clientsData);
         setProjects(enhancedProjects);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -123,9 +151,20 @@ export default function ProjectManagementPage() {
       // Use the sync function to create the project
       const newProject = await createProject(formData);
       
+      // If roles are selected, assign them to the project
+      if (selectedRoles.length > 0) {
+        await updateProjectRoles(newProject.id_proyecto, selectedRoles);
+      }
+      
       // Add client name for display
       const client = clients.find((c: Client) => c.id_cliente === newProject.id_cliente);
       newProject.cliente = client?.nombre || 'Cliente Desconocido';
+      
+      // Add roles to the project object for display
+      const projectRoles = selectedRoles.map(roleId => 
+        roles.find(role => role.id_rol === roleId)
+      ).filter(Boolean) as Role[];
+      newProject.roles = projectRoles;
       
       // Update projects list with new project
       setProjects(prev => [newProject, ...prev]);
@@ -176,9 +215,18 @@ export default function ProjectManagementPage() {
       // Use the sync function to update the project
       const updatedProject = await updateProject(selectedProject.id_proyecto, formData);
       
+      // Update project roles
+      await updateProjectRoles(selectedProject.id_proyecto, selectedRoles);
+      
       // Add client name for display
       const client = clients.find((c: Client) => c.id_cliente === updatedProject.id_cliente);
       updatedProject.cliente = client?.nombre || 'Cliente Desconocido';
+      
+      // Add roles to the project object for display
+      const projectRoles = selectedRoles.map(roleId => 
+        roles.find(role => role.id_rol === roleId)
+      ).filter(Boolean) as Role[];
+      updatedProject.roles = projectRoles;
       
       // Update projects list with the edited project
       setProjects(prev => prev.map(p => 
@@ -280,6 +328,7 @@ export default function ProjectManagementPage() {
   const resetForm = () => {
     setSelectedProject(null);
     setIsEditing(false);
+    setSelectedRoles([]);
     setFormData({
       titulo: '',
       descripcion: '',
@@ -303,6 +352,8 @@ export default function ProjectManagementPage() {
       horas_totales: project.horas_totales,
       activo: project.activo,
     });
+    // Set selected roles based on project roles
+    setSelectedRoles(project.roles?.map(role => role.id_rol) || []);
     setIsEditing(true);
   };
   
@@ -339,6 +390,9 @@ export default function ProjectManagementPage() {
               formData={formData}
               setFormData={setFormData}
               clients={clients}
+              roles={roles}
+              selectedRoles={selectedRoles}
+              setSelectedRoles={setSelectedRoles}
               isEditing={isEditing}
               isCreating={isCreating}
               isUpdating={isUpdating}

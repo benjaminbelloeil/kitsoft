@@ -1,4 +1,4 @@
-import { Client, Project } from '@/interfaces/project';
+import { Client, Project, Role } from '@/interfaces/project';
 
 /**
  * Fetch all projects from the API
@@ -122,6 +122,77 @@ export async function archiveProject(projectId: string): Promise<void> {
     }
   } catch (error) {
     console.error('Error archiving project:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all roles from the API
+ * @returns {Promise<Role[]>} Array of roles
+ */
+export async function fetchRoles(): Promise<Role[]> {
+  try {
+    const response = await fetch('/api/manager/roles', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Ensure cookies are sent
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Roles API error:', response.status, errorText);
+      throw new Error(`Failed to fetch roles: ${response.status} ${errorText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch roles for a specific project
+ * @param {string} projectId - ID of the project to get roles for
+ * @returns {Promise<Role[]>} Array of roles associated with the project
+ */
+export async function fetchProjectRoles(projectId: string): Promise<Role[]> {
+  try {
+    const response = await fetch(`/api/manager/proyectos/${projectId}/roles`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch project roles');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching project roles:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update the roles for a project
+ * @param {string} projectId - ID of the project to update roles for
+ * @param {string[]} roleIds - Array of role IDs to assign to the project
+ * @returns {Promise<void>}
+ */
+export async function updateProjectRoles(projectId: string, roleIds: string[]): Promise<void> {
+  try {
+    const response = await fetch(`/api/manager/proyectos/${projectId}/roles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ roleIds }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error updating project roles');
+    }
+  } catch (error) {
+    console.error('Error updating project roles:', error);
     throw error;
   }
 }

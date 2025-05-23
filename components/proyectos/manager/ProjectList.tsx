@@ -115,6 +115,7 @@ export default function ProjectList({
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Proyecto</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Cliente</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Horas</th>
+                <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Roles</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Fecha Inicio</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Fecha Fin</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Estado</th>
@@ -161,6 +162,18 @@ export default function ProjectList({
                   >
                     <div className="text-sm text-gray-600">
                       {project.horas_totales}
+                    </div>
+                  </td>
+                  
+                  <td 
+                    className="px-6 py-3 whitespace-nowrap align-middle text-center h-16"
+                    onClick={() => handleSelectProject(project)}
+                  >
+                    <div className="text-sm text-gray-600 flex items-center justify-center">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-[#A100FF10] to-[#A100FF20] text-[#A100FF] border border-[#A100FF30] shadow-sm">
+                        <FiUsers className="w-3 h-3 mr-1" />
+                        {project.roles?.length || 0}
+                      </span>
                     </div>
                   </td>
                   

@@ -11,17 +11,21 @@ import {
   FiSave,
   FiArchive,
   FiCheck,
-  FiX
+  FiX,
+  FiSearch
 } from 'react-icons/fi';
 import ArchiveProjectModal from '@/components/proyectos/manager/ArchiveProjectModal';
 import { motion } from 'framer-motion';
-import { Client, Project } from '@/interfaces/project';
+import { Client, Project, Role } from '@/interfaces/project';
 import ClientDetails from './ClientDetails';
 
 interface ProjectFormProps {
   formData: Partial<Project>;
   setFormData: (data: Partial<Project>) => void;
   clients: Client[];
+  roles: Role[];
+  selectedRoles: string[];
+  setSelectedRoles: (roles: string[]) => void;
   isEditing: boolean;
   isCreating: boolean;
   isUpdating: boolean;
@@ -38,6 +42,9 @@ export default function ProjectForm({
   formData,
   setFormData,
   clients,
+  roles,
+  selectedRoles,
+  setSelectedRoles,
   isEditing,
   isCreating,
   isUpdating,
@@ -51,6 +58,13 @@ export default function ProjectForm({
 }: ProjectFormProps) {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [archiveModalOpen, setArchiveModalOpen] = useState(false);
+  const [roleSearchQuery, setRoleSearchQuery] = useState('');
+
+  // Filter roles based on search query
+  const filteredRoles = roles.filter(role =>
+    role.nombre.toLowerCase().includes(roleSearchQuery.toLowerCase()) ||
+    role.descripcion?.toLowerCase().includes(roleSearchQuery.toLowerCase())
+  );
 
   // Update selected client when form data changes
   useEffect(() => {
@@ -228,6 +242,98 @@ export default function ProjectForm({
               placeholder="Número de horas"
               className="w-full border border-gray-300 rounded-lg shadow-sm py-2.5 pl-10 pr-4 bg-white focus:outline-none focus:ring-2 focus:ring-[#A100FF40] focus:border-[#A100FF] transition-all"
             />
+          </div>
+        </div>
+        
+        {/* Roles Section */}
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-3">Roles del Proyecto</label>
+          
+          {/* Combined Card for Search and Selected Roles */}
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+            {/* Role Search Bar */}
+            <div className="relative mb-4">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A100FF]">
+                <FiSearch className="h-4 w-4" />
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar y agregar roles..."
+                value={roleSearchQuery}
+                onChange={(e) => setRoleSearchQuery(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg shadow-sm py-2.5 pl-10 pr-4 bg-white focus:outline-none focus:ring-2 focus:ring-[#A100FF40] focus:border-[#A100FF] transition-all"
+              />
+              
+              {/* Search Suggestions Dropdown */}
+              {roleSearchQuery && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                  {filteredRoles.filter(role => !selectedRoles.includes(role.id_rol)).length > 0 ? (
+                    filteredRoles.filter(role => !selectedRoles.includes(role.id_rol)).map((role) => (
+                      <button
+                        key={role.id_rol}
+                        type="button"
+                        onClick={() => {
+                          setSelectedRoles([...selectedRoles, role.id_rol]);
+                          setRoleSearchQuery('');
+                        }}
+                        className="w-full flex items-center space-x-3 p-3 hover:bg-[#A100FF10] transition-colors text-left border-b border-gray-100 last:border-b-0"
+                      >
+                        <FiPlus className="h-4 w-4 text-[#A100FF] flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{role.nombre}</p>
+                          {role.descripcion && (
+                            <p className="text-xs text-gray-500 truncate">{role.descripcion}</p>
+                          )}
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-3 text-sm text-gray-500 text-center">
+                      {roleSearchQuery ? 'No se encontraron roles disponibles' : 'Todos los roles ya están seleccionados'}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Selected Roles Display */}
+            <div>
+              <div className="min-h-[80px] max-h-48 overflow-y-auto">
+                {selectedRoles.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedRoles.map((roleId) => {
+                      const role = roles.find(r => r.id_rol === roleId);
+                      return role ? (
+                        <div
+                          key={role.id_rol}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{role.nombre}</p>
+                            {role.descripcion && (
+                              <p className="text-xs text-gray-500 truncate">{role.descripcion}</p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedRoles(selectedRoles.filter(id => id !== role.id_rol))}
+                            className="ml-3 p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                          >
+                            <FiX className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <FiUsers className="h-8 w-8 mb-2 text-gray-400" />
+                    <p className="text-sm font-medium">No hay roles seleccionados</p>
+                    <p className="text-xs text-gray-400 text-center">Usa la barra de búsqueda para agregar roles al proyecto</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         
