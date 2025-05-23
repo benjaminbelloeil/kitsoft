@@ -1,55 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { isProjectLead } from '@/app/lib/auth';
 
 // GET handler to fetch roles configured for a specific project
 export async function GET(request: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Usuario no autenticado' }, 
-        { status: 401 }
-      );
-    }
-    
-    // Check if current user is a project lead directly
-    // Get the user's current level ID
-    const { data: userLevelData, error: levelError } = await supabase
-      .from('usuarios_niveles')
-      .select('id_nivel_actual')
-      .eq('id_usuario', user.id)
-      .order('fecha_cambio', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (levelError) {
-      console.error('Error getting user level:', levelError);
-      return NextResponse.json(
-        { error: 'Error al verificar permisos' },
-        { status: 500 }
-      );
-    }
-
-    // Get the level details to check the numero
-    const { data: levelDetails, error: detailsError } = await supabase
-      .from('niveles')
-      .select('numero')
-      .eq('id_nivel', userLevelData.id_nivel_actual)
-      .single();
-
-    if (detailsError) {
-      console.error('Error getting level details:', detailsError);
-      return NextResponse.json(
-        { error: 'Error al verificar permisos' },
-        { status: 500 }
-      );
-    }
-
-    // Check if numero equals 3 (Project Lead)
-    const isUserProjectLead = levelDetails.numero === 3;
+    // Check if current user is a project lead
+    const isUserProjectLead = await isProjectLead();
     
     if (!isUserProjectLead) {
       return NextResponse.json(
@@ -114,47 +74,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Usuario no autenticado' }, 
-        { status: 401 }
-      );
-    }
     
     // Check if current user is a project lead
-    const { data: userLevelData, error: levelError } = await supabase
-      .from('usuarios_niveles')
-      .select('id_nivel_actual')
-      .eq('id_usuario', user.id)
-      .order('fecha_cambio', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (levelError) {
-      console.error('Error getting user level:', levelError);
-      return NextResponse.json(
-        { error: 'Error al verificar permisos' },
-        { status: 500 }
-      );
-    }
-
-    const { data: levelDetails, error: detailsError } = await supabase
-      .from('niveles')
-      .select('numero')
-      .eq('id_nivel', userLevelData.id_nivel_actual)
-      .single();
-
-    if (detailsError) {
-      console.error('Error getting level details:', detailsError);
-      return NextResponse.json(
-        { error: 'Error al verificar permisos' },
-        { status: 500 }
-      );
-    }
-
-    const isUserProjectLead = levelDetails.numero === 3;
+    const isUserProjectLead = await isProjectLead();
     
     if (!isUserProjectLead) {
       return NextResponse.json(
@@ -167,7 +89,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { projectId, roleIds } = body;
     
+    console.log('POST project-roles: Configuring roles for project', projectId);
+    console.log('Role IDs:', roleIds);
+    
     if (!projectId || !roleIds || !Array.isArray(roleIds)) {
+      console.error('Missing required parameters:', { projectId, roleIds });
       return NextResponse.json(
         { error: 'Se requiere ID del proyecto y un array de roles' }, 
         { status: 400 }
@@ -189,6 +115,8 @@ export async function POST(request: Request) {
       );
     }
     
+    console.log('Project exists, proceeding with role configuration');
+    
     // Step 1: Delete existing role configurations for this project
     const { error: deleteError } = await supabase
       .from('proyectos_roles')
@@ -203,8 +131,11 @@ export async function POST(request: Request) {
       );
     }
     
+    console.log('Successfully deleted existing roles for project');
+    
     // If roleIds is empty, we're just removing all roles
     if (roleIds.length === 0) {
+      console.log('No new roles to add');
       return NextResponse.json({
         message: 'Roles del proyecto actualizados exitosamente',
         data: []
@@ -217,6 +148,8 @@ export async function POST(request: Request) {
       id_rol: roleId
     }));
     
+    console.log('Inserting new role configurations:', projectRoles);
+    
     const { data: insertedRoles, error: insertError } = await supabase
       .from('proyectos_roles')
       .insert(projectRoles)
@@ -228,6 +161,20 @@ export async function POST(request: Request) {
         { error: 'Error al configurar roles del proyecto' }, 
         { status: 500 }
       );
+    }
+    
+    console.log('Successfully inserted new role configurations:', insertedRoles);
+    
+    // Verify the inserted roles by querying the database again
+    const { data: verifyRoles, error: verifyError } = await supabase
+      .from('proyectos_roles')
+      .select('id_rol')
+      .eq('id_proyecto', projectId);
+      
+    if (verifyError) {
+      console.error('Error verifying inserted roles:', verifyError);
+    } else {
+      console.log('Verified roles in database:', verifyRoles?.map(r => r.id_rol));
     }
     
     return NextResponse.json({

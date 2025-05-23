@@ -20,34 +20,20 @@ export async function GET(request: Request) {
     
     const supabase = await createClient();
     
-    // Get the levels that correspond to regular employees (level 0)
-    const { data: level, error: levelError } = await supabase
-      .from('niveles')
-      .select('id_nivel')
-      .eq('numero', 0)
-      .single();
-      
-    if (levelError) {
-      console.error('Error fetching employee level:', levelError);
-      return NextResponse.json(
-        { error: 'Error al obtener nivel de empleado' }, 
-        { status: 500 }
-      );
-    }
-    
-    // Fetch users with the employee level
-    const { data: users, error: usersError } = await supabase
+    // Fetch all users
+    const { data: allUsers, error: usersError } = await supabase
       .from('usuarios')
       .select(`
         id_usuario,
         nombre,
         apellido,
-        email,
-        foto_url,
-        activo
+        titulo,
+        bio,
+        url_avatar,
+        url_curriculum,
+        fecha_inicio_empleo,
+        id_peoplelead
       `)
-      .eq('id_nivel', level.id_nivel)
-      .eq('activo', true)
       .order('nombre', { ascending: true });
       
     if (usersError) {
@@ -57,8 +43,26 @@ export async function GET(request: Request) {
         { status: 500 }
       );
     }
-
-    return NextResponse.json(users);
+    
+    // Log all users for debugging
+    console.log('All users found:', allUsers?.length);
+    
+    // Get the current authenticated user's email
+    const { data: { user: authUser }, error: authUserError } = await supabase.auth.getUser();
+    const currentUserEmail = authUser?.email || '';
+    
+    // Map the users to match the User interface
+    const mappedUsers = (allUsers || []).map(user => ({
+      ...user,
+      // Use actual email for the current user, generate placeholder emails for others
+      email: user.id_usuario === authUser?.id ? 
+             currentUserEmail : 
+             `user-${user.id_usuario.substring(0, 8)}@example.com`,
+      foto_url: user.url_avatar, // Map to match interface
+      activo: true // Set as active since we're returning all users and there's no way to filter
+    }));
+    
+    return NextResponse.json(mappedUsers);
   } catch (error) {
     console.error('Error in GET users:', error);
     return NextResponse.json(

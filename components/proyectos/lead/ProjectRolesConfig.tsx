@@ -30,14 +30,33 @@ export default function ProjectRolesConfig({
 
   // Function to check if roles have actually changed
   const areRolesChanged = useCallback((currentRoles: string[], initialRoles: string[]) => {
-    if (currentRoles.length !== initialRoles.length) return true;
-    
-    // Convert to sets and compare
-    const currentSet = new Set(currentRoles);
-    for (const roleId of initialRoles) {
-      if (!currentSet.has(roleId)) return true;
+    // First quick check: different lengths means different content
+    if (currentRoles.length !== initialRoles.length) {
+      console.log('Role arrays have different lengths, roles changed');
+      return true;
     }
     
+    // Convert to sets for efficient comparison
+    const currentSet = new Set(currentRoles);
+    const initialSet = new Set(initialRoles);
+    
+    // Check if any role in initialRoles is missing from currentRoles
+    for (const roleId of initialRoles) {
+      if (!currentSet.has(roleId)) {
+        console.log(`Role ${roleId} was removed, roles changed`);
+        return true;
+      }
+    }
+    
+    // Check if any role in currentRoles is missing from initialRoles
+    for (const roleId of currentRoles) {
+      if (!initialSet.has(roleId)) {
+        console.log(`Role ${roleId} was added, roles changed`);
+        return true;
+      }
+    }
+    
+    console.log('No role changes detected');
     return false;
   }, []);
 
@@ -47,7 +66,12 @@ export default function ProjectRolesConfig({
       if (projectIdRef.current !== project.id_proyecto) {
         // Project has changed, reset everything
         projectIdRef.current = project.id_proyecto;
-        const projectRoleIds = project.roles?.map(role => role.id_rol) || [];
+        
+        // Ensure project.roles is defined before mapping
+        const roles = project.roles || [];
+        const projectRoleIds = roles.map(role => role.id_rol);
+        
+        console.log('Project changed, updating role IDs:', projectRoleIds);
         setSelectedRoles(projectRoleIds);
         initialRolesRef.current = [...projectRoleIds];
         lastSavedRolesRef.current = [...projectRoleIds];
@@ -100,14 +124,20 @@ export default function ProjectRolesConfig({
       clearTimeout(saveTimeoutRef.current);
     }
     
+    console.log('Selected roles changed:', selectedRoles);
+    console.log('Last saved roles:', lastSavedRolesRef.current);
+    
     // Only proceed if roles have actually changed from LAST SAVED state
     if (areRolesChanged(selectedRoles, lastSavedRolesRef.current)) {
+      console.log('Roles have changed, scheduling save');
       // Set new timeout for auto-save (2000ms delay)
       saveTimeoutRef.current = setTimeout(() => {
+        console.log('Auto-save triggered');
         saveRoleConfiguration();
       }, 2000);
     } else {
       // If returning to same state as last saved, make sure we update the UI
+      console.log('Roles unchanged, updating UI');
       setShowSavedIndicator(true);
       setTimeout(() => setShowSavedIndicator(false), 3000);
     }
@@ -134,13 +164,22 @@ export default function ProjectRolesConfig({
   const saveRoleConfiguration = async () => {
     if (!project) return;
     
+    // Add debug log to see the state of selectedRoles and lastSavedRolesRef
+    console.log('Saving roles configuration:');
+    console.log('Current selectedRoles:', selectedRoles);
+    console.log('Last saved roles:', lastSavedRolesRef.current);
+    console.log('Project ID:', project.id_proyecto);
+    console.log('Has changed:', areRolesChanged(selectedRoles, lastSavedRolesRef.current));
+    
     // Only save if roles have actually changed from last saved state
     if (!areRolesChanged(selectedRoles, lastSavedRolesRef.current)) {
+      console.log('No changes detected, not saving');
       return;
     }
     
     try {
       setIsConfiguring(true);
+      console.log('Sending updated roles to server...');
       
       // Make a local copy of selected roles to prevent race conditions
       const rolesToSave = [...selectedRoles];
@@ -156,7 +195,10 @@ export default function ProjectRolesConfig({
         }),
       });
 
+      // Add debug log for response
+      console.log('API Response status:', response.status);
       const responseData = await response.json();
+      console.log('API Response data:', responseData);
       
       if (!response.ok) {
         throw new Error(responseData.error || 'Error al configurar roles');
@@ -164,6 +206,7 @@ export default function ProjectRolesConfig({
       
       // Update lastSavedRolesRef with what was actually saved
       lastSavedRolesRef.current = [...rolesToSave];
+      console.log('Updated lastSavedRolesRef:', lastSavedRolesRef.current);
       
       // Show saved indicator for 3 seconds
       setShowSavedIndicator(true);
@@ -182,22 +225,21 @@ export default function ProjectRolesConfig({
         ...prev
       ]);
       
-      // Instead of calling the callback that refreshes everything,
-      // apply the changes locally by updating the project.roles
-      // This is an optimistic UI update to avoid the full page refresh
-      if (project && project.roles) {
-        // This is where we'd normally call onConfigUpdated(), but we're skipping it
-        // to prevent the page refresh. We'll do it in a smarter way.
-        
-        // Only trigger a parent refresh in rare cases where we need it
-        // (e.g., when the component is first mounted or other edge cases)
-        const shouldReloadData = initialRolesRef.current.length === 0 && selectedRoles.length > 0;
-        if (shouldReloadData) {
-          // Call onConfigUpdated but wait until the save operation is complete
-          setTimeout(() => {
-            onConfigUpdated();
-          }, 100);
-        }
+      // Instead of optimistic UI updates, let's always call onConfigUpdated to ensure data freshness
+      console.log('Calling onConfigUpdated to refresh project data');
+      onConfigUpdated();
+      
+      // Update the local reference to what the server now has
+      if (project) {
+        // Update the project.roles with the newly saved roles
+        project.roles = rolesToSave.map(roleId => {
+          const role = allRoles.find(r => r.id_rol === roleId);
+          return {
+            id_rol: roleId,
+            nombre: role?.nombre || 'Rol desconocido',
+            descripcion: role?.descripcion || null
+          };
+        });
       }
       
     } catch (error) {

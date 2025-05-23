@@ -42,8 +42,11 @@ export default function ProjectAssignment({
   const availableUsers = users.filter(user => {
     if (!selectedProject) return true;
     
+    // Ensure selectedProject.usuarios is always an array
+    const assignedUsers = selectedProject.usuarios || [];
+    
     // Check if user is already assigned to this project
-    const alreadyAssigned = selectedProject.usuarios?.some(
+    const alreadyAssigned = assignedUsers.some(
       assigned => assigned.id_usuario === user.id_usuario
     );
     

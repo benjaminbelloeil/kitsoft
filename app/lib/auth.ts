@@ -38,23 +38,43 @@ export async function isAuthenticated(): Promise<boolean> {
  * Check if the current user has admin privileges
  */
 export async function isAdmin(): Promise<boolean> {
-  // Use the API endpoint instead of direct database access
   try {
-    const response = await fetch('/api/user/level/is-admin', {
-      cache: 'no-store',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    // Direct database check for server-side API routes
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!response.ok) {
-      console.error('Failed to check admin status:', await response.text());
+    if (authError || !user) {
       return false;
     }
-    
-    const { isAdmin } = await response.json();
-    return isAdmin;
+
+    // Get the user's current level ID
+    const { data: userLevelData, error: levelError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_nivel_actual')
+      .eq('id_usuario', user.id)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (levelError) {
+      console.error('Error getting user level:', levelError);
+      return false;
+    }
+
+    // Get the level details to check the numero
+    const { data: levelDetails, error: detailsError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userLevelData.id_nivel_actual)
+      .single();
+
+    if (detailsError) {
+      console.error('Error getting level details:', detailsError);
+      return false;
+    }
+
+    // Check if numero equals 5 (Admin)
+    return levelDetails.numero === 5;
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
@@ -66,21 +86,42 @@ export async function isAdmin(): Promise<boolean> {
  */
 export async function isProjectLead(): Promise<boolean> {
   try {
-    const response = await fetch('/api/user/level/is-project-lead', {
-      cache: 'no-store',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    // Direct database check for server-side API routes
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!response.ok) {
-      console.error('Failed to check project lead status:', await response.text());
+    if (authError || !user) {
       return false;
     }
-    
-    const { isProjectLead } = await response.json();
-    return isProjectLead;
+
+    // Get the user's current level ID
+    const { data: userLevelData, error: levelError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_nivel_actual')
+      .eq('id_usuario', user.id)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (levelError) {
+      console.error('Error getting user level:', levelError);
+      return false;
+    }
+
+    // Get the level details to check the numero
+    const { data: levelDetails, error: detailsError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userLevelData.id_nivel_actual)
+      .single();
+
+    if (detailsError) {
+      console.error('Error getting level details:', detailsError);
+      return false;
+    }
+
+    // Check if numero equals 3 (Project Lead)
+    return levelDetails.numero === 3;
   } catch (error) {
     console.error('Error checking project lead status:', error);
     return false;
@@ -92,21 +133,42 @@ export async function isProjectLead(): Promise<boolean> {
  */
 export async function isProjectManager(): Promise<boolean> {
   try {
-    const response = await fetch('/api/user/level/is-project-manager', {
-      cache: 'no-store',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    // Direct database check for server-side API routes
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!response.ok) {
-      console.error('Failed to check project manager status:', await response.text());
+    if (authError || !user) {
       return false;
     }
-    
-    const { isProjectManager } = await response.json();
-    return isProjectManager;
+
+    // Get the user's current level ID
+    const { data: userLevelData, error: levelError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_nivel_actual')
+      .eq('id_usuario', user.id)
+      .order('fecha_cambio', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (levelError) {
+      console.error('Error getting user level:', levelError);
+      return false;
+    }
+
+    // Get the level details to check the numero
+    const { data: levelDetails, error: detailsError } = await supabase
+      .from('niveles')
+      .select('numero')
+      .eq('id_nivel', userLevelData.id_nivel_actual)
+      .single();
+
+    if (detailsError) {
+      console.error('Error getting level details:', detailsError);
+      return false;
+    }
+
+    // Check if numero equals 4 (Project Manager)
+    return levelDetails.numero === 4;
   } catch (error) {
     console.error('Error checking project manager status:', error);
     return false;
