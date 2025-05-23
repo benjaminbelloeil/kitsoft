@@ -39,42 +39,18 @@ export async function isAuthenticated(): Promise<boolean> {
  */
 export async function isAdmin(): Promise<boolean> {
   try {
-    // Direct database check for server-side API routes
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Use the API endpoint to check admin status
+    const response = await fetch('/api/user/level/is-admin', {
+      method: 'GET',
+      credentials: 'include',
+    });
     
-    if (authError || !user) {
+    if (!response.ok) {
       return false;
     }
-
-    // Get the user's current level ID
-    const { data: userLevelData, error: levelError } = await supabase
-      .from('usuarios_niveles')
-      .select('id_nivel_actual')
-      .eq('id_usuario', user.id)
-      .order('fecha_cambio', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (levelError) {
-      console.error('Error getting user level:', levelError);
-      return false;
-    }
-
-    // Get the level details to check the numero
-    const { data: levelDetails, error: detailsError } = await supabase
-      .from('niveles')
-      .select('numero')
-      .eq('id_nivel', userLevelData.id_nivel_actual)
-      .single();
-
-    if (detailsError) {
-      console.error('Error getting level details:', detailsError);
-      return false;
-    }
-
-    // Check if numero equals 5 (Admin)
-    return levelDetails.numero === 5;
+    
+    const data = await response.json();
+    return data.isAdmin === true;
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
@@ -86,42 +62,18 @@ export async function isAdmin(): Promise<boolean> {
  */
 export async function isProjectLead(): Promise<boolean> {
   try {
-    // Direct database check for server-side API routes
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Use the API endpoint to check project lead status
+    const response = await fetch('/api/user/level/is-project-lead', {
+      method: 'GET',
+      credentials: 'include',
+    });
     
-    if (authError || !user) {
+    if (!response.ok) {
       return false;
     }
-
-    // Get the user's current level ID
-    const { data: userLevelData, error: levelError } = await supabase
-      .from('usuarios_niveles')
-      .select('id_nivel_actual')
-      .eq('id_usuario', user.id)
-      .order('fecha_cambio', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (levelError) {
-      console.error('Error getting user level:', levelError);
-      return false;
-    }
-
-    // Get the level details to check the numero
-    const { data: levelDetails, error: detailsError } = await supabase
-      .from('niveles')
-      .select('numero')
-      .eq('id_nivel', userLevelData.id_nivel_actual)
-      .single();
-
-    if (detailsError) {
-      console.error('Error getting level details:', detailsError);
-      return false;
-    }
-
-    // Check if numero equals 3 (Project Lead)
-    return levelDetails.numero === 3;
+    
+    const data = await response.json();
+    return data.isProjectLead === true;
   } catch (error) {
     console.error('Error checking project lead status:', error);
     return false;
@@ -133,42 +85,18 @@ export async function isProjectLead(): Promise<boolean> {
  */
 export async function isProjectManager(): Promise<boolean> {
   try {
-    // Direct database check for server-side API routes
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Use the API endpoint to check project manager status
+    const response = await fetch('/api/user/level/is-project-manager', {
+      method: 'GET',
+      credentials: 'include',
+    });
     
-    if (authError || !user) {
+    if (!response.ok) {
       return false;
     }
-
-    // Get the user's current level ID
-    const { data: userLevelData, error: levelError } = await supabase
-      .from('usuarios_niveles')
-      .select('id_nivel_actual')
-      .eq('id_usuario', user.id)
-      .order('fecha_cambio', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (levelError) {
-      console.error('Error getting user level:', levelError);
-      return false;
-    }
-
-    // Get the level details to check the numero
-    const { data: levelDetails, error: detailsError } = await supabase
-      .from('niveles')
-      .select('numero')
-      .eq('id_nivel', userLevelData.id_nivel_actual)
-      .single();
-
-    if (detailsError) {
-      console.error('Error getting level details:', detailsError);
-      return false;
-    }
-
-    // Check if numero equals 4 (Project Manager)
-    return levelDetails.numero === 4;
+    
+    const data = await response.json();
+    return data.isProjectManager === true;
   } catch (error) {
     console.error('Error checking project manager status:', error);
     return false;
