@@ -1,28 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-export interface User {
-  id_usuario: string;
-  nombre?: string;
-  apellido?: string;
-  titulo?: string;
-  email?: string;
-  url_avatar?: string | null;
-  registered: boolean;
-  role?: {
-    id_nivel?: string;
-    numero?: number;
-    titulo?: string;
-  };
-  lastLogin?: string | null;
-  hasLoggedIn?: boolean; // New field to track if the user has ever logged in
-}
-
-export interface UserRole {
-  id_nivel: string;
-  numero: number; 
-  titulo: string;
-}
+import { User, UserRole } from '@/interfaces/user';
 
 /**
  * Get all users with their current role status and email

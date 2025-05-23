@@ -5,6 +5,29 @@ import { Project } from '@/interfaces/project';
 import { Experience } from '@/interfaces/experience';
 import { Certificate } from '@/interfaces/certificate';
 
+export interface User {
+  id_usuario: string;
+  nombre?: string;
+  apellido?: string;
+  titulo?: string;
+  email?: string;
+  url_avatar?: string | null;
+  registered: boolean;
+  role?: {
+    id_nivel?: string;
+    numero?: number;
+    titulo?: string;
+  };
+  lastLogin?: string | null;
+  hasLoggedIn?: boolean; // Field to track if the user has ever logged in
+}
+
+export interface UserRole {
+  id_nivel: string;
+  numero: number; 
+  titulo: string;
+}
+
 export interface Usuario {
   id_usuario: string;
   ID_Usuario: string;
