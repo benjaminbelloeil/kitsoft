@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { userData as staticUserData } from "@/app/lib/data";
+import { userData as staticUserData, projectsData, calendarEvents, mockCourses } from "@/app/lib/data";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Sun, Moon, Sunrise } from "lucide-react";
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
@@ -31,86 +31,54 @@ export default function DashboardPage() {
   // Store user data from the database
   const [userData, setUserData] = useState(staticUserData);
 
-  // Example data - this would come from the backend in a real app
-  const myProjects = [
-    {
-      id: "p1",
-      name: "Rediseño Web Corporativa", 
-      progress: 68,
-      dueDate: "2025-03-15",
-      tasks: 12,
-      completedTasks: 8,
-      priority: "alta",
-      color: "indigo"
-    },
-    {
-      id: "p2",
-      name: "App Móvil Gestión Interna",
-      progress: 35,
-      dueDate: "2025-04-22",
-      tasks: 18,
-      completedTasks: 6,
-      priority: "media",
-      color: "emerald"
-    },
-    {
-      id: "p3",
-      name: "Integración APIs de Proveedores",
-      progress: 92,
-      dueDate: "2025-03-02",
-      tasks: 7,
-      completedTasks: 6,
-      priority: "alta",
-      color: "blue"
-    }
-  ];
+  // Función para adaptar los datos de projectsData al formato esperado por ProjectsSection
+  const adaptProjectsData = (importedProjects: any[]) => {
+    return importedProjects.map(project => ({
+      id: project.id,
+      name: project.name,
+      progress: project.cargabilidad, // Mapear cargabilidad a progress
+      dueDate: project.endDate, // Mapear endDate a dueDate
+      tasks: project.tasks ? project.tasks.length : 0, // Contar tareas totales
+      completedTasks: project.tasks ? project.tasks.filter((task: any) => task.completed).length : 0, // Contar tareas completadas
+      priority: project.cargabilidad > 50 ? 'alta' : project.cargabilidad > 20 ? 'media' : 'baja', // Mapear cargabilidad a priority
+      color: project.color
+    }));
+  };
 
-  const urgentTasks = [
-    {
-      id: "t1",
-      title: "Completar documentación de usuario",
-      projectName: "Rediseño Web Corporativa",
-      dueDate: "2025-02-28",
-      status: "in-progress",
-      projectColor: "indigo"
-    },
-    {
-      id: "t2",
-      title: "Revisar test unitarios",
-      projectName: "App Móvil Gestión Interna",
-      dueDate: "2025-02-27",
-      status: "not-started",
-      projectColor: "emerald"
-    },
-    {
-      id: "t3",
-      title: "Actualizar dependencias",
-      projectName: "Integración APIs de Proveedores",
-      dueDate: "2025-03-01",
-      status: "in-review",
-      projectColor: "blue"
-    }
-  ];
+  // Adaptar los datos de projectsData
+  const myProjects = adaptProjectsData(projectsData.filter(project => project.status === 'active'));
 
-  // Upcoming courses or certifications
-  const upcomingCourses = [
-    {
-      id: "c1",
-      name: "AWS Certified Developer Associate",
-      date: "2025-03-10",
-      completed: 65,
-      image: "/courses/aws.svg",
-      type: "certification" as const
-    },
-    {
-      id: "c2",
-      name: "React Advanced Patterns",
-      date: "2025-03-15",
-      completed: 30,
-      image: "/courses/react.svg",
+  // Generar tareas urgentes desde los datos reales
+  const urgentTasks = projectsData
+    .filter(project => project.status === 'active')
+    .flatMap(project => 
+      project.tasks
+        .filter(task => !task.completed)
+        .slice(0, 2) // Tomar máximo 2 tareas por proyecto
+        .map(task => ({
+          id: task.id,
+          title: task.name,
+          projectName: project.name,
+          dueDate: task.dueDate,
+          status: task.assignedTo ? "in-progress" : "not-started",
+          projectColor: project.color,
+          description: task.description
+        }))
+    )
+    .slice(0, 3); // Limitar a 3 tareas urgentes totales
+
+  // Adaptar datos de cursos desde mockCourses
+  const upcomingCourses = mockCourses
+    .filter(course => course.status === 'in-progress')
+    .slice(0, 2)
+    .map(course => ({
+      id: course.id,
+      name: course.name,
+      date: course.expirationDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Si no hay fecha, usar 30 días desde hoy
+      completed: course.modules ? Math.round((course.modules.filter(m => m.completed).length / course.modules.length) * 100) : 0,
+      image: course.category === 'cloud' ? "/courses/aws.svg" : "/courses/react.svg",
       type: "course" as const
-    }
-  ];
+    }));
 
   // Get the upcoming week dates for the timeline
   const upcomingWeekDates = Array.from({ length: 7 }).map((_, i) => {
@@ -119,16 +87,26 @@ export default function DashboardPage() {
     return date;
   });
 
-  // Weekly workload data for the chart
-  const weeklyWorkload = [
-    { day: "Lun", hours: 8, color: "bg-indigo-500" },
-    { day: "Mar", hours: 7.5, color: "bg-indigo-500" },
-    { day: "Mié", hours: 9, color: "bg-indigo-500" },
-    { day: "Jue", hours: 6.5, color: "bg-indigo-400" },
-    { day: "Vie", hours: 8, color: "bg-indigo-500" },
-    { day: "Sáb", hours: 0, color: "bg-gray-200" },
-    { day: "Dom", hours: 0, color: "bg-gray-200" },
-  ];
+  // Generar datos de carga de trabajo basados en los proyectos activos
+  const generateWorkloadFromProjects = () => {
+    const totalCargabilidad = projectsData
+      .filter(project => project.status === 'active')
+      .reduce((sum, project) => sum + project.cargabilidad, 0);
+    
+    const baseHours = Math.min(totalCargabilidad / 10, 9); // Convertir cargabilidad a horas (máximo 9h)
+    
+    return [
+      { day: "Lun", hours: Math.max(baseHours - 1, 0), color: "bg-indigo-500" },
+      { day: "Mar", hours: Math.max(baseHours - 0.5, 0), color: "bg-indigo-500" },
+      { day: "Mié", hours: Math.min(baseHours + 1, 9), color: "bg-indigo-500" },
+      { day: "Jue", hours: Math.max(baseHours - 1.5, 0), color: "bg-indigo-400" },
+      { day: "Vie", hours: baseHours, color: "bg-indigo-500" },
+      { day: "Sáb", hours: 0, color: "bg-gray-200" },
+      { day: "Dom", hours: 0, color: "bg-gray-200" },
+    ];
+  };
+
+  const weeklyWorkload = generateWorkloadFromProjects();
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -256,7 +234,9 @@ export default function DashboardPage() {
       case "indigo": return "bg-indigo-600";
       case "emerald": return "bg-emerald-600";
       case "blue": return "bg-blue-600";
+      case "purple": return "bg-purple-600";
       case "amber": return "bg-amber-600";
+      case "accenture": return "bg-purple-600"; // Fallback para accenture
       default: return "bg-indigo-600";
     }
   };
