@@ -90,8 +90,9 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      
+    <div className="min-h-screen bg-white p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Card */}
         {/* Header simplificado con botones de cambio de vista integrados */}
         <ProjectsHeader 
           viewMode={viewMode}
@@ -99,18 +100,12 @@ export default function ProjectsPage() {
         />
 
         {/* Content Section */}
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-          {activeProjects.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-md p-6 text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h2 className="text-xl font-medium mb-2">No hay proyectos activos</h2>
-              <p className="text-gray-500 mb-6">
-                Todos tus proyectos están actualmente archivados.
-              </p>
+        {activeProjects.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-md p-6 text-center py-12">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
             </div>
           ) : (
             
@@ -173,6 +168,7 @@ export default function ProjectsPage() {
                           </div>
                         </div>
                       </div>
+                      <p className="text-sm text-white opacity-90">{project.client}</p>
                     </div>
                   );
                 })}
@@ -242,13 +238,18 @@ export default function ProjectsPage() {
                           <FiChevronRight className="h-5 w-5 text-gray-400" />
                         </div>
                       </div>
+                      <div className="ml-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            )
-          )}
-        </div>
+                  </div>
+                );
+              })}
+            </div>
+          )
+        )}
 
         {/* Modal de detalle de proyecto (mejorado visualmente) */}
         {selectedProject && (
@@ -285,7 +286,8 @@ export default function ProjectsPage() {
                       </span>
                     </div>
                     <p className="text-white/70 text-sm">Cliente: {selectedProject.client}</p>
-                  </div>                    <button 
+                  </div>                    
+                  <button 
                     onClick={() => setSelectedProject(null)}
                     className="text-white bg-white/20 hover:bg-white/30 rounded-full p-1.5 transition-all hover:rotate-90 duration-300 z-20 h-8 w-8 flex items-center justify-center"
                     aria-label="Cerrar ventana"
@@ -637,6 +639,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         )}
+      </div>
     </div>
   );
 }
