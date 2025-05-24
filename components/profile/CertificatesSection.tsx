@@ -78,7 +78,7 @@ export default function CertificatesSection({ userID, loading = false, className
         fecha_fin: null,
       };
 
-      await addUsuarioCertificado(userID, );
+      await addUsuarioCertificado(nuevoRegistro);
       resetForm();
     } catch (error) {
       console.error("Error al agregar certificado:", error);

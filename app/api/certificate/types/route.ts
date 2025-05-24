@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
     
     // Get all certificate types
     const { data, error } = await supabase
-      .from('tipos_certificado')
+      .from('certificados')
       .select('*')
-      .order('titulo');
+      .order('curso');
     
     if (error) {
       console.error('Error fetching certificate types:', error);

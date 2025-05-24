@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CertificateVisualData } from '@/interfaces/certificate';
+import { CertificateVisualData, usuario_certificado } from '@/interfaces/certificate';
 
 /**
  * Get all certificates for a specific user
@@ -31,13 +31,7 @@ export const getCertificadosPorUsuario = getUserCertificates;
  * Add a certificate to a user's profile
  */
 export async function addUserCertificate(
-	userId: string,
-	certificateData: {
-		id_certificado: string;
-		fecha_emision: string;
-		fecha_expiracion?: string | null;
-		url_certificado?: string | null;
-	}
+	newData: usuario_certificado
 ): Promise<{ success: boolean; error?: string; id?: string }> {
 	try {
 		const res = await fetch('/api/certificate/add', {
@@ -45,7 +39,7 @@ export async function addUserCertificate(
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ userId, certificateData }),
+			body: JSON.stringify(newData),
 		});
 
 		if (!res.ok) {
