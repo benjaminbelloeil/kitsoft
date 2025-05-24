@@ -180,11 +180,11 @@ export default function ProjectLeadPage() {
                     >
                       <div className="flex items-center">
                         <motion.div 
-                          className="w-10 h-10 bg-gradient-to-br from-[#14B8A610] to-[#14B8A620] rounded-full flex items-center justify-center mr-4 shadow-lg border border-[#14B8A610]"
+                          className="w-10 h-10 bg-gradient-to-br from-[#3B82F610] to-[#3B82F620] rounded-full flex items-center justify-center mr-4 shadow-lg border border-[#3B82F610]"
                           whileHover={{ scale: 1.1, rotate: 5 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <FolderOpen className="w-5 h-5 text-[#14B8A6]" />
+                          <FolderOpen className="w-5 h-5 text-[#3B82F6]" />
                         </motion.div>
                         <div>
                           <h2 className="text-xl font-bold text-gray-800">
@@ -227,7 +227,7 @@ export default function ProjectLeadPage() {
                               {/* Enhanced Progress bar */}
                               <div className="w-full bg-gray-200 rounded-full h-3 mb-3 relative overflow-hidden shadow-inner">
                                 <motion.div 
-                                  className="bg-gradient-to-r from-[#14B8A6] via-[#20C997] to-[#10B981] h-3 rounded-full relative"
+                                  className="bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#2563EB] h-3 rounded-full relative"
                                   initial={{ width: 0 }}
                                   animate={{ width: `${project.assignedPercentage}%` }}
                                   transition={{ duration: 1, delay: 0.7 + index * 0.1, ease: "easeOut" }}
@@ -235,19 +235,19 @@ export default function ProjectLeadPage() {
                                   {/* Animated shine effect */}
                                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse opacity-60"></div>
                                   {/* Subtle glow effect */}
-                                  <div className="absolute inset-0 bg-gradient-to-r from-[#14B8A680] to-[#10B98180] blur-sm"></div>
+                                  <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F680] to-[#2563EB80] blur-sm"></div>
                                 </motion.div>
                               </div>
                               <div className="flex justify-between items-center text-xs mb-2">
                                 <span className="text-gray-600 font-medium">{project.assignedPercentage}% horas asignadas</span>
-                                <span className="text-[#14B8A6] font-semibold">{project.totalHours - project.assignedHours}h disponibles</span>
+                                <span className="text-[#3B82F6] font-semibold">{project.totalHours - project.assignedHours}h disponibles</span>
                               </div>
                               
                               {/* Project actions */}
                               <div className="flex justify-end">
                                 <motion.button 
                                   onClick={() => setExpandedProject(expandedProject === project.id ? null : project.id)}
-                                  className="px-3 py-1.5 text-xs bg-[#14B8A610] hover:bg-[#14B8A620] text-[#14B8A6] rounded-md transition-all font-medium border border-[#14B8A620] hover:border-[#14B8A630]"
+                                  className="px-3 py-1.5 text-xs bg-[#3B82F610] hover:bg-[#3B82F620] text-[#3B82F6] rounded-md transition-all font-medium border border-[#3B82F620] hover:border-[#3B82F630]"
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                 >
@@ -270,7 +270,7 @@ export default function ProjectLeadPage() {
                                     <div className="flex justify-between items-center mb-2">
                                       <h4 className="font-medium text-sm text-gray-800">Asignación de Horas</h4>
                                       <div className="text-xs">
-                                        <span className={`font-semibold ${isValidAssignment(project.id) ? 'text-[#14B8A6]' : 'text-red-500'}`}>
+                                        <span className={`font-semibold ${isValidAssignment(project.id) ? 'text-[#3B82F6]' : 'text-red-500'}`}>
                                           {project.totalHours - getTotalAssignedHours(project.id)}h
                                         </span>
                                         <span className="text-gray-600 ml-1">disponibles</span>
@@ -293,8 +293,8 @@ export default function ProjectLeadPage() {
                                           transition={{ duration: 0.3, delay: userIndex * 0.1 }}
                                         >
                                           <div className="flex items-center">
-                                            <div className="h-6 w-6 rounded-full bg-[#14B8A610] flex items-center justify-center mr-2">
-                                              <User className="h-3 w-3 text-[#14B8A6]" />
+                                            <div className="h-6 w-6 rounded-full bg-[#3B82F610] flex items-center justify-center mr-2">
+                                              <User className="h-3 w-3 text-[#3B82F6]" />
                                             </div>
                                             <div>
                                               <p className="text-xs font-medium text-gray-800">{user.name}</p>
@@ -311,7 +311,7 @@ export default function ProjectLeadPage() {
                                                 ...prev,
                                                 [user.id]: parseInt(e.target.value) || 0
                                               }))}
-                                              className="w-12 px-1 py-1 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-[#14B8A620] focus:border-[#14B8A6]"
+                                              className="w-12 px-1 py-1 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-[#3B82F620] focus:border-[#3B82F6]"
                                             />
                                             <span className="text-xs text-gray-600">h</span>
                                           </div>
@@ -365,11 +365,11 @@ export default function ProjectLeadPage() {
                     >
                       <div className="flex items-center">
                         <motion.div 
-                          className="w-10 h-10 bg-gradient-to-br from-[#6366F120] to-[#6366F110] rounded-full flex items-center justify-center mr-4 shadow-lg border border-[#6366F120]"
+                          className="w-10 h-10 bg-gradient-to-br from-[#EA580C20] to-[#EA580C10] rounded-full flex items-center justify-center mr-4 shadow-lg border border-[#EA580C20]"
                           whileHover={{ scale: 1.1, rotate: -5 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <MessageSquare className="w-5 h-5 text-[#6366F1]" />
+                          <MessageSquare className="w-5 h-5 text-[#EA580C]" />
                         </motion.div>
                         <div>
                           <h2 className="text-xl font-bold text-gray-800">
@@ -397,13 +397,13 @@ export default function ProjectLeadPage() {
                         transition={{ duration: 0.5, delay: 0.7 }}
                       >
                         <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-                          <span className="h-2 w-2 bg-[#14B8A6] mr-2 rounded-full"></span>
+                          <span className="h-2 w-2 bg-[#3B82F6] mr-2 rounded-full"></span>
                           Seleccionar proyecto:
                         </label>
                         <motion.select
                           value={selectedProject}
                           onChange={(e) => setSelectedProject(e.target.value)}
-                          className="w-full p-3 border border-gray-200 rounded-md text-sm focus:border-[#14B8A640] focus:ring-1 focus:ring-[#14B8A620] transition-all"
+                          className="w-full p-3 border border-gray-200 rounded-md text-sm focus:border-[#3B82F640] focus:ring-1 focus:ring-[#3B82F620] transition-all"
                           whileFocus={{ scale: 1.02 }}
                         >
                           <option value="">Selecciona un proyecto</option>
@@ -423,7 +423,7 @@ export default function ProjectLeadPage() {
                         transition={{ duration: 0.5, delay: 0.8 }}
                       >
                         <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-                          <span className="h-2 w-2 bg-[#3B82F6] mr-2 rounded-full"></span>
+                          <span className="h-2 w-2 bg-[#14B8A6] mr-2 rounded-full"></span>
                           Seleccionar destinatario:
                         </label>
                         <div className="bg-white rounded-md border border-gray-200 shadow-inner p-3">
@@ -443,8 +443,8 @@ export default function ProjectLeadPage() {
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                               >
-                                <div className="h-5 w-5 rounded-full bg-[#3B82F610] flex items-center justify-center overflow-hidden border border-gray-200">
-                                  <User className="h-3 w-3 text-[#3B82F6]" />
+                                <div className="h-5 w-5 rounded-full bg-[#14B8A610] flex items-center justify-center overflow-hidden border border-gray-200">
+                                  <User className="h-3 w-3 text-[#14B8A6]" />
                                 </div>
                                 <div className="ml-1.5 overflow-hidden">
                                   <p className="text-xs font-medium text-gray-800 truncate">{recipient.name}</p>
@@ -499,7 +499,7 @@ export default function ProjectLeadPage() {
                           transition={{ duration: 0.5, delay: 1.1 }}
                         >
                           <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-                            <span className="h-2 w-2 bg-[#10B981] mr-2 rounded-full"></span>
+                            <span className="h-2 w-2 bg-[#06B6D4] mr-2 rounded-full"></span>
                             Categoría: <span className="ml-1 text-xs text-gray-500 font-normal">(múltiple)</span>
                           </label>
                           <div className="flex flex-col h-[100px] p-3 bg-white rounded-md border border-gray-200 shadow-inner overflow-auto">
@@ -518,8 +518,8 @@ export default function ProjectLeadPage() {
                                     flex items-center py-3 px-3 
                                     text-xs rounded-md transition-all 
                                     ${categories.includes(cat.name) 
-                                      ? "bg-[#10B98108] border-[#10B981] text-[#10B981] font-medium shadow-sm" 
-                                      : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-[#10B98105]"
+                                      ? "bg-[#06B6D408] border-[#06B6D4] text-[#06B6D4] font-medium shadow-sm" 
+                                      : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-[#06B6D405]"
                                     } 
                                     border
                                   `}
@@ -533,7 +533,7 @@ export default function ProjectLeadPage() {
                                   <span className="truncate text-left">{cat.name}</span>
                                   {categories.includes(cat.name) && (
                                     <motion.span 
-                                      className="w-2 h-2 bg-[#10B981] rounded-full ml-auto"
+                                      className="w-2 h-2 bg-[#06B6D4] rounded-full ml-auto"
                                       initial={{ scale: 0 }}
                                       animate={{ scale: 1 }}
                                       transition={{ duration: 0.2 }}

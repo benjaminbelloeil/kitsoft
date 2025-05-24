@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,7 +15,7 @@ export default function FeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [, setUserData] = useState(staticUserData);
   const [feedbackItems] = useState(feedbackData);
-  const [selectedPeriod, setSelectedPeriod] = useState('6m');
+  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
 
   // Calculate rating average from data
   const avgRating = parseFloat((feedbackItems.reduce((sum, item) => sum + item.rating, 0) / feedbackItems.length).toFixed(1)) || 4.5;
@@ -135,7 +134,7 @@ export default function FeedbackPage() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-black">
-                    Plataforma de Retroalimentación
+                    Retroalimentación
                   </h1>
                   <p className="text-gray-600 mt-2 max-w-2xl">
                     Este espacio permite compartir valoraciones con tu equipo para promover el crecimiento profesional. El feedback constructivo es clave para mejorar nuestro trabajo conjunto.
@@ -213,16 +212,20 @@ export default function FeedbackPage() {
           {/* Left column: Feedback list */}
           <div className="lg:col-span-7">
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden h-full">
-              <div className="flex items-center justify-between p-3.5 border-b border-gray-100">
-                <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                  <span className="h-5 w-5 bg-[#F59E0B] rounded-full flex items-center justify-center">
-                    <Star className="h-3 w-3 text-white" />
-                  </span>
-                  Retroalimentación recibida
-                </h3>
-                <button className="text-xs font-medium text-[#3B82F6] hover:text-[#2563EB] bg-[#3B82F605] px-3 py-1.5 rounded-md hover:bg-[#3B82F610] transition-colors border border-[#3B82F620] shadow-sm">
-                  Ver historial completo
-                </button>
+              <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#F59E0B10] to-[#F59E0B20] rounded-full flex items-center justify-center mr-3 shadow-sm border border-[#F59E0B10]">
+                    <Star className="w-4 h-4 text-[#F59E0B]" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-800">
+                      Retroalimentación recibida
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                      Feedback de tu equipo y supervisores
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
@@ -275,11 +278,24 @@ export default function FeedbackPage() {
                     
                     {/* Message with updated colors */}
                     <div className="bg-gray-50 rounded-md p-3 border border-gray-200 shadow-inner relative">
-                      <p className="text-xs text-gray-600 line-clamp-3">{item.message}</p>
+                      <p className={`text-xs text-gray-600 ${expandedMessages.has(item.id) ? '' : 'line-clamp-3'}`}>
+                        {item.message}
+                      </p>
                       
                       {item.message.length > 150 && (
-                        <button className="absolute bottom-1.5 right-1.5 text-[10px] font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-2 py-0.5 rounded-full border border-gray-200 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                          Leer más
+                        <button 
+                          onClick={() => {
+                            const newExpanded = new Set(expandedMessages);
+                            if (expandedMessages.has(item.id)) {
+                              newExpanded.delete(item.id);
+                            } else {
+                              newExpanded.add(item.id);
+                            }
+                            setExpandedMessages(newExpanded);
+                          }}
+                          className="absolute bottom-1.5 right-1.5 text-[10px] font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-2 py-0.5 rounded-full border border-gray-200 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          {expandedMessages.has(item.id) ? 'Leer menos' : 'Leer más'}
                         </button>
                       )}
                     </div>
@@ -302,30 +318,19 @@ export default function FeedbackPage() {
           {/* Right column: Competency chart */}
           <div className="lg:col-span-5">
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 h-full overflow-hidden flex flex-col">
-              <div className="p-3.5 border-b border-gray-100 flex justify-between items-center">
-                <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                  <span className="h-5 w-5 bg-[#10B981] rounded-full flex items-center justify-center">
-                    <Award className="h-3 w-3 text-white" />
-                  </span>
-                  Evolución de competencias
-                </h3>
-                <div className="inline-flex rounded-md shadow-sm bg-white p-0.5 border border-gray-200">
-                  {['3M', '6M', '12M'].map((period) => (
-                    <button
-                      key={period}
-                      type="button"
-                      className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
-                        (period === '3M' && selectedPeriod === '3m') ||
-                        (period === '6M' && selectedPeriod === '6m') ||
-                        (period === '12M' && selectedPeriod === '12m')
-                          ? 'bg-[#10B981] text-white' 
-                          : 'text-gray-700 hover:bg-[#10B98115] hover:text-[#10B981]'
-                      }`}
-                      onClick={() => setSelectedPeriod(period.toLowerCase() as any)}
-                    >
-                      {period}
-                    </button>
-                  ))}
+              <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#10B98110] to-[#10B98120] rounded-full flex items-center justify-center mr-3 shadow-sm border border-[#10B98110]">
+                    <TrendingUp className="w-4 h-4 text-[#10B981]" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-800">
+                      Evolución de competencias
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                      Seguimiento de tu progreso profesional
+                    </p>
+                  </div>
                 </div>
               </div>
               
