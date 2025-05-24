@@ -1,17 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Certificate } from '@/interfaces/certificate';
+import { certificado } from '@/interfaces/certificate';
 
 /**
  * Get all certificates for a specific user
  */
-export async function getUserCertificates(userId: string): Promise<Certificate[]> {
+export async function getUserCertificates(userId: string): Promise<certificado[]> {
   try {
-    const res = await fetch(`/api/certificate/user?userId=${encodeURIComponent(userId)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const res = await fetch(`/api/certificate/user?userId=${encodeURIComponent(userId)}`);
 
     if (!res.ok) {
       console.error('Error fetching user certificates:', await res.text());

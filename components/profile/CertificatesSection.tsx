@@ -1,15 +1,15 @@
 // components/profile/certificados/CertificatesSection.tsx
 import { useState, useEffect } from "react";
-import { addUsuarioCertificado, uploadCertificadoFile, getCertificadosPorUsuario, deleteUsuarioCertificado } from "@/utils/database/client/certificateSync";
+import { addUsuarioCertificado, uploadCertificadoFile, deleteUsuarioCertificado, getUserCertificates } from "@/utils/database/client/certificateSync";
 import { usuario_certificado } from "@/interfaces/certificate";
 import { SkeletonCertificates } from "./SkeletonProfile";
 import CertificateCard from "./certificados/CertificateCard";
 import CertificateUploadForm from "./certificados/CertificateUploadForm";
 import NoCertificatesPlaceholder from "./certificados/NoCertificatesPlaceholder";
 import AddCertificateButton from "./certificados/AddCertificateButton";
-import { getArchivoDesdeUrl, getNombreCertificadoPorId } from "@/utils/database/client/certificateSync";
 import { certificado } from "@/interfaces/certificate";
 import { FiCheckCircle } from "react-icons/fi";
+
 interface CertificatesSectionProps {
   userID: string;
   loading?: boolean;
@@ -31,7 +31,7 @@ export interface NewCertificate {
 }
 
 export default function CertificatesSection({ userID, loading = false, className = "" }: CertificatesSectionProps) {
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [certificates, setCertificates] = useState<certificado[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [newCertificate, setNewCertificate] = useState<NewCertificate>({
     file: null,
@@ -44,27 +44,21 @@ export default function CertificatesSection({ userID, loading = false, className
     if (!userID) return;
 
     const fetchCertificates = async () => {
-      try {
-        const data = await getCertificadosPorUsuario(userID);
-        const formatted = await Promise.all(
-          data.map(async (item) => {
-            let archivo: File | null = null;
-            if (item.url_archivo) {
-              archivo = await getArchivoDesdeUrl(item.url_archivo);
-            }
-            return {
-              nombre: (await getNombreCertificadoPorId(item.id_certificado)) ?? "Certificado sin nombre",
-              file: archivo ?? new File([""], "certificado.pdf"),
-              obtainedDate: item.fecha_inicio,
-              expirationDate: item.fecha_fin ?? undefined,
-              raw: item,
-            };
-          })
-        );
-        setCertificates(formatted);
-      } catch (err) {
-        console.error("Error al obtener certificados:", err);
-      }
+		async function fetchCertificates() {
+			try {
+				const certificates: certificado[] = await getUserCertificates(userID);
+				console.log('UserID: ', userID);
+				console.log('Certificados: ', certificates);
+
+				setCertificates(certificates);
+			}
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			catch(e: any) {
+				console.log(e.message);
+			}
+		}
+
+		fetchCertificates();
     };
 
     fetchCertificates();
@@ -85,7 +79,7 @@ export default function CertificatesSection({ userID, loading = false, className
     if (!newCertificate.file || !selectedCert || !newCertificate.obtainedDate) return;
 
     try {
-      const url = await uploadCertificadoFile(userID, newCertificate.file);
+      const { url } = await uploadCertificadoFile(userID, newCertificate.file);
       const nuevoRegistro: usuario_certificado = {
         id_certificado: selectedCert.id_certificado,
         id_usuario: userID,
@@ -94,7 +88,7 @@ export default function CertificatesSection({ userID, loading = false, className
         fecha_fin: null,
       };
 
-      await addUsuarioCertificado(nuevoRegistro);
+      await addUsuarioCertificado(userID, );
       resetForm();
     } catch (error) {
       console.error("Error al agregar certificado:", error);
