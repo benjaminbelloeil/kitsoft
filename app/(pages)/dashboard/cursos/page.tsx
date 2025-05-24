@@ -103,9 +103,9 @@ const careerPaths = [
       'Arquitectura Cloud'
     ],
     certifications: [
-      { name: 'AWS Cloud Practitioner', status: 'completed' },
-      { name: 'Azure Fundamentals', status: 'in-progress' },
-      { name: 'Kubernetes Administrator', status: 'pending' }
+      { name: 'AWS Cloud Practitioner', status: 'completed' as const },
+      { name: 'Azure Fundamentals', status: 'in-progress' as const },
+      { name: 'Kubernetes Administrator', status: 'pending' as const }
     ],
     nextSteps: [
       'AWS Solutions Architect',
@@ -131,9 +131,9 @@ const careerPaths = [
       'Planificación Estratégica'
     ],
     certifications: [
-      { name: 'Scrum Master', status: 'in-progress' },
-      { name: 'PMP Certification', status: 'pending' },
-      { name: 'Agile Leadership', status: 'pending' }
+      { name: 'Scrum Master', status: 'in-progress' as const },
+      { name: 'PMP Certification', status: 'pending' as const },
+      { name: 'Agile Leadership', status: 'pending' as const }
     ],
     nextSteps: [
       'Liderazgo y Gestión de Equipos',
