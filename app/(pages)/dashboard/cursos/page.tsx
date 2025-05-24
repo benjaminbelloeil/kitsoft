@@ -1,21 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from 'react';
 import { 
-  Navigation, 
-  Check, 
-  Clock, 
-  Star, 
-  BookOpen, 
   Award, 
-  TrendingUp,
-  Calendar,
-  Filter,
   Search,
-  X,
-  ChevronRight,
-  ChevronLeft,
-  Info
 } from 'lucide-react';
 import PathSkeleton from "@/components/cursos/PathSkeleton";
 import CertificateItem from '@/components/cursos/CertificateItem';
@@ -197,11 +186,9 @@ const coursesData = [
 
 export default function CursosPage() {
   const [viewMode, setViewMode] = useState('grid');
-  const [sortBy, setSortBy] = useState('date');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [activePath, setActivePath] = useState(1);
-  const [filterCategory, setFilterCategory] = useState('');
   
   // Get only completed courses with certificates
   const completedCourses = coursesData.filter(course => 
@@ -220,27 +207,8 @@ export default function CursosPage() {
       );
     }
     
-    // Apply category filter
-    if (filterCategory) {
-      filteredCourses = filteredCourses.filter(course => 
-        course.category === filterCategory
-      );
-    }
-    
-    // Apply sorting
-    if (sortBy === 'date') {
-      filteredCourses.sort((a: any, b: any) => {
-        return new Date(b.certificate.issueDate).getTime() - new Date(a.certificate.issueDate).getTime();
-      });
-    } else if (sortBy === 'name') {
-      filteredCourses.sort((a: any, b: any) => a.title.localeCompare(b.title));
-    }
-    
     return filteredCourses;
   };
-  
-  // Get all available categories
-  const categories = [...new Set(coursesData.map(course => course.category))];
   
   // Handle course click
   const handleCourseClick = (course: any) => {
@@ -297,65 +265,37 @@ export default function CursosPage() {
       
       {/* Certificates Section */}
       <div className="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <div className="flex justify-between items-center mb-2 border-b border-gray-200 p-2">
-          <h2 className="text-xl font-bold flex items-center">
-            <Award className="mr-2 text-purple-600" size={20} />
-            Mis Cursos Completados y Certificaciones
-          </h2>
-          
-          <div className="flex space-x-6">
-            
-            <div className="flex space-x-2 items-center">
-              <Filter className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              <label htmlFor="category-select" className="sr-only">Filtrar por categoría</label>
-              <select
-                id="category-select"
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="border border-gray-300 rounded-md text-sm p-2 bg-white"
-                aria-label="Filtrar por categoría"
-              >
-                <option value="">Todas las categorías</option>
-                {categories.map((category, index) => (
-                  <option key={index} value={category}>{category}</option>
-                ))}
-              </select>
+        <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4">
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500/10 to-purple-500/20 rounded-full flex items-center justify-center mr-3 shadow-lg">
+              <Award className="w-5 h-5 text-purple-500" />
             </div>
-              <div className="flex space-x-2 items-center">
-              <label htmlFor="sort-select" className="text-sm text-gray-500">Ordenar por:</label>
-              <select
-                id="sort-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-300 rounded-md text-sm p-2 bg-white"
-                aria-label="Ordenar por"
-              >
-                <option value="date">Fecha</option>
-                <option value="name">Nombre</option>
-              </select>
+            <div>
+              <h2 className="text-lg font-bold text-gray-800">Mis Cursos Completados y Certificaciones</h2>
+              <p className="text-gray-600 text-sm">Aquí puedes encontrar todos los cursos que has completado y las certificaciones obtenidas.</p>
             </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                aria-label="Ver como cuadrícula"
-                title="Ver como cuadrícula"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                aria-label="Ver como lista"
-                title="Ver como lista"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
+              aria-label="Ver como cuadrícula"
+              title="Ver como cuadrícula"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
+              aria-label="Ver como lista"
+              title="Ver como lista"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
         
