@@ -85,9 +85,9 @@ export default function CertificatesSection({ userID, loading = false, className
     }
   };
 
-  const handleRemoveCertificate = async (certToDelete: Certificate) => {
+  const handleRemoveCertificate = async (certToDelete: CertificateVisualData) => {
     try {
-      const result = await deleteUsuarioCertificado(certToDelete.raw);
+      const result = await deleteUsuarioCertificado(certToDelete.id_usuario, certToDelete.id_usuario);
       if (!result.success) {
         console.error("Error eliminando el certificado:", result.error);
         return;

@@ -4,14 +4,14 @@ import { certificado } from '@/interfaces/certificate'; // Asegúrate que esta i
 import { FiSearch, FiCheck, FiX } from 'react-icons/fi';
 
 interface Props {
-  onSelect: (certificado: certificado) => void;
+  onSelect: (certificado: certificado) => void | null;
   initialCertificado?: certificado | null;
 }
 
 const CertificateSearchInput: React.FC<Props> = ({ onSelect, initialCertificado = null }) => {
   const [input, setInput] = useState('');
   const [results, setResults] = useState<certificado[]>([]);
-  const [certificados, setCertificados] = useState<certificado[]>([]);
+  const [remoteCertificates, setRemoteCertificates] = useState<certificado[]>([]);
   const [selected, setSelected] = useState<certificado | null>(initialCertificado);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -19,22 +19,22 @@ const CertificateSearchInput: React.FC<Props> = ({ onSelect, initialCertificado 
     const loadCertificados = async () => {
       const data = await getAllCertificados();
       console.log('Certificados cargados:', data);
-      setCertificados(data);
+      setRemoteCertificates(data);
     };
     loadCertificados();
   }, []);
 
   useEffect(() => {
     console.log('Buscando:', input);
-    console.log('Certificados actuales:', certificados);
+    console.log('Certificados actuales:', remoteCertificates);
 
-    const filtered = certificados.filter(cert =>
+    const filtered = remoteCertificates.filter(cert =>
       cert.curso?.toLowerCase().includes(input.toLowerCase())
     );
 
     console.log('Resultados filtrados:', filtered);
     setResults(filtered);
-  }, [input, certificados]);
+  }, [input, remoteCertificates]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -56,7 +56,8 @@ const CertificateSearchInput: React.FC<Props> = ({ onSelect, initialCertificado 
   const handleClear = () => {
     setSelected(null);
     setInput('');
-    setResults(certificados); // opcional: mostrar todos de nuevo
+    setResults(remoteCertificates); // opcional: mostrar todos de nuevo
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSelect(null as any);
   };
 

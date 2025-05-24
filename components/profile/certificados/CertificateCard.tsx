@@ -1,9 +1,9 @@
 // components/profile/certificados/CertificateCard.tsx
-import { certificado, CertificateVisualData } from "@/interfaces";
+import { CertificateVisualData } from "@/interfaces";
 import { FiCalendar, FiClock, FiDownload, FiFileText, FiTrash2 } from "react-icons/fi";
 
 
-export default function CertificateCard({ cert, onRemove }: {cert: CertificateVisualData, onRemove: (cert: certificado) => void;}) {
+export default function CertificateCard({ cert, onRemove }: {cert: CertificateVisualData, onRemove: (cert: CertificateVisualData) => void;}) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -65,8 +65,7 @@ export default function CertificateCard({ cert, onRemove }: {cert: CertificateVi
           </button>
           <button
             className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-full"
-            // onClick={() => onRemove(cert)}
-			// TODO: Implement onRemove certificado
+            onClick={() => onRemove(cert)}
             title="Eliminar"
           >
             <FiTrash2 size={16} />
