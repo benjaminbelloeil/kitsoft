@@ -53,7 +53,7 @@ const CertificateDetail = ({ certificate, course }: { certificate: any, course: 
 // Course detail modal component
 const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => void }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 backdrop-blur-sm bg-gray-800/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-auto">
         <div className="p-6">
           <div className="flex justify-between items-start mb-6">

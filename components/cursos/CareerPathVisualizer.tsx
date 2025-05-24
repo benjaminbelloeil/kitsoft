@@ -1,17 +1,30 @@
-// app/dashboard/certificaciones/components/ProgressBar.tsx
 import React from 'react';
-import { Award, BookOpen, Check, Clock, Info, TrendingUp } from 'lucide-react';
+import { Award, BookOpen, Check, Clock, Info, TrendingUp, PencilLine } from 'lucide-react';
 
-const CareerPathVisualizer = ({ 
-  paths, 
-  activePath, 
-  onPathChange 
-}: { 
-  paths: any[], 
-  activePath: number, 
-  onPathChange: (pathId: number) => void 
-}) => {
-  const currentPath = paths.find(p => p.id === activePath);
+interface Level {
+  id: string;
+  name: string;
+  completed: boolean;
+  current?: boolean;
+}
+
+interface CareerPath {
+  id: number;
+  title: string;
+  description: string;
+  levels: Level[];
+  color: string;
+  skills?: string[];
+  certifications?: { name: string; status: 'completed' | 'in-progress' | 'pending' }[];
+  nextSteps?: string[];
+}
+
+interface CareerPathVisualizerProps {
+  path: CareerPath;
+  onEditPath?: () => void;
+}
+
+const CareerPathVisualizer = ({ path, onEditPath }: CareerPathVisualizerProps) => {
   
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-4">
@@ -23,37 +36,30 @@ const CareerPathVisualizer = ({
           </h2>
           <p className="text-gray-600 text-sm">Visualiza y planifica tu crecimiento profesional en Accenture</p>
         </div>
-        <div className="flex">
-          <label htmlFor="path-select" className="sr-only">Seleccionar trayectoria profesional</label>
-          <select 
-            id="path-select"
-            value={activePath}
-            onChange={(e) => onPathChange(parseInt(e.target.value))}
-            className="border border-gray-300 rounded-md text-sm p-2 bg-white"
-            aria-label="Seleccionar trayectoria profesional"
+        {onEditPath && (
+          <button 
+            onClick={onEditPath}
+            className="flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-md transition-colors duration-200"
           >
-            {paths.map(path => (
-              <option key={path.id} value={path.id}>{path.title}</option>
-            ))}
-          </select>
-        </div>
+            <PencilLine size={16} />
+            Cambiar trayectoria
+          </button>
+        )}
       </div>
       
-      {currentPath && (
-        <>
-          <div className="mb-6">
-            <h3 className={`text-lg font-semibold mb-1 text-[${currentPath.color}]`}>
-              {currentPath.title}
-            </h3>
-            <p className="text-gray-600 text-sm">{currentPath.description}</p>
-          </div>
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-1" style={{ color: path.color }}>
+          {path.title}
+        </h3>
+        <p className="text-gray-600 text-sm">{path.description}</p>
+      </div>
+      
+      <div className="relative">
+        {/* Path visualization */}
+        <div className="flex items-center justify-between mb-8 relative">
+          <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 h-1 bg-gray-200 z-0"></div>
           
-          <div className="relative">
-            {/* Path visualization */}
-            <div className="flex items-center justify-between mb-8 relative">
-              <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 h-1 bg-gray-200 z-0"></div>
-              
-              {currentPath.levels.map((level: any, index: number) => {
+          {path.levels.map((level, index) => {
                 let bgColor = "bg-gray-200";
                 let textColor = "text-gray-500";
                 let borderColor = "border-gray-200";
@@ -154,8 +160,6 @@ const CareerPathVisualizer = ({
               </div>
             </div>
           </div>
-        </>
-      )}
     </div>
   );
 };

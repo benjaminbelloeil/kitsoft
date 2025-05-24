@@ -22,6 +22,9 @@ import CertificateItem from '@/components/cursos/CertificateItem';
 import CourseDetailModal from '@/components/cursos/CourseDetailModal';
 import NoCoursesFound from '@/components/cursos/NoCoursesFound';
 import CareerPathVisualizer from '@/components/cursos/CareerPathVisualizer';
+import NoPathFound from '@/components/cursos/NoPathFound';
+import PathSelectionModal from '@/components/cursos/PathSelectionModal';
+import SkillsQuestionnaire from '@/components/cursos/SkillsQuestionnaire';
 
 // CSS styles 
 const styles = `
@@ -58,7 +61,26 @@ const careerPaths = [
       { id: 'ct-5', name: 'Nivel 5', completed: false }
     ],
     description: 'Ruta especializada en consultoría tecnológica y soluciones digitales.',
-    color: '#A100FF'
+    color: '#A100FF',
+    skills: [
+      'Consultoría Estratégica',
+      'Arquitectura de Soluciones',
+      'Gestión de Proyectos Técnicos',
+      'Liderazgo Técnico',
+      'JavaScript/TypeScript',
+      'React',
+      'Cloud Computing'
+    ],
+    certifications: [
+      { name: 'Arquitectura de Soluciones', status: 'completed' as const },
+      { name: 'Inteligencia Artificial y ML', status: 'completed' as const },
+      { name: 'AWS Solutions Architect', status: 'in-progress' as const },
+      { name: 'Azure Cloud Architect', status: 'pending' as const }
+    ],
+    nextSteps: [
+      'Fundamentos de Cloud Computing',
+      'Gestión Avanzada de Proyectos'
+    ]
   },
   {
     id: 2,
@@ -70,7 +92,25 @@ const careerPaths = [
       { id: 'cl-4', name: 'Nivel 4', completed: false }
     ],
     description: 'Especialización en tecnologías cloud y arquitectura de soluciones.',
-    color: '#0077B6'
+    color: '#0077B6',
+    skills: [
+      'Cloud Computing',
+      'AWS', 
+      'Azure',
+      'DevOps',
+      'Microservicios',
+      'Seguridad Cloud',
+      'Arquitectura Cloud'
+    ],
+    certifications: [
+      { name: 'AWS Cloud Practitioner', status: 'completed' },
+      { name: 'Azure Fundamentals', status: 'in-progress' },
+      { name: 'Kubernetes Administrator', status: 'pending' }
+    ],
+    nextSteps: [
+      'AWS Solutions Architect',
+      'DevSecOps Fundamentals'
+    ]
   },
   {
     id: 3,
@@ -81,7 +121,24 @@ const careerPaths = [
       { id: 'lp-3', name: 'Nivel 3', completed: false }
     ],
     description: 'Ruta para desarrollo de habilidades de gestión y liderazgo de proyectos.',
-    color: '#00B050'
+    color: '#00B050',
+    skills: [
+      'Gestión de Proyectos',
+      'Liderazgo de Equipos',
+      'Comunicación Efectiva',
+      'Agile/Scrum',
+      'Negociación',
+      'Planificación Estratégica'
+    ],
+    certifications: [
+      { name: 'Scrum Master', status: 'in-progress' },
+      { name: 'PMP Certification', status: 'pending' },
+      { name: 'Agile Leadership', status: 'pending' }
+    ],
+    nextSteps: [
+      'Liderazgo y Gestión de Equipos',
+      'Certificación Scrum Master'
+    ]
   }
 ];
 
@@ -200,8 +257,13 @@ export default function CursosPage() {
   const [sortBy, setSortBy] = useState('date');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [activePath, setActivePath] = useState(1);
+  const [activePath, setActivePath] = useState<number | null>(null); // Changed to null to represent no path selected
   const [filterCategory, setFilterCategory] = useState('');
+  const [isPathModalOpen, setIsPathModalOpen] = useState(false);
+  const [isQuestionnaireOpen, setIsQuestionnaireOpen] = useState(false);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [currentPosition, setCurrentPosition] = useState('');
+  const [desiredPosition, setDesiredPosition] = useState('');
   
   // Get only completed courses with certificates
   const completedCourses = coursesData.filter(course => 
@@ -247,11 +309,26 @@ export default function CursosPage() {
     setSelectedCourse(course);
   };
   
-  // Close modal
+  // Close course detail modal
   const closeModal = () => {
     setSelectedCourse(null);
   };
-
+  
+  // Handle questionnaire submission
+  const handleQuestionnaireSubmit = (skills: string[], currentPos: string, desiredPos: string) => {
+    setSelectedSkills(skills);
+    setCurrentPosition(currentPos);
+    setDesiredPosition(desiredPos);
+    setIsQuestionnaireOpen(false);
+    setIsPathModalOpen(true);
+  };
+  
+  // Handle path selection from modal
+  const handlePathSelect = (pathId: number) => {
+    setActivePath(pathId);
+    setIsPathModalOpen(false);
+  };
+  
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -289,11 +366,20 @@ export default function CursosPage() {
       </div>
       
       {/* Career Path Visualizer */}
-      <CareerPathVisualizer 
-        paths={careerPaths} 
-        activePath={activePath} 
-        onPathChange={setActivePath} 
-      />
+      {activePath ? (
+        <>
+          {console.log("Selected Path:", careerPaths.find(p => p.id === activePath), "Active Path ID:", activePath)}
+          <CareerPathVisualizer 
+            path={careerPaths.find(p => p.id === activePath)!}
+            onEditPath={() => setIsQuestionnaireOpen(true)} 
+          />
+        </>
+      ) : (
+        <>
+          {console.log("No active path selected")}
+          <NoPathFound onStartQuestionnaire={() => setIsQuestionnaireOpen(true)} />
+        </>
+      )}
       
       {/* Certificates Section */}
       <div className="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
@@ -401,6 +487,29 @@ export default function CursosPage() {
         <CourseDetailModal 
           course={selectedCourse}
           onClose={closeModal}
+        />
+      )}
+      
+      {/* Skills Questionnaire Modal */}
+      {isQuestionnaireOpen && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-gray-800/50 flex items-center justify-center z-50 p-4">
+          <SkillsQuestionnaire 
+            onSubmit={handleQuestionnaireSubmit}
+            onCancel={() => setIsQuestionnaireOpen(false)}
+          />
+        </div>
+      )}
+      
+      {/* Path Selection Modal */}
+      {isPathModalOpen && (
+        <PathSelectionModal
+          paths={careerPaths}
+          userSkills={selectedSkills}
+          onPathSelect={(pathId) => {
+            setActivePath(pathId);
+            setIsPathModalOpen(false);
+          }}
+          onClose={() => setIsPathModalOpen(false)}
         />
       )}
     </div>
