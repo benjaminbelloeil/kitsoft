@@ -16,7 +16,6 @@ interface CertificatesSectionProps {
   className?: string;
 }
 
-
 export interface NewCertificate {
   file: File | null;
   obtainedDate: string;
@@ -87,7 +86,7 @@ export default function CertificatesSection({ userID, loading = false, className
 
   const handleRemoveCertificate = async (certToDelete: CertificateVisualData) => {
     try {
-      const result = await deleteUsuarioCertificado(certToDelete.id_usuario, certToDelete.id_usuario);
+      const result = await deleteUsuarioCertificado(certToDelete.id_certificado, certToDelete.id_usuario);
       if (!result.success) {
         console.error("Error eliminando el certificado:", result.error);
         return;
