@@ -1,7 +1,7 @@
 // components/profile/certificados/CertificatesSection.tsx
 import { useState, useEffect } from "react";
 import { addUsuarioCertificado, uploadCertificadoFile, deleteUsuarioCertificado, getUserCertificates } from "@/utils/database/client/certificateSync";
-import { usuario_certificado } from "@/interfaces/certificate";
+import { CertificateVisualData, usuario_certificado } from "@/interfaces/certificate";
 import { SkeletonCertificates } from "./SkeletonProfile";
 import CertificateCard from "./certificados/CertificateCard";
 import CertificateUploadForm from "./certificados/CertificateUploadForm";
@@ -16,13 +16,6 @@ interface CertificatesSectionProps {
   className?: string;
 }
 
-export interface Certificate {
-  nombre: string;
-  file: File;
-  obtainedDate: string;
-  expirationDate?: string;
-  raw: usuario_certificado;
-}
 
 export interface NewCertificate {
   file: File | null;
@@ -31,7 +24,7 @@ export interface NewCertificate {
 }
 
 export default function CertificatesSection({ userID, loading = false, className = "" }: CertificatesSectionProps) {
-  const [certificates, setCertificates] = useState<certificado[]>([]);
+  const [certificates, setCertificates] = useState<CertificateVisualData[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [newCertificate, setNewCertificate] = useState<NewCertificate>({
     file: null,
@@ -46,11 +39,8 @@ export default function CertificatesSection({ userID, loading = false, className
     const fetchCertificates = async () => {
 		async function fetchCertificates() {
 			try {
-				const certificates: certificado[] = await getUserCertificates(userID);
-				console.log('UserID: ', userID);
-				console.log('Certificados: ', certificates);
-
-				setCertificates(certificates);
+				const fetchedCertificates = await getUserCertificates(userID);
+				setCertificates(fetchedCertificates);
 			}
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			catch(e: any) {
@@ -131,7 +121,7 @@ export default function CertificatesSection({ userID, loading = false, className
         <div className="flex-col flex gap-2">
           {certificates.length > 0 ? (
             certificates.map(cert => (
-              <CertificateCard key={cert.raw.id_certificado} cert={cert} onRemove={handleRemoveCertificate} />
+              <CertificateCard key={cert.certificados.id_certificado} cert={cert} onRemove={handleRemoveCertificate} />
             ))
           ) : (
             <NoCertificatesPlaceholder />

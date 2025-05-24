@@ -13,3 +13,8 @@ export interface certificado {
   vigencia: number;
   url_Pagina: string;
 }
+
+// Tipo para uso exclusivo del frontend
+export interface CertificateVisualData extends usuario_certificado {
+	certificados: certificado,
+}

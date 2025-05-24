@@ -44,10 +44,10 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		// Get the certificates for this user
+		// Get the user-certificate relationship for this user
 		const { data, error } = await supabase
 			.from('usuarios_certificados')
-			.select()
+			.select('*, certificados(*)')
 			.eq('id_usuario', userId);
 
 		if (error) {
