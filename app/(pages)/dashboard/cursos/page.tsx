@@ -127,7 +127,7 @@ const coursesData = [
       { name: 'Patrones de Diseño', completed: true }
     ],
     relatedPath: 'Consultor Tecnológico',
-    imgUrl: '/api/placeholder/150/150',
+    imgUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
     certificate: {
       id: 'cert-arch-001',
       issueDate: '2025-04-12',
@@ -150,7 +150,7 @@ const coursesData = [
       { name: 'Implementación en Proyectos', completed: true }
     ],
     relatedPath: 'Consultor Tecnológico',
-    imgUrl: '/api/placeholder/150/150',
+    imgUrl: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
     certificate: {
       id: 'cert-ai-002',
       issueDate: '2025-03-28',
@@ -173,7 +173,7 @@ const coursesData = [
       { name: 'Desarrollo de Equipos', completed: true }
     ],
     relatedPath: 'Líder de Proyecto',
-    imgUrl: '/api/placeholder/150/150',
+    imgUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
     certificate: {
       id: 'cert-lead-003',
       issueDate: '2025-02-18',
@@ -266,14 +266,18 @@ export default function CursosPage() {
       {/* Certificates Section */}
       <div className="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
         <div className="flex items-start justify-between border-b border-gray-200 pb-4 mb-4">
-          <div className="flex-1">
-            <h2 className="text-lg font-bold text-gray-800">Mis Cursos Completados y Certificaciones</h2>
-            <p className="text-gray-600 text-sm">Aquí puedes encontrar todos los cursos que has completado y las certificaciones obtenidas.</p>
+          <div className="flex item-center">
+            <div className="flex items-center justify-center mb-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                <Award className="w-5 h-5 text-purple-600" />
+              </div>
+            </div>
+            <div className='text-left px-4'>
+              <h2 className="text-lg font-bold text-gray-800">Mis Cursos Completados y Certificaciones</h2>
+              <p className="text-gray-600 text-sm">Aquí puedes encontrar todos los cursos que has completado y las certificaciones obtenidas.</p>
+            </div>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-              <Award className="w-5 h-5 text-purple-600" />
-            </div>
             <div className="flex space-x-2">
             <button
               onClick={() => setViewMode('grid')}
