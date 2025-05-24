@@ -107,50 +107,116 @@ export default function ProjectsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-          ) : (
-            
-            viewMode === 'grid' ? (
-              // Vista de grid
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeProjects.map(project => {
-                  const projectColor = getProjectColor(project.color);
-                  
-                  return (
-                    <div 
-                      key={project.id}
-                      onClick={() => setSelectedProject(project)}
-                      className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg"
-                    >
-                      <div className={`${projectColor} p-4 rounded-t-xl`}>
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-semibold text-white">{project.name}</h3>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-green-800">
-                            Activo
-                          </span>
+          </div>
+        ) : (
+          viewMode === 'grid' ? (
+            // Vista de grid
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeProjects.map(project => {
+                const projectColor = getProjectColor(project.color);
+                
+                return (
+                  <div 
+                    key={project.id}
+                    onClick={() => setSelectedProject(project)}
+                    className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    <div className={`${projectColor} p-4 rounded-t-xl`}>
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-white">{project.name}</h3>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-green-800">
+                          Activo
+                        </span>
+                      </div>
+                      <p className="text-sm text-white opacity-90">Cliente: {project.client}</p>
+                    </div>
+                    
+                    <div className="p-5">
+                      <p className="text-gray-700 text-sm mb-6 line-clamp-2">{project.description || 'Sin descripción'}</p>
+                      
+                      <div className="flex justify-between items-center mb-4">
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Cargabilidad</p>
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 rounded-full bg-green-500 mr-1.5"></div>
+                            <p className="font-medium">{project.cargabilidad}%</p>
+                          </div>
                         </div>
-                        <p className="text-sm text-white opacity-90">Cliente: {project.client}</p>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Fecha inicio</p>
+                          <p className="font-medium">{new Date(project.startDate).toLocaleDateString('es-ES')}</p>
+                        </div>
                       </div>
                       
-                      <div className="p-5">
-                        <p className="text-gray-700 text-sm mb-6 line-clamp-2">{project.description || 'Sin descripción'}</p>
-                        
-                        <div className="flex justify-between items-center mb-4">
+                      {/* Equipo del proyecto */}
+                      <div className="flex -space-x-2 overflow-hidden">
+                        {/* Mostrar avatars (4 máximo) */}
+                        {[1, 2, 3].map((member, index) => (
+                          <div key={index} className="inline-block h-7 w-7 rounded-full ring-2 ring-white">
+                            <img
+                              src={`https://randomuser.me/api/portraits/${index % 2 ? 'men' : 'women'}/${index + 10}.jpg`}
+                              alt={`Usuario ${index + 1}`}
+                              className="h-full w-full object-cover rounded-full"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/placeholder-avatar.png';
+                              }}
+                            />
+                          </div>
+                        ))}
+                        <div className="flex items-center justify-center h-7 w-7 rounded-full bg-gray-200 ring-2 ring-white text-xs font-medium text-gray-500">
+                          +2
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-white opacity-90">{project.client}</p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            // Vista de lista
+            <div className="space-y-4">
+              {activeProjects.map(project => {
+                const projectColor = getProjectColor(project.color);
+                
+                return (
+                  <div 
+                    key={project.id}
+                    onClick={() => setSelectedProject(project)}
+                    className="bg-white rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 duration-300 overflow-hidden"
+                  >
+                    <div className={`${projectColor} p-4 rounded-t-xl`}>
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-white">{project.name}</h3>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-green-800">
+                          Activo
+                        </span>
+                      </div>
+                      <p className="text-sm text-white opacity-90">Cliente: {project.client}</p>
+                    </div>
+                    
+                    <div className="p-5 flex items-center">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700 line-clamp-2">{project.description}</p>
+                        <div className="mt-4 flex justify-between">
                           <div>
-                            <p className="text-sm text-gray-500 mb-1">Cargabilidad</p>
-                            <div className="flex items-center">
-                              <div className="w-3 h-3 rounded-full bg-green-500 mr-1.5"></div>
-                              <p className="font-medium">{project.cargabilidad}%</p>
-                            </div>
+                            <span className="text-sm text-gray-500 flex items-center">
+                              Cargabilidad: 
+                              <div className="flex items-center ml-1">
+                                <div className="w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></div>
+                                <b>{project.cargabilidad}%</b>
+                              </div>
+                            </span>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500 mb-1">Fecha inicio</p>
-                            <p className="font-medium">{new Date(project.startDate).toLocaleDateString('es-ES')}</p>
+                            <span className="text-sm text-gray-500">
+                              Fecha fin: <b>{new Date(project.endDate).toLocaleDateString('es-ES')}</b>
+                            </span>
                           </div>
                         </div>
                         
-                        {/* Equipo del proyecto */}
-                        <div className="flex -space-x-2 overflow-hidden">
-                          {/* Mostrar avatars (4 máximo) */}
+                        {/* Team members */}
+                        <div className="mt-3 flex -space-x-2 overflow-hidden">
                           {[1, 2, 3].map((member, index) => (
                             <div key={index} className="inline-block h-7 w-7 rounded-full ring-2 ring-white">
                               <img
@@ -168,81 +234,14 @@ export default function ProjectsPage() {
                           </div>
                         </div>
                       </div>
-                      <p className="text-sm text-white opacity-90">{project.client}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              // Vista de lista
-              <div className="space-y-4">
-                {activeProjects.map(project => {
-                  const projectColor = getProjectColor(project.color);
-                  
-                  return (
-                    <div 
-                      key={project.id}
-                      onClick={() => setSelectedProject(project)}
-                      className="bg-white rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 duration-300 overflow-hidden"
-                    >
-                      <div className={`${projectColor} p-4 rounded-t-xl`}>
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-semibold text-white">{project.name}</h3>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-green-800">
-                            Activo
-                          </span>
-                        </div>
-                        <p className="text-sm text-white opacity-90">Cliente: {project.client}</p>
-                      </div>
-                      
-                      <div className="p-5 flex items-center">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-700 line-clamp-2">{project.description}</p>
-                          <div className="mt-4 flex justify-between">
-                            <div>
-                              <span className="text-sm text-gray-500 flex items-center">
-                                Cargabilidad: 
-                                <div className="flex items-center ml-1">
-                                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></div>
-                                  <b>{project.cargabilidad}%</b>
-                                </div>
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-sm text-gray-500">
-                                Fecha fin: <b>{new Date(project.endDate).toLocaleDateString('es-ES')}</b>
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {/* Team members */}
-                          <div className="mt-3 flex -space-x-2 overflow-hidden">
-                            {[1, 2, 3].map((member, index) => (
-                              <div key={index} className="inline-block h-7 w-7 rounded-full ring-2 ring-white">
-                                <img
-                                  src={`https://randomuser.me/api/portraits/${index % 2 ? 'men' : 'women'}/${index + 10}.jpg`}
-                                  alt={`Usuario ${index + 1}`}
-                                  className="h-full w-full object-cover rounded-full"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = '/placeholder-avatar.png';
-                                  }}
-                                />
-                              </div>
-                            ))}
-                            <div className="flex items-center justify-center h-7 w-7 rounded-full bg-gray-200 ring-2 ring-white text-xs font-medium text-gray-500">
-                              +2
-                            </div>
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <FiChevronRight className="h-5 w-5 text-gray-400" />
-                        </div>
-                      </div>
                       <div className="ml-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                        <FiChevronRight className="h-5 w-5 text-gray-400" />
                       </div>
+                    </div>
+                    <div className="ml-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
                 );
@@ -619,12 +618,12 @@ export default function ProjectsPage() {
                           setTimeout(() => {
                             button.classList.remove('bg-green-600');
                             button.classList.add('bg-green-600');
-                            button.innerHTML = '<svg class="h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Reunión programada';
+                            button.innerHTML = '<svg class="h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 13l4 4L19 7"></path></svg> Reunión programada';
                             
                             // Reset button after 3 more seconds
                             setTimeout(() => {
                               button.classList.remove('bg-green-600');
-                              button.innerHTML = '<svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Programar reunión';
+                              button.innerHTML = '<svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Programar reunión';
                             }, 3000);
                           }, 1500);
                         }
