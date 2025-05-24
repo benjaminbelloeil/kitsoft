@@ -38,26 +38,69 @@ export async function isAuthenticated(): Promise<boolean> {
  * Check if the current user has admin privileges
  */
 export async function isAdmin(): Promise<boolean> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
+  try {
+    // Use the API endpoint to check admin status
+    const response = await fetch('/api/user/level/is-admin', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    const data = await response.json();
+    return data.isAdmin === true;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
     return false;
   }
-  
-  // Get user's role from usuarios_niveles
-  const { data } = await supabase
-    .from('usuarios_niveles')
-    .select(`
-      niveles:id_nivel_actual(numero)
-    `)
-    .eq('id_usuario', user.id)
-    .order('fecha_cambio', { ascending: false })
-    .limit(1)
-    .single();
-  
-  // Admin is role number 1
-  return data?.niveles?.[0]?.numero === 1;
+}
+
+/**
+ * Check if the current user has project lead privileges (level 3)
+ */
+export async function isProjectLead(): Promise<boolean> {
+  try {
+    // Use the API endpoint to check project lead status
+    const response = await fetch('/api/user/level/is-project-lead', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    const data = await response.json();
+    return data.isProjectLead === true;
+  } catch (error) {
+    console.error('Error checking project lead status:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if the current user has project manager privileges (level 4)
+ */
+export async function isProjectManager(): Promise<boolean> {
+  try {
+    // Use the API endpoint to check project manager status
+    const response = await fetch('/api/user/level/is-project-manager', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    const data = await response.json();
+    return data.isProjectManager === true;
+  } catch (error) {
+    console.error('Error checking project manager status:', error);
+    return false;
+  }
 }
 
 /**

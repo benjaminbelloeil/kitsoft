@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { useNavigation } from '@/context/navigation-context';
 import { useUser } from '@/context/user-context';
-import { ensureUserHasRole } from '@/utils/database/client/userRoleSync';
+import { ensureUserHasLevel } from '@/utils/database/client/userLevelSync';
 
 // Hook for handling login form state and submission
 export function useLoginForm() {
@@ -41,7 +40,7 @@ export function useLoginForm() {
       } else {
         // Ensure user has a role assigned (level 0 by default)
         if (data?.user) {
-          await ensureUserHasRole(data.user.id);
+          await ensureUserHasLevel(data.user.id);
         }
         
         // Refresh user role information
@@ -95,7 +94,7 @@ export function useAuthCheck() {
           setUser(session.user);
           
           // Ensure user has a role assigned
-          await ensureUserHasRole(session.user.id);
+          await ensureUserHasLevel(session.user.id);
           
           // Update user role information
           await refreshUserRole();
@@ -120,7 +119,7 @@ export function useAuthCheck() {
         
         if (session) {
           // Ensure user has a role assigned
-          await ensureUserHasRole(session.user.id);
+          await ensureUserHasLevel(session.user.id);
           
           // Update user role information when auth state changes
           await refreshUserRole();

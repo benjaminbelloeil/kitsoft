@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from "react";
 import { createClient } from '@/utils/supabase/client';
 
 type UserRole = {
@@ -13,8 +13,10 @@ type UserRole = {
 type UserContextType = {
   userRole: UserRole | null;
   isAdmin: boolean;
+  isProjectLead: boolean;
+  isProjectManager: boolean; // Added project manager check
   isLoading: boolean;
-  refreshUserRole: () => Promise<void>;
+  refreshUserRole: () => Promise<void>;  // Keep the name for backward compatibility
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -22,10 +24,13 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isProjectLead, setIsProjectLead] = useState(false);
+  const [isProjectManager, setIsProjectManager] = useState(false); // Added state for project manager
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
   
-  const fetchUserRole = async () => {
+  // Define fetchUserLevel with supabase as a parameter to avoid dependency issues
+  const fetchUserLevel = async () => {
     try {
       setIsLoading(true);
       
@@ -35,68 +40,98 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (!user) {
         setUserRole(null);
         setIsAdmin(false);
+        setIsProjectLead(false);
+        setIsProjectManager(false); // Reset project manager state
         setIsLoading(false);
         return;
       }
       
-      // Get the user's current role from usuarios_niveles
-      const { data: userNivel, error } = await supabase
-        .from('usuarios_niveles')
-        .select(`
-          id_nivel_actual,
-          niveles:id_nivel_actual(id_nivel, numero, titulo, descripcion)
-        `)
-        .eq('id_usuario', user.id)
-        .order('fecha_cambio', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Get the user's level via API
+      const levelResponse = await fetch('/api/user/level/get-level', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
-      if (error || !userNivel || !userNivel.niveles) {
-        console.error("Error fetching user role:", error);
+      if (!levelResponse.ok) {
+        console.error("Error fetching user level:", await levelResponse.text());
         setUserRole(null);
         setIsAdmin(false);
+        setIsProjectLead(false);
+        setIsProjectManager(false); // Reset project manager state
       } else {
-        // Handle niveles as the correct type - it appears to be an array in the response
-        const roleData = Array.isArray(userNivel.niveles) ? userNivel.niveles[0] : userNivel.niveles;
-        setUserRole(roleData as UserRole);
+        const levelData = await levelResponse.json();
+        setUserRole(levelData as UserRole);
         
         // Explicitly check if user is admin (nivel.numero === 1)
-        if (roleData && roleData.numero === 1) {
-          console.log("User is ADMIN with role number:", roleData.numero);
+        if (levelData && levelData.numero === 1) {
+          console.log("User is ADMIN with level number:", levelData.numero);
           setIsAdmin(true);
-        } else {
-          console.log("User is NOT admin with role number:", roleData?.numero);
+          setIsProjectLead(false);
+          setIsProjectManager(false);
+        } 
+        // Check if user is project lead (nivel.numero === 3)
+        else if (levelData && levelData.numero === 3) {
+          console.log("User is PROJECT LEAD with level number:", levelData.numero);
           setIsAdmin(false);
+          setIsProjectLead(true);
+          setIsProjectManager(false);
+        } 
+        // Check if user is project manager (nivel.numero === 4)
+        else if (levelData && levelData.numero === 4) {
+          console.log("User is PROJECT MANAGER with level number:", levelData.numero);
+          setIsAdmin(false);
+          setIsProjectLead(false);
+          setIsProjectManager(true);
+        } 
+        else {
+          console.log("User is regular user with level number:", levelData?.numero);
+          setIsAdmin(false);
+          setIsProjectLead(false);
+          setIsProjectManager(false);
         }
       }
     } catch (error) {
       console.error("Error in fetchUserRole:", error);
       setUserRole(null);
       setIsAdmin(false);
+      setIsProjectLead(false);
+      setIsProjectManager(false);
     } finally {
       setIsLoading(false);
     }
   };
   
-  const refreshUserRole = async () => {
-    await fetchUserRole();
+  const refreshUserLevel = async () => {
+    await memoizedFetchUserLevel();
   };
   
+  // Use useCallback to prevent infinite loop with useEffect dependency
+  const memoizedFetchUserLevel = useCallback(fetchUserLevel, [supabase]);
+  
   useEffect(() => {
-    fetchUserRole();
+    memoizedFetchUserLevel();
     
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      fetchUserRole();
+      memoizedFetchUserLevel();
     });
     
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [memoizedFetchUserLevel, supabase.auth]);
   
   return (
-    <UserContext.Provider value={{ userRole, isAdmin, isLoading, refreshUserRole }}>
+    <UserContext.Provider value={{ 
+      userRole, 
+      isAdmin, 
+      isProjectLead,
+      isProjectManager,
+      isLoading, 
+      refreshUserRole: refreshUserLevel 
+    }}>
       {children}
     </UserContext.Provider>
   );

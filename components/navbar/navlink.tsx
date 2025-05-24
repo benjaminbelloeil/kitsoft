@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useState, useEffect } from "react";
 import { navLinks, NavItem } from "@/components/navbar/navigation-data";
@@ -21,11 +22,13 @@ import { useUser } from "@/context/user-context";
 export default function NavLink() {
     const pathname = usePathname();
     const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({});
-    const { isAdmin } = useUser();
+    const { isAdmin, isProjectLead, isProjectManager } = useUser();
     
     // Filter navigation links based on user role
     const filteredNavLinks = navLinks.filter(link => 
-        !link.requiresAdmin || (link.requiresAdmin && isAdmin)
+        (!link.requiresAdmin || (link.requiresAdmin && isAdmin)) &&
+        (!link.requiresProjectLead || (link.requiresProjectLead && isProjectLead)) &&
+        (!link.requiresProjectManager || (link.requiresProjectManager && isProjectManager))
     );
     
     // Toggle dropdown state
@@ -123,7 +126,11 @@ export default function NavLink() {
                                     
                                     {openDropdowns[link.name] && link.dropdownItems && (
                                         <div className="mt-1 ml-6 pl-2.5 border-l border-gray-200 space-y-1 animate-fadeIn">
-                                            {link.dropdownItems.map((item) => (
+                                            {link.dropdownItems.filter(item => 
+                                                (!item.requiresAdmin || (item.requiresAdmin && isAdmin)) &&
+                                                (!item.requiresProjectLead || (item.requiresProjectLead && isProjectLead)) &&
+                                                (!item.requiresProjectManager || (item.requiresProjectManager && isProjectManager))
+                                            ).map((item) => (
                                                 <Link
                                                     key={item.name}
                                                     href={item.href}

@@ -2,6 +2,9 @@
 export interface DropdownItem {
   name: string;
   href: string;
+  requiresAdmin?: boolean;
+  requiresProjectLead?: boolean;
+  requiresProjectManager?: boolean;
 }
 
 export interface NavItem {
@@ -10,6 +13,8 @@ export interface NavItem {
   href: string;
   hasDropdown: boolean;
   requiresAdmin?: boolean;
+  requiresProjectLead?: boolean;
+  requiresProjectManager?: boolean;
   dropdownItems?: DropdownItem[];
 }
 
@@ -32,7 +37,9 @@ export const navLinks: NavItem[] = [
     hasDropdown: true,
     dropdownItems: [
       { name: "Activos", href: "/dashboard/proyectos" },
-      { name: "Archivados", href: "/dashboard/proyectos/archivados" }
+      { name: "Archivados", href: "/dashboard/proyectos/archivados" },
+      { name: "Lead", href: "/dashboard/proyectos/lead", requiresProjectLead: true },
+      { name: "Manager", href: "/dashboard/proyectos/manager", requiresProjectManager: true }
     ]
   },
   {

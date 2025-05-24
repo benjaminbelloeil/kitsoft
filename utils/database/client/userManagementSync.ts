@@ -1,35 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-export interface User {
-  id_usuario: string;
-  nombre?: string;
-  apellido?: string;
-  titulo?: string;
-  email?: string;
-  url_avatar?: string | null;
-  registered: boolean;
-  role?: {
-    id_nivel?: string;
-    numero?: number;
-    titulo?: string;
-  };
-  lastLogin?: string | null;
-  hasLoggedIn?: boolean; // New field to track if the user has ever logged in
-}
-
-export interface UserRole {
-  id_nivel: string;
-  numero: number; 
-  titulo: string;
-}
+import { User, UserRole } from '@/interfaces/user';
 
 /**
  * Get all users with their current role status and email
  */
 export async function getAllUsersWithRoles(): Promise<User[]> {
   try {
-    const res = await fetch('/api/user/management/all-with-roles', {
+    const res = await fetch('/api/admin/users/list', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -49,11 +27,11 @@ export async function getAllUsersWithRoles(): Promise<User[]> {
 }
 
 /**
- * Get all available roles
+ * Get all available levels
  */
-export async function getAllRoles(): Promise<UserRole[]> {
+export async function getAllLevels(): Promise<UserRole[]> {
   try {
-    const res = await fetch('/api/user/management/roles', {
+    const res = await fetch('/api/admin/levels/list', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -61,43 +39,43 @@ export async function getAllRoles(): Promise<UserRole[]> {
     });
 
     if (!res.ok) {
-      console.error('Error fetching roles:', await res.text());
+      console.error('Error fetching levels:', await res.text());
       return [];
     }
 
     return await res.json();
   } catch (err) {
-    console.error('Exception in getAllRoles:', err);
+    console.error('Exception in getAllLevels:', err);
     return [];
   }
 }
 
 /**
- * Update a user's role - completely replaces the previous implementation
- * to fix issues with role changes not persisting
+ * Update a user's level - completely replaces the previous implementation
+ * to fix issues with level changes not persisting
  */
-export async function updateUserRole(
+export async function updateUserLevel(
   userId: string, 
-  roleId: string
+  levelId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log(`Updating role for user ${userId} to ${roleId}`);
+    console.log(`Updating level for user ${userId} to ${levelId}`);
     
-    const res = await fetch('/api/user/management/update-role', {
+    const res = await fetch('/api/admin/users/update-level', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId, roleId }),
+      body: JSON.stringify({ userId, levelId }),
     });
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error('Error updating user role:', errorText);
+      console.error('Error updating user level:', errorText);
       return { success: false, error: errorText };
     }
 
-    console.log(`Successfully updated role for user ${userId}`);
+    console.log(`Successfully updated level for user ${userId}`);
     return { success: true };
   } catch (err: any) {
     console.error('Exception in updateUserRole:', err);
@@ -113,7 +91,7 @@ export async function cleanupDuplicateEntries(userId: string): Promise<boolean> 
   try {
     console.log(`Cleaning up potential duplicate entries for user ${userId}`);
     
-    const res = await fetch('/api/user/management/cleanup-duplicates', {
+    const res = await fetch('/api/admin/users/cleanup-duplicates', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -142,7 +120,7 @@ export async function deleteUser(userId: string): Promise<{ success: boolean; er
   try {
     console.log(`Starting complete deletion of user: ${userId}`);
 
-    const res = await fetch('/api/user/management/delete', {
+    const res = await fetch('/api/admin/users/delete', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

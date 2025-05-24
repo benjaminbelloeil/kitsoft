@@ -60,37 +60,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // Check for admin access if user is trying to access admin pages
-  if (user && request.nextUrl.pathname.startsWith('/dashboard/admin')) {
-    try {
-      // Get the user's current role from usuarios_niveles
-      const { data: userRole, error } = await supabase
-        .from('usuarios_niveles')
-        .select(`
-          niveles:id_nivel_actual(numero)
-        `)
-        .eq('id_usuario', user.id)
-        .order('fecha_cambio', { ascending: false })
-        .limit(1)
-        .single();
-      
-      console.log("Admin check middleware - User role:", userRole);
-      
-      // If user is not an admin (level 1), redirect to dashboard
-      if (!userRole?.niveles?.numero || userRole.niveles.numero !== 1) {
-        console.log('Non-admin user tried to access admin page:', user.id);
-        const redirectUrl = request.nextUrl.clone()
-        redirectUrl.pathname = '/dashboard'
-        return NextResponse.redirect(redirectUrl)
-      }
-    } catch (error) {
-      console.error('Error checking admin status in middleware:', error);
-      // For safety, if we can't verify admin status, redirect to dashboard
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = '/dashboard'
-      return NextResponse.redirect(redirectUrl)
-    }
-  }
+  // Admin check has been moved to utils/supabase/middleware.ts
 
   return response
 }
