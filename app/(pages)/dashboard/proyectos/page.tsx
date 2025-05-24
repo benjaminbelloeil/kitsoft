@@ -90,16 +90,17 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Card */}
-        {/* Header simplificado con botones de cambio de vista integrados */}
-        <ProjectsHeader 
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
+    <div className="min-h-screen bg-white">
+      {/* Header Card */}
+      {/* Header simplificado con botones de cambio de vista integrados */}
+      <ProjectsHeader 
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
 
-        {/* Content Section */}
+      {/* Content Section */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         {activeProjects.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-6 text-center py-12">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -638,6 +639,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
