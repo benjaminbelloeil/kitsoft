@@ -78,47 +78,38 @@ const PathSkeleton: React.FC = () => {
       
       {/* Certificates Section Skeleton */}
       <div className="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center">
-            <Award className="mr-2 text-gray-200" size={20} />
-            <div className="h-6 bg-gray-200 rounded w-40"></div>
+        <div className="flex items-start justify-between border-b border-gray-200 pb-4 mb-4">
+          <div className="flex-1">
+            <div className="h-6 bg-gray-200 rounded w-72 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-96"></div>
           </div>
-          
-          <div className="flex space-x-6">
-            {/* Search Bar */}
-            <div className="relative flex-grow max-w-xl">
-              <div className="h-10 bg-gray-200 rounded w-64"></div>
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <Award className="w-5 h-5 text-purple-200" />
             </div>
-            
-            {/* Category Filter */}
-            <div className="flex space-x-2 items-center">
-              <div className="h-5 w-5 bg-gray-200 rounded"></div>
-              <div className="h-10 bg-gray-200 rounded w-40"></div>
-            </div>
-            
-            {/* Sort Select */}
-            <div className="flex space-x-2 items-center">
-              <div className="h-4 bg-gray-200 rounded w-20"></div>
-              <div className="h-10 bg-gray-200 rounded w-24"></div>
-            </div>
-            
-            {/* View Toggle */}
-            <div className="flex items-center space-x-2">
+            <div className="flex space-x-2">
               <div className="p-2 rounded-md bg-gray-200 h-9 w-9"></div>
               <div className="p-2 rounded-md bg-gray-200 h-9 w-9"></div>
             </div>
           </div>
         </div>
         
+        {/* Filters and Search */}
+        <div className="flex flex-wrap gap-4 items-center mb-6 p-2 w-full pb-4">
+          <div className="relative flex-grow w-xl">
+            <div className="h-10 bg-gray-200 rounded w-full max-w-lg"></div>
+          </div>
+        </div>
+        
         {/* Certificates Grid Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
           {[...Array(6)].map((_, idx) => (
-            <div key={idx} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-              <div className="h-36 bg-gradient-to-r from-purple-50 to-indigo-50 flex items-center justify-center">
-                <div className="relative">
-                  <div className="h-24 w-24 bg-gray-200 rounded-lg"></div>
-                  <div className="absolute -bottom-2 -right-2 bg-purple-200 rounded-full p-1 w-6 h-6"></div>
-                </div>
+            <div key={idx} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden relative">
+              <div className="absolute top-2 right-2 bg-purple-100 rounded-full p-1 z-10 w-8 h-8 flex items-center justify-center">
+                <div className="w-4 h-4 bg-purple-200 rounded"></div>
+              </div>
+              <div className="h-36 bg-gray-50 flex items-center justify-center">
+                <div className="h-24 w-24 bg-gray-200 rounded-lg"></div>
               </div>
               <div className="p-4">
                 <div className="flex justify-between items-start">

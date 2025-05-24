@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @next/next/no-img-element */
 import React from 'react';
 import { Award, Check, Calendar, Info, ChevronRight } from 'lucide-react';
 
@@ -8,16 +10,14 @@ const CertificateItem = ({ course, onClick, viewMode }: { course: any, onClick: 
   if (viewMode === 'grid') {
     return (
       <div 
-        className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+        className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer relative"
         onClick={() => onClick(course)}
       >
-        <div className="h-36 bg-gradient-to-r from-purple-100 to-indigo-100 flex items-center justify-center">
-          <div className="relative">
-            <img src={course.imgUrl} alt={course.title} className="h-24 w-24 object-cover rounded-lg" />
-            <div className="absolute -bottom-2 -right-2 bg-purple-600 rounded-full p-1">
-              <Award className="text-white" size={16} />
-            </div>
-          </div>
+        <div className="absolute top-2 right-2 bg-purple-100 rounded-full p-1 z-10">
+          <Award className="text-purple-600" size={16} />
+        </div>
+        <div className="h-36 bg-gray-50 flex items-center justify-center">
+          <img src={course.imgUrl} alt={course.title} className="h-24 w-24 object-cover rounded-lg" />
         </div>
         <div className="p-4">
           <div className="flex justify-between items-start">
@@ -51,15 +51,15 @@ const CertificateItem = ({ course, onClick, viewMode }: { course: any, onClick: 
   } else {
     return (
       <div 
-        className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+        className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer relative"
         onClick={() => onClick(course)}
       >
+        <div className="absolute top-4 right-4 bg-purple-100 rounded-full p-1 z-10">
+          <Award className="text-purple-600" size={14} />
+        </div>
         <div className="p-4 flex">
-          <div className="flex-shrink-0 flex items-center justify-center bg-gradient-to-r from-purple-100 to-indigo-100 h-20 w-20 rounded-md relative">
+          <div className="flex-shrink-0 flex items-center justify-center bg-gray-50 h-20 w-20 rounded-md">
             <img src={course.imgUrl} alt={course.title} className="h-14 w-14 object-cover rounded" />
-            <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-1">
-              <Award className="text-white" size={12} />
-            </div>
           </div>
           <div className="ml-4 flex-grow">
             <div className="flex justify-between items-start">
