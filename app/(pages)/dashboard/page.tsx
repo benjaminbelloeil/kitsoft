@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
-import { userData as staticUserData, projectsData, calendarEvents, mockCourses } from "@/app/lib/data";
+import { userData as staticUserData, projectsData, mockCourses } from "@/app/lib/data";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Sun, Moon, Sunrise } from "lucide-react";
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';

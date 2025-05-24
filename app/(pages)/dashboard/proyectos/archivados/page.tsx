@@ -7,7 +7,7 @@ import {
   getProjectsByStatus,
 } from '@/app/lib/data';
 import ArchivedProjectsHeader from '@/components/proyectos/archivados/archivedprojectsheader';
-import ArchivedProjectsSkeleton from '@/components/proyectos/archivados/ArchivedPSkeleton';
+import ArchivedProjectsSkeleton from '@/components/proyectos/archivados/ArchivedSkeleton';
 import { 
   FiInfo, 
   FiUsers, 
