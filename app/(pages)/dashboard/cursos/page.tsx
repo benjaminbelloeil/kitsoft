@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Award, 
   Search,
@@ -233,120 +234,207 @@ export default function CursosPage() {
     return (
       <PathSkeleton />
     );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <style jsx global>{styles}</style>
-      <div className="page-header mb-8 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <div className="flex item-center p-2">
-          <div className="flex items-center justify-center mb-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Award className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-          <div className='text-left px-4 '>
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">
-              Mi Trayectoria y Certificaciones
-            </h1>
-            <p className="text-gray-600 text-sm mx-auto">
-              Explora tu progreso en las rutas de carrera y gestiona tus certificaciones profesionales en Accenture.
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Career Path Visualizer */}
-      <CareerPathVisualizer 
-        paths={careerPaths} 
-        activePath={activePath} 
-        onPathChange={setActivePath} 
-      />
-      
-      {/* Certificates Section */}
-      <div className="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <div className="flex items-start justify-between border-b border-gray-200 pb-4 mb-4">
-          <div className="flex item-center">
-            <div className="flex items-center justify-center mb-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <Award className="w-5 h-5 text-purple-600" />
-              </div>
-            </div>
-            <div className='text-left px-4'>
-              <h2 className="text-lg font-bold text-gray-800">Mis Cursos Completados y Certificaciones</h2>
-              <p className="text-gray-600 text-sm">Aquí puedes encontrar todos los cursos que has completado y las certificaciones obtenidas.</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="flex space-x-2">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-              aria-label="Ver como cuadrícula"
-              title="Ver como cuadrícula"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-              aria-label="Ver como lista"
-              title="Ver como lista"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            </div>
-          </div>
-        </div>
+  }  return (
+    <AnimatePresence mode="wait">
+      <motion.div 
+        className="min-h-screen bg-gray-50 p-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <style jsx global>{styles}</style>
         
-        {/* Filters and Search */}
-        <div className=" flex flex-wrap gap-4 items-center mb-6 p-2 w-full pb-4">
-          <div className="relative flex-grow w-xl ">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+        {/* Page Header */}
+        <motion.div 
+          className="page-header mb-8 bg-white rounded-lg border border-gray-200 shadow-sm p-6"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+          whileHover={{ y: -2, boxShadow: "0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" }}
+        >
+          <div className="flex item-center p-2">
+            <motion.div 
+              className="flex items-center justify-center mb-3"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2, type: "spring", stiffness: 200 }}
+            >
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Award className="h-6 w-6 text-purple-600" />
               </div>
-              <input
-                type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                placeholder="Buscar certificaciones..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-        </div>
-        
-        {/* Certificates List */}
-        <div>
-          <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
-            {filterAndSortCourses(completedCourses).map(course => (
-              <CertificateItem 
-                key={course.id} 
-                course={course} 
-                onClick={handleCourseClick}
-                viewMode={viewMode}
-              />
-            ))}
-            
-            {filterAndSortCourses(completedCourses).length === 0 && (
-              <div className="col-span-full">
-              <NoCoursesFound />
-              </div>
-            )}
+            </motion.div>
+            <motion.div 
+              className='text-left px-4'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <h1 className="text-2xl font-bold text-gray-800 mb-1">
+                Mi Trayectoria y Certificaciones
+              </h1>
+              <p className="text-gray-600 text-sm mx-auto">
+                Explora tu progreso en las rutas de carrera y gestiona tus certificaciones profesionales en Accenture.
+              </p>
+            </motion.div>
           </div>
-        </div>
-      </div>
-      
-      {/* Course Detail Modal */}
-      {selectedCourse && (
-        <CourseDetailModal 
-          course={selectedCourse}
-          onClose={closeModal}
-        />
-      )}
-    </div>
+        </motion.div>
+        
+        {/* Career Path Visualizer */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+        >
+          <CareerPathVisualizer 
+            paths={careerPaths} 
+            activePath={activePath} 
+            onPathChange={setActivePath} 
+          />
+        </motion.div>
+        
+        {/* Certificates Section */}
+        <motion.div 
+          className="mb-3 bg-white rounded-lg border border-gray-200 shadow-sm p-6"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+          whileHover={{ y: -2, boxShadow: "0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" }}
+        >
+          <motion.div 
+            className="flex items-start justify-between border-b border-gray-200 pb-4 mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <div className="flex item-center">
+              <motion.div 
+                className="flex items-center justify-center mb-3"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.4, type: "spring", stiffness: 200 }}
+              >
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Award className="w-5 h-5 text-purple-600" />
+                </div>
+              </motion.div>
+              <motion.div 
+                className='text-left px-4'
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                <h2 className="text-lg font-bold text-gray-800">Mis Cursos Completados y Certificaciones</h2>
+                <p className="text-gray-600 text-sm">Aquí puedes encontrar todos los cursos que has completado y las certificaciones obtenidas.</p>
+              </motion.div>
+            </div>
+            <motion.div 
+              className="flex items-center space-x-3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <div className="flex space-x-2">
+                <motion.button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
+                  aria-label="Ver como cuadrícula"
+                  title="Ver como cuadrícula"
+                  whileHover={{ scale: 1.05, backgroundColor: viewMode === 'grid' ? '#A100FF20' : '#f3f4f6' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </motion.button>
+                <motion.button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
+                  aria-label="Ver como lista"
+                  title="Ver como lista"
+                  whileHover={{ scale: 1.05, backgroundColor: viewMode === 'list' ? '#A100FF20' : '#f3f4f6' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+          
+          {/* Filters and Search */}
+          <motion.div 
+            className=" flex flex-wrap gap-4 items-center mb-6 p-2 w-full pb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <motion.div 
+              className="relative flex-grow w-xl"
+              whileHover={{ scale: 1.02 }}
+              whileFocus={{ scale: 1.02 }}
+            >
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm transition-all"
+                  placeholder="Buscar certificaciones..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </motion.div>
+          </motion.div>
+          
+          {/* Certificates List */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          >
+            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+              {filterAndSortCourses(completedCourses).map((course, index) => (
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.8 + (index * 0.1) }}
+                  whileHover={{ y: -4, scale: 1.02 }}
+                >
+                  <CertificateItem 
+                    course={course} 
+                    onClick={handleCourseClick}
+                    viewMode={viewMode}
+                  />
+                </motion.div>
+              ))}
+              
+              {filterAndSortCourses(completedCourses).length === 0 && (
+                <motion.div 
+                  className="col-span-full"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.8 }}
+                >
+                  <NoCoursesFound />
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+        
+        {/* Course Detail Modal */}
+        <AnimatePresence>
+          {selectedCourse && (
+            <CourseDetailModal 
+              course={selectedCourse}
+              onClose={closeModal}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </AnimatePresence>
   );
 }

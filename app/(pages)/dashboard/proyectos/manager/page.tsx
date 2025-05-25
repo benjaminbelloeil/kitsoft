@@ -372,55 +372,84 @@ export default function ProjectManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <ProjectManagerHeader
-        searchQuery={searchQuery || ''}
-        setSearchQuery={setSearchQuery}
-        totalProjects={projects.length}
-        activeProjects={projects.filter(p => p.activo).length}
-      />
+    <AnimatePresence mode="wait">
+      <motion.div 
+        className="min-h-screen bg-white"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+        >
+          <ProjectManagerHeader
+            searchQuery={searchQuery || ''}
+            setSearchQuery={setSearchQuery}
+            totalProjects={projects.length}
+            activeProjects={projects.filter(p => p.activo).length}
+          />
+        </motion.div>
 
-      {/* Two-Column Layout */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Project Form Card */}
-          <div>
-            <ProjectForm 
-              formData={formData}
-              setFormData={setFormData}
-              clients={clients}
-              roles={roles}
-              selectedRoles={selectedRoles}
-              setSelectedRoles={setSelectedRoles}
-              isEditing={isEditing}
-              isCreating={isCreating}
-              isUpdating={isUpdating}
-              isArchiving={isArchiving}
-              selectedProject={selectedProject}
-              handleInputChange={handleInputChange}
-              handleCreateProject={handleCreateProject}
-              handleUpdateProject={handleUpdateProject}
-              handleArchiveProject={handleArchiveProject}
-              resetForm={resetForm}
-            />
-          </div>
-          
-          {/* Right Column - Project List */}
-          <div>
-            <AnimatePresence mode="wait">
-              <ProjectList
-                projects={projects}
-                filteredProjects={filteredProjects}
-                selectedProject={selectedProject}
-                handleSelectProject={handleSelectProject}
-                handleArchiveProject={handleArchiveProject}
+        {/* Two-Column Layout */}
+        <motion.div 
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-6"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column - Project Form Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+              whileHover={{ y: -2 }}
+            >
+              <ProjectForm 
+                formData={formData}
+                setFormData={setFormData}
+                clients={clients}
+                roles={roles}
+                selectedRoles={selectedRoles}
+                setSelectedRoles={setSelectedRoles}
+                isEditing={isEditing}
+                isCreating={isCreating}
+                isUpdating={isUpdating}
                 isArchiving={isArchiving}
+                selectedProject={selectedProject}
+                handleInputChange={handleInputChange}
+                handleCreateProject={handleCreateProject}
+                handleUpdateProject={handleUpdateProject}
+                handleArchiveProject={handleArchiveProject}
+                resetForm={resetForm}
               />
-            </AnimatePresence>
+            </motion.div>
+            
+            {/* Right Column - Project List */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+              whileHover={{ y: -2 }}
+            >
+              <AnimatePresence mode="wait">
+                <ProjectList
+                  projects={projects}
+                  filteredProjects={filteredProjects}
+                  selectedProject={selectedProject}
+                  handleSelectProject={handleSelectProject}
+                  handleArchiveProject={handleArchiveProject}
+                  isArchiving={isArchiving}
+                />
+              </AnimatePresence>
+            </motion.div>
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

@@ -230,16 +230,38 @@ export default function ProfileHeader({
   }
 
   return (
-    <header className="bg-white rounded-xl shadow-lg p-0 mb-8 overflow-hidden border border-gray-100">
+    <motion.header 
+      className="bg-white rounded-xl shadow-lg p-0 mb-8 overflow-hidden border border-gray-100"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      whileHover={{ y: -2, shadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)" }}
+    >
       <div className="relative">
         {/* Decorative header background */}
-        <div className="h-32 bg-gradient-to-r from-purple-700 to-[#A100FF] w-full absolute top-0 left-0"></div>
+        <motion.div 
+          className="h-32 bg-gradient-to-r from-purple-700 to-[#A100FF] w-full absolute top-0 left-0"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          style={{ transformOrigin: "left" }}
+        ></motion.div>
         
         <div className="relative pt-12 px-6 pb-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Avatar section with improved styling */}
-            <div className="relative mt-6">
-              <div className="rounded-full p-1.5 bg-white shadow-lg">
+            <motion.div 
+              className="relative mt-6"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <motion.div 
+                className="rounded-full p-1.5 bg-white shadow-lg"
+                whileHover={{ shadow: "0 20px 40px -10px rgba(161, 0, 255, 0.3)" }}
+                transition={{ duration: 0.3 }}
+              >
                 <div className="relative h-36 w-36 md:h-44 md:w-44 rounded-full overflow-hidden border-4 border-white shadow-inner">
                   {(previewImage || hasValidAvatar(initialProfile.URL_Avatar)) ? (
                     <Image 
@@ -278,8 +300,8 @@ export default function ProfileHeader({
                   onChange={handleImageChange}
                   disabled={isUploadingAvatar}
                 />
-              </div>
-              <button 
+              </motion.div>
+              <motion.button 
                 className={`absolute bottom-2 right-2 p-2.5 rounded-full shadow-md transition-all ${
                   isUploadingAvatar 
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
@@ -288,13 +310,21 @@ export default function ProfileHeader({
                 onClick={handleImageClick}
                 title="Cambiar foto de perfil"
                 disabled={isUploadingAvatar}
+                whileHover={{ scale: 1.1, rotate: 10 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2 }}
               >
                 <FiEdit2 size={16} />
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
             
             {/* Profile Content with Framer Motion animations */}
-            <div className="flex-1 w-full bg-white rounded-xl p-6 shadow-sm">
+            <motion.div 
+              className="flex-1 w-full bg-white rounded-xl p-6 shadow-sm"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
               <AnimatePresence mode="wait" initial={false}>
                 {isEditing ? (
                   <motion.div
@@ -333,10 +363,10 @@ export default function ProfileHeader({
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

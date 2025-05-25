@@ -1,13 +1,14 @@
 // components/profile/certificados/CertificatesSection.tsx
-import { useState, useEffect } from "react";
-import { addUsuarioCertificado, uploadCertificadoFile, getCertificadosPorUsuario, deleteUsuarioCertificado } from "@/utils/database/client/certificateSync";
-import { usuario_certificado } from "@/interfaces/certificate";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
+import { addUserCertificate, uploadCertificateFile, getUserCertificates, deleteUserCertificate } from "@/utils/database/client/certificateSync";
+import { Certificate as DBCertificate } from "@/interfaces/certificate";
 import { SkeletonCertificates } from "./SkeletonProfile";
 import CertificateCard from "./certificados/CertificateCard";
 import CertificateUploadForm from "./certificados/CertificateUploadForm";
 import NoCertificatesPlaceholder from "./certificados/NoCertificatesPlaceholder";
 import AddCertificateButton from "./certificados/AddCertificateButton";
-import { getArchivoDesdeUrl, getNombreCertificadoPorId } from "@/utils/database/client/certificateSync";
+import { getFileFromUrl } from "@/utils/database/client/certificateSync";
 import { certificado } from "@/interfaces/certificate";
 import { FiCheckCircle } from "react-icons/fi";
 interface CertificatesSectionProps {
@@ -21,7 +22,7 @@ export interface Certificate {
   file: File;
   obtainedDate: string;
   expirationDate?: string;
-  raw: usuario_certificado;
+  raw: DBCertificate;
 }
 
 export interface NewCertificate {
@@ -40,35 +41,38 @@ export default function CertificatesSection({ userID, loading = false, className
   });
   const [selectedCert, setSelectedCert] = useState<certificado | null>(null);
 
-  useEffect(() => {
+  const fetchCertificates = useCallback(async () => {
     if (!userID) return;
-
-    const fetchCertificates = async () => {
-      try {
-        const data = await getCertificadosPorUsuario(userID);
-        const formatted = await Promise.all(
-          data.map(async (item) => {
-            let archivo: File | null = null;
-            if (item.url_archivo) {
-              archivo = await getArchivoDesdeUrl(item.url_archivo);
+    
+    try {
+      const data = await getUserCertificates(userID);
+      const formatted = await Promise.all(
+        data.map(async (item) => {
+          let archivo: File | null = null;
+          if (item.URL_Certificado) {
+            const blob = await getFileFromUrl(item.URL_Certificado);
+            if (blob) {
+              archivo = new File([blob], item.Nombre + ".pdf", { type: blob.type });
             }
-            return {
-              nombre: (await getNombreCertificadoPorId(item.id_certificado)) ?? "Certificado sin nombre",
-              file: archivo ?? new File([""], "certificado.pdf"),
-              obtainedDate: item.fecha_inicio,
-              expirationDate: item.fecha_fin ?? undefined,
-              raw: item,
-            };
-          })
-        );
-        setCertificates(formatted);
-      } catch (err) {
-        console.error("Error al obtener certificados:", err);
-      }
-    };
-
-    fetchCertificates();
+          }
+          return {
+            nombre: item.Nombre || "Certificado sin nombre",
+            file: archivo ?? new File([""], "certificado.pdf"),
+            obtainedDate: item.Fecha_Emision,
+            expirationDate: item.Fecha_Expiracion ?? undefined,
+            raw: item,
+          };
+        })
+      );
+      setCertificates(formatted);
+    } catch (err) {
+      console.error("Error al obtener certificados:", err);
+    }
   }, [userID]);
+
+  useEffect(() => {
+    fetchCertificates();
+  }, [userID, fetchCertificates]);
 
   const resetForm = () => {
     setNewCertificate({
@@ -85,17 +89,23 @@ export default function CertificatesSection({ userID, loading = false, className
     if (!newCertificate.file || !selectedCert || !newCertificate.obtainedDate) return;
 
     try {
-      const url = await uploadCertificadoFile(userID, newCertificate.file);
-      const nuevoRegistro: usuario_certificado = {
+      const uploadResult = await uploadCertificateFile(userID, newCertificate.file);
+      if (!uploadResult.success || !uploadResult.url) {
+        console.error("Error uploading file:", uploadResult.error);
+        return;
+      }
+
+      const certificateData = {
         id_certificado: selectedCert.id_certificado,
-        id_usuario: userID,
-        url_archivo: url,
-        fecha_inicio: newCertificate.obtainedDate,
-        fecha_fin: null,
+        fecha_emision: newCertificate.obtainedDate,
+        fecha_expiracion: newCertificate.expirationDate || null,
+        url_certificado: uploadResult.url,
       };
 
-      await addUsuarioCertificado(nuevoRegistro);
+      await addUserCertificate(userID, certificateData);
       resetForm();
+      // Refresh the certificates list
+      fetchCertificates();
     } catch (error) {
       console.error("Error al agregar certificado:", error);
     }
@@ -103,7 +113,12 @@ export default function CertificatesSection({ userID, loading = false, className
 
   const handleRemoveCertificate = async (certToDelete: Certificate) => {
     try {
-      const result = await deleteUsuarioCertificado(certToDelete.raw);
+      if (!certToDelete.raw.ID_Certificado) {
+        console.error("Certificate ID is missing");
+        return;
+      }
+      
+      const result = await deleteUserCertificate(certToDelete.raw.ID_Certificado, userID);
       if (!result.success) {
         console.error("Error eliminando el certificado:", result.error);
         return;
@@ -117,34 +132,90 @@ export default function CertificatesSection({ userID, loading = false, className
   if (loading) return <SkeletonCertificates />;
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 flex flex-col h-full w-full ${className}`}>
-      <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
-        <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
+    <motion.div 
+      className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 flex flex-col h-full w-full ${className}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      whileHover={{ y: -2 }}
+    >
+      <motion.h2 
+        className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <motion.span 
+          className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm"
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ duration: 0.2 }}
+        >
           <FiCheckCircle className="h-5 w-5 text-[#A100FF]" />
-        </span>
+        </motion.span>
         Certificados
-      </h2>
-      {showForm ? (
-        <CertificateUploadForm
-          newCertificate={newCertificate}
-          setNewCertificate={setNewCertificate}
-          selectedCert={selectedCert}
-          setSelectedCert={setSelectedCert}
-          handleSubmit={handleCertificateSubmit}
-          resetForm={resetForm}
-        />
-      ) : (
-        <div className="flex-col flex gap-2">
-          {certificates.length > 0 ? (
-            certificates.map(cert => (
-              <CertificateCard key={cert.raw.id_certificado} cert={cert} onRemove={handleRemoveCertificate} />
-            ))
-          ) : (
-            <NoCertificatesPlaceholder />
-          )}
-          <AddCertificateButton onClick={() => setShowForm(true)} />
-        </div>
-      )}
-    </div>
+      </motion.h2>
+      
+      <AnimatePresence mode="wait">
+        {showForm ? (
+          <motion.div
+            key="certificate-form"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <CertificateUploadForm
+              newCertificate={newCertificate}
+              setNewCertificate={setNewCertificate}
+              selectedCert={selectedCert}
+              setSelectedCert={setSelectedCert}
+              handleSubmit={handleCertificateSubmit}
+              resetForm={resetForm}
+            />
+          </motion.div>
+        ) : (
+          <motion.div 
+            className="flex-col flex gap-2"
+            key="certificate-list"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <AnimatePresence>
+              {certificates.length > 0 ? (
+                certificates.map((cert, index) => (
+                  <motion.div
+                    key={cert.raw.ID_Certificado || `cert-${index}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    layout
+                  >
+                    <CertificateCard cert={cert} onRemove={handleRemoveCertificate} />
+                  </motion.div>
+                ))
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                >
+                  <NoCertificatesPlaceholder />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: certificates.length * 0.1 + 0.3 }}
+            >
+              <AddCertificateButton onClick={() => setShowForm(true)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { calendarEvents, userData, colorClasses } from "@/app/lib/data";
 import MiniCalendar from "@/components/calendar/MiniCalendar";
 import ProjectFilter from "@/components/calendar/ProjectFilter";
@@ -47,7 +48,6 @@ const additionalEvents = [
     location: "Client Office",
     color: "purple"
   },
-  // Add events to other dates
   {
     id: "e11",
     projectId: "p1",
@@ -91,7 +91,6 @@ export default function CalendarPage() {
 
   // Simulate loading
   useEffect(() => {
-    // Simulate data loading
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1500);
@@ -150,7 +149,6 @@ export default function CalendarPage() {
   // Handle date selection
   const selectDate = (date: Date) => {
     setSelectedDate(new Date(date));
-    // Close event preview when selecting a new date
     setSelectedEvent(null);
   };
 
@@ -170,7 +168,6 @@ export default function CalendarPage() {
   const showDayEvents = (date: Date, position: { x: number, y: number, width: number }) => {
     setDayEventsDate(date);
     setDayEventsPosition(position);
-    // Close event preview if open
     closeEventPreview();
   };
   
@@ -209,13 +206,12 @@ export default function CalendarPage() {
     );
   }, [filteredEvents, dayEventsDate]);
 
-  // New function to handle "go to today"
+  // Function to handle "go to today"
   const goToToday = () => {
     const today = new Date();
     setSelectedDate(today);
     setCurrentDate(today);
     setMiniCalendarDate(today);
-    // Using an existing animation class for consistency
     setAnimationClass("animate-slideLeft");
     setTimeout(() => setAnimationClass(""), 300);
   };
@@ -226,154 +222,204 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="h-full flex flex-col relative max-w-[1920px] mx-auto px-4 md:px-6 pt-6">
-      {/* Simplified header - cleaner with only essential elements */}
-      <div className="mb-6">
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:border-[#A100FF20] transition-all duration-300">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            {/* Title section with enhanced visuals */}
-            <div className="flex items-center">
-              <div className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm">
-                <FiCalendar size={24} className="text-[#A100FF]" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-black">
-                  Calendario de Proyectos
-                </h1>
-                <p className="text-gray-500 mt-1">
-                  {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </p>
-              </div>
-            </div>
-            
-            {/* Right side controls - only search and notifications */}
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              {/* Search input with animation - updated color */}
-              <div className="relative group flex-1 sm:flex-initial sm:w-64">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#A100FF] transition-colors" />
-                <input
-                  type="search"
-                  placeholder="Buscar eventos..."
-                  className="w-full py-1.5 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF80] transition-colors"
-                />
+    <AnimatePresence mode="wait">
+      <motion.div 
+        className="h-full flex flex-col relative max-w-[1920px] mx-auto px-4 md:px-6 pt-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        {/* Header */}
+        <motion.div 
+          className="mb-6"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <motion.div 
+            className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:border-[#A100FF20] transition-all duration-300"
+            whileHover={{ y: -2 }}
+          >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex items-center">
+                <motion.div 
+                  className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <FiCalendar size={24} className="text-[#A100FF]" />
+                </motion.div>
+                <div>
+                  <h1 className="text-2xl font-bold text-black">
+                    Calendario de Proyectos
+                  </h1>
+                  <p className="text-gray-500 mt-1">
+                    {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
               </div>
               
-              {/* Notification badge */}
-              <NotificationBadge />
+              <motion.div 
+                className="flex items-center gap-3 w-full sm:w-auto"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+              >
+                <div className="relative group flex-1 sm:flex-initial sm:w-64">
+                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#A100FF] transition-colors" />
+                  <input
+                    type="search"
+                    placeholder="Buscar eventos..."
+                    className="w-full py-1.5 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF80] transition-colors"
+                  />
+                </div>
+                <NotificationBadge />
+              </motion.div>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
 
-      {/* The rest of the calendar with fixed overflow issues */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
-        {/* Left sidebar */}
-        <div className="w-full lg:w-64 flex-shrink-0 space-y-4">
-          <div className="flex flex-col gap-4">
-            {/* Mini calendar */}
-            <div>
-              <MiniCalendar 
-                miniCalendarDate={miniCalendarDate}
-                selectedDate={selectedDate}
-                setMiniCalendarDate={setMiniCalendarDate}
-                setSelectedDate={selectDate}
-                getEventsForDate={getEventsForDate}
-              />
-            </div>
+        {/* Main content */}
+        <motion.div 
+          className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          {/* Left sidebar */}
+          <motion.div
+            className="w-full lg:w-80 xl:w-96 space-y-4 flex-shrink-0"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <div className="flex flex-col gap-4">
+              {/* Mini calendar */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <MiniCalendar 
+                  miniCalendarDate={miniCalendarDate}
+                  selectedDate={selectedDate}
+                  setMiniCalendarDate={setMiniCalendarDate}
+                  setSelectedDate={selectDate}
+                  getEventsForDate={getEventsForDate}
+                />
+              </motion.div>
 
-            {/* Filters */}
-            <div>
-              <ProjectFilter 
-                projects={userData.projects}
-                activeFilters={activeFilters}
-                toggleFilter={toggleFilter}
-                resetFilters={resetFilters}
-              />
+              {/* Filters */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <ProjectFilter 
+                  projects={userData.projects}
+                  activeFilters={activeFilters}
+                  toggleFilter={toggleFilter}
+                  resetFilters={resetFilters}
+                />
+              </motion.div>
             </div>
-          </div>
-          
-          {/* Small screen events for selected date */}
-          <div className="lg:hidden bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-            <h2 className="font-bold mb-3 text-gray-800 border-b pb-2">
-              {selectedDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </h2>
             
-            {eventsForSelectedDate.length > 0 ? (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {eventsForSelectedDate.map((event, i) => (
-                  <div 
-                    key={i}
-                    onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      selectEvent(event, {
-                        x: rect.left,
-                        y: rect.bottom,
-                        width: rect.width
-                      });
-                    }}
-                    className={`p-3 rounded-md border-l-4 ${colorClasses[event.color].border} shadow-sm hover:shadow-md fast-transition cursor-pointer bg-white`}
-                  >
-                    <h3 className="font-medium">{event.title}</h3>
-                    <div className="flex flex-wrap gap-2 mt-1 text-sm text-gray-500">
-                      <div className="flex items-center">
-                        {event.allDay ? 'Todo el día' : `${formatTime(event.start)} - ${formatTime(event.end)}`}
-                      </div>
-                      {event.location && (
+            {/* Small screen events for selected date */}
+            <motion.div 
+              className="lg:hidden bg-white rounded-xl shadow-lg p-4 border border-gray-100"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.7 }}
+              whileHover={{ y: -2 }}
+            >
+              <h2 className="font-bold mb-3 text-gray-800 border-b pb-2">
+                {selectedDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </h2>
+              
+              {eventsForSelectedDate.length > 0 ? (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {eventsForSelectedDate.map((event, i) => (
+                    <div 
+                      key={i}
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        selectEvent(event, {
+                          x: rect.left,
+                          y: rect.bottom,
+                          width: rect.width
+                        });
+                      }}
+                      className={`p-3 rounded-md border-l-4 ${colorClasses[event.color].border} shadow-sm hover:shadow-md fast-transition cursor-pointer bg-white`}
+                    >
+                      <h3 className="font-medium">{event.title}</h3>
+                      <div className="flex flex-wrap gap-2 mt-1 text-sm text-gray-500">
                         <div className="flex items-center">
-                          • {event.location}
+                          {event.allDay ? 'Todo el día' : `${formatTime(event.start)} - ${formatTime(event.end)}`}
                         </div>
-                      )}
+                        {event.location && (
+                          <div className="flex items-center">
+                            • {event.location}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500 bg-white rounded-lg">
-                No hay eventos para esta fecha
-              </div>
-            )}
-          </div>
-        </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 bg-white rounded-lg">
+                  No hay eventos para esta fecha
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
 
-        {/* Main content area with calendar - prevent horizontal overflow */}
-        <div className="flex-1 flex flex-col min-h-[650px] overflow-hidden">
-          {/* Main calendar - always uses full width and now prevents overflow */}
-          <div className="h-full overflow-hidden">
-            <MainCalendar
-              currentDate={currentDate}
-              selectedDate={selectedDate}
-              selectDate={selectDate}
-              selectEvent={selectEvent}
-              prevMonth={prevMonth}
-              nextMonth={nextMonth}
-              animationClass={animationClass}
-              getEventsForDate={getEventsForDate}
-              formatTime={formatTime}
-              showDayEvents={showDayEvents}
-              goToToday={goToToday}
-            />
-          </div>
-        </div>
-      </div>
-      
-      {/* Event preview popup - positioned relatively based on clicked event */}
-      <EventPreview
-        event={selectedEvent}
-        position={eventPosition}
-        closePreview={closeEventPreview}
-        formatTime={formatTime}
-        findProject={findProject}
-      />
-      
-      {/* Day events list popup */}
-      <DayEventsList
-        date={dayEventsDate}
-        events={eventsForDayPopup}
-        position={dayEventsPosition}
-        closeList={closeDayEventsList}
-        formatTime={formatTime}
-        selectEvent={selectEvent}
-      />
-    </div>
+          {/* Main calendar */}
+          <motion.div 
+            className="flex-1 flex flex-col min-h-[650px] overflow-hidden"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <div className="h-full overflow-hidden">
+              <MainCalendar
+                currentDate={currentDate}
+                selectedDate={selectedDate}
+                selectDate={selectDate}
+                selectEvent={selectEvent}
+                prevMonth={prevMonth}
+                nextMonth={nextMonth}
+                animationClass={animationClass}
+                getEventsForDate={getEventsForDate}
+                formatTime={formatTime}
+                showDayEvents={showDayEvents}
+                goToToday={goToToday}
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+        
+        {/* Event preview popup */}
+        <EventPreview
+          event={selectedEvent}
+          position={eventPosition}
+          closePreview={closeEventPreview}
+          formatTime={formatTime}
+          findProject={findProject}
+        />
+        
+        {/* Day events list popup */}
+        <DayEventsList
+          date={dayEventsDate}
+          events={eventsForDayPopup}
+          position={dayEventsPosition}
+          closeList={closeDayEventsList}
+          formatTime={formatTime}
+          selectEvent={selectEvent}
+        />
+      </motion.div>
+    </AnimatePresence>
   );
 }

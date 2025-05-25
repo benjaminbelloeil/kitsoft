@@ -6,6 +6,7 @@ import SettingsPanel from "@/components/admin/SettingsPanel";
 import LogsPanel from "@/components/admin/LogsPanel";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import TabNavigation from "@/components/admin/TabNavigation";
+import AdminPageClient from "@/components/admin/AdminPageClient";
 
 export default async function AdminPage() {
   // Server-side authorization check
@@ -29,7 +30,11 @@ export default async function AdminPage() {
     .single();
   
   // If user is not admin (level 1), redirect to dashboard
-  const isAdmin = userRole?.niveles?.numero === 1;
+  const niveles = userRole?.niveles;
+  const isAdmin = niveles && 
+    (Array.isArray(niveles) 
+      ? niveles[0]?.numero === 1 
+      : (niveles as { numero: number })?.numero === 1);
   if (!isAdmin) {
     redirect("/dashboard");
   }
@@ -38,23 +43,25 @@ export default async function AdminPage() {
   const users = await getAllUsersWithRolesAndAuth();
 
   return (
-    <div className="container mx-auto p-4 sm:p-8">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Panel de Administración</h1>
+    <AdminPageClient>
+      <div className="container mx-auto p-4 sm:p-8">
+        <h1 className="text-3xl font-bold mb-6 text-gray-800">Panel de Administración</h1>
 
-      <div className="mb-8">
-        <p className="text-gray-600">
-          Bienvenido al panel de administración. Aquí puedes gestionar usuarios, configurar el sistema y acceder a herramientas administrativas.
-        </p>
+        <div className="mb-8">
+          <p className="text-gray-600">
+            Bienvenido al panel de administración. Aquí puedes gestionar usuarios, configurar el sistema y acceder a herramientas administrativas.
+          </p>
+        </div>
+
+        {/* Client-side tab navigation */}
+        <TabNavigation />
+
+        {/* Pass users to client components */}
+        <UserManagementPanel serverUsers={users} />
+        <SettingsPanel />
+        <LogsPanel />
+        <AdminDashboard />
       </div>
-
-      {/* Client-side tab navigation */}
-      <TabNavigation />
-
-      {/* Pass users to client components */}
-      <UserManagementPanel serverUsers={users} />
-      <SettingsPanel />
-      <LogsPanel />
-      <AdminDashboard />
-    </div>
+    </AdminPageClient>
   );
 }

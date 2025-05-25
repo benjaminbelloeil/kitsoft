@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiDownload, FiTrash2, FiFileText, FiUpload, FiFile, FiPlus } from 'react-icons/fi';
 import { getUserCurriculum, updateUserCurriculum, deleteUserCurriculum } from '@/utils/database/client/curriculumSync';
 import { UseNotification } from "@/components/ui/toast-notification";
@@ -74,83 +75,147 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
   }
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full ${className}`}>
-      <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
-        <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
+    <motion.div 
+      className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300 flex flex-col h-full ${className}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      whileHover={{ y: -2 }}
+    >
+      <motion.h2 
+        className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <motion.span 
+          className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm"
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ duration: 0.2 }}
+        >
           <FiFile className="h-5 w-5 text-[#A100FF]" />
-        </span>
+        </motion.span>
         Currículum
-      </h2>
+      </motion.h2>
       
-      <div className="space-y-4 flex-grow flex flex-col">
+      <motion.div 
+        className="space-y-4 flex-grow flex flex-col"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
         <div className="flex-grow">
-          {resumeFile ? (
-            <div className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF30] bg-white shadow-sm mb-4">
-              <div className="flex items-center">
-                <FiFileText className="text-[#A100FF] mr-2 flex-shrink-0" size={18} />
-                <div className="truncate max-w-[200px]">
-                  <p className="font-medium text-sm text-gray-800">{resumeFile.name}</p>
-                  <p className="text-xs text-gray-500">{(resumeFile.size / 1024 / 1024).toFixed(2)} MB</p>
+          <AnimatePresence mode="wait">
+            {resumeFile ? (
+              <motion.div 
+                key="resume-file"
+                className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF30] bg-white shadow-sm mb-4"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                whileHover={{ y: -2, shadow: "0 8px 20px -5px rgba(0, 0, 0, 0.1)" }}
+              >
+                <div className="flex items-center">
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <FiFileText className="text-[#A100FF] mr-2 flex-shrink-0" size={18} />
+                  </motion.div>
+                  <div className="truncate max-w-[200px]">
+                    <p className="font-medium text-sm text-gray-800">{resumeFile.name}</p>
+                    <p className="text-xs text-gray-500">{(resumeFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex space-x-1 flex-shrink-0">
-                <button
-                  className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
-                  onClick={() => {
-                    if (resumeFile) {
-                      downloadFile(resumeFile);
-                    }
-                  }}
-                  title="Descargar"
-                >
-                  <FiDownload size={14} />
-                </button>
-                <button 
-                  className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
-                  onClick={async () => {
-                    if (resumeFile) {
-                      try {
-                        await deleteUserCurriculum(userId, resumeFile.name, undefined);
-                        setResumeFile(null);
-                        if (notificationState) {
-                          notificationState.showInfo('Currículum eliminado');
-                        }
-                      } catch (error) {
-                        console.error("Error deleting curriculum:", error);
-                        if (notificationState) {
-                          notificationState.showError('Error al eliminar el currículum');
+                <div className="flex space-x-1 flex-shrink-0">
+                  <motion.button
+                    className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
+                    onClick={() => {
+                      if (resumeFile) {
+                        downloadFile(resumeFile);
+                      }
+                    }}
+                    title="Descargar"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <FiDownload size={14} />
+                  </motion.button>
+                  <motion.button 
+                    className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
+                    onClick={async () => {
+                      if (resumeFile) {
+                        try {
+                          await deleteUserCurriculum(userId, resumeFile.name, undefined);
+                          setResumeFile(null);
+                          if (notificationState) {
+                            notificationState.showInfo('Currículum eliminado');
+                          }
+                        } catch (error) {
+                          console.error("Error deleting curriculum:", error);
+                          if (notificationState) {
+                            notificationState.showError('Error al eliminar el currículum');
+                          }
                         }
                       }
-                    }
-                  }}
-                  title="Eliminar"
-                >
-                  <FiTrash2 size={14} />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex-grow flex items-center justify-center mb-4">
-              <div className="text-center p-8">
-                <div className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-2">
-                  <FiFile className="h-6 w-6 text-[#A100FF]" />
+                    }}
+                    title="Eliminar"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <FiTrash2 size={14} />
+                  </motion.button>
                 </div>
-                <p className="text-gray-500 text-sm">No hay currículum subido</p>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="no-resume"
+                className="flex-grow flex items-center justify-center mb-4"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="text-center p-8">
+                  <motion.div 
+                    className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-2"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    <FiFile className="h-6 w-6 text-[#A100FF]" />
+                  </motion.div>
+                  <p className="text-gray-500 text-sm">No hay currículum subido</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <div className="border-2 border-dashed border-[#A100FF20] rounded-lg p-4 text-center hover:bg-[#A100FF05] transition-colors duration-200 mt-auto">
+        <motion.div 
+          className="border-2 border-dashed border-[#A100FF20] rounded-lg p-4 text-center hover:bg-[#A100FF05] transition-colors duration-200 mt-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          whileHover={{ scale: 1.02, borderColor: "#A100FF40" }}
+        >
           <label htmlFor="file-upload" className="cursor-pointer block py-4">
             <div className="flex items-center justify-center">
-              <div className="bg-[#A100FF10] rounded-full p-2 mr-3 hover:scale-110 hover:bg-[#A100FF15] transition-all duration-300">
+              <motion.div 
+                className="bg-[#A100FF10] rounded-full p-2 mr-3 hover:scale-110 hover:bg-[#A100FF15] transition-all duration-300"
+                whileHover={{ scale: 1.15, rotate: 10 }}
+                transition={{ duration: 0.2 }}
+              >
                 {resumeFile ? (
                   <FiUpload size={18} className="text-[#A100FF]" />
                 ) : (
                   <FiPlus size={18} className="text-[#A100FF]" />
                 )}
-              </div>
+              </motion.div>
               <div className="text-center">
                 <span className="block text-sm font-medium text-[#A100FF]">
                   {resumeFile ? 'Actualizar currículum' : 'Subir currículum'}
@@ -168,8 +233,8 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
               accept=".pdf,.doc,.docx" 
             />
           </label>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
