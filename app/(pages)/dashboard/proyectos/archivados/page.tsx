@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   getProjectsByStatus,
 } from '@/app/lib/data';
-import ArchivedProjectsHeader from '@/components/proyectos/archivados/archivedprojectsheader';
+import ArchivedProjectsHeader from '@/components/proyectos/archivados/ArchivedProjectsHeader';
 import ArchivedProjectsSkeleton from '@/components/proyectos/archivados/ArchivedSkeleton';
 import { 
   FiInfo, 
