@@ -40,8 +40,8 @@ export default function UserManagementSkeleton() {
       >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div className="flex items-center">
-            <div className="bg-purple-100 p-2 rounded-lg mr-3 animate-pulse">
-              <div className="w-8 h-8 bg-purple-200 rounded"></div>
+            <div className="bg-gray-200 p-2 rounded-lg mr-3 animate-pulse">
+              <div className="w-8 h-8 bg-gray-300 rounded"></div>
             </div>
             <div>
               <div className="h-6 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
@@ -113,7 +113,7 @@ export default function UserManagementSkeleton() {
 
         {/* Pulse animation overlay for extra visual feedback */}
         <motion.div
-          className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-blue-500 z-50"
+          className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-500 to-gray-700 z-50"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: [0, 1, 0] }}
           transition={{
