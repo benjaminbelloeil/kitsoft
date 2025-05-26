@@ -13,10 +13,10 @@ import {
   deleteUser
 } from "@/utils/database/client/userManagementSync";
 import { User, UserRole } from "@/interfaces/user";
-import UserList from "./UserList";
+import UserList from "@/components/admin/management/UserList";
 import { useNotificationState } from "@/components/ui/toast-notification";
-import LevelChangeModal from "./modals/LevelChangeModal";
-import DeleteUserModal from "./modals/DeleteUserModal";
+import LevelChangeModal from "../modals/LevelChangeModal";
+import DeleteUserModal from "../modals/DeleteUserModal";
 
 // Cache key for user management data
 const USER_MANAGEMENT_DATA_KEY = 'user_management_data';
