@@ -51,7 +51,8 @@ export async function DELETE(request: NextRequest) {
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} 
+	catch (error) {
 		console.error('Unexpected error in delete certificate API:', error);
 		return NextResponse.json(
 			{ error: 'Internal server error' },
