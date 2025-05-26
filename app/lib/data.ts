@@ -43,14 +43,14 @@ export const projectsData: Project[] = [
     endDate: '2024-07-31',
     tasks: [
       { 
-        id: 't1', 
+        id: 'p1-t1', 
         name: 'Diseño de arquitectura', 
         completed: true, 
         dueDate: '2023-12-15',
         description: 'Definición de la arquitectura tecnológica del proyecto.'
       },
       { 
-        id: 't2', 
+        id: 'p1-t2', 
         name: 'Desarrollo frontend', 
         completed: true, 
         dueDate: '2024-02-20',
@@ -58,7 +58,7 @@ export const projectsData: Project[] = [
         description: 'Implementación de la interfaz de usuario.'
       },
       { 
-        id: 't3', 
+        id: 'p1-t3', 
         name: 'Integración APIs', 
         completed: false, 
         dueDate: '2024-05-30',
@@ -66,7 +66,7 @@ export const projectsData: Project[] = [
         description: 'Desarrollo de las APIs necesarias.'
       },
       { 
-        id: 't4', 
+        id: 'p1-t4', 
         name: 'Testing y QA', 
         completed: false, 
         dueDate: '2024-06-30',
@@ -87,7 +87,7 @@ export const projectsData: Project[] = [
     endDate: '2024-12-31',
     tasks: [
       { 
-        id: 't1', 
+        id: 'p2-t1', 
         name: 'Auditoría de sistemas actuales', 
         completed: true, 
         dueDate: '2024-01-20',
@@ -95,7 +95,7 @@ export const projectsData: Project[] = [
         description: 'Evaluación completa de la infraestructura actual.'
       },
       { 
-        id: 't2', 
+        id: 'p2-t2', 
         name: 'Planificación de migración', 
         completed: true, 
         dueDate: '2024-02-28',
@@ -103,7 +103,7 @@ export const projectsData: Project[] = [
         description: 'Desarrollo del plan de migración.'
       },
       { 
-        id: 't3', 
+        id: 'p2-t3', 
         name: 'Implementación fase 1', 
         completed: false, 
         dueDate: '2024-07-15',
@@ -111,7 +111,7 @@ export const projectsData: Project[] = [
         description: 'Migración de los primeros sistemas no críticos.'
       },
       { 
-        id: 't4', 
+        id: 'p2-t4', 
         name: 'Capacitación del personal', 
         completed: false, 
         dueDate: '2024-10-30',
@@ -131,7 +131,7 @@ export const projectsData: Project[] = [
     endDate: '2024-09-15',
     tasks: [
       { 
-        id: 't1', 
+        id: 'p3-t1', 
         name: 'Análisis de procesos', 
         completed: true, 
         dueDate: '2024-03-30',
@@ -139,7 +139,7 @@ export const projectsData: Project[] = [
         description: 'Documentación y análisis de los procesos actuales.'
       },
       { 
-        id: 't2', 
+        id: 'p3-t2', 
         name: 'Diseño de nuevos flujos', 
         completed: false, 
         dueDate: '2024-05-15',
@@ -147,7 +147,7 @@ export const projectsData: Project[] = [
         description: 'Diseño de los nuevos flujos de trabajo digitalizados.'
       },
       { 
-        id: 't3', 
+        id: 'p3-t3', 
         name: 'Desarrollo e implementación', 
         completed: false, 
         dueDate: '2024-07-30',
@@ -155,7 +155,7 @@ export const projectsData: Project[] = [
         description: 'Desarrollo de las soluciones tecnológicas necesarias.'
       },
       { 
-        id: 't4', 
+        id: 'p3-t4', 
         name: 'Evaluación y ajustes', 
         completed: false, 
         dueDate: '2024-08-30',
@@ -175,7 +175,7 @@ export const projectsData: Project[] = [
     endDate: '2024-01-30',
     tasks: [
       { 
-        id: 't1', 
+        id: 'p4-t1', 
         name: 'Análisis de requisitos', 
         completed: true, 
         dueDate: '2023-05-10',
@@ -183,7 +183,7 @@ export const projectsData: Project[] = [
         description: 'Definición de los requisitos técnicos y funcionales.'
       },
       { 
-        id: 't2', 
+        id: 'p4-t2', 
         name: 'Desarrollo de plataforma', 
         completed: true, 
         dueDate: '2023-09-20',
@@ -191,7 +191,7 @@ export const projectsData: Project[] = [
         description: 'Implementación de la plataforma de gestión centralizada.'
       },
       { 
-        id: 't3', 
+        id: 'p4-t3', 
         name: 'Implementación de sensores', 
         completed: true, 
         dueDate: '2023-11-15',
@@ -199,7 +199,7 @@ export const projectsData: Project[] = [
         description: 'Instalación y configuración de la red de sensores IoT.'
       },
       { 
-        id: 't4', 
+        id: 'p4-t4', 
         name: 'Entrega final', 
         completed: true, 
         dueDate: '2024-01-30',
@@ -219,7 +219,7 @@ export const projectsData: Project[] = [
     endDate: '2024-02-01',
     tasks: [
       { 
-        id: 't1', 
+        id: 'p5-t1', 
         name: 'Auditoría técnica', 
         completed: true, 
         dueDate: '2023-04-15',
@@ -227,7 +227,7 @@ export const projectsData: Project[] = [
         description: 'Evaluación de la plataforma actual.'
       },
       { 
-        id: 't2', 
+        id: 'p5-t2', 
         name: 'Diseño de arquitectura', 
         completed: true, 
         dueDate: '2023-06-20',
@@ -235,7 +235,7 @@ export const projectsData: Project[] = [
         description: 'Diseño de la nueva arquitectura tecnológica.'
       },
       { 
-        id: 't3', 
+        id: 'p5-t3', 
         name: 'Desarrollo e integración', 
         completed: true, 
         dueDate: '2023-10-30',
@@ -243,14 +243,14 @@ export const projectsData: Project[] = [
         description: 'Implementación de la nueva plataforma.'
       },
       { 
-        id: 't4', 
+        id: 'p5-t4', 
         name: 'Migración de datos', 
         completed: true, 
         dueDate: '2023-12-15',
         description: 'Transferencia de datos históricos y actuales.'
       },
       { 
-        id: 't5', 
+        id: 'p5-t5', 
         name: 'Lanzamiento', 
         completed: true, 
         dueDate: '2024-02-01',
