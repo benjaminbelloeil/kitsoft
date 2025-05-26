@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
 import { getAllUsersWithRolesAndAuth } from "@/utils/database/server/userSync";
+import { checkCurrentUserIsAdmin } from "@/utils/admin/authorization";
 import UserManagementPanel from "@/components/admin/UserManagementPanel";
 import SettingsPanel from "@/components/admin/SettingsPanel";
 import LogsPanel from "@/components/admin/LogsPanel";
@@ -9,32 +9,15 @@ import TabNavigation from "@/components/admin/TabNavigation";
 import AdminPageClient from "@/components/admin/AdminPageClient";
 
 export default async function AdminPage() {
-  // Server-side authorization check
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // Server-side authorization check using the utility function
+  const { user, isAdmin } = await checkCurrentUserIsAdmin();
   
   // If no user is authenticated, redirect to login
   if (!user) {
     redirect("/login");
   }
   
-  // Check if the user is an admin
-  const { data: userRole } = await supabase
-    .from('usuarios_niveles')
-    .select(`
-      niveles:id_nivel_actual(numero)
-    `)
-    .eq('id_usuario', user.id)
-    .order('fecha_cambio', { ascending: false })
-    .limit(1)
-    .single();
-  
-  // If user is not admin (level 1), redirect to dashboard
-  const niveles = userRole?.niveles;
-  const isAdmin = niveles && 
-    (Array.isArray(niveles) 
-      ? niveles[0]?.numero === 1 
-      : (niveles as { numero: number })?.numero === 1);
+  // If user is not admin, redirect to dashboard
   if (!isAdmin) {
     redirect("/dashboard");
   }
