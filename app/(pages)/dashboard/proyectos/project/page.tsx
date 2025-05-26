@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ThumbsUp, CheckCircle, Clock, MessageSquare, Send, User, FolderOpen, Users, Clock as ClockIcon } from "lucide-react";
-import ProjectLeadHeader from '@/components/proyectos/lead/ProjectLeadHeader';
-import ProjectLeadSkeleton from '@/components/proyectos/lead/ProjectLeadSkeleton';
+import ProjectLeadHeader from '@/components/proyectos/project/ProjectLeadHeader';
+import ProjectLeadSkeleton from '@/components/proyectos/project/ProjectLeadSkeleton';
 import { feedbackRecipients } from "@/app/lib/data";
 
 export default function ProjectLeadPage() {
