@@ -39,7 +39,7 @@ export const navLinks: NavItem[] = [
       { name: "Activos", href: "/dashboard/proyectos" },
       { name: "Archivados", href: "/dashboard/proyectos/archivados" },
       { name: "Project Lead", href: "/dashboard/proyectos/project", requiresProjectLead: true },
-      { name: "Manager", href: "/dashboard/proyectos/manager", requiresProjectManager: true }
+      { name: "Project Manager", href: "/dashboard/proyectos/manager", requiresProjectManager: true }
     ]
   },
   {
