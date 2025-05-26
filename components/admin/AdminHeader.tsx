@@ -12,9 +12,9 @@ export default function AdminHeader({
   setSearchQuery
 }: AdminHeaderProps) {
   return (
-    <div className="max-w-[98%] mx-auto py-6 px-2 sm:px-3 mb-4">
+    <div className="container px-0">
       {/* Header card with white background and enhanced styling */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
+      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden mb-8">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-[#A100FF05] -mr-20 -mt-20"></div>
         <div className="absolute bottom-0 left-0 w-20 h-20 rounded-full bg-[#A100FF05] -ml-10 -mb-10"></div>

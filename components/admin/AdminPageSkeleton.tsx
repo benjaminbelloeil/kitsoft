@@ -23,30 +23,34 @@ export default function AdminPageSkeleton() {
       >
         {/* Header Section Skeleton */}
         <motion.div 
-          className="mb-6"
+          className="px-0 mb-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <motion.div 
-            className="h-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-80 mb-6"
-            style={{ backgroundSize: '200% 100%' }}
-            animate={shimmer.animate}
-            transition={shimmer.transition}
-          />
-          
-          <motion.div 
-            className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-96 mb-2"
-            style={{ backgroundSize: '200% 100%' }}
-            animate={shimmer.animate}
-            transition={shimmer.transition}
-          />
-          <motion.div 
-            className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-72"
-            style={{ backgroundSize: '200% 100%' }}
-            animate={shimmer.animate}
-            transition={shimmer.transition}
-          />
+          <motion.div
+            className="bg-white rounded-xl shadow-md border border-gray-100 p-6"
+          >
+            <motion.div 
+              className="h-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-80 mb-6"
+              style={{ backgroundSize: '200% 100%' }}
+              animate={shimmer.animate}
+              transition={shimmer.transition}
+            />
+            
+            <motion.div 
+              className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-96 mb-2"
+              style={{ backgroundSize: '200% 100%' }}
+              animate={shimmer.animate}
+              transition={shimmer.transition}
+            />
+            <motion.div 
+              className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-72"
+              style={{ backgroundSize: '200% 100%' }}
+              animate={shimmer.animate}
+              transition={shimmer.transition}
+            />
+          </motion.div>
         </motion.div>
 
         {/* Tab Navigation Skeleton */}
