@@ -129,15 +129,36 @@ export default function UserManagement() {
   // Display a skeleton loader while loading
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <motion.div 
+          className="flex justify-between items-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="h-8 bg-gray-200 rounded w-64 animate-pulse"></div>
           <div className="h-10 bg-gray-200 rounded w-64 animate-pulse"></div>
-        </div>
+        </motion.div>
         
-        <div className="grid grid-cols-1 gap-4">
+        <motion.div 
+          className="grid grid-cols-1 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-white p-4 rounded-lg shadow animate-pulse">
+            <motion.div 
+              key={i} 
+              className="bg-white p-4 rounded-lg shadow animate-pulse"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.1 }}
+            >
               <div className="flex items-center space-x-4">
                 <div className="rounded-full bg-gray-200 h-12 w-12"></div>
                 <div className="flex-1 space-y-2">
@@ -146,10 +167,10 @@ export default function UserManagement() {
                 </div>
                 <div className="h-8 bg-gray-200 rounded w-24"></div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
   }
 

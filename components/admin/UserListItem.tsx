@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiUser, FiEdit2, FiCheck, FiX, FiTrash2, FiMail, FiClock, FiUserX } from "react-icons/fi";
-import { User, UserRole } from '@/utils/database/client/userManagementSync';
+import { User, UserRole } from '@/interfaces/user';
 import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 
 interface UserListItemProps {
@@ -78,12 +78,19 @@ export default function UserListItem({
 
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="bg-white rounded-xl shadow-sm p-4 transition-all duration-200 hover:shadow border border-gray-100"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="bg-white rounded-xl shadow-sm p-4 transition-all duration-200 hover:shadow-md border border-gray-100"
     >
       <div className="flex items-center">
-        <div className="flex-shrink-0">
+        <motion.div 
+          className="flex-shrink-0"
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.2 }}
+        >
           {user.url_avatar ? (
             <img 
               src={user.url_avatar} 
@@ -93,17 +100,32 @@ export default function UserListItem({
           ) : (
             <PlaceholderAvatar size={48} />
           )}
-        </div>
+        </motion.div>
         
-        <div className="ml-4 flex-1">
+        <motion.div 
+          className="ml-4 flex-1"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
           <div className="flex items-baseline">
-            <h3 className="text-lg font-medium text-gray-900">
+            <motion.h3 
+              className="text-lg font-medium text-gray-900"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
               {user.nombre && user.apellido ? `${user.nombre} ${user.apellido}` : "Usuario sin nombre"}
-            </h3>
+            </motion.h3>
           </div>
           
           {/* Email display */}
-          <div className="flex items-center text-sm text-gray-500 truncate">
+          <motion.div 
+            className="flex items-center text-sm text-gray-500 truncate"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
             {hasEmail ? (
               <>
                 <FiMail className="mr-1 text-gray-400" size={14} />
@@ -112,87 +134,124 @@ export default function UserListItem({
             ) : (
               <span className="text-gray-400">Sin correo electrónico</span>
             )}
-          </div>
+          </motion.div>
           
           {/* Show last login as a small text under the title - only if there is a last login */}
           {lastLoginDate && (
-            <div className="flex items-center text-xs text-gray-400 mt-1">
+            <motion.div 
+              className="flex items-center text-xs text-gray-400 mt-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
               <FiClock className="mr-1" size={12} />
               <span>Último acceso: {lastLoginDate}</span>
-            </div>
+            </motion.div>
           )}
           
-          <p className="text-sm text-gray-500 truncate">
+          <motion.p 
+            className="text-sm text-gray-500 truncate"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
             {user.titulo || "Sin título profesional"}
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
         
         <div className="ml-4 flex items-center">
-          {editingUser ? (
-            <div className="flex items-center space-x-2">
-              <select
-                className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:outline-none focus:ring-0"
-                value={selectedRole || ""}
-                onChange={(e) => setSelectedRole(e.target.value)}
+          <AnimatePresence mode="wait">
+            {editingUser ? (
+              <motion.div 
+                key="editing"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center space-x-2"
               >
-                <option value="" disabled>Seleccionar rol</option>
-                {roles.map(role => (
-                  <option key={role.id_nivel} value={role.id_nivel}>
-                    {role.titulo}
-                  </option>
-                ))}
-              </select>
-              
-              <button 
-                onClick={() => {
-                  if (selectedRole) {
-                    onConfirmRoleChange(user.id_usuario, selectedRole);
-                    cancelEditing();
-                  }
-                }}
-                disabled={!selectedRole}
-                className={`p-2 text-white rounded-full focus:outline-none focus:ring-0 admin-action-btn ${
-                  selectedRole ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
-                }`}
-                title="Guardar"
+                <motion.select
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                  value={selectedRole || ""}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                >
+                  <option value="" disabled>Seleccionar rol</option>
+                  {roles.map(role => (
+                    <option key={role.id_nivel} value={role.id_nivel}>
+                      {role.titulo}
+                    </option>
+                  ))}
+                </motion.select>
+                
+                <motion.button 
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (selectedRole) {
+                      onConfirmRoleChange(user.id_usuario, selectedRole);
+                      cancelEditing();
+                    }
+                  }}
+                  disabled={!selectedRole}
+                  className={`p-2 text-white rounded-full focus:outline-none focus:ring-0 admin-action-btn transition-all ${
+                    selectedRole ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                  title="Guardar"
+                >
+                  <FiCheck size={16} className="text-white" />
+                </motion.button>
+                
+                <motion.button 
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={cancelEditing}
+                  className="p-2 text-white bg-red-600 rounded-full hover:bg-red-700 focus:outline-none focus:ring-0 admin-action-btn transition-all"
+                  title="Cancelar"
+                >
+                  <FiX size={16} className="text-white" />
+                </motion.button>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="viewing"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center space-x-3"
               >
-                <FiCheck size={16} className="text-white" />
-              </button>
-              
-              <button 
-                onClick={cancelEditing}
-                className="p-2 text-white bg-red-600 rounded-full hover:bg-red-700 focus:outline-none focus:ring-0 admin-action-btn"
-                title="Cancelar"
-              >
-                <FiX size={16} className="text-white" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-3">
-              <span 
-                className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${getRoleBadgeStyle(user)}`}
-              >
-                {getRoleIcon(user)}
-                {getRoleLabel(user)}
-              </span>
-              
-              <button 
-                onClick={() => startEditing(user.role?.id_nivel)}
-                className="p-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors focus:outline-none focus:ring-0 admin-action-btn"
-                title="Editar rol"
-              >
-                <FiEdit2 size={16} className="text-indigo-500 group-hover:text-purple-600" />
-              </button>
-              
-              <button 
-                onClick={() => onConfirmDelete(user.id_usuario)}
-                className="p-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors focus:outline-none focus:ring-0 admin-action-btn"
-                title="Eliminar usuario"
-              >
-                <FiTrash2 size={16} className="text-rose-500 group-hover:text-red-600" />
-              </button>
-            </div>
-          )}
+                <motion.span 
+                  whileHover={{ scale: 1.05 }}
+                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all ${getRoleBadgeStyle(user)}`}
+                >
+                  {getRoleIcon(user)}
+                  {getRoleLabel(user)}
+                </motion.span>
+                
+                <motion.button 
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => startEditing(user.role?.id_nivel)}
+                  className="p-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors focus:outline-none focus:ring-0 admin-action-btn"
+                  title="Editar rol"
+                >
+                  <FiEdit2 size={16} className="text-indigo-500 group-hover:text-purple-600" />
+                </motion.button>
+                
+                <motion.button 
+                  whileHover={{ scale: 1.1, rotate: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => onConfirmDelete(user.id_usuario)}
+                  className="p-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors focus:outline-none focus:ring-0 admin-action-btn"
+                  title="Eliminar usuario"
+                >
+                  <FiTrash2 size={16} className="text-rose-500 group-hover:text-red-600" />
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </motion.div>

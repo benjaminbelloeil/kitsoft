@@ -5,6 +5,7 @@ import UserManagementPanel from "@/components/admin/UserManagementPanel";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import TabNavigation from "@/components/admin/TabNavigation";
 import AdminPageClient from "@/components/admin/AdminPageClient";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export default async function AdminPage() {
   // Server-side authorization check using the utility function
@@ -26,12 +27,8 @@ export default async function AdminPage() {
   return (
     <AdminPageClient>
       <div className="container mx-auto p-4 sm:p-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">Panel de Administración</h1>
-          <p className="text-gray-600">
-            Bienvenido al panel de administración. Aquí puedes gestionar usuarios, configurar el sistema y acceder a herramientas administrativas.
-          </p>
-        </div>
+        {/* Admin Header */}
+        <AdminHeader />
 
         {/* Client-side tab navigation */}
         <TabNavigation />
