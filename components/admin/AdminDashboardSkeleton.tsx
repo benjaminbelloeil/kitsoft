@@ -1,11 +1,15 @@
-
 import { motion } from 'framer-motion';
 
 export default function AdminDashboardSkeleton() {
   const shimmer = {
-    backgroundImage: 'linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%)',
-    backgroundSize: '200% 100%',
-    animation: 'shimmer 1.5s infinite linear',
+    animate: {
+      backgroundPosition: '200% 0',
+    },
+    transition: {
+      duration: 1.5,
+      repeat: Infinity,
+      ease: 'linear',
+    },
   };
 
   return (
@@ -15,13 +19,6 @@ export default function AdminDashboardSkeleton() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
-      
       {/* Header with icon and title */}
       <motion.div 
         className="flex items-center mb-6"
@@ -29,8 +26,18 @@ export default function AdminDashboardSkeleton() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
       >
-        <div className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-10 h-10 mr-3" style={shimmer}></div>
-        <div className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 h-6 w-48 rounded" style={shimmer}></div>
+        <motion.div 
+          className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-10 h-10 mr-3" 
+          style={{ backgroundSize: '200% 100%' }}
+          animate={shimmer.animate}
+          transition={shimmer.transition}
+        />
+        <motion.div 
+          className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 h-6 w-48 rounded" 
+          style={{ backgroundSize: '200% 100%' }}
+          animate={shimmer.animate}
+          transition={shimmer.transition}
+        />
       </motion.div>
       
       {/* Grid layout matching exactly the AdminDashboard layout */}
@@ -43,10 +50,25 @@ export default function AdminDashboardSkeleton() {
           transition={{ duration: 0.3, delay: 0.2 }}
         >
           <div className="flex items-center mb-4">
-            <div className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-8 h-8" style={shimmer}></div>
-            <div className="ml-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 h-5 w-20 rounded" style={shimmer}></div>
+            <motion.div 
+              className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-8 h-8" 
+              style={{ backgroundSize: '200% 100%' }}
+              animate={shimmer.animate}
+              transition={shimmer.transition}
+            />
+            <motion.div 
+              className="ml-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 h-5 w-20 rounded" 
+              style={{ backgroundSize: '200% 100%' }}
+              animate={shimmer.animate}
+              transition={shimmer.transition}
+            />
           </div>
-          <div className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 h-4 w-3/4 rounded" style={shimmer}></div>
+          <motion.div 
+            className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 h-4 w-3/4 rounded" 
+            style={{ backgroundSize: '200% 100%' }}
+            animate={shimmer.animate}
+            transition={shimmer.transition}
+          />
         </motion.div>
         
         {/* "Coming soon" card */}
@@ -56,7 +78,12 @@ export default function AdminDashboardSkeleton() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.3 }}
         >
-          <div className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 h-5 w-48 rounded" style={shimmer}></div>
+          <motion.div 
+            className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 h-5 w-48 rounded" 
+            style={{ backgroundSize: '200% 100%' }}
+            animate={shimmer.animate}
+            transition={shimmer.transition}
+          />
         </motion.div>
       </div>
     </motion.div>
