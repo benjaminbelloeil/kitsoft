@@ -330,7 +330,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
           </motion.div>
         </motion.div>
 
-        {/* Statistics - Updated spacing to match LeadManagement */}
+        {/* Statistics - Fixed unregistered count */}
         <motion.div 
           className="bg-gray-50 rounded-lg p-3 mb-8 border border-gray-100 flex items-center text-sm"
           variants={sectionVariants}
@@ -353,7 +353,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              {users.filter(u => u.registered).length}
+              {users.filter(u => u.registered && u.hasLoggedIn).length}
             </motion.span> 
             Usuarios registrados
           </motion.div>
@@ -376,7 +376,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.4 }}
             >
-              {users.filter(u => !u.registered).length}
+              {users.filter(u => !u.registered || !u.hasLoggedIn).length}
             </motion.span> 
             Sin registrar
           </motion.div>
