@@ -7,13 +7,15 @@ interface PeopleLeadHeaderProps {
   setSearchQuery: (query: string) => void;
   totalUsers: number;
   activeUsers: number;
+  onRefresh?: () => void;
+  isLoading?: boolean;
 }
 
 export default function PeopleLeadHeader({
   searchQuery,
   setSearchQuery,
   totalUsers,
-  activeUsers
+  activeUsers,
 }: PeopleLeadHeaderProps) {
   return (
     <div className="max-w-[1400px] mx-auto py-6 px-4 sm:px-6 lg:px-8 mb-8">
@@ -65,28 +67,28 @@ export default function PeopleLeadHeader({
             </div>
           </div>
           
-          {/* Statistics */}
+          {/* Statistics - made smaller */}
           <div className="mt-6 grid grid-cols-2 gap-4">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-3 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Total de Usuarios</p>
-                  <p className="text-2xl font-bold text-blue-700">{totalUsers}</p>
+                  <p className="text-xs font-medium text-blue-600">Total de Usuarios</p>
+                  <p className="text-lg font-bold text-blue-700">{totalUsers}</p>
                 </div>
-                <div className="bg-blue-200 p-2 rounded-lg">
-                  <FiUsers className="h-5 w-5 text-blue-600" />
+                <div className="bg-blue-200 p-1.5 rounded-lg">
+                  <FiUsers className="h-4 w-4 text-blue-600" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 p-3 rounded-lg border border-green-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Usuarios Activos</p>
-                  <p className="text-2xl font-bold text-green-700">{activeUsers}</p>
+                  <p className="text-xs font-medium text-green-600">Usuarios Activos</p>
+                  <p className="text-lg font-bold text-green-700">{activeUsers}</p>
                 </div>
-                <div className="bg-green-200 p-2 rounded-lg">
-                  <FiUsers className="h-5 w-5 text-green-600" />
+                <div className="bg-green-200 p-1.5 rounded-lg">
+                  <FiUsers className="h-4 w-4 text-green-600" />
                 </div>
               </div>
             </div>

@@ -9,14 +9,11 @@
 
 // Types for people lead API responses
 export interface PeopleLeadCertificate {
-  id_certificado: string;
   titulo: string;
-  descripcion?: string;
-  url_certificado?: string;
-  fecha_emision?: string;
+  institucion: string;
+  fecha_obtencion: string;
   fecha_expiracion?: string;
-  emisor?: string;
-  id_usuario: string;
+  url?: string;
 }
 
 export interface PeopleLeadExperience {
@@ -242,14 +239,14 @@ export function transformPeopleLeadCertificatesForDisplay(certificates: PeopleLe
   expirationDate?: string;
   issuer?: string;
 }> {
-  return certificates.map(cert => ({
-    id: cert.id_certificado,
+  return certificates.map((cert, index) => ({
+    id: `cert-${index}`, // Generate ID since the new interface doesn't have id_certificado
     title: cert.titulo,
-    description: cert.descripcion,
-    url: cert.url_certificado,
-    issueDate: cert.fecha_emision,
+    description: undefined, // Not available in the current certificate data
+    url: cert.url,
+    issueDate: cert.fecha_obtencion,
     expirationDate: cert.fecha_expiracion,
-    issuer: cert.emisor
+    issuer: cert.institucion
   }));
 }
 

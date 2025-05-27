@@ -77,16 +77,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get the certificates for this user
-    const { data, error } = await supabase
-      .from('certificados')
-      .select(`
-        *,
-        tipos_certificado(*)
-      `)
-      .eq('id_usuario', userId)
-      .order('fecha_emision', { ascending: false });
-    
+    // Get the certificates for this user using a manual join approach
+    const { data: userCerts, error } = await supabase
+      .from('usuarios_certificados')
+      .select('fecha_inicio, fecha_fin, url_archivo, id_certificado')
+      .eq('id_usuario', userId);
+
     if (error) {
       console.error('Error fetching user certificates:', error);
       return NextResponse.json(
@@ -94,8 +90,39 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    if (!userCerts || userCerts.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    // Get certificate details for all user certificates
+    const certificateIds = userCerts.map(uc => uc.id_certificado);
+    const { data: certificates, error: certError } = await supabase
+      .from('certificados')
+      .select('id_certificado, curso, descripcion, url_pagina_certificado, vigencia_meses')
+      .in('id_certificado', certificateIds);
+
+    if (certError) {
+      console.error('Error fetching certificate details:', certError);
+      return NextResponse.json(
+        { error: 'Failed to fetch certificate details' },
+        { status: 500 }
+      );
+    }
+
+    // Transform the data to match the expected format for ReadOnlyCertificatesSection
+    const transformedData = userCerts.map(userCert => {
+      const cert = certificates?.find(c => c.id_certificado === userCert.id_certificado);
+      return {
+        titulo: cert?.curso || 'Certificado sin título',
+        institucion: 'Institución no especificada', // This field doesn't exist in the current schema
+        fecha_obtencion: userCert.fecha_inicio,
+        fecha_expiracion: userCert.fecha_fin,
+        url: userCert.url_archivo || cert?.url_pagina_certificado
+      };
+    });
     
-    return NextResponse.json(data || []);
+    return NextResponse.json(transformedData);
   } catch (error) {
     console.error('Unexpected error in people-lead certificates API:', error);
     return NextResponse.json(

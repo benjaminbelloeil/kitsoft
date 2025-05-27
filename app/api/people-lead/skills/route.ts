@@ -77,20 +77,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get the skills for this user with a join to get the skill titles
-    const { data, error } = await supabase
+    // Get the skills for this user using a manual join approach
+    const { data: userSkills, error } = await supabase
       .from('usuarios_habilidades')
-      .select(`
-        id_habilidad,
-        id_usuario,
-        nivel_experiencia,
-        habilidades (
-          id,
-          nombre
-        )
-      `)
+      .select('id_habilidad, id_usuario, nivel_experiencia')
       .eq('id_usuario', userId);
-    
+
     if (error) {
       console.error('Error fetching user skills:', error);
       return NextResponse.json(
@@ -98,14 +90,36 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
+    if (!userSkills || userSkills.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    // Get skill details for all user skills
+    const skillIds = userSkills.map(us => us.id_habilidad);
+    const { data: skills, error: skillError } = await supabase
+      .from('habilidades')
+      .select('id_habilidad, titulo')
+      .in('id_habilidad', skillIds);
+
+    if (skillError) {
+      console.error('Error fetching skill details:', skillError);
+      return NextResponse.json(
+        { error: 'Failed to fetch skill details' },
+        { status: 500 }
+      );
+    }
+
     // Transform the data to include the skill title directly in the object
-    const transformedData = data?.map(item => ({
-      id_habilidad: item.id_habilidad,
-      id_usuario: item.id_usuario,
-      nivel_experiencia: item.nivel_experiencia,
-      titulo: item.habilidades?.nombre || 'Unknown skill'
-    })) || [];
+    const transformedData = userSkills.map(userSkill => {
+      const skill = skills?.find(s => s.id_habilidad === userSkill.id_habilidad);
+      return {
+        id_habilidad: userSkill.id_habilidad,
+        id_usuario: userSkill.id_usuario,
+        nivel_experiencia: userSkill.nivel_experiencia,
+        titulo: skill?.titulo || 'Unknown skill'
+      };
+    });
     
     return NextResponse.json(transformedData);
   } catch (error) {
