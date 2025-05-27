@@ -38,8 +38,8 @@ export const navLinks: NavItem[] = [
     dropdownItems: [
       { name: "Activos", href: "/dashboard/proyectos" },
       { name: "Archivados", href: "/dashboard/proyectos/archivados" },
-      { name: "Project Lead", href: "/dashboard/proyectos/project", requiresProjectLead: true },
-      { name: "Project Manager", href: "/dashboard/proyectos/manager", requiresProjectManager: true }
+      { name: "Project Lead", href: "/dashboard/proyectos/project-lead", requiresProjectLead: true },
+      { name: "Project Manager", href: "/dashboard/proyectos/project-manager", requiresProjectManager: true }
     ]
   },
   {
