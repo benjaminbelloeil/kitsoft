@@ -7,11 +7,11 @@ import {
   Award, 
   Search,
 } from 'lucide-react';
-import PathSkeleton from "@/components/cursos/PathSkeleton";
-import CertificateItem from '@/components/cursos/CertificateItem';
-import CourseDetailModal from '@/components/cursos/CourseDetailModal';
-import NoCoursesFound from '@/components/cursos/NoCoursesFound';
-import CareerPathVisualizer from '@/components/cursos/CareerPathVisualizer';
+import PathSkeleton from "@/components/courses/CoursesSkeleton";
+import CertificateItem from '@/components/courses/CertificateItem';
+import CourseDetailModal from '@/components/courses/CourseDetailModal';
+import NoCoursesFound from '@/components/courses/NoCoursesFound';
+import CareerPathVisualizer from '@/components/courses/CareerPathVisualizer';
 
 // CSS styles 
 const styles = `
