@@ -1,18 +1,3 @@
-export interface Certificate {
-  ID_Certificado?: string;
-  ID_Usuario?: string;
-  Nombre: string;
-  Emisor: string;
-  Fecha_Emision: string;
-  Fecha_Expiracion?: string | null;
-  URL_Certificado?: string;
-  Credencial_ID?: string;
-}
-
-export interface CertificatesSectionProps {
-  initialCertificates?: Certificate[];
-}
-
 export interface usuario_certificado {
   id_certificado: string;
   id_usuario: string;
@@ -27,4 +12,9 @@ export interface certificado {
   descripcion: string;
   vigencia: number;
   url_Pagina: string;
+}
+
+// Tipo para uso exclusivo del frontend
+export interface CertificateVisualData extends usuario_certificado {
+	certificados: certificado,
 }
