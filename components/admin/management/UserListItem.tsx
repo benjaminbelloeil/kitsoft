@@ -36,14 +36,33 @@ export default function UserListItem({
   // Get badge color based on role
   const getRoleBadgeStyle = (user: User) => {
     if (!user.registered || !user.hasLoggedIn) return 'bg-gray-100 text-gray-800';
-    if (user.role?.numero === 1) return 'bg-purple-100 text-purple-800';
-    return 'bg-blue-100 text-blue-800';
+    
+    switch (user.role?.numero) {
+      case 1: // Admin
+        return 'bg-purple-100 text-purple-800';
+      case 2: // People Lead
+        return 'bg-green-100 text-green-800';
+      case 3: // Project Lead
+        return 'bg-blue-100 text-blue-800';
+      case 4: // Project Manager
+        return 'bg-orange-100 text-orange-800';
+      default: // Empleado
+        return 'bg-gray-100 text-gray-800';
+    }
   };
   
   // Get role label text
   const getRoleLabel = (user: User) => {
     if (!user.registered || !user.hasLoggedIn) return "Sin registrar";
-    return user.role?.titulo || "Sin rol"; 
+    if (!user.role) return "Sin rol";
+    
+    switch (user.role.numero) {
+      case 1: return "Administrador";
+      case 2: return "People Lead";
+      case 3: return "Project Lead";
+      case 4: return "Project Manager";
+      default: return "Empleado";
+    }
   };
 
   // Get the appropriate icon for the user's status

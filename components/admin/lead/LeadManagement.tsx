@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
@@ -24,9 +25,10 @@ const LEAD_MANAGEMENT_TIMESTAMP_KEY = 'lead_management_timestamp';
 export default function LeadManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [peopleLeads, setPeopleLeads] = useState<PeopleLead[]>([]);
-  const [loading, setLoading] = useState(false); // Start with false
+  const [loading, setLoading] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [lastVisibilityCheck, setLastVisibilityCheck] = useState<number>(0);
   const [search, setSearch] = useState("");
   const notifications = useNotificationState();
 
@@ -56,7 +58,7 @@ export default function LeadManagement() {
     }
   };
 
-  // Load cached data
+  // Load cached data with shorter cache time for people leads
   const loadCachedData = () => {
     try {
       const cachedData = localStorage.getItem(LEAD_MANAGEMENT_DATA_KEY);
@@ -66,10 +68,10 @@ export default function LeadManagement() {
         const data = JSON.parse(cachedData);
         const timestamp = parseInt(cachedTimestamp);
         const now = Date.now();
-        const fiveMinutes = 5 * 60 * 1000;
+        const twoMinutes = 2 * 60 * 1000; // Shorter cache for lead data
         
-        // Use cached data if it's less than 5 minutes old
-        if (now - timestamp < fiveMinutes && data.users && data.peopleLeads) {
+        // Use cached data if it's less than 2 minutes old
+        if (now - timestamp < twoMinutes && data.users && data.peopleLeads) {
           setUsers(data.users);
           setPeopleLeads(data.peopleLeads);
           setDataLoaded(true);
@@ -104,15 +106,25 @@ export default function LeadManagement() {
     
     try {
       // Fetch all users
-      const usersResponse = await fetch('/api/admin/users/list');
+      const usersResponse = await fetch('/api/admin/users/list', {
+        cache: 'no-store', // Ensure fresh data
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (!usersResponse.ok) {
         throw new Error('Failed to fetch users');
       }
       const usersData = await usersResponse.json();
       const users = usersData.users || [];
 
-      // Fetch people leads
-      const leadsResponse = await fetch('/api/admin/leads/list');
+      // Fetch people leads with no cache
+      const leadsResponse = await fetch('/api/admin/leads/list', {
+        cache: 'no-store', // Ensure fresh data
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (!leadsResponse.ok) {
         throw new Error('Failed to fetch people leads');
       }
@@ -125,11 +137,23 @@ export default function LeadManagement() {
       // Update cache
       updateCache(users, leadsData || []);
 
+      console.log('Refreshed lead data - People leads found:', leadsData?.length || 0);
+
     } catch (error) {
       console.error('Error fetching data:', error);
       notifications.showError('Error al cargar los datos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Clear cache when component mounts (force fresh data)
+  const clearCache = () => {
+    try {
+      localStorage.removeItem(LEAD_MANAGEMENT_DATA_KEY);
+      localStorage.removeItem(LEAD_MANAGEMENT_TIMESTAMP_KEY);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
     }
   };
 
@@ -139,26 +163,20 @@ export default function LeadManagement() {
     return panel && panel.style.display !== 'none';
   }, []);
 
-  // Initial setup - load cached data first, then check visibility
+  // Initial setup - always fetch fresh data
   useEffect(() => {
     if (!hasInitialized) {
-      const hasCachedData = loadCachedData();
+      clearCache(); // Clear any stale cache
       setHasInitialized(true);
       
-      // Always try to fetch fresh data if panel is visible, but don't show loading if we have cache
+      // Check if panel is visible and fetch data
       if (checkVisibility()) {
-        if (!hasCachedData) {
-          // No cached data, show loading and fetch
-          fetchData();
-        } else {
-          // Has cached data, fetch silently in background
-          fetchData(false);
-        }
+        fetchData(true); // Force fresh data
       }
     }
   }, [hasInitialized]);
 
-  // Watch for panel visibility changes - only fetch if we don't have any data
+  // Watch for panel visibility changes and always refresh when becoming visible
   useEffect(() => {
     const panel = document.getElementById('admin-panel-leads');
     if (panel) {
@@ -166,9 +184,17 @@ export default function LeadManagement() {
         mutations.forEach((mutation) => {
           if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
             const target = mutation.target as HTMLElement;
-            // Only fetch if panel becomes visible AND we don't have data
-            if (target.style.display !== 'none' && hasInitialized && !dataLoaded) {
-              fetchData();
+            const now = Date.now();
+            
+            // Panel becomes visible
+            if (target.style.display !== 'none' && hasInitialized) {
+              // Always refresh if it's been more than 30 seconds since last check
+              // or if we don't have data
+              if (now - lastVisibilityCheck > 30000 || !dataLoaded) {
+                console.log('Panel became visible, refreshing data...');
+                setLastVisibilityCheck(now);
+                fetchData(true); // Force refresh
+              }
             }
           }
         });
@@ -181,7 +207,23 @@ export default function LeadManagement() {
 
       return () => observer.disconnect();
     }
-  }, [hasInitialized, dataLoaded]);
+  }, [hasInitialized, dataLoaded, lastVisibilityCheck]);
+
+  // Listen for storage events (when user management updates users)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user_management_data' && checkVisibility()) {
+        console.log('User management data changed, refreshing lead data...');
+        // User data was updated, refresh our data
+        setTimeout(() => {
+          fetchData(true);
+        }, 1000); // Small delay to ensure API has processed the changes
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <motion.div 

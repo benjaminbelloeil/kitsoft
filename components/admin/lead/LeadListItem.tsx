@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FiCheck } from "react-icons/fi";
+import { FiCheck, FiUser } from "react-icons/fi";
 import { User } from "@/interfaces/user";
 import { UserAvatar } from "./LeadList";
 
@@ -11,6 +11,35 @@ interface LeadListItemProps {
   onToggleSelection: () => void;
   currentLeadName: string;
 }
+
+// Get role badge style based on role number
+const getRoleBadgeStyle = (roleNumber?: number) => {
+  switch (roleNumber) {
+    case 1: // Admin
+      return 'bg-purple-100 text-purple-800';
+    case 2: // People Lead
+      return 'bg-green-100 text-green-800';
+    case 3: // Project Lead
+      return 'bg-blue-100 text-blue-800';
+    case 4: // Project Manager
+      return 'bg-orange-100 text-orange-800';
+    default: // Empleado
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+// Get role label
+const getRoleLabel = (user: User) => {
+  if (!user.role) return 'Sin rol';
+  
+  switch (user.role.numero) {
+    case 1: return 'Administrador';
+    case 2: return 'People Lead';
+    case 3: return 'Project Lead';
+    case 4: return 'Project Manager';
+    default: return 'Empleado';
+  }
+};
 
 export default function LeadListItem({ 
   user, 
@@ -70,9 +99,19 @@ export default function LeadListItem({
         </div>
         
         <div className="text-right ml-6 flex-shrink-0">
-          <p className="text-sm font-medium text-gray-700 mb-1">
-            {user.role?.titulo || 'Sin rol'}
-          </p>
+          {/* Role Tag */}
+          <div className="mb-2">
+            <motion.span 
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all ${getRoleBadgeStyle(user.role?.numero)}`}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FiUser className="mr-1" size={12} />
+              {getRoleLabel(user)}
+            </motion.span>
+          </div>
+          
+          {/* People Lead Assignment Status */}
           <div className="text-xs">
             {user.ID_PeopleLead ? (
               <div className="flex items-center justify-end space-x-1">

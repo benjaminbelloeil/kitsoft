@@ -16,56 +16,7 @@ import { User } from "@/interfaces/user";
 import { useNotificationState } from "@/components/ui/toast-notification";
 import { PeopleLead } from "./LeadManagement";
 import LeadListItem from "./LeadListItem";
-
-// Assignment Confirmation Modal
-interface AssignmentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  selectedCount: number;
-  leadName: string;
-  isAssigning: boolean;
-}
-
-function AssignmentModal({ isOpen, onClose, onConfirm, selectedCount, leadName, isAssigning }: AssignmentModalProps) {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
-      >
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Confirmar asignación
-        </h3>
-        <p className="text-sm text-gray-500 mb-6">
-          ¿Estás seguro de que quieres asignar <span className="font-medium">{leadName}</span> como People Lead a {selectedCount} usuario{selectedCount !== 1 ? 's' : ''}?
-        </p>
-        <div className="flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isAssigning}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={isAssigning}
-            className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
-          >
-            {isAssigning ? 'Asignando...' : 'Confirmar'}
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
+import LeadConfirmationModal from "../modals/LeadConfirmationModal";
 
 // Custom Dropdown for People Lead Selection
 interface PeopleLeadDropdownProps {
@@ -81,13 +32,16 @@ function PeopleLeadDropdown({ selectedLead, peopleLeads, onSelect, isOpen, onTog
 
   return (
     <div className="relative">
-      <button
+      <motion.button
         type="button"
         onClick={onToggle}
         disabled={peopleLeads.length === 0}
         className="relative w-full min-h-[48px] bg-white border border-gray-300 rounded-lg pl-3 pr-10 py-3 text-left 
                  cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 
                  sm:text-sm transition duration-150 ease-in-out disabled:bg-gray-50 disabled:cursor-not-allowed"
+        whileHover={peopleLeads.length > 0 ? { scale: 1.01 } : {}}
+        whileTap={peopleLeads.length > 0 ? { scale: 0.99 } : {}}
+        transition={{ duration: 0.1 }}
       >
         <div className="flex items-center space-x-2">
           {peopleLeads.length === 0 ? (
@@ -107,57 +61,69 @@ function PeopleLeadDropdown({ selectedLead, peopleLeads, onSelect, isOpen, onTog
           )}
         </div>
         <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-          <FiChevronDown 
-            className={`h-5 w-5 text-gray-400 transform transition-transform duration-150 ${
-              isOpen ? 'rotate-180' : ''
-            }`} 
-          />
-        </span>
-      </button>
-
-      {isOpen && peopleLeads.length > 0 && (
-        <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base 
-                      ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-          <div
-            onClick={() => {
-              onSelect("");
-              onToggle();
-            }}
-            className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-gray-50"
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
           >
-            <span className="block truncate text-gray-500">Sin asignar</span>
-          </div>
-          {peopleLeads.map((lead) => (
-            <div
-              key={lead.id_usuario}
-              onClick={() => {
-                onSelect(lead.id_usuario);
-                onToggle();
-              }}
-              className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-purple-50"
-            >
-              <div className="flex items-center space-x-2">
-                <UserAvatar user={lead} size="sm" />
-                <div className="flex-1">
-                  <div className="block truncate font-medium">
-                    {lead.nombre} {lead.apellido}
-                  </div>
-                  {lead.titulo && (
-                    <div className="block truncate text-xs text-gray-500">
-                      {lead.titulo}
+            <FiChevronDown className="h-5 w-5 text-gray-400" />
+          </motion.div>
+        </span>
+      </motion.button>
+
+      <AnimatePresence>
+        {isOpen && peopleLeads.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base 
+                      ring-1 ring-black ring-opacity-5 overflow-hidden focus:outline-none sm:text-sm"
+            style={{ transformOrigin: "top" }}
+          >
+            <div className="overflow-y-auto max-h-60">
+              {peopleLeads.map((lead, index) => (
+                <motion.div
+                  key={lead.id_usuario}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.05 }}
+                  onClick={() => {
+                    onSelect(lead.id_usuario);
+                    onToggle();
+                  }}
+                  className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-purple-50 transition-colors duration-150"
+                  whileHover={{ backgroundColor: "rgb(250 245 255)" }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <UserAvatar user={lead} size="sm" />
+                    <div className="flex-1">
+                      <div className="block truncate font-medium">
+                        {lead.nombre} {lead.apellido}
+                      </div>
+                      {lead.titulo && (
+                        <div className="block truncate text-xs text-gray-500">
+                          {lead.titulo}
+                        </div>
+                      )}
                     </div>
+                  </div>
+                  {selectedLead === lead.id_usuario && (
+                    <motion.span
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.2, delay: 0.1 }}
+                      className="absolute inset-y-0 right-0 flex items-center pr-4"
+                    >
+                      <FiCheck className="h-5 w-5 text-purple-600" />
+                    </motion.span>
                   )}
-                </div>
-              </div>
-              {selectedLead === lead.id_usuario && (
-                <span className="absolute inset-y-0 right-0 flex items-center pr-4">
-                  <FiCheck className="h-5 w-5 text-purple-600" />
-                </span>
-              )}
+                </motion.div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -534,16 +500,16 @@ export default function LeadList({ users, peopleLeads, onRefresh, sectionVariant
         )}
       </motion.div>
 
-      {/* Assignment Confirmation Modal */}
+      {/* Lead Assignment Confirmation Modal */}
       <AnimatePresence>
         {showAssignmentModal && (
-          <AssignmentModal
+          <LeadConfirmationModal
             isOpen={showAssignmentModal}
+            isAssigning={isAssigning}
             onClose={() => !isAssigning && setShowAssignmentModal(false)}
             onConfirm={confirmAssignment}
             selectedCount={selectedUsers.size}
             leadName={selectedLeadName}
-            isAssigning={isAssigning}
           />
         )}
       </AnimatePresence>

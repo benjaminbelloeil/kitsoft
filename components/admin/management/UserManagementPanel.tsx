@@ -35,6 +35,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isChangingLevel, setIsChangingLevel] = useState(false);
   const notifications = useNotificationState();
   const [pendingLevelChange, setPendingLevelChange] = useState<{userId: string, levelId: string} | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
@@ -199,6 +200,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
   // Handle level change using API
   const handleLevelChange = async () => {
     if (pendingLevelChange) {
+      setIsChangingLevel(true);
       try {
         // Call API to update the level
         const res = await fetch('/api/admin/users/update-level', {
@@ -226,6 +228,12 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         // Update the local state
         updateUserLevel(pendingLevelChange.userId, pendingLevelChange.levelId);
         
+        // Trigger storage event to notify other components
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'user_management_data',
+          newValue: Date.now().toString()
+        }));
+        
         // Refresh data to ensure we have the latest level information
         setTimeout(() => {
           refreshData();
@@ -234,7 +242,7 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         console.error("Error changing level:", error);
         notifications.showError("Ocurrió un error al cambiar el nivel");
       } finally {
-        // Close modal and clean up
+        setIsChangingLevel(false);
         setShowConfirmModal(false);
         setPendingLevelChange(null);
       }
@@ -403,7 +411,8 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         {showConfirmModal && (
           <LevelChangeModal 
             isOpen={showConfirmModal}
-            onClose={() => setShowConfirmModal(false)}
+            isChanging={isChangingLevel}
+            onClose={() => !isChangingLevel && setShowConfirmModal(false)}
             onConfirm={handleLevelChange}
           />
         )}
