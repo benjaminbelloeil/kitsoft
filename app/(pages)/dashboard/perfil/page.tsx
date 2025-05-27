@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { userData } from "@/app/lib/data"; // Keep this import for other sections
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { createClient } from '@/utils/supabase/client';
@@ -148,53 +149,100 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      {/* Global notification container */}
-      <NotificationContainer 
-        notifications={notificationState.notifications} 
-        onClose={(id) => {
-          const filtered = notificationState.notifications.filter(n => n.id !== id);
-          notificationState.clearNotifications();
-          filtered.forEach(n => {
-            if (n.type === 'success') notificationState.showSuccess(n.message);
-            if (n.type === 'error') notificationState.showError(n.message);
-            if (n.type === 'info') notificationState.showInfo(n.message);
-          });
-        }} 
-      />
-
-      {/* Profile Header Section */}
-      <ProfileHeader 
-        userData={userProfile} 
-        onProfileUpdate={handleProfileUpdate}
-        isNewUser={isNewUser}
-        isSaving={saving}
-        loading={!fullyLoaded}
-      />
-
-      {/* Resume and Certificates section - replacing Cargabilidad */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Resume section */}
-        <ResumeUpload 
-          userId={userProfile.ID_Usuario}
-          notificationState={notificationState} 
-          loading={!fullyLoaded}
+    <AnimatePresence mode="wait">
+      <motion.div 
+        className="max-w-5xl mx-auto py-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        {/* Global notification container */}
+        <NotificationContainer 
+          notifications={notificationState.notifications} 
+          onClose={(id) => {
+            const filtered = notificationState.notifications.filter(n => n.id !== id);
+            notificationState.clearNotifications();
+            filtered.forEach(n => {
+              if (n.type === 'success') notificationState.showSuccess(n.message);
+              if (n.type === 'error') notificationState.showError(n.message);
+              if (n.type === 'info') notificationState.showInfo(n.message);
+            });
+          }} 
         />
 
-        {/* Certificates section */}
-        <CertificatesSection userID={userProfile.ID_Usuario} loading={!fullyLoaded} />
-      </div>
+        {/* Profile Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+        >
+          <ProfileHeader 
+            userData={userProfile} 
+            onProfileUpdate={handleProfileUpdate}
+            isNewUser={isNewUser}
+            isSaving={saving}
+            loading={!fullyLoaded}
+          />
+        </motion.div>
 
-      <SkillsSection 
-        loading={!fullyLoaded}
-        externalSkills={globalSkills} initialSkills={[]}      />
+        {/* Resume and Certificates section - replacing Cargabilidad */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+        >
+          {/* Resume section */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            whileHover={{ y: -2 }}
+          >
+            <ResumeUpload 
+              userId={userProfile.ID_Usuario}
+              notificationState={notificationState} 
+              loading={!fullyLoaded}
+            />
+          </motion.div>
 
-      {/* Pass empty array as initialExperiences to let ExperienceSection load directly from database */}
-      <ExperienceSection 
-        initialExperiences={[]} 
-        loading={!fullyLoaded}
-        onSkillsChanged={handleSkillsChanged}
-      />
-    </div>
+          {/* Certificates section */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            whileHover={{ y: -2 }}
+          >
+            <CertificatesSection userID={userProfile.ID_Usuario} loading={!fullyLoaded} />
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
+          whileHover={{ y: -2 }}
+        >
+          <SkillsSection 
+            loading={!fullyLoaded}
+            externalSkills={globalSkills} initialSkills={[]}      />
+        </motion.div>
+
+        {/* Pass empty array as initialExperiences to let ExperienceSection load directly from database */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
+          whileHover={{ y: -2 }}
+        >
+          <ExperienceSection 
+            initialExperiences={[]} 
+            loading={!fullyLoaded}
+            onSkillsChanged={handleSkillsChanged}
+          />
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

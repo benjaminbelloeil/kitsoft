@@ -49,7 +49,7 @@ export default function DeleteUserModal({
           onClick={() => !isDeleting && onClose()}
         >
           <motion.div 
-            className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl border border-gray-100"
+            className="bg-white rounded-xl p-6 max-w-lg w-full shadow-xl border border-gray-100"
             variants={modalContentVariants}
             initial="hidden"
             animate="visible"
@@ -104,8 +104,8 @@ export default function DeleteUserModal({
                 Cancelar
               </button>
               <motion.button
-                whileHover={!isDeleting ? { scale: 1.05 } : {}}
-                whileTap={!isDeleting ? { scale: 0.95 } : {}}
+                whileHover={!isDeleting ? { scale: 1.02 } : {}}
+                whileTap={!isDeleting ? { scale: 0.98 } : {}}
                 onClick={onConfirm}
                 disabled={isDeleting}
                 className={`flex items-center px-4 py-2 bg-red-600 text-white rounded-lg transition-colors focus:outline-none focus:ring-0 ${

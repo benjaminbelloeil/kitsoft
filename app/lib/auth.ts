@@ -81,6 +81,29 @@ export async function isProjectLead(): Promise<boolean> {
 }
 
 /**
+ * Check if the current user has people lead privileges (level 2)
+ */
+export async function isPeopleLead(): Promise<boolean> {
+  try {
+    // Use the API endpoint to check people lead status
+    const response = await fetch('/api/user/level/is-people-lead', {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    const data = await response.json();
+    return data.isPeopleLead === true;
+  } catch (error) {
+    console.error('Error checking people lead status:', error);
+    return false;
+  }
+}
+
+/**
  * Check if the current user has project manager privileges (level 4)
  */
 export async function isProjectManager(): Promise<boolean> {

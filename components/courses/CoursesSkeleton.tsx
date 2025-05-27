@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Award, TrendingUp } from 'lucide-react';
 
 const PathSkeleton: React.FC = () => {
   const shimmer = {
@@ -32,9 +31,7 @@ const PathSkeleton: React.FC = () => {
       >
         <div className="flex items-center p-2">
           <div className="flex items-center justify-center mb-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Award className="h-6 w-6 text-purple-200" />
-            </div>
+            <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
           </div>
           <div className='text-left px-4'>
             <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-64 mb-2" style={shimmer}></div>
@@ -57,9 +54,7 @@ const PathSkeleton: React.FC = () => {
           transition={{ duration: 0.3, delay: 0.3 }}
         >
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500/10 to-purple-500/20 rounded-full flex items-center justify-center mr-3 shadow-lg">
-              <TrendingUp className="w-5 h-5 text-purple-200" />
-            </div>
+            <div className="w-10 h-10 bg-gradient-to-br from-gray-500/10 to-gray-500/20 rounded-full flex-shrink-0 mr-3 shadow-lg"></div>
             <div>
               <div className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48 mb-2" style={shimmer}></div>
               <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-64" style={shimmer}></div>
@@ -168,9 +163,7 @@ const PathSkeleton: React.FC = () => {
         >
           <div className="flex item-center">
             <div className="flex items-center justify-center mb-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <Award className="w-5 h-5 text-purple-200" />
-              </div>
+              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
             </div>
             <div className='text-left px-4'>
               <div className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-72 mb-2" style={shimmer}></div>
@@ -210,8 +203,8 @@ const PathSkeleton: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 1.6 + idx * 0.1 }}
             >
-              <div className="absolute top-2 right-2 bg-purple-100 rounded-full p-1 z-10 w-8 h-8 flex items-center justify-center">
-                <div className="w-4 h-4 bg-purple-200 rounded"></div>
+              <div className="absolute top-2 right-2 bg-gray-200 rounded-full p-1 z-10 w-8 h-8 flex items-center justify-center">
+                <div className="w-4 h-4 bg-gray-300 rounded"></div>
               </div>
               <div className="h-36 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 relative overflow-hidden" style={shimmer}>
               </div>

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { userData as staticUserData, projectsData, mockCourses } from "@/app/lib/data";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Sun, Moon, Sunrise } from "lucide-react";
@@ -267,45 +268,124 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="pb-12">
-      <Header userData={userData} />
-      
-      <GreetingCard 
-        greetingState={greetingState}
-        userData={userData}
-        currentDate={currentDate}
-        timeString={timeString}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1920px] mx-auto px-4">
-        {/* Left column - My Projects */}
-        <div className="lg:col-span-2 space-y-6">
-          <ProjectsSection 
-            projects={myProjects}
-            getDateColor={getDateColor}
-            formatDate={formatDate}
-            getProjectColor={getProjectColor}
-          />
-          
-          <TasksSection 
-            tasks={urgentTasks}
-            getDateColor={getDateColor}
-            formatDate={formatDate}
-            getProjectColor={getProjectColor}
-            getStatusColor={getStatusColor}
-            getStatusText={getStatusText}
-          />
-          
-          <WorkSummary workload={weeklyWorkload} />
-        </div>
+    <AnimatePresence mode="wait">
+      <motion.div 
+        className="pb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Header userData={userData} />
+        </motion.div>
         
-        {/* Right column - Skills, Timeline, Training */}
-        <div className="space-y-6">
-          <PerformanceCard />
-          <TrainingCard courses={upcomingCourses} formatDate={formatDate} />
-          <EventsCard upcomingWeekDates={upcomingWeekDates} />
-        </div>
-      </div>
-    </div>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <GreetingCard 
+            greetingState={greetingState}
+            userData={userData}
+            currentDate={currentDate}
+            timeString={timeString}
+          />
+        </motion.div>
+
+        <motion.div 
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1920px] mx-auto px-4"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          {/* Left column - My Projects */}
+          <motion.div 
+            className="lg:col-span-2 space-y-6"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+              whileHover={{ y: -2 }}
+            >
+              <ProjectsSection 
+                projects={myProjects}
+                getDateColor={getDateColor}
+                formatDate={formatDate}
+                getProjectColor={getProjectColor}
+              />
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.6 }}
+              whileHover={{ y: -2 }}
+            >
+              <TasksSection 
+                tasks={urgentTasks}
+                getDateColor={getDateColor}
+                formatDate={formatDate}
+                getProjectColor={getProjectColor}
+                getStatusColor={getStatusColor}
+                getStatusText={getStatusText}
+              />
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.7 }}
+              whileHover={{ y: -2 }}
+            >
+              <WorkSummary workload={weeklyWorkload} />
+            </motion.div>
+          </motion.div>
+          
+          {/* Right column - Skills, Timeline, Training */}
+          <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <PerformanceCard />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.6 }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <TrainingCard courses={upcomingCourses} formatDate={formatDate} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.7 }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <EventsCard upcomingWeekDates={upcomingWeekDates} />
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

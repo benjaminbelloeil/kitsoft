@@ -20,6 +20,7 @@ export interface User {
   };
   lastLogin?: string | null;
   hasLoggedIn?: boolean; // Field to track if the user has ever logged in
+  ID_PeopleLead?: string | null; // Field to track assigned people lead
 }
 
 export interface UserRole {

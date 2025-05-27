@@ -47,7 +47,8 @@ export async function GET() {
         nombre,
         apellido,
         titulo,
-        url_avatar
+        url_avatar,
+        id_peoplelead
       `);
     
     if (error) {
@@ -117,12 +118,13 @@ export async function GET() {
           registered,
           role,
           lastLogin,
-          hasLoggedIn: !!lastLogin
+          hasLoggedIn: !!lastLogin,
+          ID_PeopleLead: user.id_peoplelead
         };
       })
     );
     
-    return NextResponse.json(usersWithRoles);
+    return NextResponse.json({ users: usersWithRoles });
   } catch (error) {
     console.error('Error in GET /api/admin/users/list:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

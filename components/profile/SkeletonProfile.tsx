@@ -21,8 +21,8 @@ export function SkeletonProfileHeader() {
         }
       `}</style>
       <div className="relative">
-        {/* Decorative header background - exact same as real component */}
-        <div className="h-32 bg-gradient-to-r from-purple-700 to-[#A100FF] w-full absolute top-0 left-0"></div>
+        {/* Decorative header background - using matching gray tones */}
+        <div className="h-32 bg-gradient-to-r from-gray-200 to-gray-300 w-full absolute top-0 left-0"></div>
         
         <motion.div 
           className="relative pt-12 px-6 pb-6"

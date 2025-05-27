@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
 import { HistoryTab } from '@/components/cargabilidad/RecordTab';
 import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
@@ -246,77 +247,149 @@ const PersonalLoadPage = () => {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-6">
-      {/* Header card with purple icon */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <HeaderCard
-          name={employee.name}
-          position={employee.role}
-          projects={projects}
-          totalHours={employee.totalHoursPerWeek}
-          assignedHours={totalUsedHours}
-          totalLoad={totalLoad}
-        />
-      </div>
+    <AnimatePresence mode="wait">
+      <motion.main 
+        className="min-h-screen bg-gray-50 py-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        {/* Header card with animation */}
+        <motion.div 
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+        >
+          <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
+            <HeaderCard
+              name={employee.name}
+              position={employee.role}
+              projects={projects}
+              totalHours={employee.totalHoursPerWeek}
+              assignedHours={totalUsedHours}
+              totalLoad={totalLoad}
+            />
+          </motion.div>
+        </motion.div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Show alert only if overloaded */}
-        {AvailableHoursRatio < 0 && <LoadAlert totalLoad={totalLoad} />}
-        
-        
-        
-        {/* Improved tabs with more visual appeal - removed surrounding borders */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
-          {/* Updated tabs with cleaner styling - no surrounding borders */}
-          <div className="flex px-4 pt-4 gap-2 border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
-                ${activeTab === 'dashboard'
-                  ? 'text-[#A100FF] bg-white'
-                  : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
-                }
-              `}
+        <motion.div 
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+        >
+          {/* Show alert only if overloaded */}
+          {AvailableHoursRatio < 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
             >
-              <span>Dashboard</span>
-              {activeTab === 'dashboard' && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"></span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
-                ${activeTab === 'history'
-                  ? 'text-[#A100FF] bg-white'
-                  : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
-                }
-              `}
+              <LoadAlert totalLoad={totalLoad} />
+            </motion.div>
+          )}
+          
+          {/* Improved tabs with more visual appeal - removed surrounding borders */}
+          <motion.div 
+            className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+            whileHover={{ scale: 1.01 }}
+          >
+            {/* Updated tabs with cleaner styling - no surrounding borders */}
+            <motion.div 
+              className="flex px-4 pt-4 gap-2 border-b border-gray-200"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
             >
-              <span>Historial</span>
-              {activeTab === 'history' && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"></span>
-              )}
-            </button>
-          </div>
+              <motion.button
+                onClick={() => setActiveTab('dashboard')}
+                className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
+                  ${activeTab === 'dashboard'
+                    ? 'text-[#A100FF] bg-white'
+                    : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
+                  }
+                `}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span>Dashboard</span>
+                {activeTab === 'dashboard' && (
+                  <motion.span 
+                    className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"
+                    layoutId="activeTab"
+                    transition={{ duration: 0.2 }}
+                  />
+                )}
+              </motion.button>
+              <motion.button
+                onClick={() => setActiveTab('history')}
+                className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
+                  ${activeTab === 'history'
+                    ? 'text-[#A100FF] bg-white'
+                    : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
+                  }
+                `}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span>Historial</span>
+                {activeTab === 'history' && (
+                  <motion.span 
+                    className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"
+                    layoutId="activeTab"
+                    transition={{ duration: 0.2 }}
+                  />
+                )}
+              </motion.button>
+            </motion.div>
 
-          <div className="p-6">
-            {activeTab === 'dashboard' ? (
-              <DashboardTab
-                projects={projects}
-                weeklyLoad={weeklyLoad}
-                availableHours={availableHours}
-                totalHoursPerWeek={employee.totalHoursPerWeek}
-              />
-            ) : activeTab === 'history' ? (
-              <HistoryTab
-                historyData={historyData}
-                maxWeeklyHours={employee.totalHoursPerWeek}
-              />
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </main>
+            <motion.div 
+              className="p-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+            >
+              <AnimatePresence mode="wait">
+                {activeTab === 'dashboard' ? (
+                  <motion.div
+                    key="dashboard"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <DashboardTab
+                      projects={projects}
+                      weeklyLoad={weeklyLoad}
+                      availableHours={availableHours}
+                      totalHoursPerWeek={employee.totalHoursPerWeek}
+                    />
+                  </motion.div>
+                ) : activeTab === 'history' ? (
+                  <motion.div
+                    key="history"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <HistoryTab
+                      historyData={historyData}
+                      maxWeeklyHours={employee.totalHoursPerWeek}
+                    />
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </motion.main>
+    </AnimatePresence>
   );
 };
 

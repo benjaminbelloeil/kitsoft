@@ -22,12 +22,13 @@ import { useUser } from "@/context/user-context";
 export default function NavLink() {
     const pathname = usePathname();
     const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({});
-    const { isAdmin, isProjectLead, isProjectManager } = useUser();
+    const { isAdmin, isProjectLead, isPeopleLead, isProjectManager } = useUser();
     
     // Filter navigation links based on user role
     const filteredNavLinks = navLinks.filter(link => 
         (!link.requiresAdmin || (link.requiresAdmin && isAdmin)) &&
         (!link.requiresProjectLead || (link.requiresProjectLead && isProjectLead)) &&
+        (!link.requiresPeopleLead || (link.requiresPeopleLead && isPeopleLead)) &&
         (!link.requiresProjectManager || (link.requiresProjectManager && isProjectManager))
     );
     
@@ -129,6 +130,7 @@ export default function NavLink() {
                                             {link.dropdownItems.filter(item => 
                                                 (!item.requiresAdmin || (item.requiresAdmin && isAdmin)) &&
                                                 (!item.requiresProjectLead || (item.requiresProjectLead && isProjectLead)) &&
+                                                (!item.requiresPeopleLead || (item.requiresPeopleLead && isPeopleLead)) &&
                                                 (!item.requiresProjectManager || (item.requiresProjectManager && isProjectManager))
                                             ).map((item) => (
                                                 <Link
