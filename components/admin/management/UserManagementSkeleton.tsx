@@ -28,59 +28,18 @@ export default function UserManagementSkeleton() {
 
   return (
     <motion.div
-      className="min-h-screen bg-white"
+      className="space-y-6 mb-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Header Skeleton */}
-      <motion.div
-        className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8"
-        variants={itemVariants}
-      >
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="flex items-center">
-            <div className="bg-gray-200 p-2 rounded-lg mr-3 animate-pulse">
-              <div className="w-8 h-8 bg-gray-300 rounded"></div>
-            </div>
-            <div>
-              <div className="h-6 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <div className="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-            </div>
-            <div className="h-10 w-32 bg-gray-200 rounded-lg animate-pulse"></div>
-            <div className="h-10 w-10 bg-gray-200 rounded-lg animate-pulse"></div>
-          </div>
-        </div>
-
-        {/* Stats Bar Skeleton */}
-        <motion.div
-          className="bg-gray-50 rounded-lg p-3 mb-6 border border-gray-100 animate-pulse"
-          variants={itemVariants}
-        >
-          <div className="flex items-center gap-6">
-            <div className="h-5 bg-gray-200 rounded w-32"></div>
-            <div className="h-5 w-px bg-gray-300"></div>
-            <div className="h-5 bg-gray-200 rounded w-28"></div>
-            <div className="h-5 w-px bg-gray-300"></div>
-            <div className="h-5 bg-gray-200 rounded w-36 ml-auto"></div>
-          </div>
-        </motion.div>
-
-        {/* User List Skeleton */}
-        <motion.div
-          className="space-y-4"
-          variants={containerVariants}
-        >
-          {[...Array(8)].map((_, i) => (
+      {/* User List Skeleton - Show exactly 5 items */}
+      <div className="pr-3 py-2 relative" style={{ isolation: 'isolate' }}>
+        <div className="space-y-6">
+          {[...Array(5)].map((_, i) => (
             <motion.div
               key={i}
-              className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 animate-pulse"
+              className="bg-white rounded-xl shadow-sm px-5 py-7 border-2 border-gray-100 animate-pulse"
               variants={itemVariants}
               style={{ animationDelay: `${i * 0.1}s` }}
             >
@@ -91,7 +50,7 @@ export default function UserManagementSkeleton() {
                 </div>
 
                 {/* User info skeleton */}
-                <div className="ml-4 flex-1">
+                <div className="ml-4 flex-1 min-w-0">
                   <div className="flex items-baseline mb-2">
                     <div className="h-5 bg-gray-200 rounded w-48"></div>
                   </div>
@@ -100,8 +59,8 @@ export default function UserManagementSkeleton() {
                   <div className="h-3 bg-gray-200 rounded w-40 mt-1"></div>
                 </div>
 
-                {/* Actions skeleton */}
-                <div className="ml-4 flex items-center space-x-3">
+                {/* Actions skeleton - Keep horizontal layout */}
+                <div className="ml-6 flex items-center space-x-3">
                   <div className="h-8 bg-gray-200 rounded-full w-24"></div>
                   <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
                   <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
@@ -109,20 +68,30 @@ export default function UserManagementSkeleton() {
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
+      </div>
 
-        {/* Pulse animation overlay for extra visual feedback */}
-        <motion.div
-          className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-500 to-gray-700 z-50"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: [0, 1, 0] }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          style={{ transformOrigin: "left" }}
-        />
+      {/* Pagination Controls Skeleton */}
+      <motion.div 
+        className="flex items-center justify-between bg-white rounded-lg p-4 border border-gray-100 animate-pulse"
+        variants={itemVariants}
+      >
+        <div className="h-4 bg-gray-200 rounded w-48"></div>
+        
+        <div className="flex items-center space-x-2">
+          {/* Previous button */}
+          <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+          
+          {/* Page numbers */}
+          <div className="flex items-center space-x-1">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+          
+          {/* Next button */}
+          <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+        </div>
       </motion.div>
     </motion.div>
   );

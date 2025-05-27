@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { FiUserPlus } from "react-icons/fi";
+import { FiUserPlus, FiSearch } from "react-icons/fi";
 import { User } from "@/interfaces/user";
 import { useNotificationState } from "@/components/ui/toast-notification";
 import LeadList from "./LeadList";
@@ -17,11 +17,17 @@ export interface PeopleLead {
   url_avatar?: string | null;
 }
 
+// Cache keys for lead management data
+const LEAD_MANAGEMENT_DATA_KEY = 'lead_management_data';
+const LEAD_MANAGEMENT_TIMESTAMP_KEY = 'lead_management_timestamp';
+
 export default function LeadManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [peopleLeads, setPeopleLeads] = useState<PeopleLead[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
+  const [search, setSearch] = useState("");
   const notifications = useNotificationState();
 
   // Animation variants
@@ -50,9 +56,52 @@ export default function LeadManagement() {
     }
   };
 
+  // Load cached data
+  const loadCachedData = () => {
+    try {
+      const cachedData = localStorage.getItem(LEAD_MANAGEMENT_DATA_KEY);
+      const cachedTimestamp = localStorage.getItem(LEAD_MANAGEMENT_TIMESTAMP_KEY);
+      
+      if (cachedData && cachedTimestamp) {
+        const data = JSON.parse(cachedData);
+        const timestamp = parseInt(cachedTimestamp);
+        const now = Date.now();
+        const fiveMinutes = 5 * 60 * 1000;
+        
+        // Use cached data if it's less than 5 minutes old
+        if (now - timestamp < fiveMinutes && data.users && data.peopleLeads) {
+          setUsers(data.users);
+          setPeopleLeads(data.peopleLeads);
+          setDataLoaded(true);
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached data:', error);
+    }
+    return false;
+  };
+
+  // Update cache function
+  const updateCache = (usersData: User[], leadsData: PeopleLead[]) => {
+    try {
+      localStorage.setItem(LEAD_MANAGEMENT_DATA_KEY, JSON.stringify({
+        users: usersData,
+        peopleLeads: leadsData
+      }));
+      localStorage.setItem(LEAD_MANAGEMENT_TIMESTAMP_KEY, Date.now().toString());
+    } catch (error) {
+      console.error('Error updating cache:', error);
+    }
+  };
+
   // Fetch all users and people leads
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (force = false) => {
+    // Only show loading if we don't have data or it's a forced refresh
+    if (!dataLoaded || force) {
+      setLoading(true);
+    }
+    
     try {
       // Fetch all users
       const usersResponse = await fetch('/api/admin/users/list');
@@ -60,7 +109,7 @@ export default function LeadManagement() {
         throw new Error('Failed to fetch users');
       }
       const usersData = await usersResponse.json();
-      setUsers(usersData.users || []);
+      const users = usersData.users || [];
 
       // Fetch people leads
       const leadsResponse = await fetch('/api/admin/leads/list');
@@ -68,9 +117,14 @@ export default function LeadManagement() {
         throw new Error('Failed to fetch people leads');
       }
       const leadsData = await leadsResponse.json();
-      setPeopleLeads(leadsData || []);
 
+      setUsers(users);
+      setPeopleLeads(leadsData || []);
       setDataLoaded(true);
+      
+      // Update cache
+      updateCache(users, leadsData || []);
+
     } catch (error) {
       console.error('Error fetching data:', error);
       notifications.showError('Error al cargar los datos');
@@ -85,19 +139,35 @@ export default function LeadManagement() {
     return panel && panel.style.display !== 'none';
   }, []);
 
-  // Initial data fetch only when component mounts and is visible
+  // Initial setup - load cached data first, then check visibility
   useEffect(() => {
-    if (checkVisibility() && !dataLoaded) {
-      fetchData();
+    if (!hasInitialized) {
+      const hasCachedData = loadCachedData();
+      setHasInitialized(true);
+      
+      // Always try to fetch fresh data if panel is visible, but don't show loading if we have cache
+      if (checkVisibility()) {
+        if (!hasCachedData) {
+          // No cached data, show loading and fetch
+          fetchData();
+        } else {
+          // Has cached data, fetch silently in background
+          fetchData(false);
+        }
+      }
     }
+  }, [hasInitialized]);
 
+  // Watch for panel visibility changes - only fetch if we don't have any data
+  useEffect(() => {
     const panel = document.getElementById('admin-panel-leads');
     if (panel) {
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
             const target = mutation.target as HTMLElement;
-            if (target.style.display !== 'none' && !dataLoaded) {
+            // Only fetch if panel becomes visible AND we don't have data
+            if (target.style.display !== 'none' && hasInitialized && !dataLoaded) {
               fetchData();
             }
           }
@@ -111,7 +181,7 @@ export default function LeadManagement() {
 
       return () => observer.disconnect();
     }
-  }, []);
+  }, [hasInitialized, dataLoaded]);
 
   return (
     <motion.div 
@@ -122,28 +192,57 @@ export default function LeadManagement() {
       id="admin-panel-leads"
       style={{ display: 'none' }}
     >
-      {/* Header */}
+      {/* Header - Updated to match UserManagement layout */}
       <motion.div 
-        className="flex items-center text-purple-800 mb-6"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
         variants={sectionVariants}
       >
-        <div className="bg-purple-100 p-2 rounded-lg mr-3">
-          <FiUserPlus className="text-2xl text-purple-600" />
+        <div className="flex items-center text-purple-800">
+          <motion.div 
+            className="bg-purple-100 p-2 rounded-lg mr-3"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FiUserPlus className="text-2xl text-purple-600" />
+          </motion.div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800">Gestión de People Leads</h2>
+            <p className="text-sm text-gray-500">Asigna people leads a los usuarios</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800">Gestión de People Leads</h2>
-          <p className="text-sm text-gray-500">Asigna people leads a los usuarios</p>
-        </div>
+        
+        {/* Search Bar - Updated placeholder text */}
+        <motion.div 
+          className="relative max-w-md w-full sm:w-64"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <motion.input
+            type="text"
+            placeholder="Buscar usuarios por nombre, email o rol..."
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500 transition-all"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            whileFocus={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          />
+          <div className="absolute left-0 top-0 h-full flex items-center justify-center pl-3">
+            <FiSearch className="text-gray-400 h-4 w-4" />
+          </div>
+        </motion.div>
       </motion.div>
 
-      {loading ? (
+      {loading && !dataLoaded ? (
         <LeadManagementSkeleton />
       ) : (
         <LeadList 
           users={users}
           peopleLeads={peopleLeads}
-          onRefresh={fetchData}
+          onRefresh={() => fetchData(true)} // Force refresh when explicitly called
           sectionVariants={sectionVariants}
+          search={search}
+          setSearch={setSearch}
         />
       )}
     </motion.div>

@@ -1,7 +1,9 @@
-import { FiUsers } from "react-icons/fi";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { FiUsers, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, UserRole } from "@/interfaces/user";
 import UserListItem from "./UserListItem";
+import { useState, useEffect } from "react";
 
 interface UserListProps {
   users: User[];
@@ -22,6 +24,9 @@ export default function UserList({
   onConfirmRoleChange,
   onConfirmDelete
 }: UserListProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
+
   // Animation variants for the container
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -72,18 +77,51 @@ export default function UserList({
     return matchesSearch;
   });
 
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const startIndex = (currentPage - 1) * usersPerPage;
+  const endIndex = startIndex + usersPerPage;
+  const currentUsers = filteredUsers.slice(startIndex, endIndex);
+
+  // Reset to first page when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter]);
+
+  // Fix pagination when current page exceeds total pages
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
   if (loading) {
     return (
       <motion.div
-        className="space-y-4 mb-6"
+        className="space-y-6 mb-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        {[...Array(6)].map((_, i) => (
+        {[...Array(5)].map((_, i) => (
           <motion.div 
             key={i} 
-            className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 animate-pulse"
+            className="bg-white rounded-xl shadow-sm px-5 py-7 border-2 border-gray-100 animate-pulse"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: i * 0.1 }}
@@ -140,28 +178,104 @@ export default function UserList({
 
   return (
     <motion.div 
-      className="space-y-4 mb-6"
+      className="space-y-6 mb-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <AnimatePresence>
-        {filteredUsers.map((user) => (
+      {/* Users List */}
+      <div className="pr-3 py-2 relative" style={{ isolation: 'isolate' }}>
+        <AnimatePresence mode="wait">
           <motion.div
-            key={user.id_usuario}
-            variants={itemVariants}
-            layout
-            layoutId={user.id_usuario}
+            key={currentPage}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
           >
-            <UserListItem 
-              user={user}
-              roles={roles}
-              onConfirmRoleChange={onConfirmRoleChange}
-              onConfirmDelete={onConfirmDelete}
-            />
+            {currentUsers.map((user, index) => (
+              <motion.div
+                key={user.id_usuario}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                layout
+                style={{ 
+                  position: 'relative',
+                  zIndex: currentUsers.length - index
+                }}
+              >
+                <UserListItem 
+                  user={user}
+                  roles={roles}
+                  onConfirmRoleChange={onConfirmRoleChange}
+                  onConfirmDelete={onConfirmDelete}
+                />
+              </motion.div>
+            ))}
           </motion.div>
-        ))}
-      </AnimatePresence>
+        </AnimatePresence>
+      </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <motion.div 
+          className="flex items-center justify-between bg-white rounded-lg p-4 border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className="text-sm text-gray-500">
+            Mostrando {startIndex + 1}-{Math.min(endIndex, filteredUsers.length)} de {filteredUsers.length} usuarios
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <motion.button
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              whileHover={{ scale: currentPage === 1 ? 1 : 1.05 }}
+              whileTap={{ scale: currentPage === 1 ? 1 : 0.95 }}
+            >
+              <FiChevronLeft className="w-4 h-4" />
+            </motion.button>
+            
+            <div className="flex items-center space-x-1">
+              {[...Array(totalPages)].map((_, index) => {
+                const pageNumber = index + 1;
+                const isCurrentPage = pageNumber === currentPage;
+                
+                return (
+                  <motion.button
+                    key={pageNumber}
+                    onClick={() => goToPage(pageNumber)}
+                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                      isCurrentPage
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {pageNumber}
+                  </motion.button>
+                );
+              })}
+            </div>
+            
+            <motion.button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              whileHover={{ scale: currentPage === totalPages ? 1 : 1.05 }}
+              whileTap={{ scale: currentPage === totalPages ? 1 : 0.95 }}
+            >
+              <FiChevronRight className="w-4 h-4" />
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

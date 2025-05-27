@@ -81,9 +81,16 @@ export default function UserListItem({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className="bg-white rounded-xl shadow-sm p-4 transition-all duration-200 hover:shadow-md border border-gray-100"
+      whileHover={{ 
+        y: -1,
+        zIndex: 5
+      }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="bg-white rounded-xl shadow-sm px-5 py-7 border-2 border-gray-100 hover:border-gray-200 relative z-0 cursor-pointer transition-all duration-200 hover:shadow-md"
+      style={{ 
+        isolation: 'isolate',
+        willChange: 'transform'
+      }}
     >
       <div className="flex items-center">
         <motion.div 
@@ -103,14 +110,14 @@ export default function UserListItem({
         </motion.div>
         
         <motion.div 
-          className="ml-4 flex-1"
+          className="ml-4 flex-1 min-w-0"
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
           <div className="flex items-baseline">
             <motion.h3 
-              className="text-lg font-medium text-gray-900"
+              className="text-lg font-medium text-gray-900 truncate"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -159,7 +166,8 @@ export default function UserListItem({
           </motion.p>
         </motion.div>
         
-        <div className="ml-4 flex items-center">
+        {/* Actions section - Keep original horizontal layout */}
+        <div className="ml-6 flex items-center">
           <AnimatePresence mode="wait">
             {editingUser ? (
               <motion.div 

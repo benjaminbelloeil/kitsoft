@@ -281,40 +281,50 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100 admin-content-panel"
         id="admin-panel-users"
       >
-        {/* Header */}
+        {/* Header - Updated to match LeadManagement layout exactly */}
         <motion.div 
-          className="flex items-center text-purple-800 mb-6"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
           variants={sectionVariants}
         >
-          <div className="bg-purple-100 p-2 rounded-lg mr-3">
-            <FiUserCheck className="text-2xl text-purple-600" />
+          <div className="flex items-center text-purple-800">
+            <motion.div 
+              className="bg-purple-100 p-2 rounded-lg mr-3"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FiUserCheck className="text-2xl text-purple-600" />
+            </motion.div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Gestión de Usuarios</h2>
+              <p className="text-sm text-gray-500">Administra roles y permisos de usuarios</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800">Gestión de Usuarios</h2>
-            <p className="text-sm text-gray-500">Administra roles y permisos de usuarios</p>
-          </div>
-        </motion.div>
 
-        {/* Search Bar */}
-        <motion.div 
-          className="mb-6"
-          variants={sectionVariants}
-        >
-          <div className="relative max-w-md">
-            <input
+          {/* Search Bar - Updated to match LeadManagement */}
+          <motion.div 
+            className="relative max-w-md w-full sm:w-64"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <motion.input
               type="text"
               placeholder="Buscar usuarios por nombre, email o rol..."
               className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500 transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              whileFocus={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
             />
             <div className="absolute left-0 top-0 h-full flex items-center justify-center pl-3">
               <FiSearch className="text-gray-400 h-4 w-4" />
             </div>
-          </div>
+          </motion.div>
         </motion.div>
+
+        {/* Statistics - Updated spacing to match LeadManagement */}
         <motion.div 
-          className="bg-gray-50 rounded-lg p-3 mb-6 border border-gray-100 flex items-center text-sm"
+          className="bg-gray-50 rounded-lg p-3 mb-8 border border-gray-100 flex items-center text-sm"
           variants={sectionVariants}
         >
           <motion.div 
@@ -374,7 +384,8 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
           </div>
         </motion.div>
         
-        <motion.div variants={sectionVariants}>
+        {/* User List container - Remove max-height and scroll */}
+        <motion.div variants={sectionVariants} className="px-2">
           <UserList
             users={users}
             roles={roles}

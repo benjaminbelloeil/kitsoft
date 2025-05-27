@@ -101,104 +101,7 @@ export default function AdminPageSkeleton() {
             transition={{ duration: 0.5, delay: 0.5 }}
           >
             {/* Panel Header */}
-            <div className="flex items-center mb-6">
-              <motion.div 
-                className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-10 h-10 mr-3"
-                style={{ backgroundSize: '200% 100%' }}
-                animate={shimmer.animate}
-                transition={shimmer.transition}
-              />
-              <motion.div 
-                className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48"
-                style={{ backgroundSize: '200% 100%' }}
-                animate={shimmer.animate}
-                transition={shimmer.transition}
-              />
-            </div>
-
-            {/* Search and Filters */}
-            <motion.div 
-              className="mb-6 space-y-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.6 }}
-            >
-              <motion.div 
-                className="h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-full max-w-md"
-                style={{ backgroundSize: '200% 100%' }}
-                animate={shimmer.animate}
-                transition={shimmer.transition}
-              />
-              <div className="flex gap-3">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <motion.div 
-                    key={index}
-                    className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-20"
-                    style={{ backgroundSize: '200% 100%' }}
-                    animate={shimmer.animate}
-                    transition={shimmer.transition}
-                  />
-                ))}
-              </div>
-            </motion.div>
-
-            {/* User List Items */}
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <motion.div 
-                  key={index}
-                  className="flex items-center p-4 border border-gray-200 rounded-lg"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
-                >
-                  <motion.div 
-                    className="w-10 h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full mr-4"
-                    style={{ backgroundSize: '200% 100%' }}
-                    animate={shimmer.animate}
-                    transition={shimmer.transition}
-                  />
-                  <div className="flex-1">
-                    <motion.div 
-                      className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-32 mb-2"
-                      style={{ backgroundSize: '200% 100%' }}
-                      animate={shimmer.animate}
-                      transition={shimmer.transition}
-                    />
-                    <motion.div 
-                      className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48"
-                      style={{ backgroundSize: '200% 100%' }}
-                      animate={shimmer.animate}
-                      transition={shimmer.transition}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <motion.div 
-                      className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-16"
-                      style={{ backgroundSize: '200% 100%' }}
-                      animate={shimmer.animate}
-                      transition={shimmer.transition}
-                    />
-                    <motion.div 
-                      className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-8"
-                      style={{ backgroundSize: '200% 100%' }}
-                      animate={shimmer.animate}
-                      transition={shimmer.transition}
-                    />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Settings Panel Skeleton */}
-          <motion.div 
-            className="bg-white rounded-xl shadow-md p-6 border border-gray-100"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-          >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div className="flex items-center">
                 <motion.div 
                   className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-10 h-10 mr-3"
@@ -208,7 +111,7 @@ export default function AdminPageSkeleton() {
                 />
                 <div>
                   <motion.div 
-                    className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-40 mb-2"
+                    className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48 mb-2"
                     style={{ backgroundSize: '200% 100%' }}
                     animate={shimmer.animate}
                     transition={shimmer.transition}
@@ -221,40 +124,98 @@ export default function AdminPageSkeleton() {
                   />
                 </div>
               </div>
+              
               <motion.div 
-                className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-28"
+                className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-64"
                 style={{ backgroundSize: '200% 100%' }}
                 animate={shimmer.animate}
                 transition={shimmer.transition}
               />
             </div>
 
-            {/* Statistics Cards Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              {Array.from({ length: 4 }).map((_, index) => (
+            {/* Statistics Bar */}
+            <motion.div
+              className="bg-gray-50 rounded-lg p-3 mb-8 border border-gray-100"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.6 }}
+            >
+              <div className="flex items-center gap-6">
+                <motion.div 
+                  className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-32"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
+                <div className="h-5 w-px bg-gray-300"></div>
+                <motion.div 
+                  className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-28"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
+                <div className="h-5 w-px bg-gray-300"></div>
+                <motion.div 
+                  className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-36 ml-auto"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
+              </div>
+            </motion.div>
+
+            {/* User List Items - Show exactly 5 */}
+            <div className="space-y-6 mb-6">
+              {Array.from({ length: 5 }).map((_, index) => (
                 <motion.div 
                   key={index}
-                  className="p-4 border border-gray-200 rounded-lg"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.9 + index * 0.1 }}
+                  className="bg-white rounded-xl shadow-sm px-5 py-7 border-2 border-gray-100"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
                 >
                   <div className="flex items-center">
                     <motion.div 
-                      className="w-8 h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mr-3"
+                      className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full mr-4"
                       style={{ backgroundSize: '200% 100%' }}
                       animate={shimmer.animate}
                       transition={shimmer.transition}
                     />
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <motion.div 
-                        className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-12 mb-1"
+                        className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48 mb-2"
                         style={{ backgroundSize: '200% 100%' }}
                         animate={shimmer.animate}
                         transition={shimmer.transition}
                       />
                       <motion.div 
-                        className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-16"
+                        className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-32 mb-1"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                      <motion.div 
+                        className="h-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-40"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <motion.div 
+                        className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full w-24"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                      <motion.div 
+                        className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full w-8"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                      <motion.div 
+                        className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full w-8"
                         style={{ backgroundSize: '200% 100%' }}
                         animate={shimmer.animate}
                         transition={shimmer.transition}
@@ -265,143 +226,199 @@ export default function AdminPageSkeleton() {
               ))}
             </div>
 
-            {/* Lead List Skeleton */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            {/* Pagination Controls Skeleton */}
+            <motion.div 
+              className="flex items-center justify-between bg-white rounded-lg p-4 border border-gray-100"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 1.2 }}
+            >
               <motion.div 
-                className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-32 mb-4"
+                className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48"
                 style={{ backgroundSize: '200% 100%' }}
                 animate={shimmer.animate}
                 transition={shimmer.transition}
               />
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <motion.div 
-                    key={index}
-                    className="bg-white p-4 border border-gray-200 rounded-lg"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 1.2 + index * 0.1 }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-2">
-                          <motion.div 
-                            className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-40 mr-3"
-                            style={{ backgroundSize: '200% 100%' }}
-                            animate={shimmer.animate}
-                            transition={shimmer.transition}
-                          />
-                          <motion.div 
-                            className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-16 mr-2"
-                            style={{ backgroundSize: '200% 100%' }}
-                            animate={shimmer.animate}
-                            transition={shimmer.transition}
-                          />
-                          <motion.div 
-                            className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-12"
-                            style={{ backgroundSize: '200% 100%' }}
-                            animate={shimmer.animate}
-                            transition={shimmer.transition}
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          {Array.from({ length: 3 }).map((_, i) => (
-                            <motion.div 
-                              key={i}
-                              className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-32"
-                              style={{ backgroundSize: '200% 100%' }}
-                              animate={shimmer.animate}
-                              transition={shimmer.transition}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <motion.div 
-                          className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-16"
-                          style={{ backgroundSize: '200% 100%' }}
-                          animate={shimmer.animate}
-                          transition={shimmer.transition}
-                        />
-                        <motion.div 
-                          className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-24"
-                          style={{ backgroundSize: '200% 100%' }}
-                          animate={shimmer.animate}
-                          transition={shimmer.transition}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+              
+              <div className="flex items-center space-x-2">
+                <motion.div 
+                  className="w-8 h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
+                <div className="flex items-center space-x-1">
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div 
+                      key={i}
+                      className="w-8 h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
+                      style={{ backgroundSize: '200% 100%' }}
+                      animate={shimmer.animate}
+                      transition={shimmer.transition}
+                    />
+                  ))}
+                </div>
+                <motion.div 
+                  className="w-8 h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
               </div>
-            </div>
+            </motion.div>
           </motion.div>
 
-          {/* Admin Dashboard Skeleton */}
+          {/* Lead Management Panel Skeleton */}
           <motion.div 
             className="bg-white rounded-xl shadow-md p-6 border border-gray-100"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1.0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
           >
-            <div className="flex items-center mb-6">
+            {/* Lead Management Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <motion.div 
-                className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-10 h-10 mr-3"
+                className="min-h-[48px] bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
                 style={{ backgroundSize: '200% 100%' }}
                 animate={shimmer.animate}
                 transition={shimmer.transition}
               />
               <motion.div 
-                className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-56"
+                className="min-h-[48px] bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
                 style={{ backgroundSize: '200% 100%' }}
                 animate={shimmer.animate}
                 transition={shimmer.transition}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Statistics */}
+            <div className="bg-gray-50 rounded-lg p-3 mb-8 border border-gray-100">
+              <div className="flex items-center text-sm">
+                <motion.div 
+                  className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-32 mr-3"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
+                <div className="w-px h-5 bg-gray-300 mx-3"></div>
+                <motion.div 
+                  className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-24 mr-3"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
+                <div className="w-px h-5 bg-gray-300 mx-3"></div>
+                <motion.div 
+                  className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-20"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
+              </div>
+            </div>
+
+            {/* Lead Assignment Items - Show exactly 5 */}
+            <div className="space-y-6 mb-6">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <motion.div 
+                  key={index}
+                  className="bg-white rounded-xl shadow-sm px-5 py-7 border-2 border-gray-100"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.9 + index * 0.1 }}
+                >
+                  <div className="flex items-center">
+                    <motion.div 
+                      className="w-5 h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mr-4"
+                      style={{ backgroundSize: '200% 100%' }}
+                      animate={shimmer.animate}
+                      transition={shimmer.transition}
+                    />
+                    <motion.div 
+                      className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full mr-4"
+                      style={{ backgroundSize: '200% 100%' }}
+                      animate={shimmer.animate}
+                      transition={shimmer.transition}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <motion.div 
+                        className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48 mb-2"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                      <motion.div 
+                        className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-32 mb-1"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                      <motion.div 
+                        className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-40"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                    </div>
+                    <div className="text-right ml-6 flex-shrink-0">
+                      <motion.div 
+                        className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-20 mb-1"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                      <motion.div 
+                        className="h-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-16"
+                        style={{ backgroundSize: '200% 100%' }}
+                        animate={shimmer.animate}
+                        transition={shimmer.transition}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Pagination Controls Skeleton */}
+            <motion.div 
+              className="flex items-center justify-between bg-white rounded-lg p-4 border border-gray-100"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 1.4 }}
+            >
               <motion.div 
-                className="p-6 border border-gray-200 rounded-xl"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 1.1 }}
-              >
-                <div className="flex items-center mb-4">
-                  <motion.div 
-                    className="w-8 h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mr-3"
-                    style={{ backgroundSize: '200% 100%' }}
-                    animate={shimmer.animate}
-                    transition={shimmer.transition}
-                  />
-                  <motion.div 
-                    className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-20"
-                    style={{ backgroundSize: '200% 100%' }}
-                    animate={shimmer.animate}
-                    transition={shimmer.transition}
-                  />
+                className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48"
+                style={{ backgroundSize: '200% 100%' }}
+                animate={shimmer.animate}
+                transition={shimmer.transition}
+              />
+              
+              <div className="flex items-center space-x-2">
+                <motion.div 
+                  className="w-8 h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
+                  style={{ backgroundSize: '200% 100%' }}
+                  animate={shimmer.animate}
+                  transition={shimmer.transition}
+                />
+                <div className="flex items-center space-x-1">
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div 
+                      key={i}
+                      className="w-8 h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
+                      style={{ backgroundSize: '200% 100%' }}
+                      animate={shimmer.animate}
+                      transition={shimmer.transition}
+                    />
+                  ))}
                 </div>
                 <motion.div 
-                  className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-3/4"
+                  className="w-8 h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
                   style={{ backgroundSize: '200% 100%' }}
                   animate={shimmer.animate}
                   transition={shimmer.transition}
                 />
-              </motion.div>
-
-              <motion.div 
-                className="p-6 border border-gray-200 rounded-xl bg-gray-50"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 1.2 }}
-              >
-                <motion.div 
-                  className="h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48 mx-auto"
-                  style={{ backgroundSize: '200% 100%' }}
-                  animate={shimmer.animate}
-                  transition={shimmer.transition}
-                />
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </motion.div>
