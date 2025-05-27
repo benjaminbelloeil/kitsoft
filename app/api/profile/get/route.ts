@@ -20,12 +20,67 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId');
     
     // Security check: normal users can only get their own profile
+    // People Leads can access profiles of their assigned team members
     if (userId !== user.id) {
-      // TODO: Add admin check here when implementing admin roles
-      return NextResponse.json(
-        { error: 'You can only access your own profile' },
-        { status: 403 }
-      );
+      // Check if the requesting user is a People Lead
+      const { data: userLevelData, error: levelError } = await supabase
+        .from('usuarios_niveles')
+        .select('id_nivel_actual')
+        .eq('id_usuario', user.id)
+        .order('fecha_cambio', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (levelError || !userLevelData) {
+        return NextResponse.json(
+          { error: 'You can only access your own profile' },
+          { status: 403 }
+        );
+      }
+
+      // Get the level details to check if People Lead (numero === 2)
+      const { data: levelDetails, error: detailsError } = await supabase
+        .from('niveles')
+        .select('numero')
+        .eq('id_nivel', userLevelData.id_nivel_actual)
+        .single();
+
+      if (detailsError || !levelDetails) {
+        return NextResponse.json(
+          { error: 'You can only access your own profile' },
+          { status: 403 }
+        );
+      }
+
+      // If user is a People Lead (level 2), check if the requested user is assigned to them
+      if (levelDetails.numero === 2) {
+        const { data: targetUserData, error: targetUserError } = await supabase
+          .from('usuarios')
+          .select('id_peoplelead')
+          .eq('id_usuario', userId)
+          .single();
+
+        if (targetUserError || !targetUserData) {
+          return NextResponse.json(
+            { error: 'User not found' },
+            { status: 404 }
+          );
+        }
+
+        // Check if the requesting People Lead is assigned to the target user
+        if (targetUserData.id_peoplelead !== user.id) {
+          return NextResponse.json(
+            { error: 'You can only access profiles of your assigned team members' },
+            { status: 403 }
+          );
+        }
+      } else {
+        // For non-People Leads, only allow access to their own profile
+        return NextResponse.json(
+          { error: 'You can only access your own profile' },
+          { status: 403 }
+        );
+      }
     }
     
     // Get the main user data with error handling

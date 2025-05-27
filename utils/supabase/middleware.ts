@@ -103,7 +103,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Check for project lead access if user is trying to access project lead pages
-  if (user && request.nextUrl.pathname.startsWith('/dashboard/proyectos/lead')) {
+  if (user && request.nextUrl.pathname.startsWith('/dashboard/proyectos/project-lead')) {
     try {
       console.log('Middleware: User trying to access project lead page:', user.id);
       // Use the API endpoint to check if user is project lead with absolute URL constructed from request
@@ -131,6 +131,42 @@ export async function updateSession(request: NextRequest) {
       }
     } catch (error) {
       console.error('Error checking project lead status in middleware:', error);
+      // For safety, if we can't verify status, redirect to dashboard
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/dashboard';
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  // Check for people lead access if user is trying to access people lead pages
+  if (user && request.nextUrl.pathname.startsWith('/dashboard/proyectos/people-lead')) {
+    try {
+      console.log('Middleware: User trying to access people lead page:', user.id);
+      // Use the API endpoint to check if user is people lead with absolute URL constructed from request
+      const origin = request.nextUrl.origin; // Get the origin (protocol + hostname + port)
+      const apiUrl = `${origin}/api/user/level/is-people-lead`;
+      console.log('Middleware: Calling people lead check API at:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        headers: { 
+          'Authorization': `Bearer ${await supabase.auth.getSession().then(res => res.data.session?.access_token || '')}` 
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to verify people lead status');
+      }
+      
+      const { isPeopleLead } = await response.json();
+      
+      if (!isPeopleLead) {
+        console.log('Non-people-lead user tried to access people lead page:', user.id);
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = '/dashboard';
+        return NextResponse.redirect(redirectUrl);
+      }
+    } catch (error) {
+      console.error('Error checking people lead status in middleware:', error);
       // For safety, if we can't verify status, redirect to dashboard
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = '/dashboard';
