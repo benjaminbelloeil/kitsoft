@@ -3,10 +3,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ProjectManagerHeader from '@/components/proyectos/manager/ProjectManagerHeader';
-import ProjectManagerSkeleton from '@/components/proyectos/manager/ProjectManagerSkeleton';
-import ProjectForm from '@/components/proyectos/manager/ProjectForm';
-import ProjectList from '@/components/proyectos/manager/ProjectList';
+import ProjectManagerHeader from '@/components/proyectos//project-manager/ProjectManagerHeader';
+import ProjectManagerSkeleton from '@/components/proyectos//project-manager/ProjectManagerSkeleton';
+import ProjectForm from '@/components/proyectos//project-manager/ProjectForm';
+import ProjectList from '@/components/proyectos/project-manager/ProjectList';
 import { useNotifications } from '@/context/notification-context';
 import { Client, Project, Role } from '@/interfaces/project';
 import { 

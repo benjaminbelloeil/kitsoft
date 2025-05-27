@@ -14,7 +14,7 @@ import {
   FiX,
   FiSearch
 } from 'react-icons/fi';
-import ArchiveProjectModal from '@/components/proyectos/manager/ArchiveProjectModal';
+import ArchiveProjectModal from '@/components/proyectos//project-manager/ArchiveProjectModal';
 import { motion } from 'framer-motion';
 import { Client, Project, Role } from '@/interfaces/project';
 import ClientDetails from './ClientDetails';

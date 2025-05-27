@@ -9,7 +9,7 @@ import {
 import { motion } from 'framer-motion';
 import { Project } from '@/interfaces/project';
 import { useState } from 'react';
-import ArchiveProjectModal from '@/components/proyectos/manager/ArchiveProjectModal';
+import ArchiveProjectModal from '@/components/proyectos//project-manager/ArchiveProjectModal';
 
 interface ProjectListProps {
   projects: Project[];
