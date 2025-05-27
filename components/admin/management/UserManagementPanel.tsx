@@ -140,7 +140,8 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         throw new Error('Failed to refresh user data');
       }
       
-      const usersData = await res.json();
+      const response = await res.json();
+      const usersData = response.users || []; // Extract users array from response
       
       // Update the state and cache
       setUsers(usersData);
@@ -280,6 +281,20 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
         className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100 admin-content-panel"
         id="admin-panel-users"
       >
+        {/* Header */}
+        <motion.div 
+          className="flex items-center text-purple-800 mb-6"
+          variants={sectionVariants}
+        >
+          <div className="bg-purple-100 p-2 rounded-lg mr-3">
+            <FiUserCheck className="text-2xl text-purple-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800">Gestión de Usuarios</h2>
+            <p className="text-sm text-gray-500">Administra roles y permisos de usuarios</p>
+          </div>
+        </motion.div>
+
         {/* Search Bar */}
         <motion.div 
           className="mb-6"
@@ -349,13 +364,13 @@ export default function UserManagementPanel({ serverUsers = [] }: UserManagement
           </motion.div>
           <div className="border-l border-gray-300 h-5 mx-3 hidden sm:block"></div>
           <div className="ml-auto text-sm text-gray-500 hidden sm:block">
-            {users.filter(u => {
+            {(users || []).filter(u => {
               if (filter === "all") return true;
               if (filter === "admin") return u.role?.numero === 1;
               if (filter === "empleado") return u.role?.numero === 0;
               if (filter === "unregistered") return !u.registered;
               return true;
-            }).length} resultado{users.length !== 1 && 's'} de búsqueda
+            }).length} resultado{(users || []).length !== 1 && 's'} de búsqueda
           </div>
         </motion.div>
         

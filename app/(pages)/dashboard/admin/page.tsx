@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getAllUsersWithRolesAndAuth } from "@/utils/database/server/userSync";
 import { checkCurrentUserIsAdmin } from "@/utils/admin/authorization";
 import UserManagementPanel from "@/components/admin/management/UserManagementPanel";
+import LeadManagementPanel from "@/components/admin/lead/LeadManagementPanel";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import TabNavigation from "@/components/admin/TabNavigation";
 import AdminPageClient from "@/components/admin/AdminPageClient";
@@ -35,6 +36,7 @@ export default async function AdminPage() {
 
         {/* Pass users to client components */}
         <UserManagementPanel serverUsers={users} />
+        <LeadManagementPanel />
         <AdminDashboard />
       </div>
     </AdminPageClient>

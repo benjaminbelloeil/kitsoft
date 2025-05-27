@@ -55,7 +55,7 @@ export default function UserList({
   };
 
   // Filter users by search term and role filter
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = (users || []).filter(user => {
     const fullName = `${user.nombre || ""} ${user.apellido || ""}`.toLowerCase();
     const searchTerm = search.toLowerCase();
     const matchesSearch = fullName.includes(searchTerm) || 
