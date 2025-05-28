@@ -7,7 +7,7 @@ export interface Client {
   url_logo: string | null;
 }
 
-export interface User {
+export interface ProjectTeamMember {
   id_usuario: string;
   nombre: string;
   apellido: string | null;

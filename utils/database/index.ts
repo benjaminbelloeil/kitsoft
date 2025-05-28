@@ -3,7 +3,7 @@ export * from './server';
 
 // Export functions for working with duplicate entries
 export { cleanupDuplicateEntries } from './client/userManagementSync';
-export { cleanupUserRoles } from './client/userRoleSync';
+export { cleanupUserLevels } from './client/userLevelSync';
 
 // This approach uses the index.ts files you created in each directory
 // But be careful about importing server code in client components

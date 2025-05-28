@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FiBarChart2 } from 'react-icons/fi';
 
@@ -28,8 +28,6 @@ export interface HeaderCardProps {
 // -----------------------------------------------------------------------------
 // HELPERS
 // -----------------------------------------------------------------------------
-const pct = (v: number, t: number) => (t <= 0 ? 0 : (v / t) * 100);
-
 const utilLabel = (u: number) =>
   u >= 90 ? 'Sobrecargado' : u >= 70 ? 'Nivel óptimo' : 'Baja ocupación';
 
@@ -51,7 +49,7 @@ const projectHours = (p: ProjectInfo) => p.hours ?? p.hoursPerWeek ?? 0;
 // -----------------------------------------------------------------------------
 // HEADER CARD COMPONENT
 // -----------------------------------------------------------------------------
-export function HeaderCard({ name, position, projects = [], totalHours = 40, assignedHours, totalLoad }: HeaderCardProps) {
+export function HeaderCard({ projects = [], totalHours = 40, assignedHours, totalLoad }: HeaderCardProps) {
   const calculatedTotalLoad = totalLoad ?? Math.min(100, (assignedHours ?? 0) / totalHours * 100);
   const availableHours = Math.max(totalHours - (assignedHours ?? 0), 0);
 

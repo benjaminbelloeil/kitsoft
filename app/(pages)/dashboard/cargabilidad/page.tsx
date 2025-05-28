@@ -8,35 +8,7 @@ import { HistoryTab } from '@/components/cargabilidad/RecordTab';
 import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
 import { HeaderCard } from '@/components/cargabilidad/EmployeeSummary';
 import CargabilidadSkeleton from '@/components/cargabilidad/CargabilidadSkeleton';
-
-export const PROJECT_COLORS = [
-  'bg-purple-500',
-  'bg-blue-500',
-  'bg-indigo-500',
-  'bg-pink-500',
-  'bg-teal-500',
-  'bg-green-500',
-  'bg-orange-500',
-  'bg-red-500',
-];
-
-export interface Project {
-  name: string;
-  load: number;
-  deadline?: string;
-  hoursPerWeek: number;
-  color?: string; // Color del proyecto, opcional
-}
-
-interface HistoryEntry {
-  week: string;
-  totalHours: number;
-  availableHours: number;
-  projects: {
-    name: string;
-    hours: number;
-  }[];
-}
+import { Project, HistoryEntry, PROJECT_COLORS } from '@/interfaces/cargabilidad';
 
 const PersonalLoadPage = () => {
   const [projects, setProjects] = useState<Project[]>([
@@ -68,7 +40,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 15 },
         { name: 'Delta Zero', hours: 8 },
         { name: 'Omega UX', hours: 9 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-01-12',
@@ -78,7 +51,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 16 },
         { name: 'Delta Zero', hours: 10 },
         { name: 'Omega UX', hours: 12 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-01-19',
@@ -88,10 +62,12 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 18 },
         { name: 'Delta Zero', hours: 8 },
         { name: 'Omega UX', hours: 17 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-01-26',
+      totalLoad: 105,
       totalHours: 42,
       availableHours: -2,
       projects: [
@@ -108,7 +84,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 18 },
         { name: 'Delta Zero', hours: 9 },
         { name: 'Omega UX', hours: 12 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-02-09',
@@ -118,7 +95,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 17 },
         { name: 'Delta Zero', hours: 10 },
         { name: 'Omega UX', hours: 10 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-02-16',
@@ -128,7 +106,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 15 },
         { name: 'Delta Zero', hours: 8 },
         { name: 'Omega UX', hours: 12 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-02-23',
@@ -138,7 +117,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 18 },
         { name: 'Delta Zero', hours: 10 },
         { name: 'Omega UX', hours: 12 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-03-02',
@@ -148,7 +128,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 18 },
         { name: 'Delta Zero', hours: 10 },
         { name: 'Omega UX', hours: 14 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-03-09',
@@ -158,7 +139,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 20 },
         { name: 'Delta Zero', hours: 10 },
         { name: 'Omega UX', hours: 15 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-03-16',
@@ -168,7 +150,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 19 },
         { name: 'Delta Zero', hours: 8 },
         { name: 'Omega UX', hours: 15 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-03-23',
@@ -178,7 +161,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 18 },
         { name: 'Delta Zero', hours: 8 },
         { name: 'Omega UX', hours: 12 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-03-30',
@@ -188,7 +172,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 18 },
         { name: 'Delta Zero', hours: 9 },
         { name: 'Omega UX', hours: 13 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-04-06',
@@ -198,7 +183,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 18 },
         { name: 'Delta Zero', hours: 9 },
         { name: 'Omega UX', hours: 14 }
-      ]
+      ],
+      totalLoad: 0
     },
     {
       week: '2025-04-13',
@@ -208,7 +194,8 @@ const PersonalLoadPage = () => {
         { name: 'Expediente Alfa', hours: 18 },
         { name: 'Delta Zero', hours: 10 },
         { name: 'Omega UX', hours: 22 }
-      ]
+      ],
+      totalLoad: 0
     }
   ];
 

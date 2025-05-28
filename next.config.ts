@@ -2,9 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-  // Ensure output includes static resources
-  output: 'standalone',
+  // Remove output: 'standalone' for Vercel deployment
   // Add optional webpack config for troubleshooting
   webpack: (config) => {
     // Keep source maps enabled for better debugging

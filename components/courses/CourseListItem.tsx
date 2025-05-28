@@ -1,9 +1,21 @@
 import { colorClasses } from '../ui/CourseUtils';
 import StatusBadge from './StatusBadge';
 
+interface Course {
+  id: string;
+  name: string;
+  issuer: string;
+  description: string;
+  status: 'completed' | 'in-progress' | 'not-started';
+  category: string;
+  completionDate?: string;
+  expirationDate?: string;
+  modules?: Array<{ completed: boolean }>;
+}
+
 interface CourseListItemProps {
-  course: any;
-  onClick: (course: any) => void;
+  course: Course;
+  onClick: (course: Course) => void;
 }
 
 export default function CourseListItem({ course, onClick }: CourseListItemProps) {
@@ -61,9 +73,9 @@ export default function CourseListItem({ course, onClick }: CourseListItemProps)
 }
 
 // Función auxiliar para calcular el progreso
-function calculateProgress(course: any) {
+function calculateProgress(course: Course) {
   if (course.modules) {
-    const completedModules = course.modules.filter((m: any) => m.completed).length;
+    const completedModules = course.modules.filter((m) => m.completed).length;
     return Math.round((completedModules / course.modules.length) * 100);
   }
   return 0;
