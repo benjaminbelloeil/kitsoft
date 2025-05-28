@@ -17,7 +17,6 @@ export async function POST(request: NextRequest) {
 
 		// Get the request body
 		const certificateData: usuario_certificado = await request.json();
-		console.log('ADD request data: ', certificateData);
 
 		if (!certificateData.id_usuario || !certificateData || !certificateData.id_certificado || !certificateData.fecha_inicio) {
 			return NextResponse.json(
