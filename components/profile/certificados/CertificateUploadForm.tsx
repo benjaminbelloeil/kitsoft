@@ -11,6 +11,7 @@ interface CertificateUploadFormProps {
   setSelectedCert: (cert: certificado) => void;
   handleSubmit: (e: React.FormEvent) => void;
   resetForm: () => void;
+  isSubmitting?: boolean;
 }
 
 export default function CertificateUploadForm({
@@ -19,7 +20,8 @@ export default function CertificateUploadForm({
   selectedCert,
   setSelectedCert,
   handleSubmit,
-  resetForm
+  resetForm,
+  isSubmitting = false
 }: CertificateUploadFormProps) {
   const handleFileSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -81,10 +83,17 @@ export default function CertificateUploadForm({
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={!newCertificate.file || !selectedCert || !newCertificate.obtainedDate}
-          className="inline-flex items-center px-4 py-2 bg-[#A100FF] text-white rounded-md hover:bg-[#8400d1] disabled:opacity-40"
+          disabled={!newCertificate.file || !selectedCert || !newCertificate.obtainedDate || isSubmitting}
+          className="inline-flex items-center justify-center px-4 py-2 bg-[#A100FF] text-white rounded-md hover:bg-[#8400d1] disabled:opacity-40 disabled:cursor-not-allowed min-w-[100px]"
         >
-          <FiSave className="mr-2" /> Agregar
+          {isSubmitting ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <FiSave className="mr-2" />
+              Agregar
+            </>
+          )}
         </button>
       </div>
     </form>

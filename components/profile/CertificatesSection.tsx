@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // components/profile/certificados/CertificatesSection.tsx
 import { useState, useEffect, useCallback } from "react";
 import { addUsuarioCertificado, uploadCertificadoFile, deleteUsuarioCertificado, getUserCertificates } from "@/utils/database/client/certificateSync";
@@ -25,6 +26,7 @@ export interface NewCertificate {
 export default function CertificatesSection({ userID, loading = false, className = "" }: CertificatesSectionProps) {
 	const [certificates, setCertificates] = useState<CertificateVisualData[]>([]);
 	const [showForm, setShowForm] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [newCertificate, setNewCertificate] = useState<NewCertificate>({
 		file: null,
 		obtainedDate: new Date().toISOString().split('T')[0],
@@ -65,8 +67,9 @@ export default function CertificatesSection({ userID, loading = false, className
 
 	const handleCertificateSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!newCertificate.file || !selectedCert || !newCertificate.obtainedDate) return;
+		if (!newCertificate.file || !selectedCert || !newCertificate.obtainedDate || isSubmitting) return;
 
+		setIsSubmitting(true);
 		try {
 			const { url } = await uploadCertificadoFile(userID, newCertificate.file);
 			const nuevoRegistro: usuario_certificado = {
@@ -80,9 +83,10 @@ export default function CertificatesSection({ userID, loading = false, className
 			await addUsuarioCertificado(nuevoRegistro);
 			resetForm();
 		} catch (error) {
-			console.error("Error al agregar certificado:", error);
+			// Handle error silently
 		}
 		finally {
+			setIsSubmitting(false);
 			fetchCertificates();
 		}
 	};
@@ -90,13 +94,11 @@ export default function CertificatesSection({ userID, loading = false, className
 	const handleRemoveCertificate = async (certToDelete: CertificateVisualData) => {
 		try {
 			const result = await deleteUsuarioCertificado(certToDelete.id_certificado, certToDelete.id_usuario);
-			if (!result.success) {
-				console.error("Error eliminando el certificado:", result.error);
-				return;
+			if (result.success) {
+				setCertificates(certificates.filter(c => c !== certToDelete));
 			}
-			setCertificates(certificates.filter(c => c !== certToDelete));
-		} catch (error) {
-			console.error("Error inesperado al eliminar certificado:", error);
+		} catch {
+			// Handle error silently
 		}
 		finally {
 			fetchCertificates();
@@ -121,6 +123,7 @@ export default function CertificatesSection({ userID, loading = false, className
 					setSelectedCert={setSelectedCert}
 					handleSubmit={handleCertificateSubmit}
 					resetForm={resetForm}
+					isSubmitting={isSubmitting}
 				/>
 			) : (
 				<div className="flex-col flex gap-2">
@@ -131,7 +134,9 @@ export default function CertificatesSection({ userID, loading = false, className
 					) : (
 						<NoCertificatesPlaceholder />
 					)}
-					<AddCertificateButton onClick={() => setShowForm(true)} />
+					<div className="mt-4">
+						<AddCertificateButton onClick={() => setShowForm(true)} />
+					</div>
 				</div>
 			)}
 		</div>

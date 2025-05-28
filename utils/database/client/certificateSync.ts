@@ -113,13 +113,11 @@ export async function deleteUserCertificate(
 
 		if (!res.ok) {
 			const errorText = await res.text();
-			console.error('Error deleting certificate:', errorText);
 			return { success: false, error: errorText };
 		}
 
 		return { success: true };
 	} catch (err: any) {
-		console.error('Exception in deleteUserCertificate:', err);
 		return { success: false, error: err.message || 'Error inesperado' };
 	}
 }
@@ -184,7 +182,6 @@ export async function uploadCertificateFile(
 
 		if (!res.ok) {
 			const errorText = await res.text();
-			console.error('Error uploading certificate file:', errorText);
 			return { success: false, error: errorText };
 		}
 
@@ -192,7 +189,6 @@ export async function uploadCertificateFile(
 		setStatus?.('Archivo subido correctamente');
 		return { success: true, url: data.url };
 	} catch (err: any) {
-		console.error('Error inesperado en uploadCertificateFile:', err);
 		return { success: false, error: err.message || 'Error desconocido' };
 	}
 }

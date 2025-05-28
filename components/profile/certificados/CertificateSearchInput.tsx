@@ -18,21 +18,16 @@ const CertificateSearchInput: React.FC<Props> = ({ onSelect, initialCertificado 
   useEffect(() => {
     const loadCertificados = async () => {
       const data = await getAllCertificados();
-      console.log('Certificados cargados:', data);
       setRemoteCertificates(data);
     };
     loadCertificados();
   }, []);
 
   useEffect(() => {
-    console.log('Buscando:', input);
-    console.log('Certificados actuales:', remoteCertificates);
-
     const filtered = remoteCertificates.filter(cert =>
       cert.curso?.toLowerCase().includes(input.toLowerCase())
     );
 
-    console.log('Resultados filtrados:', filtered);
     setResults(filtered);
   }, [input, remoteCertificates]);
 
@@ -93,13 +88,13 @@ const CertificateSearchInput: React.FC<Props> = ({ onSelect, initialCertificado 
           )}
         </div>
       ) : (
-        <div className="relative flex items-center justify-between p-2 pl-4 pr-10 border border-green-300 bg-green-50 rounded-lg">
-          <span className="text-sm text-green-700 flex items-center gap-2">
-            <FiCheck /> {selected.curso}
+        <div className="relative flex items-center justify-between p-2.5 border border-[#A100FF30] bg-[#A100FF08] rounded-lg">
+          <span className="text-sm text-[#A100FF] flex items-center gap-2 font-medium">
+            <FiCheck size={16} /> {selected.curso}
           </span>
           <button
             onClick={handleClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
+            className="ml-2 text-gray-400 hover:text-gray-600 transition-colors p-0.5"
             aria-label="Eliminar certificado seleccionado"
             title="Eliminar certificado seleccionado"
           >
