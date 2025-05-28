@@ -9,13 +9,10 @@ let initialLevelCheckComplete = false;
 export async function ensureUserHasLevel(userId: string): Promise<{ success: boolean; levelNumber?: number }> {
   // Skip if we've already run this once in the current session
   if (initialLevelCheckComplete) {
-    console.log('Level check already performed in this session, skipping');
     return { success: true };
   }
   
   try {
-    console.log('Starting level check for user', userId);
-    
     // First clean up potential duplicate levels
     await cleanupUserLevels(userId);
     
@@ -28,21 +25,17 @@ export async function ensureUserHasLevel(userId: string): Promise<{ success: boo
     });
     
     if (!res.ok) {
-      console.error('Error ensuring user level:', await res.text());
       return { success: false };
     }
     
     const data = await res.json();
     initialLevelCheckComplete = true;
     
-    console.log(`User ${userId} has level number: ${data.levelNumber}`);
-    
     return { 
       success: true, 
       levelNumber: data.levelNumber 
     };
-  } catch (err) {
-    console.error('Exception in ensureUserHasLevel:', err);
+  } catch {
     return { success: false };
   } finally {
     // Mark that we've completed the initial check
@@ -64,15 +57,12 @@ export async function checkUserIsAdmin(userId: string): Promise<boolean> {
     });
     
     if (!res.ok) {
-      console.error('Error checking admin status:', await res.text());
       return false;
     }
     
     const data = await res.json();
-    console.log(`User ${userId} is admin: ${data.isAdmin}`);
     return data.isAdmin;
-  } catch (err) {
-    console.error('Exception in checkUserIsAdmin:', err);
+  } catch {
     return false;
   }
 }
@@ -99,13 +89,11 @@ export async function cleanupUserLevels(userId: string): Promise<boolean> {
     });
     
     if (!res.ok) {
-      console.error('Error cleaning up user levels:', await res.text());
       return false;
     }
     
     return true;
-  } catch (err) {
-    console.error('Error in cleanupUserLevels:', err);
+  } catch {
     return false;
   }
 }
@@ -125,7 +113,6 @@ export async function resetUserLevel(userId: string): Promise<boolean> {
     });
     
     if (!res.ok) {
-      console.error('Error resetting user level:', await res.text());
       return false;
     }
     
@@ -133,8 +120,7 @@ export async function resetUserLevel(userId: string): Promise<boolean> {
     resetLevelCheckState();
     
     return true;
-  } catch (err) {
-    console.error('Exception in resetUserLevel:', err);
+  } catch {
     return false;
   }
 }
@@ -147,8 +133,6 @@ export async function resetUserLevel(userId: string): Promise<boolean> {
  */
 export async function changeUserLevel(userId: string, newLevelNumber: number): Promise<boolean> {
   try {
-    console.log(`Changing level for user ${userId} to level number ${newLevelNumber}`);
-    
     const res = await fetch('/api/admin/users/change-level', {
       method: 'POST',
       headers: {
@@ -158,18 +142,14 @@ export async function changeUserLevel(userId: string, newLevelNumber: number): P
     });
     
     if (!res.ok) {
-      console.error('Error changing user level:', await res.text());
       return false;
     }
-    
-    console.log(`Successfully changed level for user ${userId} to ${newLevelNumber}`);
     
     // Reset the level check state to force a refresh on next auth check
     resetLevelCheckState();
     
     return true;
-  } catch (err) {
-    console.error('Exception in changeUserLevel:', err);
+  } catch {
     return false;
   }
 }
