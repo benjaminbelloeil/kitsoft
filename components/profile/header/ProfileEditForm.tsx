@@ -419,8 +419,8 @@ export default function ProfileEditForm({
             </p>
           </div>
           
-          <div className="grid grid-cols-3 gap-2">
-            <div>
+          <div className="flex gap-2">
+            <div className="w-32">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Código País <span className="text-red-500">*</span>
               </label>
@@ -439,11 +439,10 @@ export default function ProfileEditForm({
                 isSearchable
                 noOptionsMessage={() => "No se encontraron resultados"}
                 loadingMessage={() => "Cargando..."}
-                menuPosition="fixed"
                 menuPlacement="auto"
               />
             </div>
-            <div>
+            <div className="w-24">
               <label className="block text-sm font-medium text-gray-700 mb-1">Cod. Estado</label>
               <input
                 type="text"
@@ -455,7 +454,7 @@ export default function ProfileEditForm({
                 maxLength={3}
               />
             </div>
-            <div>
+            <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Número <span className="text-red-500">*</span>
               </label>
@@ -500,7 +499,6 @@ export default function ProfileEditForm({
               required
               noOptionsMessage={() => "No se encontraron países"}
               loadingMessage={() => "Cargando países..."}
-              menuPosition="fixed"
               menuPlacement="auto"
             />
           </div>
@@ -527,7 +525,6 @@ export default function ProfileEditForm({
               isDisabled={!selectedCountry || isLoading.states}
               noOptionsMessage={() => "No se encontraron estados"}
               loadingMessage={() => "Cargando estados..."}
-              menuPosition="fixed"
               menuPlacement="auto"
             />
           </div>
@@ -557,7 +554,6 @@ export default function ProfileEditForm({
               isDisabled={!selectedState || isLoading.cities}
               noOptionsMessage={() => "No se encontraron ciudades"}
               loadingMessage={() => "Cargando ciudades..."}
-              menuPosition="fixed"
               menuPlacement="auto"
             />
           </div>
