@@ -47,7 +47,7 @@ export default function UserListItem({
       case 4: // Project Manager
         return 'bg-orange-100 text-orange-800';
       default: // Empleado
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-teal-100 text-teal-800';
     }
   };
   

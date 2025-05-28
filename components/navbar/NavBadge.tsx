@@ -31,7 +31,8 @@ export default function NavBadge() {
           isAdmin ? 'bg-[#A100FF]' : 
           isProjectManager ? 'bg-orange-500' : 
           isProjectLead ? 'bg-blue-500' :
-          'bg-green-500'
+          userRole.numero === 2 ? 'bg-green-500' :
+          'bg-teal-500'
         } mr-2`}></div>
         <p className="text-sm font-medium">
           {isAdmin 
@@ -71,7 +72,7 @@ export default function NavBadge() {
         )}
 
         {!isAdmin && !isProjectManager && !isProjectLead && userRole.numero === 0 && (
-          <span className="ml-auto text-xs px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full">
+          <span className="ml-auto text-xs px-2 py-0.5 bg-teal-100 text-teal-800 rounded-full">
             Empleado
           </span>
         )}
