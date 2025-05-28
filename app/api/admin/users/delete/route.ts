@@ -58,8 +58,53 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Begin transaction by deleting related records in the correct order
+    // We need to handle foreign key constraints properly
     
-    // 1. Delete from correos (email table) first since it has a foreign key constraint
+    // 1. First, get all experience IDs for this user to delete junction table records
+    const { data: userExperiences, error: expQueryError } = await supabase
+      .from('experiencia')
+      .select('id_experiencia')
+      .eq('id_usuario', userId);
+    
+    if (expQueryError) {
+      console.error('Error querying user experiences:', expQueryError);
+    }
+    
+    // 2. Delete experience-skills junction records (experiencias_habilidades)
+    if (userExperiences && userExperiences.length > 0) {
+      const experienceIds = userExperiences.map(exp => exp.id_experiencia);
+      
+      const { error: expSkillsError } = await supabase
+        .from('experiencias_habilidades')
+        .delete()
+        .in('id_experiencia', experienceIds);
+        
+      if (expSkillsError) {
+        console.error('Error deleting experience-skills junction records:', expSkillsError);
+      }
+    }
+    
+    // 3. Delete user addresses (direccion table)
+    const { error: direccionError } = await supabase
+      .from('direccion')
+      .delete()
+      .eq('id_usuario', userId);
+    
+    if (direccionError) {
+      console.error('Error deleting user addresses:', direccionError);
+    }
+    
+    // 4. Delete user phone numbers (telefono table)
+    const { error: telefonoError } = await supabase
+      .from('telefono')
+      .delete()
+      .eq('id_usuario', userId);
+    
+    if (telefonoError) {
+      console.error('Error deleting user phone numbers:', telefonoError);
+    }
+    
+    // 5. Delete from correos (email table)
     const { error: correosError } = await supabase
       .from('correos')
       .delete()
@@ -67,13 +112,9 @@ export async function DELETE(request: NextRequest) {
     
     if (correosError) {
       console.error('Error deleting user emails:', correosError);
-      return NextResponse.json(
-        { success: false, error: 'Failed to delete user emails' },
-        { status: 500 }
-      );
     }
     
-    // 2. Delete from usuarios_niveles (role history)
+    // 6. Delete from usuarios_niveles (role history)
     const { error: nivelesDeletionError } = await supabase
       .from('usuarios_niveles')
       .delete()
@@ -81,56 +122,39 @@ export async function DELETE(request: NextRequest) {
     
     if (nivelesDeletionError) {
       console.error('Error deleting user roles history:', nivelesDeletionError);
-      return NextResponse.json(
-        { success: false, error: 'Failed to delete user role history' },
-        { status: 500 }
-      );
     }
     
-    // 3. Delete certificates - check the correct column name first
-    try {
-      // Try with id_usuario column
-      const { error: certError } = await supabase
-        .from('certificados_usuarios')  // Using the correct join table name
-        .delete()
-        .eq('id_usuario', userId);
-        
-      if (certError) {
-        console.error('Error deleting certificates:', certError);
-      }
-    } catch (certErr) {
-      console.error('Exception when deleting certificates:', certErr);
+    // 7. Delete user certificates (using correct table name)
+    const { error: certError } = await supabase
+      .from('usuarios_certificados')  // Corrected table name
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (certError) {
+      console.error('Error deleting user certificates:', certError);
     }
     
-    // 4. Delete skills - check for correct table name
-    try {
-      const { error: skillsError } = await supabase
-        .from('habilidades_usuario')  // Using the correct table name (singular)
-        .delete()
-        .eq('id_usuario', userId);
-        
-      if (skillsError) {
-        console.error('Error deleting skills:', skillsError);
-      }
-    } catch (skillsErr) {
-      console.error('Exception when deleting skills:', skillsErr);
+    // 8. Delete user skills (using correct table name)
+    const { error: skillsError } = await supabase
+      .from('usuarios_habilidades')  // Corrected table name
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (skillsError) {
+      console.error('Error deleting user skills:', skillsError);
     }
     
-    // 5. Delete experiences 
-    try {
-      const { error: expError } = await supabase
-        .from('experiencia')
-        .delete()
-        .eq('id_usuario', userId);
-        
-      if (expError) {
-        console.error('Error deleting experiences:', expError);
-      }
-    } catch (expErr) {
-      console.error('Exception when deleting experiences:', expErr);
+    // 9. Delete user experiences (now that junction tables are cleared)
+    const { error: expError } = await supabase
+      .from('experiencia')
+      .delete()
+      .eq('id_usuario', userId);
+      
+    if (expError) {
+      console.error('Error deleting user experiences:', expError);
     }
     
-    // 6. Finally delete the user profile record
+    // 10. Finally delete the user profile record
     const { error: profileError } = await supabase
       .from('usuarios')
       .delete()
@@ -144,7 +168,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
       
-    // 7. Delete the auth user using the admin client
+    // 11. Delete the auth user using the admin client
     try {
       const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(userId);
       
