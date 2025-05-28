@@ -110,8 +110,8 @@ export default function ProfilePage() {
       const safeUpdateData = {
         ...updatedData,
         ID_Usuario: userId,
-        // Keep placeholder for now, this will be replaced with actual image URL later
-        URL_Avatar: updatedData.URL_Avatar || '/placeholder-avatar.png'
+        // Keep null for now, this will be replaced with actual image URL later
+        URL_Avatar: updatedData.URL_Avatar || null
       };
       
       // Save to the database

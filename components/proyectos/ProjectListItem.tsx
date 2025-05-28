@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FiChevronRight } from 'react-icons/fi';
 import { getProjectColor } from './utils/projectUtils';
+import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 
 interface ProjectListItemProps {
   project: any;
@@ -55,9 +56,14 @@ export default function ProjectListItem({ project, onProjectClick }: ProjectList
                   alt={`Usuario ${index + 1}`}
                   className="h-full w-full object-cover rounded-full"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder-avatar.png';
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
                   }}
                 />
+                <div className="hidden h-full w-full">
+                  <PlaceholderAvatar size={28} />
+                </div>
               </div>
             ))}
             <div className="flex items-center justify-center h-7 w-7 rounded-full bg-gray-200 ring-2 ring-white text-xs font-medium text-gray-500">

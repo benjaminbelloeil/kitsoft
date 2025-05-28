@@ -220,7 +220,6 @@ export default function ProfileHeader({
   // Check if the avatar URL is empty or not valid
   const hasValidAvatar = (url: string | null | undefined): boolean => {
     return !!url && 
-      url !== 'placeholder-avatar.png' &&
       !url.includes('undefined') &&
       !url.includes('null');
   };

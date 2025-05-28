@@ -9,6 +9,7 @@ import {
 } from '@/app/lib/data';
 import ArchivedProjectsHeader from '@/components/proyectos/archivados/ArchiveProjectsHeader';
 import ArchivedProjectsSkeleton from '@/components/proyectos/archivados/ArchivedSkeleton';
+import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 import { 
   FiInfo, 
   FiUsers, 
@@ -194,15 +195,21 @@ export default function ArchivedProjectsPage() {
                         <div className="flex -space-x-2 overflow-hidden">
                           {/* Mostrar avatars (4 máximo) */}
                           {[1, 2, 3].map((member, index) => (
-                            <div key={index} className="inline-block h-7 w-7 rounded-full ring-2 ring-white">
+                            <div key={index} className="inline-block h-7 w-7 rounded-full ring-2 ring-white relative">
                               <img
                                 src={`https://randomuser.me/api/portraits/${index % 2 ? 'men' : 'women'}/${index + 10}.jpg`}
                                 alt={`Usuario ${index + 1}`}
                                 className="h-full w-full object-cover rounded-full"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).src = '/placeholder-avatar.png';
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const placeholder = target.parentElement?.querySelector('.placeholder-avatar');
+                                  if (placeholder) (placeholder as HTMLElement).style.display = 'block';
                                 }}
                               />
+                              <div className="placeholder-avatar absolute inset-0 hidden">
+                                <PlaceholderAvatar size={28} />
+                              </div>
                             </div>
                           ))}
                           <div className="flex items-center justify-center h-7 w-7 rounded-full bg-gray-200 ring-2 ring-white text-xs font-medium text-gray-500">
@@ -269,15 +276,21 @@ export default function ArchivedProjectsPage() {
                           {/* Team members */}
                           <div className="mt-3 flex -space-x-2 overflow-hidden">
                             {[1, 2, 3].map((member, index) => (
-                              <div key={index} className="inline-block h-7 w-7 rounded-full ring-2 ring-white">
+                              <div key={index} className="inline-block h-7 w-7 rounded-full ring-2 ring-white relative">
                                 <img
                                   src={`https://randomuser.me/api/portraits/${index % 2 ? 'men' : 'women'}/${index + 10}.jpg`}
                                   alt={`Usuario ${index + 1}`}
                                   className="h-full w-full object-cover rounded-full"
                                   onError={(e) => {
-                                    (e.target as HTMLImageElement).src = '/placeholder-avatar.png';
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const placeholder = target.parentElement?.querySelector('.placeholder-avatar');
+                                    if (placeholder) (placeholder as HTMLElement).style.display = 'block';
                                   }}
                                 />
+                                <div className="placeholder-avatar absolute inset-0 hidden">
+                                  <PlaceholderAvatar size={28} />
+                                </div>
                               </div>
                             ))}
                             <div className="flex items-center justify-center h-7 w-7 rounded-full bg-gray-200 ring-2 ring-white text-xs font-medium text-gray-500">
@@ -387,15 +400,21 @@ export default function ArchivedProjectsPage() {
                       {[1, 2, 3, 4].map(member => (
                         <div key={member} className="flex flex-col items-center group">
                           <div className="relative">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md group-hover:border-[#A100FF20] transition-all">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md group-hover:border-[#A100FF20] transition-all relative">
                               <img 
                                 src={`https://randomuser.me/api/portraits/${member % 2 ? 'men' : 'women'}/${member + 10}.jpg`}
                                 alt={`Miembro del equipo ${member}`}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).src = '/placeholder-avatar.png';
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const placeholder = target.parentElement?.querySelector('.placeholder-avatar');
+                                  if (placeholder) (placeholder as HTMLElement).style.display = 'block';
                                 }}
                               />
+                              <div className="placeholder-avatar absolute inset-0 hidden">
+                                <PlaceholderAvatar size={48} />
+                              </div>
                             </div>
                             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-500 rounded-full border-2 border-white"></div>
                           </div>

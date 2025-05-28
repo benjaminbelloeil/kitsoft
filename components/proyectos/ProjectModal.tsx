@@ -17,6 +17,7 @@ import {
   FiClipboard
 } from 'react-icons/fi';
 import { getProjectColor } from './utils/projectUtils';
+import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 
 interface ProjectModalProps {
   project: any;
@@ -129,9 +130,14 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                         alt={`Miembro del equipo ${member}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-avatar.png';
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
                         }}
                       />
+                      <div className="hidden w-full h-full">
+                        <PlaceholderAvatar size={48} />
+                      </div>
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
