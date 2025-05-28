@@ -3,7 +3,7 @@ import { Correo, Telefono } from '@/interfaces/contact';
 import { Skill } from '@/interfaces/skill';
 import { Project } from '@/interfaces/project';
 import { Experience } from '@/interfaces/experience';
-import { Certificate } from '@/interfaces/certificate';
+import { certificado as Certificate } from '@/interfaces/certificate';
 
 export interface User {
   id_usuario: string;
