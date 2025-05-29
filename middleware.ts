@@ -47,7 +47,25 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError
   } = await supabase.auth.getUser()
+
+  // Handle invalid refresh token errors
+  if (authError && authError.message?.includes('Invalid Refresh Token')) {
+    console.log('Invalid refresh token detected in main middleware, clearing cookies and redirecting to login');
+    
+    // Clear auth cookies and redirect to login
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    const redirectResponse = NextResponse.redirect(redirectUrl)
+    
+    // Clear all auth-related cookies
+    redirectResponse.cookies.delete('sb-access-token');
+    redirectResponse.cookies.delete('sb-refresh-token'); 
+    redirectResponse.cookies.delete('supabase-auth-token');
+    
+    return redirectResponse;
+  }
 
   // If not logged in and trying to access a protected route
   if (

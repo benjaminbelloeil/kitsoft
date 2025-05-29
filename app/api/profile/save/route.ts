@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     };
     
     // Insert or update the user record
-    const { data: upsertData, error: userError } = await supabase
+    const { error: userError } = await supabase
       .from('usuarios')
       .upsert(userData)
       .select();
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (userError) {
       // Try to create the user using the Postgres function instead
       try {
-        const { data: fnData, error: fnError } = await supabase
+        const { error: fnError } = await supabase
           .rpc('save_user_profile', {
             p_id_usuario: userData.id_usuario,
             p_nombre: userData.nombre,
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
             { status: 500 }
           );
         }
-      } catch (fnCatchError: any) {
+      } catch {
         return NextResponse.json(
           { error: `Error al guardar usuario: ${userError.message || 'Error desconocido'}` },
           { status: 500 }

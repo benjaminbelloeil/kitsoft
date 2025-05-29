@@ -15,12 +15,18 @@ interface ReadOnlyExperienceSectionProps {
   loading?: boolean;
 }
 
-// Format date for display (e.g. "January 2023")
+// Format date for display (e.g. "marzo de 2021")
 const formatDateDisplay = (dateString: string): string => {
   if (!dateString) return '';
   
   try {
     const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if date is invalid
+    }
+    
     return date.toLocaleDateString('es-ES', { 
       month: 'long', 
       year: 'numeric' 
@@ -76,23 +82,24 @@ export default function ReadOnlyExperienceSection({ experiences, loading = false
           </span>
           Experiencia
         </h3>
-        <div className="text-center py-8">
-          <FiBriefcase className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-          <h4 className="text-lg font-medium text-gray-500 mb-2">Sin experiencia registrada</h4>
-          <p className="text-gray-400">Este usuario no ha registrado experiencia laboral.</p>
+        <div className="text-center py-5">
+          <div className="bg-gray-50 rounded-full p-3 inline-flex mb-3 shadow-sm">
+            <FiBriefcase className="h-5 w-5 text-gray-400" />
+          </div>
+          <p className="text-gray-500 text-sm">Sin experiencia registrada</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300">
-      <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
-        <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+      <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
+        <span className="bg-[#A100FF20] p-2 rounded-md mr-3">
           <FiBriefcase className="h-5 w-5 text-[#A100FF]" />
         </span>
         Experiencia
-      </h2>
+      </h3>
 
       <div className="mt-4">
         {experiences.map((exp, index) => {

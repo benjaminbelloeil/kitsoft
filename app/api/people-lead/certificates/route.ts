@@ -115,7 +115,6 @@ export async function GET(request: NextRequest) {
       const cert = certificates?.find(c => c.id_certificado === userCert.id_certificado);
       return {
         titulo: cert?.curso || 'Certificado sin título',
-        institucion: 'Institución no especificada', // This field doesn't exist in the current schema
         fecha_obtencion: userCert.fecha_inicio,
         fecha_expiracion: userCert.fecha_fin,
         url: userCert.url_archivo || cert?.url_pagina_certificado

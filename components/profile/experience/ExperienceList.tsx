@@ -23,12 +23,18 @@ interface ExperienceListProps {
   isAddingExperience: boolean;
 }
 
-// Format date for display (e.g. "January 2023")
+// Format date for display (e.g. "marzo de 2021")
 const formatDateDisplay = (dateString: string): string => {
   if (!dateString) return '';
   
   try {
     const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if date is invalid
+    }
+    
     return date.toLocaleDateString('es-ES', { 
       month: 'long', 
       year: 'numeric' 

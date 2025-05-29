@@ -4,7 +4,7 @@ export * from './profileSync';
 export * from './skillsSync';
 export * from './emailSync';
 export * from './experienceSync';
-export * from './userRoleSync';
+export * from './userLevelSync';
 export * from './userManagementSync';
 export * from './certificateSync';
 export * from './avatarSync';

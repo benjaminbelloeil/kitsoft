@@ -5,7 +5,6 @@ import { FiAward, FiExternalLink, FiCalendar, FiCheckCircle } from "react-icons/
 
 interface Certificate {
   titulo: string;
-  institucion: string;
   fecha_obtencion: string;
   fecha_expiracion?: string;
   url?: string;
@@ -44,42 +43,85 @@ const isExpiringSoon = (expirationDate?: string): boolean => {
 export default function ReadOnlyCertificatesSection({ certificates, loading = false }: ReadOnlyCertificatesSectionProps) {
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+      <motion.div 
+        className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <div className="animate-pulse">
-          <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-gray-200 rounded-md mr-3"></div>
+          <motion.div 
+            className="flex items-center mb-6 pb-3 border-b border-gray-100"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <div className="bg-gray-200 p-2 rounded-md mr-2 shadow-sm w-9 h-9"></div>
             <div className="h-6 bg-gray-200 rounded w-32"></div>
-          </div>
-          <div className="space-y-4">
+          </motion.div>
+          <motion.div 
+            className="space-y-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             {[1, 2, 3].map((i) => (
-              <div key={i} className="p-4 bg-gray-50 rounded-lg">
-                <div className="h-5 bg-gray-200 rounded w-48 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-40"></div>
+              <div key={i} className="p-3 border border-gray-200 rounded-lg flex justify-between items-center bg-white shadow-sm">
+                <div className="flex items-center flex-1">
+                  <div className="bg-gray-200 p-2 rounded-md mr-3 w-8 h-8"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-48 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-32"></div>
+                  </div>
+                </div>
+                <div className="w-6 h-6 bg-gray-200 rounded"></div>
               </div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (certificates.length === 0) {
-    return (
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-          <span className="bg-[#A100FF20] p-2 rounded-md mr-3">
-            <FiAward className="h-5 w-5 text-[#A100FF]" />
-          </span>
-          Certificaciones
-        </h3>
-        <div className="text-center py-8">
-          <FiAward className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-          <h4 className="text-lg font-medium text-gray-500 mb-2">Sin certificaciones registradas</h4>
-          <p className="text-gray-400">Este usuario no ha registrado certificaciones.</p>
+  return (
+    <motion.div 
+      className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      whileHover={{ y: -2 }}
+    >
+      <motion.h2 
+        className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <motion.span 
+          className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm"
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ duration: 0.2 }}
+        >
+          <FiAward className="h-5 w-5 text-[#A100FF]" />
+        </motion.span>
+        Certificaciones
+      </motion.h2>
+      <motion.div
+        className="space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <div className="text-center py-5">
+          <div className="bg-gray-50 rounded-full p-3 inline-flex mb-3 shadow-sm">
+            <FiAward className="h-5 w-5 text-gray-400" />
+          </div>
+          <p className="text-gray-500 text-sm">Sin certificaciones registradas</p>
         </div>
-      </div>
-    );
+      </motion.div>
+    </motion.div>
+  );
   }
 
   const activeCertificates = certificates.filter(cert => !isExpired(cert.fecha_expiracion));
@@ -87,96 +129,119 @@ export default function ReadOnlyCertificatesSection({ certificates, loading = fa
   const expiringSoonCount = certificates.filter(cert => isExpiringSoon(cert.fecha_expiracion)).length;
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-        <span className="bg-[#A100FF20] p-2 rounded-md mr-3">
+    <motion.div 
+      className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      whileHover={{ y: -2 }}
+    >
+      <motion.h2 
+        className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <motion.span 
+          className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm"
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ duration: 0.2 }}
+        >
           <FiAward className="h-5 w-5 text-[#A100FF]" />
-        </span>
+        </motion.span>
         Certificaciones
         <span className="ml-3 bg-[#A100FF10] text-[#A100FF] px-2 py-1 rounded-full text-sm font-medium">
           {certificates.length} certificado{certificates.length !== 1 ? 's' : ''}
         </span>
-      </h3>
+      </motion.h2>
 
-
-      <div className="space-y-4">
-        {certificates.map((cert, index) => {
-          const expired = isExpired(cert.fecha_expiracion);
-          const expiringSoon = isExpiringSoon(cert.fecha_expiracion);
-          
-          return (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={`p-4 rounded-lg border transition-all duration-200 ${
-                expired
-                  ? 'bg-red-50 border-red-200'
-                  : expiringSoon
-                  ? 'bg-yellow-50 border-yellow-200'
-                  : 'bg-gray-50 border-gray-200 hover:border-[#A100FF] hover:shadow-md'
-              }`}
-            >
-              <div className="flex justify-between items-start">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start space-x-3">
-                    <div className={`p-2 rounded-md ${
+      <motion.div
+        className="space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <div className="space-y-4">
+          {certificates.map((cert, index) => {
+            const expired = isExpired(cert.fecha_expiracion);
+            const expiringSoon = isExpiringSoon(cert.fecha_expiracion);
+            
+            return (
+              <motion.div
+                key={index}
+                className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF30] bg-white shadow-sm"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                whileHover={{ y: -2, shadow: "0 8px 20px -5px rgba(0, 0, 0, 0.1)" }}
+              >
+                <div className="flex items-center flex-1">
+                  <motion.div
+                    className={`p-2 rounded-md mr-3 ${
                       expired
                         ? 'bg-red-100 text-red-600'
                         : expiringSoon
                         ? 'bg-yellow-100 text-yellow-600'
                         : 'bg-[#A100FF20] text-[#A100FF]'
-                    }`}>
-                      <FiAward className="h-4 w-4" />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 mb-1 truncate" title={cert.titulo}>
-                        {cert.titulo}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-2">{cert.institucion}</p>
-                      
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <FiCalendar className="h-3 w-3 mr-1" />
-                          <span>Obtenido: {formatDate(cert.fecha_obtencion)}</span>
-                        </div>
-                        
-                        
-                        {!cert.fecha_expiracion && (
-                          <div className="flex items-center text-green-600">
-                            <FiCheckCircle className="h-3 w-3 mr-1" />
-                            <span>Sin expiración</span>
-                          </div>
-                        )}
-                      </div>
+                    }`}
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <FiAward className="h-4 w-4" />
+                  </motion.div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-gray-800 truncate" title={cert.titulo}>
+                      {cert.titulo}
+                    </p>
+                    {cert.url && (
+                      <p className="text-xs text-gray-600">
+                        Documento disponible
+                      </p>
+                    )}
+                    <div className="flex items-center text-xs text-gray-500 space-x-3">
+                      <span className="flex items-center">
+                        <FiCalendar className="h-3 w-3 mr-1" />
+                        {formatDate(cert.fecha_obtencion)}
+                      </span>
+                      {!cert.fecha_expiracion && (
+                        <span className="flex items-center text-green-600">
+                          <FiCheckCircle className="h-3 w-3 mr-1" />
+                          Sin expiración
+                        </span>
+                      )}
+                      {expired && (
+                        <span className="text-red-600 font-medium">
+                          Expirado
+                        </span>
+                      )}
+                      {expiringSoon && (
+                        <span className="text-yellow-600 font-medium">
+                          Expira pronto
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
-                
-                {cert.url && (
-                  <a
-                    href={cert.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                      expired
-                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                        : expiringSoon
-                        ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                        : 'bg-[#A100FF] text-white hover:bg-[#8A00E6]'
-                    }`}
-                  >
-                    Ver
-                    <FiExternalLink className="h-3 w-3 ml-1" />
-                  </a>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
+                <div className="flex space-x-1 flex-shrink-0">
+                  {cert.url && (
+                    <motion.button
+                      onClick={() => window.open(cert.url, '_blank', 'noopener,noreferrer')}
+                      className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
+                      title="Ver certificado"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.1 }}
+                    >
+                      <FiExternalLink size={14} />
+                    </motion.button>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }

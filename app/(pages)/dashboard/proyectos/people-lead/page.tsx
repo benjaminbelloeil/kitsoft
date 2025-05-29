@@ -44,7 +44,12 @@ export default function PeopleLeadPage() {
   }, [userLoading, isPeopleLead, router]);
   // Fetch assigned users when component mounts
   useEffect(() => {
+    // Prevent multiple simultaneous fetches and ensure we only run this once per mount
+    if (fetchInProgress.current || hasInitialized.current) return;
+    
+    // Only fetch if user is loaded, is people lead, and we don't have valid cached data
     if (!userLoading && isPeopleLead && !dataLoaded) {
+      hasInitialized.current = true;
       fetchAssignedUsers();
     }
   }, [userLoading, isPeopleLead, dataLoaded, fetchAssignedUsers]);  // Container animation variants

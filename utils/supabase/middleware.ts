@@ -51,9 +51,40 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: DO NOT add code between createServerClient and
   // supabase.auth.getUser() to avoid unexpected auth issues
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null;
+  try {
+    const {
+      data: { user: authUser },
+      error: authError
+    } = await supabase.auth.getUser()
+    
+    // If there's an invalid refresh token error, clear the auth cookies
+    if (authError && authError.message?.includes('Invalid Refresh Token')) {
+      console.log('Invalid refresh token detected, clearing auth cookies');
+      
+      // Clear all auth-related cookies
+      response.cookies.delete('sb-access-token');
+      response.cookies.delete('sb-refresh-token'); 
+      response.cookies.delete('supabase-auth-token');
+      
+      // Also clear any cookies with supabase prefix
+      const cookieNames = ['sb-access-token', 'sb-refresh-token', 'supabase-auth-token'];
+      cookieNames.forEach(name => {
+        response.cookies.set(name, '', { 
+          expires: new Date(0),
+          path: '/',
+          maxAge: 0
+        });
+      });
+      
+      user = null;
+    } else if (!authError) {
+      user = authUser;
+    }
+  } catch (error) {
+    console.log('Auth error in middleware:', error);
+    user = null;
+  }
 
   // If not logged in and trying to access a protected route
   if (

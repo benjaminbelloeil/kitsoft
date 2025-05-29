@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FiFileText, FiDownload, FiExternalLink } from "react-icons/fi";
+import { FiFileText, FiExternalLink } from "react-icons/fi";
 
 interface ReadOnlyResumeSectionProps {
   resumeUrl: string | null;
@@ -32,12 +32,13 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
           <span className="bg-[#A100FF20] p-2 rounded-md mr-3">
             <FiFileText className="h-5 w-5 text-[#A100FF]" />
           </span>
-          Currículum Vitae
+          Currículum
         </h3>
-        <div className="text-center py-8">
-          <FiFileText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-          <h4 className="text-lg font-medium text-gray-500 mb-2">Sin currículum disponible</h4>
-          <p className="text-gray-400">Este usuario no ha subido su currículum vitae.</p>
+        <div className="text-center py-5">
+          <div className="bg-gray-50 rounded-full p-3 inline-flex mb-3 shadow-sm">
+            <FiFileText className="h-5 w-5 text-gray-400" />
+          </div>
+          <p className="text-gray-500 text-sm">Sin currículum disponible</p>
         </div>
       </div>
     );
@@ -47,76 +48,57 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
     window.open(resumeUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleDownloadResume = () => {
-    const link = document.createElement('a');
-    link.href = resumeUrl;
-    link.download = 'curriculum.pdf';
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
       <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
         <span className="bg-[#A100FF20] p-2 rounded-md mr-3">
           <FiFileText className="h-5 w-5 text-[#A100FF]" />
         </span>
-        Currículum Vitae
-        <span className="ml-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-sm font-medium">
-          Disponible
-        </span>
+        Currículum
       </h3>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-[#A100FF10] to-purple-50 rounded-lg p-6 border border-[#A100FF20]"
+      <motion.div 
+        className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF30] bg-white shadow-sm"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        whileHover={{ y: -2, shadow: "0 8px 20px -5px rgba(0, 0, 0, 0.1)" }}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="bg-[#A100FF] p-3 rounded-lg">
-              <FiFileText className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-1">Currículum Vitae</h4>
-              <p className="text-sm text-gray-600 mb-3">
-                Documento PDF con la información profesional completa
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={handleViewResume}
-                  className="inline-flex items-center px-4 py-2 bg-[#A100FF] text-white rounded-lg hover:bg-[#8A00E6] transition-colors text-sm font-medium"
-                >
-                  <FiExternalLink className="h-4 w-4 mr-2" />
-                  Ver Currículum
-                </button>
-                <button
-                  onClick={handleDownloadResume}
-                  className="inline-flex items-center px-4 py-2 bg-white text-[#A100FF] border border-[#A100FF] rounded-lg hover:bg-[#A100FF10] transition-colors text-sm font-medium"
-                >
-                  <FiDownload className="h-4 w-4 mr-2" />
-                  Descargar
-                </button>
-              </div>
-            </div>
+        <div className="flex items-center">
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FiFileText className="text-[#A100FF] mr-2 flex-shrink-0" size={18} />
+          </motion.div>
+          <div className="max-w-[300px] pr-2">
+            <p className="font-medium text-sm text-gray-800 break-all">
+              {resumeUrl ? (
+                (() => {
+                  // Extract the filename from URL
+                  const fullFilename = decodeURIComponent(resumeUrl.split('/').pop() || 'Currículum');
+                  // Pattern to match UUID-timestamp-actualFilename
+                  const parts = fullFilename.match(/^[a-f0-9-]+-\d+-(.+)$/);
+                  return parts && parts[1] ? parts[1] : fullFilename;
+                })()
+              ) : 'Currículum'}
+            </p>
+            <p className="text-xs text-gray-500">Documento disponible</p>
           </div>
+        </div>
+        <div className="flex space-x-1 flex-shrink-0">
+          <motion.button
+            onClick={handleViewResume}
+            className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
+            title="Ver Currículum"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.1 }}
+          >
+            <FiExternalLink size={14} />
+          </motion.button>
         </div>
       </motion.div>
-
-      {/* Additional info */}
-      <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div className="flex items-start space-x-2">
-          <div className="flex-shrink-0 w-4 h-4 bg-blue-500 rounded-full mt-0.5"></div>
-          <div>
-            <p className="text-sm text-blue-800 font-medium mb-1">Información de visualización</p>
-            <p className="text-xs text-blue-700">
-              Este documento se abrirá en una nueva ventana. Puedes descargarlo para revisarlo sin conexión.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
