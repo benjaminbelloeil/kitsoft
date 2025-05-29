@@ -3,9 +3,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ThumbsUp, CheckCircle, Clock, MessageSquare, Send, User, FolderOpen, Users, Clock as ClockIcon } from "lucide-react";
+import { feedbackRecipients } from "@/app/lib/data";
+import { useUser } from "@/context/user-context";
 import ProjectLeadHeader from '@/components/proyectos/project-lead/ProjectLeadHeader';
 import ProjectLeadSkeleton from '@/components/proyectos/project-lead/ProjectLeadSkeleton';
-import { feedbackRecipients } from "@/app/lib/data";
+import UnauthorizedState from '@/components/auth/UnauhtorizedState';
+import { fetchProjects } from "@/utils/database/client/projectManagerSync";
 
 export default function ProjectLeadPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,15 +19,20 @@ export default function ProjectLeadPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-
+  const { isProjectLead, isLoading: userLoading } = useUser();
+  
   // Simulate loading state
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 2000); // 2 second loading simulation
-
+    
     return () => clearTimeout(timer);
   }, []);
+  
+  if (!isProjectLead) {
+    return <UnauthorizedState />;
+  }  
 
   const projects = [
     { 
@@ -134,7 +142,7 @@ export default function ProjectLeadPage() {
     // Show success notification
     alert("Retroalimentación enviada con éxito!");
   };
-   return (
+  return (
     <div className="min-h-screen bg-white">
       <AnimatePresence mode="wait">
         {isLoading ? (

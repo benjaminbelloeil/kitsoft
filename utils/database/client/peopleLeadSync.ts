@@ -351,3 +351,143 @@ export function groupSkillsByLevel(skills: Array<{ id: string; name: string; lev
     professional: skills.filter(skill => skill.level === 3)
   };
 }
+
+// HOOKS ======================
+import { useState, useEffect, useCallback } from 'react';
+
+export interface AssignedUser {
+  id_usuario: string;
+  nombre: string;
+  apellido: string;
+  correo: string;
+  titulo: string;
+  url_avatar: string | null;
+  fecha_inicio_empleo: string | null;
+}
+
+interface AssignedUsersData {
+  users: AssignedUser[];
+  filteredUsers: AssignedUser[];
+  loading: boolean;
+  error: string | null;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  fetchAssignedUsers: () => Promise<void>;
+  refreshData: () => void;
+  dataLoaded: boolean;
+}
+
+/**
+ * Custom hook to manage assigned users for a People Lead
+ * Handles fetching, caching, filtering, and refreshing user data
+ */
+/**
+ * Custom hook to manage profile modal state
+ * Handles opening and closing the modal with user ID
+ */
+export function useProfileModal() {
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  const handleViewProfile = (userId: string) => {
+    setSelectedUserId(userId);
+    setShowProfileModal(true);
+  };
+
+  const handleCloseProfileModal = () => {
+    setShowProfileModal(false);
+    setSelectedUserId(null);
+  };
+
+  return {
+    selectedUserId,
+    showProfileModal,
+    handleViewProfile,
+    handleCloseProfileModal
+  };
+}
+
+export function useAssignedUsers(): AssignedUsersData {
+  const [users, setUsers] = useState<AssignedUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<AssignedUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Fetch assigned users with caching
+  const fetchAssignedUsers = useCallback(async () => {
+    try {
+      // Check if we have cached data first
+      const cachedData = localStorage.getItem('people-lead-users');
+      const cacheTimestamp = localStorage.getItem('people-lead-users-timestamp');
+      const cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
+      
+      if (cachedData && cacheTimestamp) {
+        const age = Date.now() - parseInt(cacheTimestamp);
+        if (age < cacheExpiry) {
+          // Use cached data
+          const parsedData = JSON.parse(cachedData);
+          setUsers(parsedData);
+          setDataLoaded(true);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Fetch fresh data if no cache or cache expired
+      const response = await fetch('/api/people-lead/users');
+      if (!response.ok) {
+        throw new Error('Failed to fetch assigned users');
+      }
+      const data = await response.json();
+      
+      // Cache the data
+      localStorage.setItem('people-lead-users', JSON.stringify(data.users));
+      localStorage.setItem('people-lead-users-timestamp', Date.now().toString());
+      
+      setUsers(data.users);
+      setDataLoaded(true);
+    } catch (error) {
+      console.error('Error fetching assigned users:', error);
+      setError('Error al cargar los usuarios asignados');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Function to refresh data by clearing cache
+  const refreshData = useCallback(() => {
+    // Clear cache
+    localStorage.removeItem('people-lead-users');
+    localStorage.removeItem('people-lead-users-timestamp');
+    
+    // Reset state and refetch
+    setDataLoaded(false);
+    setLoading(true);
+    fetchAssignedUsers();
+  }, [fetchAssignedUsers]);
+
+  // Filter users when search term or users array changes
+  useEffect(() => {
+    // Filter users based on search term
+    const filtered = users.filter(user =>
+      `${user.nombre} ${user.apellido}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.titulo && user.titulo.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredUsers(filtered);
+  }, [users, searchTerm]);
+
+  return {
+    users,
+    filteredUsers,
+    loading,
+    error,
+    searchTerm,
+    setSearchTerm,
+    fetchAssignedUsers,
+    refreshData,
+    dataLoaded
+  };
+}
