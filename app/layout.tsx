@@ -5,6 +5,7 @@ import { NavigationProvider } from "@/context/navigation-context";
 import { UserProvider } from "@/context/user-context";
 import { Metadata } from "next";
 import { PageTransition } from "@/components/ui/page-transition";
+import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,8 +39,10 @@ export default function RootLayout({
       >
         <NavigationProvider>
           <UserProvider>
-            <PageTransition />
-            {children}
+            <AuthErrorBoundary>
+              <PageTransition />
+              {children}
+            </AuthErrorBoundary>
           </UserProvider>
         </NavigationProvider>
       </body>

@@ -5,36 +5,12 @@ import { createClient } from '@/utils/supabase/client';
 import { useNavigation } from '@/context/navigation-context';
 import { useUser } from '@/context/user-context';
 import { ensureUserHasLevel } from '@/utils/database/client/userLevelSync';
+import { handleAuthError } from '@/utils/auth/error-handler';
 
 // Utility function to handle invalid refresh token errors
 // Clears the auth state and redirects to login
 export async function handleInvalidRefreshToken() {
-  const supabase = createClient();
-  
-  try {
-    // Sign out to clear all auth state
-    await supabase.auth.signOut();
-    
-    // Clear any remaining auth cookies on the client side
-    if (typeof window !== 'undefined') {
-      // Clear localStorage items that might contain auth data
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('sb-access-token');
-      localStorage.removeItem('sb-refresh-token');
-      
-      // Clear sessionStorage as well
-      sessionStorage.clear();
-      
-      // Redirect to login
-      window.location.href = '/login';
-    }
-  } catch (error) {
-    console.error('Error handling invalid refresh token:', error);
-    // Force redirect even if signOut fails
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
-    }
-  }
+  await handleAuthError({ message: 'Invalid refresh token' });
 }
 
 // Hook for handling login form state and submission
@@ -47,6 +23,21 @@ export function useLoginForm() {
   const supabase = createClient();
   const { startNavigation } = useNavigation();
   const { refreshUserRole } = useUser();
+
+  // Check for session expiration message on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const message = urlParams.get('message');
+      
+      if (message === 'session_expired') {
+        setError('Your session has expired. Please sign in again.');
+        // Clear the URL parameter
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -34,7 +34,8 @@ export function handleApiAuthError(error: any): NextResponse {
     { 
       error: 'Authentication session expired',
       code: 'session_expired',
-      details: 'Please log in again'
+      details: 'Please log in again',
+      redirect: '/login?message=session_expired'
     },
     { 
       status: 401,

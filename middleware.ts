@@ -45,24 +45,61 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-    error: authError
-  } = await supabase.auth.getUser()
+  let user = null;
+  let authError: Error | null = null;
 
-  // Handle invalid refresh token errors
-  if (authError && authError.message?.includes('Invalid Refresh Token')) {
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    user = data.user;
+    authError = error;
+  } catch (error) {
+    console.log('Error getting user in middleware:', error);
+    authError = error as Error;
+  }
+
+  // Handle invalid refresh token errors or auth errors
+  const isRefreshTokenError = authError && (
+    authError.message?.includes('Invalid Refresh Token') ||
+    authError.message?.includes('refresh_token_not_found') ||
+    ('code' in authError && (authError as {code: string}).code === 'refresh_token_not_found')
+  );
+
+  if (isRefreshTokenError) {
     console.log('Invalid refresh token detected in main middleware, clearing cookies and redirecting to login');
     
     // Clear auth cookies and redirect to login
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/login'
+    redirectUrl.searchParams.set('message', 'session_expired')
     const redirectResponse = NextResponse.redirect(redirectUrl)
     
-    // Clear all auth-related cookies
-    redirectResponse.cookies.delete('sb-access-token');
-    redirectResponse.cookies.delete('sb-refresh-token'); 
-    redirectResponse.cookies.delete('supabase-auth-token');
+    // Get all cookies and clear any that might be auth-related
+    const cookiesToClear = [
+      'sb-access-token',
+      'sb-refresh-token',
+      'supabase-auth-token',
+      'sb-localhost-auth-token',
+      'sb-127.0.0.1-auth-token'
+    ];
+
+    // Also clear cookies that start with your project ref
+    const allCookies = request.cookies.getAll();
+    allCookies.forEach((cookie) => {
+      if (cookie.name.includes('sb-') || cookie.name.includes('supabase')) {
+        cookiesToClear.push(cookie.name);
+      }
+    });
+
+    // Clear all identified cookies
+    cookiesToClear.forEach(cookieName => {
+      redirectResponse.cookies.set(cookieName, '', {
+        expires: new Date(0),
+        path: '/',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      });
+    });
     
     return redirectResponse;
   }

@@ -17,12 +17,6 @@ export default function UnauthorizedState({
 }: UnauthorizedStateProps) {
     const router = useRouter();
 
-    const handleRedirect = () => {
-        if (redirectTo) {
-            router.push(redirectTo);
-        }
-    };
-
     return (
         <motion.div 
       className="min-h-screen bg-gray-50 flex items-center justify-center p-4"

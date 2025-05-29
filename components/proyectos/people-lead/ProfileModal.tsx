@@ -1,4 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserProfile } from "@/interfaces/user"
 import { FiX, FiMail, FiPhone, FiMapPin } from "react-icons/fi";

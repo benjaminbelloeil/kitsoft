@@ -2,6 +2,22 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 /**
+ * Check if an error is a refresh token error
+ */
+function isRefreshTokenError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  
+  const authError = error as { message?: string; code?: string };
+  return Boolean(
+    authError.message?.includes('Invalid Refresh Token') ||
+    authError.message?.includes('refresh_token_not_found') ||
+    authError.code === 'refresh_token_not_found' ||
+    authError.message?.includes('JWT expired') ||
+    authError.message?.includes('Invalid JWT')
+  );
+}
+
+/**
  * Server-side utility to get the authenticated user
  * Redirects to login if no user is found
  */
@@ -9,7 +25,15 @@ export async function getAuthenticatedUser() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   
-  if (error || !user) {
+  if (error) {
+    // If it's a refresh token error, redirect with a specific message
+    if (isRefreshTokenError(error)) {
+      redirect('/login?message=session_expired');
+    }
+    redirect('/login');
+  }
+  
+  if (!user) {
     redirect('/login');
   }
   
@@ -21,7 +45,13 @@ export async function getAuthenticatedUser() {
  */
 export async function getCurrentUser() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  // Log refresh token errors for debugging
+  if (error && isRefreshTokenError(error)) {
+    console.log('Refresh token error in getCurrentUser:', error);
+  }
+  
   return user;
 }
 
@@ -30,7 +60,13 @@ export async function getCurrentUser() {
  */
 export async function isAuthenticated(): Promise<boolean> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  // If there's a refresh token error, consider user as not authenticated
+  if (error && isRefreshTokenError(error)) {
+    return false;
+  }
+  
   return !!user;
 }
 

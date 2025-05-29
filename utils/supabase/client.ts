@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr'
+import { handleAuthError, isInvalidRefreshTokenError } from '@/utils/auth/error-handler'
 
 export function createClient() {
   const client = createBrowserClient(
@@ -7,7 +8,7 @@ export function createClient() {
   )
 
   // Add global auth error handler
-  client.auth.onAuthStateChange((event, session) => {
+  client.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_OUT' && !session) {
       // Clear any remaining auth data when signed out
       if (typeof window !== 'undefined') {
@@ -15,7 +16,27 @@ export function createClient() {
         sessionStorage.clear();
       }
     }
+    
+    // Handle token refresh failures
+    if (event === 'TOKEN_REFRESHED' && !session) {
+      console.log('Token refresh failed, handling auth error');
+      await handleAuthError({ message: 'Token refresh failed' });
+    }
   });
 
+  // Add error interceptor for API calls
+  const originalRequest = client.auth.getUser;
+  client.auth.getUser = async () => {
+    try {
+      return await originalRequest.call(client.auth);
+    } catch (error) {
+      if (isInvalidRefreshTokenError(error)) {
+        await handleAuthError(error);
+        throw error;
+      }
+      throw error;
+    }
+  };
+  
   return client;
 }

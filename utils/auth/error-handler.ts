@@ -58,8 +58,8 @@ export async function handleAuthError(error: any): Promise<void> {
       // Clear sessionStorage
       sessionStorage.clear();
       
-      // Redirect to login
-      window.location.href = '/login';
+      // Redirect to login with session expired message
+      window.location.href = '/login?message=session_expired';
     }
   }
 }

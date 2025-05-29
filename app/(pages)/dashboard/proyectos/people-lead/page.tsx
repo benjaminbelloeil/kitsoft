@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { FiUsers, FiAlertCircle } from 'react-icons/fi';
+import { FiUsers } from 'react-icons/fi';
 import { useRef } from 'react';
 import PeopleLeadHeader from '@/components/proyectos/people-lead/PeopleLeadHeader';
 import PeopleLeadSkeleton from '@/components/proyectos/people-lead/PeopleLeadSkeleton';
@@ -28,7 +28,6 @@ export default function PeopleLeadPage() {
     searchTerm, 
     setSearchTerm, 
     fetchAssignedUsers, 
-    refreshData, 
     dataLoaded 
   } = useAssignedUsers();
   

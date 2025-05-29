@@ -8,7 +8,7 @@ import { useUser } from "@/context/user-context";
 import ProjectLeadHeader from '@/components/proyectos/project-lead/ProjectLeadHeader';
 import ProjectLeadSkeleton from '@/components/proyectos/project-lead/ProjectLeadSkeleton';
 import UnauthorizedState from '@/components/auth/UnauhtorizedState';
-import { fetchProjects } from "@/utils/database/client/projectManagerSync";
+// import { fetchProjects } from "@/utils/database/client/projectManagerSync";
 
 export default function ProjectLeadPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,7 +19,9 @@ export default function ProjectLeadPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const { isProjectLead, isLoading: userLoading } = useUser();
+  const { isProjectLead } = useUser();
+  const [expandedProject, setExpandedProject] = useState<string | null>(null);
+  const [hourAssignments, setHourAssignments] = useState<Record<string, number>>({});
   
   // Simulate loading state
   useEffect(() => {
@@ -81,9 +83,6 @@ export default function ProjectLeadPage() {
       ]
     },
   ];
-
-  const [expandedProject, setExpandedProject] = useState<string | null>(null);
-  const [hourAssignments, setHourAssignments] = useState<Record<string, number>>({});
 
   // Helper function to calculate total assigned hours for a project
   const getTotalAssignedHours = (projectId: string) => {
