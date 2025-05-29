@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { FiUsers, FiAlertCircle } from 'react-icons/fi';
+import { useRef } from 'react';
 import PeopleLeadHeader from '@/components/proyectos/people-lead/PeopleLeadHeader';
 import PeopleLeadSkeleton from '@/components/proyectos/people-lead/PeopleLeadSkeleton';
 import ProfileModal from '@/components/proyectos/people-lead/ProfileModal';
@@ -16,6 +17,8 @@ import UnauthorizedState from '@/components/auth/UnauhtorizedState';
 export default function PeopleLeadPage() {
   const { isPeopleLead, isLoading: userLoading } = useUser();
   const router = useRouter();
+  const hasInitialized = useRef(false);// Add refs to prevent multiple fetches and track initialization
+  const fetchInProgress = useRef(false);
   
   const { 
     users, 
@@ -35,6 +38,7 @@ export default function PeopleLeadPage() {
     handleViewProfile,
     handleCloseProfileModal
   } = useProfileModal();
+
 
   // Permission check - redirect unauthorized users
   useEffect(() => {
