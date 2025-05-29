@@ -6,6 +6,37 @@ import { useNavigation } from '@/context/navigation-context';
 import { useUser } from '@/context/user-context';
 import { ensureUserHasLevel } from '@/utils/database/client/userLevelSync';
 
+// Utility function to handle invalid refresh token errors
+// Clears the auth state and redirects to login
+export async function handleInvalidRefreshToken() {
+  const supabase = createClient();
+  
+  try {
+    // Sign out to clear all auth state
+    await supabase.auth.signOut();
+    
+    // Clear any remaining auth cookies on the client side
+    if (typeof window !== 'undefined') {
+      // Clear localStorage items that might contain auth data
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-access-token');
+      localStorage.removeItem('sb-refresh-token');
+      
+      // Clear sessionStorage as well
+      sessionStorage.clear();
+      
+      // Redirect to login
+      window.location.href = '/login';
+    }
+  } catch (error) {
+    console.error('Error handling invalid refresh token:', error);
+    // Force redirect even if signOut fails
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  }
+}
+
 // Hook for handling login form state and submission
 export function useLoginForm() {
   const [email, setEmail] = useState('');
@@ -86,7 +117,15 @@ export function useAuthCheck() {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        
+        // Handle invalid refresh token errors
+        if (error && error.message?.includes('Invalid Refresh Token')) {
+          console.log('Invalid refresh token detected in auth check, clearing auth state');
+          await handleInvalidRefreshToken();
+          return;
+        }
+        
         const session = data.session;
         
         if (session) {
@@ -113,16 +152,32 @@ export function useAuthCheck() {
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        // Handle sign out events or invalid token errors
+        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
+          setIsAuthenticated(false);
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+        
         setIsAuthenticated(!!session);
         setUser(session?.user || null);
         
         if (session) {
-          // Ensure user has a role assigned
-          await ensureUserHasLevel(session.user.id);
-          
-          // Update user role information when auth state changes
-          await refreshUserRole();
+          try {
+            // Ensure user has a role assigned
+            await ensureUserHasLevel(session.user.id);
+            
+            // Update user role information when auth state changes
+            await refreshUserRole();
+          } catch (error) {
+            console.error('Error in auth state change handler:', error);
+            // If there's an error, it might be due to invalid tokens
+            if (error instanceof Error && error.message?.includes('Invalid Refresh Token')) {
+              await handleInvalidRefreshToken();
+            }
+          }
         }
         
         setIsLoading(false);

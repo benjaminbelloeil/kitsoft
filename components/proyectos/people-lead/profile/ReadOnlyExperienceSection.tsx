@@ -15,12 +15,18 @@ interface ReadOnlyExperienceSectionProps {
   loading?: boolean;
 }
 
-// Format date for display (e.g. "January 2023")
+// Format date for display (e.g. "marzo de 2021")
 const formatDateDisplay = (dateString: string): string => {
   if (!dateString) return '';
   
   try {
     const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if date is invalid
+    }
+    
     return date.toLocaleDateString('es-ES', { 
       month: 'long', 
       year: 'numeric' 
@@ -86,13 +92,13 @@ export default function ReadOnlyExperienceSection({ experiences, loading = false
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300">
-      <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
-        <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+      <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
+        <span className="bg-[#A100FF20] p-2 rounded-md mr-3">
           <FiBriefcase className="h-5 w-5 text-[#A100FF]" />
         </span>
         Experiencia
-      </h2>
+      </h3>
 
       <div className="mt-4">
         {experiences.map((exp, index) => {

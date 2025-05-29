@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUsers, FiMail, FiPhone, FiMapPin, FiX, FiEye, FiAlertCircle } from 'react-icons/fi';
 import Image from 'next/image';
@@ -43,13 +43,9 @@ function ProfileModal({ isOpen, onClose, userId }: ProfileModalProps) {
   const [resume, setResume] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [profileDataLoaded, setProfileDataLoaded] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
-    if (isOpen && userId && !profileDataLoaded[userId]) {
-      fetchCompleteProfile();
-    } else if (isOpen && userId && profileDataLoaded[userId]) {
-      // Load from cache if available
+    if (isOpen && userId) {
       loadCachedProfileData();
     }
   }, [isOpen, userId]);
@@ -99,8 +95,6 @@ function ProfileModal({ isOpen, onClose, userId }: ProfileModalProps) {
       
       localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
       localStorage.setItem(`${cacheKey}-timestamp`, Date.now().toString());
-      
-      setProfileDataLoaded(prev => ({ ...prev, [userId]: true }));
     } catch (error) {
       console.error('Error saving profile data to cache:', error);
     }
@@ -460,28 +454,73 @@ function ProfileModal({ isOpen, onClose, userId }: ProfileModalProps) {
 }
 
 // User Card Component with enhanced animations
-function UserCard({ user, onViewProfile, index }: { user: AssignedUser; onViewProfile: (userId: string) => void, index: number }) {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+const UserCard = React.memo(function UserCard({ user, onViewProfile, index }: { user: AssignedUser; onViewProfile: (userId: string) => void, index: number }) {
+  // Centralized cache validation for user cards
+  const getUserCachedData = () => {
+    if (typeof window === 'undefined') {
+      return { data: null, isValid: false };
+    }
+    
+    try {
+      const cacheKey = `basic-profile-${user.id_usuario}`;
+      const cachedData = localStorage.getItem(cacheKey);
+      const cacheTimestamp = localStorage.getItem(`${cacheKey}-timestamp`);
+      const cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
+      
+      if (cachedData && cacheTimestamp) {
+        const age = Date.now() - parseInt(cacheTimestamp);
+        if (age < cacheExpiry) {
+          const parsedData = JSON.parse(cachedData);
+          return { data: parsedData, isValid: true };
+        }
+      }
+    } catch (error) {
+      console.error('Error reading cached profile data:', error);
+    }
+    
+    return { data: null, isValid: false };
+  };
 
-  // Fetch basic profile info for the card
+  // Get cached data once and use it for state initialization
+  const cachedProfileResult = getUserCachedData();
+  
+  // Initialize states based on the single cache check
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(cachedProfileResult.data);
+  const [loading, setLoading] = useState(!cachedProfileResult.isValid);
+  const fetchInProgressRef = useRef(false);
+
+  // Fetch basic profile info for the card with caching
   useEffect(() => {
+    // Only fetch if we don't have valid cached data and no fetch is in progress
+    if (cachedProfileResult.isValid || fetchInProgressRef.current) return;
+    
     const fetchBasicProfile = async () => {
+      if (fetchInProgressRef.current) return;
+      
+      fetchInProgressRef.current = true;
       setLoading(true);
+      
       try {
         const response = await fetch(`/api/profile/get?userId=${user.id_usuario}`);
         if (response.ok) {
           const profileData = await response.json();
           setUserProfile(profileData);
+          
+          // Cache the data
+          const cacheKey = `basic-profile-${user.id_usuario}`;
+          localStorage.setItem(cacheKey, JSON.stringify(profileData));
+          localStorage.setItem(`${cacheKey}-timestamp`, Date.now().toString());
         }
       } catch (error) {
         console.error('Error fetching basic profile:', error);
       } finally {
         setLoading(false);
+        fetchInProgressRef.current = false;
       }
     };
+    
     fetchBasicProfile();
-  }, [user.id_usuario]);
+  }, []); // Empty dependency array since we only want this to run once per mount
 
   return (
     <motion.div
@@ -651,20 +690,54 @@ function UserCard({ user, onViewProfile, index }: { user: AssignedUser; onViewPr
       </motion.div>
     </motion.div>
   );
-}
+});
+
+// Centralized cache validation function
+const getCachedData = () => {
+  if (typeof window === 'undefined') {
+    return { data: [], isValid: false };
+  }
+  
+  try {
+    const cachedData = localStorage.getItem('people-lead-users');
+    const cacheTimestamp = localStorage.getItem('people-lead-users-timestamp');
+    const cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
+    
+    if (cachedData && cacheTimestamp) {
+      const age = Date.now() - parseInt(cacheTimestamp);
+      if (age < cacheExpiry) {
+        const parsedData = JSON.parse(cachedData);
+        return { data: parsedData, isValid: true };
+      }
+    }
+  } catch (error) {
+    console.error('Error reading cached data:', error);
+  }
+  
+  return { data: [], isValid: false };
+};
 
 // Main Page Component with enhanced animations
 export default function PeopleLeadPage() {
   const { isPeopleLead, isLoading: userLoading } = useUser();
   const router = useRouter();
-  const [users, setUsers] = useState<AssignedUser[]>([]);
+  
+  // Get cached data once and use it for all state initialization
+  const cachedResult = getCachedData();
+  
+  // Initialize all states based on the single cache check
+  const [users, setUsers] = useState<AssignedUser[]>(cachedResult.data);
   const [filteredUsers, setFilteredUsers] = useState<AssignedUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cachedResult.isValid);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [dataLoaded, setDataLoaded] = useState(false); // Track if data has been loaded
+  const [dataLoaded, setDataLoaded] = useState(cachedResult.isValid);
+  
+  // Ref to track if a fetch is already in progress to prevent race conditions
+  const fetchInProgress = useRef(false);
+  const hasInitialized = useRef(false);
 
   // Permission check - redirect unauthorized users
   useEffect(() => {
@@ -673,14 +746,20 @@ export default function PeopleLeadPage() {
     }
   }, [userLoading, isPeopleLead, router]);
 
+  // Data fetching effect - only runs once when conditions are met
   useEffect(() => {
+    // Prevent multiple simultaneous fetches and ensure we only run this once per mount
+    if (fetchInProgress.current || hasInitialized.current) return;
+    
+    // Only fetch if user is loaded, is people lead, and we don't have valid cached data
     if (!userLoading && isPeopleLead && !dataLoaded) {
+      hasInitialized.current = true;
       fetchAssignedUsers();
     }
   }, [userLoading, isPeopleLead, dataLoaded]);
 
+  // Filter users whenever users or search term changes
   useEffect(() => {
-    // Filter users based on search term
     const filtered = users.filter(user =>
       `${user.nombre} ${user.apellido}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -690,25 +769,14 @@ export default function PeopleLeadPage() {
   }, [users, searchTerm]);
 
   const fetchAssignedUsers = async () => {
+    if (fetchInProgress.current) return; // Prevent concurrent fetches
+    
     try {
-      // Check if we have cached data first
-      const cachedData = localStorage.getItem('people-lead-users');
-      const cacheTimestamp = localStorage.getItem('people-lead-users-timestamp');
-      const cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
+      fetchInProgress.current = true;
+      setLoading(true);
+      setError(null);
       
-      if (cachedData && cacheTimestamp) {
-        const age = Date.now() - parseInt(cacheTimestamp);
-        if (age < cacheExpiry) {
-          // Use cached data
-          const parsedData = JSON.parse(cachedData);
-          setUsers(parsedData);
-          setDataLoaded(true);
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Fetch fresh data if no cache or cache expired
+      // Fetch fresh data from API
       const response = await fetch('/api/people-lead/users');
       if (!response.ok) {
         throw new Error('Failed to fetch assigned users');
@@ -726,6 +794,7 @@ export default function PeopleLeadPage() {
       setError('Error al cargar los usuarios asignados');
     } finally {
       setLoading(false);
+      fetchInProgress.current = false;
     }
   };
 
@@ -734,9 +803,13 @@ export default function PeopleLeadPage() {
     localStorage.removeItem('people-lead-users');
     localStorage.removeItem('people-lead-users-timestamp');
     
-    // Reset state and refetch
+    // Reset refs and state
+    hasInitialized.current = false;
+    fetchInProgress.current = false;
     setDataLoaded(false);
     setLoading(true);
+    
+    // Fetch fresh data
     fetchAssignedUsers();
   };
 
