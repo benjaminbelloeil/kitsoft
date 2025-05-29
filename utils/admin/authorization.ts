@@ -9,7 +9,7 @@ import { cookies } from 'next/headers';
 export async function checkIsAdmin(userId: string): Promise<boolean> {
   try {
     // Get the base URL for API calls
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kitsoft.vercel.app';
     
     // Get the cookies for authentication
     const cookieStore = await cookies();
