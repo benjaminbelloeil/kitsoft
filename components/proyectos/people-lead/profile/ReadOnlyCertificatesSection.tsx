@@ -113,16 +113,10 @@ export default function ReadOnlyCertificatesSection({ certificates, loading = fa
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <div className="text-center p-8">
-          <motion.div 
-            className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-2"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            whileHover={{ scale: 1.1 }}
-          >
-            <FiAward className="h-6 w-6 text-[#A100FF]" />
-          </motion.div>
+        <div className="text-center py-5">
+          <div className="bg-gray-50 rounded-full p-3 inline-flex mb-3 shadow-sm">
+            <FiAward className="h-5 w-5 text-gray-400" />
+          </div>
           <p className="text-gray-500 text-sm">Sin certificaciones registradas</p>
         </div>
       </motion.div>
@@ -200,6 +194,11 @@ export default function ReadOnlyCertificatesSection({ certificates, loading = fa
                     <p className="font-medium text-sm text-gray-800 truncate" title={cert.titulo}>
                       {cert.titulo}
                     </p>
+                    {cert.url && (
+                      <p className="text-xs text-gray-600">
+                        Documento disponible
+                      </p>
+                    )}
                     <div className="flex items-center text-xs text-gray-500 space-x-3">
                       <span className="flex items-center">
                         <FiCalendar className="h-3 w-3 mr-1" />
@@ -226,10 +225,8 @@ export default function ReadOnlyCertificatesSection({ certificates, loading = fa
                 </div>
                 <div className="flex space-x-1 flex-shrink-0">
                   {cert.url && (
-                    <motion.a
-                      href={cert.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <motion.button
+                      onClick={() => window.open(cert.url, '_blank', 'noopener,noreferrer')}
                       className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
                       title="Ver certificado"
                       whileHover={{ scale: 1.1 }}
@@ -237,7 +234,7 @@ export default function ReadOnlyCertificatesSection({ certificates, loading = fa
                       transition={{ duration: 0.1 }}
                     >
                       <FiExternalLink size={14} />
-                    </motion.a>
+                    </motion.button>
                   )}
                 </div>
               </motion.div>

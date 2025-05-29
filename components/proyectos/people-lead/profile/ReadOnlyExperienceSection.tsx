@@ -82,10 +82,11 @@ export default function ReadOnlyExperienceSection({ experiences, loading = false
           </span>
           Experiencia
         </h3>
-        <div className="text-center py-8">
-          <FiBriefcase className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-          <h4 className="text-lg font-medium text-gray-500 mb-2">Sin experiencia registrada</h4>
-          <p className="text-gray-400">Este usuario no ha registrado experiencia laboral.</p>
+        <div className="text-center py-5">
+          <div className="bg-gray-50 rounded-full p-3 inline-flex mb-3 shadow-sm">
+            <FiBriefcase className="h-5 w-5 text-gray-400" />
+          </div>
+          <p className="text-gray-500 text-sm">Sin experiencia registrada</p>
         </div>
       </div>
     );

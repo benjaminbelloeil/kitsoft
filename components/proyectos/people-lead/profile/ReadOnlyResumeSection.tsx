@@ -34,10 +34,11 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
           </span>
           Currículum
         </h3>
-        <div className="text-center py-8">
-          <FiFileText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-          <h4 className="text-lg font-medium text-gray-500 mb-2">Sin currículum disponible</h4>
-          <p className="text-gray-400">Este usuario no ha subido su currículum.</p>
+        <div className="text-center py-5">
+          <div className="bg-gray-50 rounded-full p-3 inline-flex mb-3 shadow-sm">
+            <FiFileText className="h-5 w-5 text-gray-400" />
+          </div>
+          <p className="text-gray-500 text-sm">Sin currículum disponible</p>
         </div>
       </div>
     );
@@ -70,11 +71,19 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
           >
             <FiFileText className="text-[#A100FF] mr-2 flex-shrink-0" size={18} />
           </motion.div>
-          <div className="truncate max-w-[200px]">
-            <p className="font-medium text-sm text-gray-800">Currículum</p>
-            <div className="flex items-center text-xs bg-[#A100FF08] px-2 py-1 rounded mt-1 w-fit">
-              <span>Documento PDF disponible</span>
-            </div>
+          <div className="max-w-[300px] pr-2">
+            <p className="font-medium text-sm text-gray-800 break-all">
+              {resumeUrl ? (
+                (() => {
+                  // Extract the filename from URL
+                  const fullFilename = decodeURIComponent(resumeUrl.split('/').pop() || 'Currículum');
+                  // Pattern to match UUID-timestamp-actualFilename
+                  const parts = fullFilename.match(/^[a-f0-9-]+-\d+-(.+)$/);
+                  return parts && parts[1] ? parts[1] : fullFilename;
+                })()
+              ) : 'Currículum'}
+            </p>
+            <p className="text-xs text-gray-500">Documento disponible</p>
           </div>
         </div>
         <div className="flex space-x-1 flex-shrink-0">
