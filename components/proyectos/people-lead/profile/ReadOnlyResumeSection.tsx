@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FiFileText, FiDownload, FiExternalLink } from "react-icons/fi";
+import { FiFileText, FiExternalLink } from "react-icons/fi";
 
 interface ReadOnlyResumeSectionProps {
   resumeUrl: string | null;
@@ -47,16 +47,6 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
     window.open(resumeUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleDownloadResume = () => {
-    const link = document.createElement('a');
-    link.href = resumeUrl;
-    link.download = 'curriculum.pdf';
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
       <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
@@ -97,16 +87,6 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
             transition={{ duration: 0.1 }}
           >
             <FiExternalLink size={14} />
-          </motion.button>
-          <motion.button
-            onClick={handleDownloadResume}
-            className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
-            title="Descargar"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.1 }}
-          >
-            <FiDownload size={14} />
           </motion.button>
         </div>
       </motion.div>

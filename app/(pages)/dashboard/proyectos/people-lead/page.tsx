@@ -681,7 +681,7 @@ const UserCard = React.memo(function UserCard({ user, onViewProfile, index }: { 
         <motion.button
           onClick={() => onViewProfile(user.id_usuario)}
           className="w-full flex items-center justify-center px-4 py-2 bg-[#A100FF] text-white rounded-lg hover:bg-[#8A00E6] transition-colors"
-          whileHover={{ scale: 1.03, backgroundColor: "#8A00E6" }}
+          whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
         >
           <FiEye className="w-4 h-4 mr-2" />
