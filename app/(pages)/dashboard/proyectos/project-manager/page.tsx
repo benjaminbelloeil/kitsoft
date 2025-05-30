@@ -195,6 +195,72 @@ export default function ProjectManagementPage() {
         newProject.project_lead = null;
       }
       
+      // 🤖 AUTO AGENT ASSIGNMENT: Call the agent system to automatically assign team members
+      if (selectedRoles.length > 0) {
+        try {
+          console.log(`🚀 Triggering automatic team assignment for project: ${newProject.titulo}`);
+          
+          const agentResponse = await fetch('/api/agent/assign', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id_proyecto: newProject.id_proyecto
+            }),
+          });
+          
+          const agentResult = await agentResponse.json();
+          
+          if (agentResult.success) {
+            console.log(`✅ Team assignment successful: ${agentResult.assignments.length} members assigned`);
+            
+            // Add additional success notification for agent assignment
+            setNotifications(prev => [
+              {
+                id: (Date.now() + 1).toString(),
+                title: 'Equipo asignado automáticamente',
+                message: `Se asignaron ${agentResult.assignments.length} miembros al proyecto "${newProject.titulo}" en ${agentResult.tiempo_total.toFixed(2)}s`,
+                date: new Date(),
+                read: false,
+                type: 'project'
+              },
+              ...prev
+            ]);
+          } else {
+            console.warn(`⚠️ Agent assignment failed: ${agentResult.error}`);
+            
+            // Add warning notification for failed agent assignment
+            setNotifications(prev => [
+              {
+                id: (Date.now() + 1).toString(),
+                title: 'Asignación automática fallida',
+                message: `No se pudieron asignar miembros automáticamente: ${agentResult.error}`,
+                date: new Date(),
+                read: false,
+                type: 'project'
+              },
+              ...prev
+            ]);
+          }
+        } catch (agentError) {
+          console.error('Error calling agent system:', agentError);
+          
+          // Add error notification for agent system failure
+          setNotifications(prev => [
+            {
+              id: (Date.now() + 1).toString(),
+              title: 'Error en asignación automática',
+              message: 'El sistema de asignación automática no está disponible',
+              date: new Date(),
+              read: false,
+              type: 'project'
+            },
+            ...prev
+          ]);
+        }
+      }
+      
       // Update projects list with new project
       setProjects(prev => [newProject, ...prev]);
       
