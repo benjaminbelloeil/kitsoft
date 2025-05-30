@@ -10,12 +10,11 @@ import {
   FiMail,
   FiPhone,
   FiMapPin,
-  FiExternalLink,
   FiClock,
   FiUser,
   FiClipboard
 } from 'react-icons/fi';
-import { getProjectColor } from './utils/projectUtils';
+import { getProjectColor, calculateCargabilidad } from './utils/projectUtils';
 
 interface ProjectModalProps {
   project: any;
@@ -237,12 +236,12 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                         <div className="h-3 w-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
                         <span className="text-gray-700 font-medium">Cargabilidad:</span>
                       </div>
-                      <span className="font-bold text-green-600">{project.assignedPercentage || 0}%</span>
+                      <span className="font-bold text-green-600">{calculateCargabilidad(project)}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div 
                         className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-inner transition-all duration-500" 
-                        style={{ width: `${project.assignedPercentage || 0}%` }}
+                        style={{ width: `${calculateCargabilidad(project)}%` }}
                       ></div>
                     </div>
                   </div>
@@ -261,7 +260,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 </h2>
                 
                 <div className="flex items-center mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mr-4 overflow-hidden border-4 border-white shadow-md">
+                  <div className="w-20 h-14 bg-gradient-to-r from-gray-100 to-gray-200 rounded-md flex items-center justify-center mr-4 overflow-hidden border border-gray-100 shadow-sm">
                     {project.clientData?.url_logo ? (
                       <img 
                         src={project.clientData.url_logo.startsWith('http') 
@@ -269,15 +268,22 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                           : `https://${project.clientData.url_logo}/favicon.ico`
                         } 
                         alt={`Logo de ${project.cliente}`}
-                        className="w-12 h-12 object-contain"
+                        className="max-h-full max-w-full object-contain p-1"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/placeholder-company.png';
                         }}
                       />
                     ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+                          <span className="text-xs font-semibold text-gray-600">
+                            {project.cliente.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="text-xs font-medium text-gray-600 truncate max-w-12">
+                          {project.cliente}
+                        </span>
+                      </div>
                     )}
                   </div>
                   <div>
@@ -337,33 +343,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                       </div>
                       <span>Dirección no disponible</span>
                     </div>
-                  )}
-                </div>
-                
-                {project.clientData?.url_logo && (
-                  <div className="mt-5 pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-600 mb-2 font-medium">Sitio web del cliente:</p>
-                    <a 
-                      href={project.clientData.url_logo.startsWith('http') 
-                        ? project.clientData.url_logo 
-                        : `https://${project.clientData.url_logo}`
-                      } 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-[#A100FF] hover:text-[#8000CC] flex items-center p-3 rounded-lg border border-gray-100 bg-white hover:bg-[#A100FF08] transition-all group"
-                    >
-                      <div className="flex-1 truncate">
-                        {project.clientData.url_logo.startsWith('http') 
-                          ? new URL(project.clientData.url_logo).hostname 
-                          : project.clientData.url_logo
-                        }
-                      </div>
-                      <div className="ml-2 p-2 rounded-full bg-[#A100FF15] group-hover:bg-[#A100FF25] transition-all">
-                        <FiExternalLink className="h-4 w-4 text-[#A100FF] group-hover:rotate-12 transition-all duration-300" />
-                      </div>
-                    </a>
-                  </div>
-                )}
+                  )}                </div>
               </div>
             </div>
           </div>

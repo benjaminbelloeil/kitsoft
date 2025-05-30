@@ -20,8 +20,17 @@ export default function ClientDetails({ client }: ClientDetailsProps) {
           />
         </div>
       ) : (
-        <div className="w-full h-14 py-2 mb-4 bg-gray-100 rounded-md flex items-center justify-center text-xl font-medium text-gray-600">
-          {client.nombre.charAt(0)}
+        <div className="w-full h-14 py-2 mb-4 bg-gradient-to-r from-gray-100 to-gray-200 rounded-md flex items-center justify-center border border-gray-100">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <span className="text-sm font-semibold text-gray-600">
+                {client.nombre.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-sm font-medium text-gray-600">
+              {client.nombre}
+            </span>
+          </div>
         </div>
       )}
       <div className="flex flex-col gap-2">
