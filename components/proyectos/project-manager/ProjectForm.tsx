@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,7 +17,7 @@ import {
 } from 'react-icons/fi';
 import ArchiveProjectModal from '@/components/proyectos//project-manager/ArchiveProjectModal';
 import { motion } from 'framer-motion';
-import { Client, Project, Role } from '@/interfaces/project';
+import { Client, Project, Role, ProjectLead } from '@/interfaces/project';
 import ClientDetails from './ClientDetails';
 
 interface ProjectFormProps {
@@ -59,6 +60,32 @@ export default function ProjectForm({
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [archiveModalOpen, setArchiveModalOpen] = useState(false);
   const [roleSearchQuery, setRoleSearchQuery] = useState('');
+  const [projectLeads, setProjectLeads] = useState<ProjectLead[]>([]);
+  const [selectedProjectLead, setSelectedProjectLead] = useState<ProjectLead | null>(null);
+  const [loadingProjectLeads, setLoadingProjectLeads] = useState(false);
+
+  // Fetch project leads
+  const fetchProjectLeads = async () => {
+    setLoadingProjectLeads(true);
+    try {
+      const response = await fetch('/api/project-lead/users');
+      if (response.ok) {
+        const leads = await response.json();
+        setProjectLeads(leads);
+      } else {
+        console.error('Error fetching project leads');
+      }
+    } catch (error) {
+      console.error('Error fetching project leads:', error);
+    } finally {
+      setLoadingProjectLeads(false);
+    }
+  };
+
+  // Load project leads on component mount
+  useEffect(() => {
+    fetchProjectLeads();
+  }, []);
 
   // Filter roles based on search query
   const filteredRoles = roles.filter(role =>
@@ -75,6 +102,21 @@ export default function ProjectForm({
       setSelectedClient(null);
     }
   }, [formData.id_cliente, clients]);
+
+  // Update selected project lead when form data changes
+  useEffect(() => {
+    if (formData.id_projectlead) {
+      const lead = projectLeads.find(l => l.id_usuario === formData.id_projectlead) || null;
+      setSelectedProjectLead(lead);
+    } else {
+      setSelectedProjectLead(null);
+    }
+  }, [formData.id_projectlead, projectLeads]);
+
+  const handleProjectLeadChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const leadId = e.target.value;
+    setFormData({ ...formData, id_projectlead: leadId });
+  };
 
   return (
     <motion.div 
@@ -171,6 +213,92 @@ export default function ProjectForm({
         {/* Client details section */}
         {selectedClient && (
           <ClientDetails client={selectedClient} />
+        )}
+        
+        {/* Project Lead Selection */}
+        <div className="relative">
+          <label htmlFor="id_projectlead" className="block text-sm font-medium text-gray-700 mb-1">
+            Project Lead * 
+          </label>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A100FF]">
+              <FiUsers className="h-4 w-4" />
+            </div>
+            <select
+              id="id_projectlead"
+              name="id_projectlead"
+              value={formData.id_projectlead || ''}
+              onChange={handleProjectLeadChange}
+              required
+              className="w-full appearance-none border border-gray-300 rounded-lg shadow-sm py-2.5 pl-10 pr-10 bg-white focus:outline-none focus:ring-2 focus:ring-[#A100FF40] focus:border-[#A100FF] focus:bg-[#FCFAFF] transition-all text-gray-800 font-medium"
+              style={{ 
+                fontSize: '0.95rem',
+                background: 'linear-gradient(to bottom, #ffffff, #f9f9f9)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
+              }}
+            >
+              <option 
+                value="" 
+                disabled 
+                className="text-gray-400"
+                style={{
+                  background: 'white',
+                  padding: '8px',
+                  borderBottom: '1px solid #f0f0f0'
+                }}
+              >
+                {loadingProjectLeads ? 'Cargando project leads...' : 'Selecciona un project lead'}
+              </option>
+              {projectLeads && projectLeads.length > 0 ? projectLeads.map((lead: ProjectLead) => (
+                <option 
+                  key={lead.id_usuario} 
+                  value={lead.id_usuario}
+                  className="py-2 font-medium text-gray-800"
+                  style={{ 
+                    padding: '10px', 
+                    background: 'white',
+                    borderBottom: '1px solid #f0f0f0'
+                  }}
+                >
+                  {lead.nombre} {lead.apellido} {lead.titulo ? `- ${lead.titulo}` : ''}
+                </option>
+              )) : (
+                <option value="" disabled>
+                  {loadingProjectLeads ? 'Cargando...' : 'No hay project leads disponibles'}
+                </option>
+              )}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#A100FF]">
+              <FiChevronDown className="w-5 h-5" />
+            </div>
+          </div>
+        </div>
+
+        {/* Selected Project Lead Details */}
+        {selectedProjectLead && (
+          <div className="bg-gradient-to-r from-[#A100FF08] to-[#A100FF05] border border-[#A100FF20] rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <img
+                  src={selectedProjectLead.url_avatar || '/placeholder-avatar.png'}
+                  alt={`${selectedProjectLead.nombre} ${selectedProjectLead.apellido}`}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-[#A100FF30] shadow-md"
+                />
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#A100FF] rounded-full flex items-center justify-center">
+                  <FiUsers className="w-2 h-2 text-white" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-gray-800">
+                  {selectedProjectLead.nombre} {selectedProjectLead.apellido}
+                </h4>
+                {selectedProjectLead.titulo && (
+                  <p className="text-sm text-gray-600">{selectedProjectLead.titulo}</p>
+                )}
+                <p className="text-xs text-[#A100FF] font-medium">Project Lead Asignado</p>
+              </div>
+            </div>
+          </div>
         )}
         
         <div className="relative">

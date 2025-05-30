@@ -8,7 +8,7 @@ import ProjectManagerSkeleton from '@/components/proyectos//project-manager/Proj
 import ProjectForm from '@/components/proyectos//project-manager/ProjectForm';
 import ProjectList from '@/components/proyectos/project-manager/ProjectList';
 import { useNotifications } from '@/context/notification-context';
-import { Client, Project, Role } from '@/interfaces/project';
+import { Client, Project, Role, ProjectLead } from '@/interfaces/project';
 import { 
   fetchProjects, 
   fetchClients, 
@@ -53,7 +53,7 @@ export default function ProjectManagementPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch projects, clients, and roles using our sync functions
+        // Fetch projects, clients, roles, and project leads using our sync functions
         const [projectsData, clientsData, rolesData] = await Promise.all([
           fetchProjects(),
           fetchClients(),
@@ -64,20 +64,32 @@ export default function ProjectManagementPage() {
         setClients(clientsData);
         setRoles(rolesData);
         
-        // Fetch roles for each project
+        // Fetch project leads
+        const projectLeadsResponse = await fetch('/api/project-lead/users');
+        const projectLeadsData: ProjectLead[] = projectLeadsResponse.ok ? await projectLeadsResponse.json() : [];
+        
+        // Fetch roles for each project and enhance with project lead data
         const projectsWithRoles = await Promise.all(
           projectsData.map(async (project) => {
             try {
               const projectRoles = await fetchProjectRoles(project.id_proyecto);
+              
+              // Find the project lead for this project
+              const projectLead = project.id_projectlead 
+                ? projectLeadsData.find((lead: ProjectLead) => lead.id_usuario === project.id_projectlead) || null
+                : null;
+              
               return {
                 ...project,
-                roles: projectRoles
+                roles: projectRoles,
+                project_lead: projectLead
               };
             } catch (error) {
               console.error(`Error fetching roles for project ${project.id_proyecto}:`, error);
               return {
                 ...project,
-                roles: []
+                roles: [],
+                project_lead: null
               };
             }
           })
@@ -166,6 +178,23 @@ export default function ProjectManagementPage() {
       ).filter(Boolean) as Role[];
       newProject.roles = projectRoles;
       
+      // Add project lead data if assigned
+      if (newProject.id_projectlead) {
+        try {
+          const projectLeadsResponse = await fetch('/api/project-lead/users');
+          if (projectLeadsResponse.ok) {
+            const projectLeadsData: ProjectLead[] = await projectLeadsResponse.json();
+            const projectLead = projectLeadsData.find((lead: ProjectLead) => lead.id_usuario === newProject.id_projectlead) || null;
+            newProject.project_lead = projectLead;
+          }
+        } catch (error) {
+          console.error('Error fetching project lead data:', error);
+          newProject.project_lead = null;
+        }
+      } else {
+        newProject.project_lead = null;
+      }
+      
       // Update projects list with new project
       setProjects(prev => [newProject, ...prev]);
       
@@ -227,6 +256,23 @@ export default function ProjectManagementPage() {
         roles.find(role => role.id_rol === roleId)
       ).filter(Boolean) as Role[];
       updatedProject.roles = projectRoles;
+      
+      // Add project lead data if assigned
+      if (updatedProject.id_projectlead) {
+        try {
+          const projectLeadsResponse = await fetch('/api/project-lead/users');
+          if (projectLeadsResponse.ok) {
+            const projectLeadsData: ProjectLead[] = await projectLeadsResponse.json();
+            const projectLead = projectLeadsData.find((lead: ProjectLead) => lead.id_usuario === updatedProject.id_projectlead) || null;
+            updatedProject.project_lead = projectLead;
+          }
+        } catch (error) {
+          console.error('Error fetching project lead data:', error);
+          updatedProject.project_lead = null;
+        }
+      } else {
+        updatedProject.project_lead = null;
+      }
       
       // Update projects list with the edited project
       setProjects(prev => prev.map(p => 

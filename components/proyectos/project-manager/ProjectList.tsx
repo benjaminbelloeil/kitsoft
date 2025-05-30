@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { 
@@ -114,6 +115,7 @@ export default function ProjectList({
               <tr>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Proyecto</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Cliente</th>
+                <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Project Lead</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Horas</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Roles</th>
                 <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">Fecha Inicio</th>
@@ -153,6 +155,38 @@ export default function ProjectList({
                         {project.cliente?.charAt(0) || 'C'}
                       </div>
                       {project.cliente}
+                    </div>
+                  </td>
+                  
+                  <td 
+                    className="px-6 py-3 whitespace-nowrap align-middle h-16"
+                    onClick={() => handleSelectProject(project)}
+                  >
+                    <div className="text-sm text-gray-600 flex items-center">
+                      {project.project_lead ? (
+                        <>
+                          <img
+                            src={project.project_lead.url_avatar || '/placeholder-avatar.png'}
+                            alt={`${project.project_lead.nombre} ${project.project_lead.apellido}`}
+                            className="w-8 h-8 rounded-full object-cover border-2 border-[#A100FF30] shadow-sm mr-3"
+                          />
+                          <div>
+                            <div className="font-medium text-gray-800">
+                              {project.project_lead.nombre} {project.project_lead.apellido}
+                            </div>
+                            {project.project_lead.titulo && (
+                              <div className="text-xs text-gray-500">{project.project_lead.titulo}</div>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center text-gray-400">
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                            <FiUsers className="w-4 h-4" />
+                          </div>
+                          <span className="text-sm">Sin asignar</span>
+                        </div>
+                      )}
                     </div>
                   </td>
                   

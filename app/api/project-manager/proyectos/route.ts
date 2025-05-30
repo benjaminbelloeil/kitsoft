@@ -30,11 +30,11 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Validate request body
-    const { titulo, descripcion, id_cliente, fecha_inicio, fecha_fin, horas_totales } = body;
+    const { titulo, descripcion, id_cliente, id_projectlead, fecha_inicio, fecha_fin, horas_totales } = body;
 
-    if (!titulo || !id_cliente || !fecha_inicio || !horas_totales) {
+    if (!titulo || !id_cliente || !id_projectlead || !fecha_inicio || !horas_totales) {
       return NextResponse.json(
-        { error: 'Missing required fields: titulo, id_cliente, fecha_inicio, horas_totales' },
+        { error: 'Missing required fields: titulo, id_cliente, id_projectlead, fecha_inicio, horas_totales' },
         { status: 400 }
       );
     }
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
           titulo, 
           descripcion, 
           id_cliente, 
+          id_projectlead,
           fecha_inicio, 
           fecha_fin, 
           horas_totales,

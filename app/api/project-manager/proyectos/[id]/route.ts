@@ -37,13 +37,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const body = await request.json();
 
     // Extract update fields
-    const { titulo, descripcion, id_cliente, fecha_inicio, fecha_fin, horas_totales, activo } = body;
+    const { titulo, descripcion, id_cliente, id_projectlead, fecha_inicio, fecha_fin, horas_totales, activo } = body;
 
     // Create update object with only the fields that were provided
     const updateData: any = {};
     if (titulo !== undefined) updateData.titulo = titulo;
     if (descripcion !== undefined) updateData.descripcion = descripcion;
     if (id_cliente !== undefined) updateData.id_cliente = id_cliente;
+    if (id_projectlead !== undefined) updateData.id_projectlead = id_projectlead;
     if (fecha_inicio !== undefined) updateData.fecha_inicio = fecha_inicio;
     if (fecha_fin !== undefined) updateData.fecha_fin = fecha_fin;
     if (horas_totales !== undefined) updateData.horas_totales = horas_totales;

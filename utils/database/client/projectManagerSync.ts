@@ -6,7 +6,7 @@ import { Client, Project, Role } from '@/interfaces/project';
  */
 export async function fetchProjects(): Promise<Project[]> {
   try {
-    const response = await fetch('/api/manager/proyectos');
+    const response = await fetch('/api/project-manager/proyectos');
     if (!response.ok) {
       throw new Error('Failed to fetch projects');
     }
@@ -23,7 +23,7 @@ export async function fetchProjects(): Promise<Project[]> {
  */
 export async function fetchClients(): Promise<Client[]> {
   try {
-    const response = await fetch('/api/manager/clients');
+    const response = await fetch('/api/project-manager/clients');
     if (!response.ok) {
       throw new Error('Failed to fetch clients');
     }
@@ -57,7 +57,7 @@ export function enhanceProjectsWithClientInfo(projects: Project[], clients: Clie
  */
 export async function createProject(projectData: Partial<Project>): Promise<Project> {
   try {
-    const response = await fetch('/api/manager/proyectos', {
+    const response = await fetch('/api/project-manager/proyectos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export async function createProject(projectData: Partial<Project>): Promise<Proj
  */
 export async function updateProject(projectId: string, projectData: Partial<Project>): Promise<Project> {
   try {
-    const response = await fetch(`/api/manager/proyectos/${projectId}`, {
+    const response = await fetch(`/api/project-manager/proyectos/${projectId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ export async function updateProject(projectId: string, projectData: Partial<Proj
  */
 export async function archiveProject(projectId: string): Promise<void> {
   try {
-    const response = await fetch(`/api/manager/proyectos/${projectId}`, {
+    const response = await fetch(`/api/project-manager/proyectos/${projectId}`, {
       method: 'DELETE', // This actually just marks as inactive
     });
     
@@ -132,7 +132,7 @@ export async function archiveProject(projectId: string): Promise<void> {
  */
 export async function fetchRoles(): Promise<Role[]> {
   try {
-    const response = await fetch('/api/manager/roles', {
+    const response = await fetch('/api/project-manager/roles', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -160,7 +160,7 @@ export async function fetchRoles(): Promise<Role[]> {
  */
 export async function fetchProjectRoles(projectId: string): Promise<Role[]> {
   try {
-    const response = await fetch(`/api/manager/proyectos/${projectId}/roles`);
+    const response = await fetch(`/api/project-manager/proyectos/${projectId}/roles`);
     if (!response.ok) {
       throw new Error('Failed to fetch project roles');
     }
@@ -179,7 +179,7 @@ export async function fetchProjectRoles(projectId: string): Promise<Role[]> {
  */
 export async function updateProjectRoles(projectId: string, roleIds: string[]): Promise<void> {
   try {
-    const response = await fetch(`/api/manager/proyectos/${projectId}/roles`, {
+    const response = await fetch(`/api/project-manager/proyectos/${projectId}/roles`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
