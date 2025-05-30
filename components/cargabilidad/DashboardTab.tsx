@@ -10,6 +10,7 @@ interface Project {
   load: number;
   deadline?: string;
   hoursPerWeek: number;
+  color?: string;
 }
 
 interface Props {
@@ -43,8 +44,10 @@ export const DashboardTab = ({ projects, weeklyLoad, availableHours, totalHoursP
           {projects.map((project, index) => (
             <LinearProgress
               key={index}
-              value={(project.load)}
+              value={project.load}
               label={project.name}
+              projectId={project.name}
+              color={project.color}
             />
           ))}
         </div>

@@ -40,7 +40,11 @@ export async function GET(request: NextRequest) {
           horas_totales,
           clientes (
             id_cliente,
-            nombre
+            nombre,
+            correo,
+            telefono,
+            direccion,
+            url_logo
           ),
           usuarios!id_projectlead (
             id_usuario,
@@ -92,6 +96,7 @@ export async function GET(request: NextRequest) {
         activo: project?.activo,
         horas_totales: project?.horas_totales,
         cliente: cliente?.nombre || 'Cliente Desconocido',
+        clientData: cliente || null, // Include full client data
         project_lead: usuario ? {
           id_usuario: usuario.id_usuario,
           nombre: usuario.nombre,

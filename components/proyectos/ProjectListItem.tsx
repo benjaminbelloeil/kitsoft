@@ -1,8 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FiChevronRight } from 'react-icons/fi';
-import { getProjectColor } from './utils/projectUtils';
-import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
+import { FiChevronRight, FiUsers } from 'react-icons/fi';
+import { getProjectColor, getProjectHexColor, calculateCargabilidad } from './utils/projectUtils';
+import Image from 'next/image';
 
 interface ProjectListItemProps {
   project: any;
@@ -10,7 +9,9 @@ interface ProjectListItemProps {
 }
 
 export default function ProjectListItem({ project, onProjectClick }: ProjectListItemProps) {
-  const projectColor = getProjectColor(project.color);
+  const projectColor = getProjectColor(project.color || null, project.id_proyecto);
+  const projectHexColor = getProjectHexColor(project.color || null, project.id_proyecto);
+  const cargabilidadPercentage = calculateCargabilidad(project);
   
   return (
     <div 
@@ -19,56 +20,82 @@ export default function ProjectListItem({ project, onProjectClick }: ProjectList
     >
       <div className={`${projectColor} p-4 rounded-t-xl`}>
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-white">{project.name}</h3>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-green-800">
-            Activo
+          <h3 className="text-lg font-semibold text-white">{project.titulo}</h3>
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            project.activo 
+              ? 'bg-white text-green-800' 
+              : 'bg-white text-gray-600'
+          }`}>
+            {project.activo ? 'Activo' : 'Archivado'}
           </span>
         </div>
-        <p className="text-sm text-white opacity-90">Cliente: {project.client}</p>
+        <p className="text-sm text-white opacity-90">Cliente: {project.cliente}</p>
       </div>
       
       <div className="p-5 flex items-center">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-700 line-clamp-2">{project.description}</p>
+          <p className="text-sm text-gray-700 line-clamp-2">{project.descripcion || 'Sin descripción'}</p>
           <div className="mt-4 flex justify-between">
             <div>
               <span className="text-sm text-gray-500 flex items-center">
-                Cargabilidad: 
+                Rol: 
                 <div className="flex items-center ml-1">
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></div>
-                  <b>{project.cargabilidad}%</b>
+                  <div 
+                    className="w-2.5 h-2.5 rounded-full mr-1"
+                    style={{ backgroundColor: projectHexColor }}
+                  ></div>
+                  <b>{project.user_role || 'Sin rol'}</b>
                 </div>
               </span>
             </div>
             <div>
               <span className="text-sm text-gray-500">
-                Fecha fin: <b>{new Date(project.endDate).toLocaleDateString('es-ES')}</b>
+                Cargabilidad: <b>{cargabilidadPercentage}%</b>
               </span>
             </div>
           </div>
           
-          {/* Team members */}
-          <div className="mt-3 flex -space-x-2 overflow-hidden">
-            {[1, 2, 3].map((member, index) => (
-              <div key={index} className="inline-block h-7 w-7 rounded-full ring-2 ring-white">
-                <img
-                  src={`https://randomuser.me/api/portraits/${index % 2 ? 'men' : 'women'}/${index + 10}.jpg`}
-                  alt={`Usuario ${index + 1}`}
-                  className="h-full w-full object-cover rounded-full"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-                <div className="hidden h-full w-full">
-                  <PlaceholderAvatar size={28} />
+          {/* Project lead and team info */}
+          <div className="mt-3 flex items-center justify-between">
+            {project.project_lead ? (
+              <div className="flex items-center">
+                <div className="w-6 h-6 rounded-full mr-2">
+                  {project.project_lead.url_avatar ? (
+                    <Image
+                      src={project.project_lead.url_avatar}
+                      alt={`${project.project_lead.nombre} ${project.project_lead.apellido}`}
+                      width={24}
+                      height={24}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
+                      <span className="text-xs font-medium text-blue-700">
+                        {project.project_lead.nombre?.charAt(0)}{project.project_lead.apellido?.charAt(0)}
+                      </span>
+                    </div>
+                  )}
                 </div>
+                <span className="text-sm text-gray-600">
+                  {project.project_lead.nombre} {project.project_lead.apellido}
+                </span>
               </div>
-            ))}
-            <div className="flex items-center justify-center h-7 w-7 rounded-full bg-gray-200 ring-2 ring-white text-xs font-medium text-gray-500">
-              +2
-            </div>
+            ) : (
+              <div className="flex items-center">
+                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                  <FiUsers className="w-3 h-3 text-gray-400" />
+                </div>
+                <span className="text-sm text-gray-500">Sin project lead</span>
+              </div>
+            )}
+            
+            {/* Team size indicator */}
+            {project.assignedUsers && project.assignedUsers.length > 0 && (
+              <div className="flex items-center text-sm text-gray-500">
+                <FiUsers className="w-4 h-4 mr-1" />
+                <span>{project.assignedUsers.length} miembro{project.assignedUsers.length !== 1 ? 's' : ''}</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="ml-4">

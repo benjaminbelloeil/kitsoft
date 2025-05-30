@@ -7,7 +7,6 @@ import {
   FiCalendar, 
   FiVideo,
   FiX,
-  FiPlus,
   FiMail,
   FiPhone,
   FiMapPin,
@@ -17,7 +16,6 @@ import {
   FiClipboard
 } from 'react-icons/fi';
 import { getProjectColor } from './utils/projectUtils';
-import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 
 interface ProjectModalProps {
   project: any;
@@ -77,12 +75,12 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           <div className="relative z-10 flex justify-between items-center">
             <div>
               <div className="flex items-center space-x-3 mb-1">
-                <h1 className="text-2xl font-bold text-white">{project.name}</h1>
+                <h1 className="text-2xl font-bold text-white">{project.titulo}</h1>
                 <span className="px-3 py-1 rounded-full text-xs font-medium bg-white text-green-800 shadow-sm">
                   Activo
                 </span>
               </div>
-              <p className="text-white/70 text-sm">Cliente: {project.client}</p>
+              <p className="text-white/70 text-sm">Cliente: {project.cliente}</p>
             </div>                    
             <button 
               onClick={onClose}
@@ -105,8 +103,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             </h2>
             <div className="p-5 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 max-h-[250px] overflow-y-auto">
               <div className="prose prose-sm max-w-none text-gray-700">
-                <p className="leading-relaxed">{project.description || "Sin descripción disponible."}</p>
-                <p className="mt-3 text-sm text-gray-500">Este proyecto se centra en desarrollar soluciones innovadoras para {project.client}, mejorando su presencia digital y eficiencia operativa.</p>
+                <p className="leading-relaxed">{project.descripcion || "Sin descripción disponible."}</p>
               </div>
             </div>
           </div>
@@ -120,35 +117,50 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               Equipo asignado
             </h2>
             <div className="flex flex-wrap gap-2">
-              {/* Mock data for team members - Replace with actual data */}
-              {[1, 2, 3, 4].map(member => (
-                <div key={member} className="flex flex-col items-center group">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md group-hover:border-[#A100FF20] transition-all">
-                      <img 
-                        src={`https://randomuser.me/api/portraits/${member % 2 ? 'men' : 'women'}/${member + 10}.jpg`}
-                        alt={`Miembro del equipo ${member}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <div className="hidden w-full h-full">
-                        <PlaceholderAvatar size={48} />
+              {/* Real team members from project data */}
+              {project.assignedUsers && project.assignedUsers.length > 0 ? (
+                project.assignedUsers.map((member: any) => (
+                  <div key={member.id_usuario} className="flex flex-col items-center group">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md group-hover:border-[#A100FF20] transition-all">
+                        {member.url_avatar ? (
+                          <img 
+                            src={member.url_avatar}
+                            alt={`${member.nombre} ${member.apellido || ''}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const placeholder = target.parentElement?.querySelector('.fallback-avatar') as HTMLElement;
+                              if (placeholder) {
+                                placeholder.style.display = 'flex';
+                              }
+                            }}
+                          />
+                        ) : null}
+                        <div className={`fallback-avatar w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ${member.url_avatar ? 'hidden' : ''}`}>
+                          <span className="text-xs font-medium text-gray-600">
+                            {member.nombre?.charAt(0) || ''}
+                            {member.apellido?.charAt(0) || ''}
+                          </span>
+                        </div>
                       </div>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                    <span className="text-xs text-gray-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center max-w-16 truncate">
+                      {member.nombre}
+                    </span>
+                    <span className="text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center max-w-16 truncate">
+                      {member.rol_nombre}
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Usuario {member}</span>
+                ))
+              ) : (
+                <div className="flex items-center text-gray-500 text-sm">
+                  <FiUsers className="h-4 w-4 mr-2" />
+                  No hay miembros asignados a este proyecto
                 </div>
-              ))}
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full bg-[#A100FF10] border-2 border-dashed border-[#A100FF] flex items-center justify-center cursor-pointer hover:bg-[#A100FF20] transition-all">
-                  <FiPlus className="h-5 w-5 text-[#A100FF]" />
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -173,7 +185,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                       </div>
                       <div>
                         <span className="text-gray-500 text-xs">Fecha de inicio</span>
-                        <p className="font-semibold text-gray-800">{new Date(project.startDate).toLocaleDateString('es-ES', {
+                        <p className="font-semibold text-gray-800">{new Date(project.fecha_inicio).toLocaleDateString('es-ES', {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric'
@@ -189,15 +201,16 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                       </div>
                       <div>
                         <span className="text-gray-500 text-xs">Fecha de fin</span>
-                        <p className="font-semibold text-gray-800">{new Date(project.endDate).toLocaleDateString('es-ES', {
+                        <p className="font-semibold text-gray-800">{project.fecha_fin ? new Date(project.fecha_fin).toLocaleDateString('es-ES', {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric'
-                        })}</p>
+                        }) : 'No definida'}</p>
                         {/* Days remaining calculation */}
                         {(() => {
+                          if (!project.fecha_fin) return null;
                           const today = new Date();
-                          const endDate = new Date(project.endDate);
+                          const endDate = new Date(project.fecha_fin);
                           const diffTime = endDate.getTime() - today.getTime();
                           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                           
@@ -224,12 +237,12 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                         <div className="h-3 w-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
                         <span className="text-gray-700 font-medium">Cargabilidad:</span>
                       </div>
-                      <span className="font-bold text-green-600">{project.cargabilidad}%</span>
+                      <span className="font-bold text-green-600">{project.assignedPercentage || 0}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div 
                         className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-inner transition-all duration-500" 
-                        style={{ width: `${project.cargabilidad}%` }}
+                        style={{ width: `${project.assignedPercentage || 0}%` }}
                       ></div>
                     </div>
                   </div>
@@ -249,10 +262,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 
                 <div className="flex items-center mb-6">
                   <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mr-4 overflow-hidden border-4 border-white shadow-md">
-                    {project.url_logo ? (
+                    {project.clientData?.url_logo ? (
                       <img 
-                        src={`https://${project.url_logo}/favicon.ico`} 
-                        alt={`Logo de ${project.client}`}
+                        src={project.clientData.url_logo.startsWith('http') 
+                          ? project.clientData.url_logo 
+                          : `https://${project.clientData.url_logo}/favicon.ico`
+                        } 
+                        alt={`Logo de ${project.cliente}`}
                         className="w-12 h-12 object-contain"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/placeholder-company.png';
@@ -265,7 +281,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                     )}
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-1">{project.client}</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-1">{project.cliente}</h3>
                     <p className="text-sm text-gray-500 flex items-center">
                       <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                       Cliente activo
@@ -275,37 +291,72 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 
                 <div className="space-y-3 text-sm bg-white p-4 rounded-lg border border-gray-100">
                   <h4 className="font-medium text-gray-700 mb-2">Información de contacto</h4>
-                  <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
-                    <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
-                    <FiMail className="h-4 w-4 text-[#A100FF]" />
+                  {project.clientData?.correo ? (
+                    <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
+                      <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
+                        <FiMail className="h-4 w-4 text-[#A100FF]" />
+                      </div>
+                      <span className="group-hover:font-medium">{project.clientData.correo}</span>
                     </div>
-                    <span className="group-hover:font-medium">contacto@{project.client.toLowerCase().replace(/\s+/g, '')}.com</span>
-                  </div>
-                  <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
-                    <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
-                    <FiPhone className="h-4 w-4 text-[#A100FF]" />
+                  ) : (
+                    <div className="flex items-center text-gray-500">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                        <FiMail className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <span>Correo no disponible</span>
                     </div>
-                    <span className="group-hover:font-medium">+34 91 XXX XX XX</span>
-                  </div>
-                  <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
-                    <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
-                    <FiMapPin className="h-4 w-4 text-[#A100FF]" />
+                  )}
+                  
+                  {project.clientData?.telefono ? (
+                    <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
+                      <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
+                        <FiPhone className="h-4 w-4 text-[#A100FF]" />
+                      </div>
+                      <span className="group-hover:font-medium">{project.clientData.telefono}</span>
                     </div>
-                    <span className="group-hover:font-medium">Madrid, España</span>
-                  </div>
+                  ) : (
+                    <div className="flex items-center text-gray-500">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                        <FiPhone className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <span>Teléfono no disponible</span>
+                    </div>
+                  )}
+                  
+                  {project.clientData?.direccion ? (
+                    <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
+                      <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
+                        <FiMapPin className="h-4 w-4 text-[#A100FF]" />
+                      </div>
+                      <span className="group-hover:font-medium">{project.clientData.direccion}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center text-gray-500">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                        <FiMapPin className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <span>Dirección no disponible</span>
+                    </div>
+                  )}
                 </div>
                 
-                {project.url_logo && (
+                {project.clientData?.url_logo && (
                   <div className="mt-5 pt-4 border-t border-gray-200">
                     <p className="text-sm text-gray-600 mb-2 font-medium">Sitio web del cliente:</p>
                     <a 
-                      href={`https://${project.url_logo}`} 
+                      href={project.clientData.url_logo.startsWith('http') 
+                        ? project.clientData.url_logo 
+                        : `https://${project.clientData.url_logo}`
+                      } 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-[#A100FF] hover:text-[#8000CC] flex items-center p-3 rounded-lg border border-gray-100 bg-white hover:bg-[#A100FF08] transition-all group"
                     >
                       <div className="flex-1 truncate">
-                        {project.url_logo}
+                        {project.clientData.url_logo.startsWith('http') 
+                          ? new URL(project.clientData.url_logo).hostname 
+                          : project.clientData.url_logo
+                        }
                       </div>
                       <div className="ml-2 p-2 rounded-full bg-[#A100FF15] group-hover:bg-[#A100FF25] transition-all">
                         <FiExternalLink className="h-4 w-4 text-[#A100FF] group-hover:rotate-12 transition-all duration-300" />
@@ -374,7 +425,20 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                     type="text"
                     className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md py-2 bg-white"
                     placeholder="Añadir correos electrónicos separados por comas"
-                    defaultValue={`${project.client.toLowerCase().replace(/\s+/g, '')}@email.com, equipo@kitsoft.com`}
+                    defaultValue={(() => {
+                      const participants = ['equipo@kitsoft.com'];
+                      if (project.clientData?.correo) {
+                        participants.unshift(project.clientData.correo);
+                      }
+                      if (project.assignedUsers && project.assignedUsers.length > 0) {
+                        const teamEmails = project.assignedUsers
+                          .filter((member: any) => member.correo)
+                          .map((member: any) => member.correo)
+                          .slice(0, 3); // Limit to first 3 team members
+                        participants.push(...teamEmails);
+                      }
+                      return participants.join(', ');
+                    })()}
                     id="zoom-meeting-participants"
                   />
                 </div>
@@ -386,7 +450,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   <input
                     type="text"
                     className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md py-2 bg-white"
-                    defaultValue={`Reunión: Proyecto ${project.name} - Actualización`}
+                    defaultValue={`Reunión: Proyecto ${project.titulo} - Actualización`}
                     id="zoom-meeting-subject"
                   />
                 </div>

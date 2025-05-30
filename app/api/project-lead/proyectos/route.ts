@@ -31,7 +31,11 @@ export async function GET(request: NextRequest) {
         horas_totales,
         clientes (
           id_cliente,
-          nombre
+          nombre,
+          correo,
+          telefono,
+          direccion,
+          url_logo
         )
       `)
       .eq('id_projectlead', projectLeadId)
@@ -111,6 +115,7 @@ export async function GET(request: NextRequest) {
       return {
         ...project,
         cliente: cliente?.nombre || 'Cliente Desconocido',
+        clientData: cliente || null, // Include full client data
         assignedUsers,
         assignedHours,
         assignedPercentage,
