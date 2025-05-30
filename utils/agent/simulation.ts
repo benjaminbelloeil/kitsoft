@@ -31,9 +31,6 @@ const PESOS: AgentWeights = {
   repeticion_habilidades: 0.05   // Skills validated in multiple sources
 };
 
-// Concurrency configuration  
-const MAX_ROLES_PARALLEL = 3;
-
 class Cache implements AgentCache {
   public roles = new Map();
   public projects = new Map();
@@ -260,29 +257,24 @@ export async function simular(idProyecto: string): Promise<AssignmentResult[]> {
     // Track assigned employees
     const empleadosAsignados = new Set<string>();
 
-    // Process roles in parallel groups
-    for (let i = 0; i < roles.length; i += MAX_ROLES_PARALLEL) {
-      const rolesGrupo = roles.slice(i, i + MAX_ROLES_PARALLEL);
+    // Process roles sequentially to avoid assigning the same employee to multiple roles
+    for (const rol of roles) {
+      // Filter out already assigned employees
+      const empleadosDisponibles = empleados.filter(e => !empleadosAsignados.has(e.id_usuario));
       
-      const tareasRoles = rolesGrupo.map(async (rol) => {
-        // Filter out already assigned employees
-        const empleadosDisponibles = empleados.filter(e => !empleadosAsignados.has(e.id_usuario));
-        
-        if (empleadosDisponibles.length === 0) {
-          console.log(`No hay empleados disponibles para el rol ${rol.nombre}`);
-          return null;
-        }
-        
-        return await procesarRolParalelo(rol, empleadosDisponibles, agentes, cachedDbFuncs);
-      });
-
-      const resultadosGrupo = await Promise.all(tareasRoles);
+      if (empleadosDisponibles.length === 0) {
+        console.log(`No hay empleados disponibles para el rol ${rol.nombre}`);
+        continue;
+      }
       
-      for (const resultado of resultadosGrupo) {
-        if (resultado) {
-          asignados.push(resultado);
-          empleadosAsignados.add(resultado.empleado_id);
-        }
+      const resultado = await procesarRolParalelo(rol, empleadosDisponibles, agentes, cachedDbFuncs);
+      
+      if (resultado) {
+        asignados.push(resultado);
+        empleadosAsignados.add(resultado.empleado_id);
+        console.log(`✅ Empleado ${resultado.empleado_nombre} asignado al rol ${resultado.rol_nombre}`);
+      } else {
+        console.log(`⚠️ No se pudo asignar empleado para el rol ${rol.nombre}`);
       }
 
       if (empleadosAsignados.size >= empleados.length) {

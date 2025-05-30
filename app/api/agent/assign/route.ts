@@ -41,7 +41,33 @@ export async function POST(request: Request) {
     
     console.log(`💾 Saving ${assignments.length} assignments to database...`);
     
-    const assignmentsToInsert = assignments.map(assignment => ({
+    // Check for existing assignments first
+    const { data: existingAssignments } = await supabase
+      .from('usuarios_proyectos')
+      .select('id_usuario, id_rol')
+      .eq('id_proyecto', id_proyecto);
+
+    const existingSet = new Set(
+      (existingAssignments || []).map(ea => `${ea.id_usuario}-${ea.id_rol}`)
+    );
+
+    // Filter out assignments that already exist
+    const newAssignments = assignments.filter(assignment => 
+      !existingSet.has(`${assignment.empleado_id}-${assignment.rol_id}`)
+    );
+
+    if (newAssignments.length === 0) {
+      console.log(`ℹ️ All assignments already exist for project: ${id_proyecto}`);
+      return NextResponse.json({
+        success: true,
+        message: 'All team members were already assigned to this project',
+        assignments,
+        tiempo_total: totalTime,
+        skipped: assignments.length
+      });
+    }
+
+    const assignmentsToInsert = newAssignments.map(assignment => ({
       id_proyecto: id_proyecto,
       id_usuario: assignment.empleado_id,
       id_rol: assignment.rol_id,
@@ -63,8 +89,8 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
-    // Mark project roles as occupied
-    for (const assignment of assignments) {
+    // Mark project roles as occupied (only for new assignments)
+    for (const assignment of newAssignments) {
       await supabase
         .from('proyectos_roles')
         .update({ ocupado: true })
@@ -72,14 +98,26 @@ export async function POST(request: Request) {
         .eq('id_rol', assignment.rol_id);
     }
 
+    const totalAssignments = assignments.length;
+    const newAssignmentsCount = newAssignments.length;
+    const skippedCount = totalAssignments - newAssignmentsCount;
+
     console.log(`✅ Agent simulation completed successfully in ${totalTime.toFixed(2)} seconds`);
-    console.log(`📋 Assignments made: ${assignments.length}`);
+    console.log(`📋 Total assignments processed: ${totalAssignments}`);
+    console.log(`➕ New assignments made: ${newAssignmentsCount}`);
+    if (skippedCount > 0) {
+      console.log(`⏭️ Assignments skipped (already exist): ${skippedCount}`);
+    }
     
     return NextResponse.json({
       success: true,
-      message: `Successfully assigned ${assignments.length} team members`,
+      message: newAssignmentsCount > 0 
+        ? `Successfully assigned ${newAssignmentsCount} new team members${skippedCount > 0 ? ` (${skippedCount} already assigned)` : ''}`
+        : 'All team members were already assigned to this project',
       assignments,
-      tiempo_total: totalTime
+      tiempo_total: totalTime,
+      new_assignments: newAssignmentsCount,
+      skipped: skippedCount
     });
 
   } catch (error) {
