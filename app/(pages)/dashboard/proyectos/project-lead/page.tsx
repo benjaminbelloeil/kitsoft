@@ -9,6 +9,7 @@ import { useUser } from "@/context/user-context";
 import ProjectLeadHeader from '@/components/proyectos/project-lead/ProjectLeadHeader';
 import ProjectLeadSkeleton from '@/components/proyectos/project-lead/ProjectLeadSkeleton';
 import UnauthorizedState from '@/components/auth/UnauhtorizedState';
+import { useNotificationState, NotificationContainer } from '@/components/ui/toast-notification';
 
 export default function ProjectLeadPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,6 +26,8 @@ export default function ProjectLeadPage() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [savingHours, setSavingHours] = useState<string | null>(null);
+  // Use the toast notification system
+  const notifications = useNotificationState();
   
   // Fetch projects data
   useEffect(() => {
@@ -100,15 +103,15 @@ export default function ProjectLeadPage() {
           const data = await projectsResponse.json();
           setProjects(data);
           setHourAssignments({}); // Reset local assignments
-          alert('Horas asignadas con éxito!');
+          notifications.showSuccess('¡Horas asignadas con éxito!');
         }
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        notifications.showError(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error('Error saving hour assignments:', error);
-      alert('Error al guardar las asignaciones');
+      notifications.showError('Error al guardar las asignaciones');
     } finally {
       setSavingHours(null);
     }
@@ -159,8 +162,8 @@ export default function ProjectLeadPage() {
     setCategories([]);
     setMessage("");
     
-    // Show success notification
-    alert("Retroalimentación enviada con éxito!");
+    // Show success notification using the toast system
+    notifications.showSuccess("Retroalimentación enviada con éxito!");
   };
   return (
     <div className="min-h-screen bg-white">
@@ -654,6 +657,20 @@ export default function ProjectLeadPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Toast Notifications Container */}
+      <NotificationContainer
+        notifications={notifications.notifications}
+        onClose={(id) => {
+          const updatedNotifications = notifications.notifications.filter(n => n.id !== id);
+          notifications.clearNotifications();
+          updatedNotifications.forEach(n => {
+            if (n.id !== id) {
+              notifications.showNotification(n.type, n.message);
+            }
+          });
+        }}
+      />
     </div>
   );
 }
