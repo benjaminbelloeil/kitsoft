@@ -101,12 +101,27 @@ export async function GET(request: NextRequest) {
             nombre: usuario?.nombre || '',
             apellido: usuario?.apellido || '',
             url_avatar: usuario?.url_avatar || null,
-            rol_nombre: rol?.nombre || ''
+            rol_nombre: rol?.nombre || '',
+            cargabilidad: 0 // Will be calculated after all users are mapped
           };
         });
 
+      // Calculate total hours assigned to this project
       const assignedHours = assignedUsers.reduce((total, user) => total + (user.horas || 0), 0);
+      
+      // Calculate percentage of project hours that have been assigned
+      // This represents what percentage of the total project work has been allocated
       const assignedPercentage = project.horas_totales > 0 ? Math.round((assignedHours / project.horas_totales) * 100) : 0;
+      
+      // For each assigned user, calculate their individual cargabilidad percentage
+      // This represents what percentage of the total project each user is responsible for
+      assignedUsers.forEach(user => {
+        if (user.horas && project.horas_totales) {
+          user.cargabilidad = Math.round((user.horas / project.horas_totales) * 100);
+        } else {
+          user.cargabilidad = 0;
+        }
+      });
 
       // Handle clientes which might be an array
       const clientes = project.clientes as unknown;

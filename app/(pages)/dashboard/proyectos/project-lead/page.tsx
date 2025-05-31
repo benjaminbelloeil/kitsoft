@@ -165,6 +165,15 @@ export default function ProjectLeadPage() {
     // Show success notification using the toast system
     notifications.showSuccess("Retroalimentación enviada con éxito!");
   };
+
+  // Helper function to calculate real-time user cargabilidad percentage
+  const calculateUserCargabilidad = (userHours: number, projectTotalHours: number) => {
+    if (projectTotalHours > 0 && userHours > 0) {
+      return Math.round((userHours / projectTotalHours) * 100);
+    }
+    return 0;
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <AnimatePresence mode="wait">
@@ -346,9 +355,21 @@ export default function ProjectLeadPage() {
                                                 <User className="h-3 w-3 text-[#3B82F6]" />
                                               )}
                                             </div>
-                                            <div>
+                                            <div className="flex-1">
                                               <p className="text-xs font-medium text-gray-800">{user.nombre} {user.apellido}</p>
-                                              <p className="text-[10px] text-gray-500">{user.rol_nombre}</p>
+                                              <div className="flex items-center space-x-2">
+                                                <p className="text-[10px] text-gray-500">{user.rol_nombre}</p>
+                                                {/* Show user's cargabilidad percentage - real-time calculation */}
+                                                {(() => {
+                                                  const currentHours = hourAssignments[user.id_usuario_proyecto] ?? user.horas;
+                                                  const cargabilidad = calculateUserCargabilidad(currentHours, project.horas_totales);
+                                                  return cargabilidad > 0 ? (
+                                                    <span className="text-[10px] font-medium text-[#3B82F6] bg-[#3B82F610] px-1 py-0.5 rounded">
+                                                      {cargabilidad}% del proyecto
+                                                    </span>
+                                                  ) : null;
+                                                })()}
+                                              </div>
                                             </div>
                                           </div>
                                           <div className="flex items-center space-x-1">

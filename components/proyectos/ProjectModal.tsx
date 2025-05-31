@@ -15,7 +15,7 @@ import {
   FiUser,
   FiClipboard
 } from 'react-icons/fi';
-import { getProjectColor, calculateCargabilidad, getCargabilidadStatus } from './utils/projectUtils';
+import { getProjectColor, getCargabilidadStatus } from './utils/projectUtils';
 
 interface ProjectModalProps {
   project: any;
@@ -227,18 +227,24 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center">
                         {(() => {
-                          const cargabilidad = calculateCargabilidad(project);
+                          // Calculate individual user cargabilidad for this specific project
+                          const cargabilidad = project.user_hours && project.horas_totales > 0 
+                            ? Math.round((project.user_hours / project.horas_totales) * 100)
+                            : 0;
                           const status = getCargabilidadStatus(cargabilidad);
                           return (
                             <>
                               <div className={`h-3 w-3 ${status.dotColor} rounded-full mr-2 animate-pulse`}></div>
-                              <span className="text-gray-700 font-medium">Cargabilidad:</span>
+                              <span className="text-gray-700 font-medium">Mi Cargabilidad:</span>
                             </>
                           );
                         })()}
                       </div>
                       {(() => {
-                        const cargabilidad = calculateCargabilidad(project);
+                        // Calculate individual user cargabilidad for this specific project
+                        const cargabilidad = project.user_hours && project.horas_totales > 0 
+                          ? Math.round((project.user_hours / project.horas_totales) * 100)
+                          : 0;
                         const status = getCargabilidadStatus(cargabilidad);
                         return (
                           <span className={`font-bold ${status.color}`}>{cargabilidad}%</span>
@@ -247,7 +253,10 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       {(() => {
-                        const cargabilidad = calculateCargabilidad(project);
+                        // Calculate individual user cargabilidad for this specific project
+                        const cargabilidad = project.user_hours && project.horas_totales > 0 
+                          ? Math.round((project.user_hours / project.horas_totales) * 100)
+                          : 0;
                         const status = getCargabilidadStatus(cargabilidad);
                         let gradientClass = "bg-gradient-to-r";
                         

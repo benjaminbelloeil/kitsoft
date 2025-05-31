@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // Project utility functions
 
 // Extended color palette for projects
@@ -52,7 +51,7 @@ export const getProjectColor = (color: string | null | undefined, projectId?: st
 };
 
 // Function to get corresponding text color for contrast
-export const getProjectTextColor = (bgColor: string) => {
+export const getProjectTextColor = () => {
   // All our background colors are dark enough to need white text
   return 'text-white';
 };
@@ -77,61 +76,6 @@ export const getProjectHexColor = (color: string | null | undefined, projectId?:
     case 'bg-[#A100FF]': return '#A100FF';
     default: return '#A100FF';
   }
-};
-
-// Function to calculate project cargabilidad percentage
-export const calculateCargabilidad = (project: {
-  assignedUsers?: Array<{ horas?: number }>;
-  horas_totales?: number;
-  assignedPercentage?: number;
-  cargabilidad?: number;
-  user_hours?: number;
-  calculation_mode?: 'project_total' | 'weekly'; // New parameter to control calculation mode
-}): number => {
-  // If project has assigned users and hours, calculate based on that
-  if (project.assignedUsers && Array.isArray(project.assignedUsers)) {
-    const totalAssignedHours = project.assignedUsers.reduce((total: number, user: { horas?: number }) => {
-      return total + (user.horas || 0);
-    }, 0);
-    
-    // Always prefer project total calculation when available
-    if (project.horas_totales && project.horas_totales > 0) {
-      return Math.round((totalAssignedHours / project.horas_totales) * 100);
-    }
-    
-    // Fallback: if no total hours, assume 40h per week standard
-    const standardWeeklyHours = 40;
-    return Math.min(Math.round((totalAssignedHours / standardWeeklyHours) * 100), 100);
-  }
-  
-  // If we have user_hours, calculate based on project total by default
-  if (project.user_hours !== undefined && project.user_hours > 0) {
-    // Always prefer project total calculation when available
-    if (project.horas_totales && project.horas_totales > 0) {
-      // Only use weekly calculation mode if explicitly requested
-      if (project.calculation_mode === 'weekly') {
-        const standardWeeklyHours = 40;
-        return Math.min(Math.round((project.user_hours / standardWeeklyHours) * 100), 100);
-      }
-      // Default to project total calculation
-      return Math.round((project.user_hours / project.horas_totales) * 100);
-    }
-    
-    // Fallback to weekly calculation only when no project total available
-    const standardWeeklyHours = 40;
-    return Math.min(Math.round((project.user_hours / standardWeeklyHours) * 100), 100);
-  }
-  
-  // Fallback to existing cargabilidad values (ensure they are percentages)
-  if (project.assignedPercentage !== undefined) {
-    return project.assignedPercentage;
-  }
-  
-  if (project.cargabilidad !== undefined) {
-    return project.cargabilidad;
-  }
-  
-  return 0;
 };
 
 // Function to get cargabilidad status and color
@@ -165,29 +109,4 @@ export const getCargabilidadStatus = (percentage: number) => {
       dotColor: 'bg-yellow-500'
     };
   }
-};
-
-// Function to format user hours display
-export const formatUserHours = (hours: number | undefined): string => {
-  if (!hours || hours === 0) return '0h';
-  return `${hours}h`;
-};
-
-// Function to calculate individual user cargabilidad percentage for a project
-export const calculateUserCargabilidadForProject = (
-  userHours: number, 
-  projectTotalHours: number, 
-  mode: 'project_total' | 'weekly' = 'project_total' // Default to project_total as preferred mode
-): number => {
-  if (!userHours || userHours <= 0) return 0;
-  
-  // Always use project total calculation when available (and weekly mode not explicitly requested)
-  if (projectTotalHours > 0 && mode !== 'weekly') {
-    // User hours as a percentage of total project hours
-    return Math.round((userHours / projectTotalHours) * 100);
-  }
-  
-  // Only use weekly calculation when explicitly requested or when project total is not available
-  const standardWeeklyHours = 40; // Standard workweek hours
-  return Math.min(Math.round((userHours / standardWeeklyHours) * 100), 100);
 };

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FiChevronRight, FiUsers } from 'react-icons/fi';
-import { getProjectColor, getProjectHexColor, calculateCargabilidad, getCargabilidadStatus } from './utils/projectUtils';
+import { getProjectColor, getProjectHexColor, getCargabilidadStatus } from './utils/projectUtils';
 import Image from 'next/image';
 
 interface ProjectListItemProps {
@@ -11,7 +11,13 @@ interface ProjectListItemProps {
 export default function ProjectListItem({ project, onProjectClick }: ProjectListItemProps) {
   const projectColor = getProjectColor(project.color || null, project.id_proyecto);
   const projectHexColor = getProjectHexColor(project.color || null, project.id_proyecto);
-  const cargabilidadPercentage = calculateCargabilidad(project);
+  
+  // Calculate individual user cargabilidad for this specific project
+  // This should show what percentage of the total project this user is responsible for
+  const cargabilidadPercentage = project.user_hours && project.horas_totales > 0 
+    ? Math.round((project.user_hours / project.horas_totales) * 100)
+    : 0;
+  
   const cargabilidadStatus = getCargabilidadStatus(cargabilidadPercentage);
   
   return (
