@@ -11,7 +11,7 @@ export default function ProjectList({ projects, onProjectClick }: ProjectListPro
     <div className="space-y-4">
       {projects.map(project => (
         <ProjectListItem
-          key={project.id}
+          key={project.id_proyecto}
           project={project}
           onProjectClick={onProjectClick}
         />

@@ -3,9 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  getProjectsByStatus, 
-} from '@/app/lib/data';
+import { useUser } from '@/context/user-context';
 import ProjectsHeader from '@/components/proyectos/projectsheader';
 import ProyectosSkeleton from '@/components/proyectos/ProyectosSkeleton';
 import ProjectGrid from '@/components/proyectos/ProjectGrid';
@@ -16,17 +14,34 @@ import EmptyProjectsState from '@/components/proyectos/EmptyProjectsState';
 export default function ProjectsPage() {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  
-  const activeProjects = getProjectsByStatus('active');
-
+  const [activeProjects, setActiveProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  //Use effect para simular la carga de datos
+  const { userRole } = useUser();
+
+  // Fetch user's active projects
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const fetchUserProjects = async () => {
+      try {
+        const response = await fetch('/api/user/proyectos?status=active');
+        if (response.ok) {
+          const data = await response.json();
+          setActiveProjects(data);
+        } else {
+          console.error('Failed to fetch user projects');
+        }
+      } catch (error) {
+        console.error('Error fetching user projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userRole) {
+      fetchUserProjects();
+    } else {
       setLoading(false);
-    }, 1500); // Simula un retraso de 1.5 segundo para la carga
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [userRole]);
 
   // If loading, show skeleton
   if (loading) {

@@ -1,12 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  getProjectsByStatus,
-} from '@/app/lib/data';
+import { useUser } from '@/context/user-context';
 import ArchivedProjectsHeader from '@/components/proyectos/archivados/ArchiveProjectsHeader';
 import ArchivedProjectsSkeleton from '@/components/proyectos/archivados/ArchivedSkeleton';
 import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
@@ -28,9 +27,30 @@ import {
 export default function ArchivedProjectsPage() {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [archivedProjects, setArchivedProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const archivedProjects = getProjectsByStatus('archived');
+  // Fetch user's archived projects
+  useEffect(() => {
+    const fetchArchivedProjects = async () => {
+      try {
+        const response = await fetch('/api/user/proyectos?status=archived');
+        if (response.ok) {
+          const data = await response.json();
+          setArchivedProjects(data);
+        } else {
+          console.error('Failed to fetch archived projects');
+        }
+      } catch (error) {
+        console.error('Error fetching archived projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArchivedProjects();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -67,14 +87,6 @@ export default function ArchivedProjectsPage() {
       default: return 'bg-[#A100FF]';
     }
   };
-
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500); // Simula un retraso de 1.5 segundo
-    return () => clearTimeout(timer);
-  }, []);
 
   if (loading) {
     return <ArchivedProjectsSkeleton/>

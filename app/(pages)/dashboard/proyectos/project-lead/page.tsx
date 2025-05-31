@@ -1,14 +1,14 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ThumbsUp, CheckCircle, Clock, MessageSquare, Send, User, FolderOpen, Users, Clock as ClockIcon } from "lucide-react";
-import { feedbackRecipients } from "@/app/lib/data";
 import { useUser } from "@/context/user-context";
 import ProjectLeadHeader from '@/components/proyectos/project-lead/ProjectLeadHeader';
 import ProjectLeadSkeleton from '@/components/proyectos/project-lead/ProjectLeadSkeleton';
 import UnauthorizedState from '@/components/auth/UnauhtorizedState';
-// import { fetchProjects } from "@/utils/database/client/projectManagerSync";
 
 export default function ProjectLeadPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,6 +22,32 @@ export default function ProjectLeadPage() {
   const { isProjectLead } = useUser();
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [hourAssignments, setHourAssignments] = useState<Record<string, number>>({});
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [savingHours, setSavingHours] = useState<string | null>(null);
+  
+  // Fetch projects data
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/project-lead/proyectos');
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data);
+        } else {
+          console.error('Failed to fetch projects');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    if (isProjectLead) {
+      fetchProjects();
+    }
+  }, [isProjectLead]);
   
   // Simulate loading state
   useEffect(() => {
@@ -36,78 +62,73 @@ export default function ProjectLeadPage() {
     return <UnauthorizedState />;
   }  
 
-  const projects = [
-    { 
-      id: '1', 
-      name: 'Sistema de Gestión CRM', 
-      totalHours: 480, 
-      assignedHours: 360, 
-      assignedPercentage: 75,
-      assignedUsers: [
-        { id: '1', name: 'Ana García', role: 'Frontend Dev', assignedHours: 120 },
-        { id: '2', name: 'Carlos López', role: 'Backend Dev', assignedHours: 160 },
-        { id: '3', name: 'María Rodríguez', role: 'UI/UX Designer', assignedHours: 80 }
-      ]
-    },
-    { 
-      id: '2', 
-      name: 'E-commerce Platform', 
-      totalHours: 640, 
-      assignedHours: 288, 
-      assignedPercentage: 45,
-      assignedUsers: [
-        { id: '4', name: 'David Torres', role: 'Full Stack Dev', assignedHours: 200 },
-        { id: '5', name: 'Laura Mendez', role: 'QA Engineer', assignedHours: 88 }
-      ]
-    },
-    { 
-      id: '3', 
-      name: 'Dashboard Analytics', 
-      totalHours: 320, 
-      assignedHours: 288, 
-      assignedPercentage: 90,
-      assignedUsers: [
-        { id: '6', name: 'Roberto Silva', role: 'Data Analyst', assignedHours: 160 },
-        { id: '7', name: 'Elena Vargas', role: 'Frontend Dev', assignedHours: 128 }
-      ]
-    },
-    { 
-      id: '4', 
-      name: 'Mobile App React Native', 
-      totalHours: 560, 
-      assignedHours: 336, 
-      assignedPercentage: 60,
-      assignedUsers: [
-        { id: '8', name: 'José Martín', role: 'Mobile Dev', assignedHours: 200 },
-        { id: '9', name: 'Patricia Luna', role: 'UI/UX Designer', assignedHours: 136 }
-      ]
-    },
-  ];
-
   // Helper function to calculate total assigned hours for a project
   const getTotalAssignedHours = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
+    const project = projects.find((p: any) => p.id_proyecto === projectId);
     if (!project) return 0;
     
-    return project.assignedUsers.reduce((total, user) => {
-      return total + (hourAssignments[user.id] ?? user.assignedHours);
+    return project.assignedUsers.reduce((total: number, user: any) => {
+      return total + (hourAssignments[user.id_usuario_proyecto] ?? user.horas);
     }, 0);
   };
 
   // Helper function to check if hour assignment is valid
   const isValidAssignment = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
+    const project = projects.find((p: any) => p.id_proyecto === projectId);
     if (!project) return false;
     
     const totalAssigned = getTotalAssignedHours(projectId);
-    return totalAssigned <= project.totalHours;
+    return totalAssigned <= project.horas_totales;
+  };
+
+  // Save hour assignments
+  const saveHourAssignments = async (projectId: string) => {
+    setSavingHours(projectId);
+    try {
+      const response = await fetch(`/api/project-lead/proyectos/${projectId}/hours`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ hourAssignments }),
+      });
+
+      if (response.ok) {
+        // Refresh projects data
+        const projectsResponse = await fetch('/api/project-lead/proyectos');
+        if (projectsResponse.ok) {
+          const data = await projectsResponse.json();
+          setProjects(data);
+          setHourAssignments({}); // Reset local assignments
+          alert('Horas asignadas con éxito!');
+        }
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Error saving hour assignments:', error);
+      alert('Error al guardar las asignaciones');
+    } finally {
+      setSavingHours(null);
+    }
   };
 
   // Filter users based on selected project
   const getFilteredRecipients = () => {
-    if (!selectedProject) return feedbackRecipients;
-    // In a real app, filter users based on project assignment
-    return feedbackRecipients;
+    if (!selectedProject) return [];
+    
+    // Find the selected project and return its assigned users
+    const project = projects.find((p) => p.id_proyecto === selectedProject);
+    if (!project || !project.assignedUsers) return [];
+    
+    // Convert assigned users to the format expected by the feedback component
+    return project.assignedUsers.map((user: any) => ({
+      id: user.id_usuario,
+      name: `${user.nombre} ${user.apellido || ''}`.trim(),
+      role: user.rol_nombre,
+      avatar: user.url_avatar || null
+    }));
   };
 
   // Toggle category selection
@@ -207,9 +228,20 @@ export default function ProjectLeadPage() {
                     <div className="p-4">
                       {/* Projects List */}
                       <div className="space-y-3">
-                        {projects.map((project, index) => (
+                        {loadingProjects ? (
+                          <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3B82F6] mx-auto"></div>
+                            <p className="text-sm text-gray-500 mt-2">Cargando proyectos...</p>
+                          </div>
+                        ) : projects.length === 0 ? (
+                          <div className="text-center py-8">
+                            <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-500">No tienes proyectos asignados</p>
+                          </div>
+                        ) : (
+                          projects.map((project: any, index: number) => (
                           <motion.div 
-                            key={project.id} 
+                            key={project.id_proyecto} 
                             className="border border-gray-200 rounded-lg overflow-hidden transition-all"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -218,15 +250,15 @@ export default function ProjectLeadPage() {
                           >
                             <div className="p-3">
                               <div className="flex items-center justify-between mb-3">
-                                <h3 className="font-medium text-sm text-gray-800">{project.name}</h3>
+                                <h3 className="font-medium text-sm text-gray-800">{project.titulo}</h3>
                                 <div className="flex items-center space-x-3 text-xs text-gray-500">
                                   <div className="flex items-center">
                                     <Users className="w-4 h-4 mr-1" />
-                                    {project.assignedUsers.length} usuarios
+                                    {project.assignedUsers?.length || 0} usuarios
                                   </div>
                                   <div className="flex items-center">
                                     <ClockIcon className="w-4 h-4 mr-1" />
-                                    {project.assignedHours}/{project.totalHours}h
+                                    {project.assignedHours}/{project.horas_totales}h
                                   </div>
                                 </div>
                               </div>
@@ -247,25 +279,25 @@ export default function ProjectLeadPage() {
                               </div>
                               <div className="flex justify-between items-center text-xs mb-2">
                                 <span className="text-gray-600 font-medium">{project.assignedPercentage}% horas asignadas</span>
-                                <span className="text-[#3B82F6] font-semibold">{project.totalHours - project.assignedHours}h disponibles</span>
+                                <span className="text-[#3B82F6] font-semibold">{project.availableHours}h disponibles</span>
                               </div>
                               
                               {/* Project actions */}
                               <div className="flex justify-end">
                                 <motion.button 
-                                  onClick={() => setExpandedProject(expandedProject === project.id ? null : project.id)}
+                                  onClick={() => setExpandedProject(expandedProject === project.id_proyecto ? null : project.id_proyecto)}
                                   className="px-3 py-1.5 text-xs bg-[#3B82F610] hover:bg-[#3B82F620] text-[#3B82F6] rounded-md transition-all font-medium border border-[#3B82F620] hover:border-[#3B82F630]"
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                 >
-                                  {expandedProject === project.id ? 'Ocultar asignación' : 'Asignar horas'}
+                                  {expandedProject === project.id_proyecto ? 'Ocultar asignación' : 'Asignar horas'}
                                 </motion.button>
                               </div>
                             </div>
 
                             {/* Expandable hour assignment section */}
                             <AnimatePresence>
-                              {expandedProject === project.id && (
+                              {expandedProject === project.id_proyecto && (
                                 <motion.div 
                                   className="border-t border-gray-200 bg-gray-50 p-3"
                                   initial={{ height: 0, opacity: 0 }}
@@ -277,11 +309,11 @@ export default function ProjectLeadPage() {
                                     <div className="flex justify-between items-center mb-2">
                                       <h4 className="font-medium text-sm text-gray-800">Asignación de Horas</h4>
                                       <div className="text-xs">
-                                        <span className={`font-semibold ${isValidAssignment(project.id) ? 'text-[#3B82F6]' : 'text-red-500'}`}>
-                                          {project.totalHours - getTotalAssignedHours(project.id)}h
+                                        <span className={`font-semibold ${isValidAssignment(project.id_proyecto) ? 'text-[#3B82F6]' : 'text-red-500'}`}>
+                                          {project.horas_totales - getTotalAssignedHours(project.id_proyecto)}h
                                         </span>
                                         <span className="text-gray-600 ml-1">disponibles</span>
-                                        {!isValidAssignment(project.id) && (
+                                        {!isValidAssignment(project.id_proyecto) && (
                                           <div className="text-xs text-red-500 mt-1">
                                             ⚠️ Horas excedidas
                                           </div>
@@ -291,32 +323,40 @@ export default function ProjectLeadPage() {
                                     
                                     {/* User hour assignments */}
                                     <div className="space-y-2">
-                                      {project.assignedUsers.map((user, userIndex) => (
+                                      {project.assignedUsers?.map((user: any, userIndex: number) => (
                                         <motion.div 
-                                          key={user.id} 
+                                          key={user.id_usuario_proyecto} 
                                           className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-200"
                                           initial={{ opacity: 0, x: -20 }}
                                           animate={{ opacity: 1, x: 0 }}
                                           transition={{ duration: 0.3, delay: userIndex * 0.1 }}
                                         >
                                           <div className="flex items-center">
-                                            <div className="h-6 w-6 rounded-full bg-[#3B82F610] flex items-center justify-center mr-2">
-                                              <User className="h-3 w-3 text-[#3B82F6]" />
+                                            <div className="h-6 w-6 rounded-full bg-[#3B82F610] flex items-center justify-center mr-2 overflow-hidden">
+                                              {user.url_avatar ? (
+                                                <img 
+                                                  src={user.url_avatar} 
+                                                  alt={`${user.nombre} ${user.apellido}`}
+                                                  className="h-full w-full object-cover"
+                                                />
+                                              ) : (
+                                                <User className="h-3 w-3 text-[#3B82F6]" />
+                                              )}
                                             </div>
                                             <div>
-                                              <p className="text-xs font-medium text-gray-800">{user.name}</p>
-                                              <p className="text-[10px] text-gray-500">{user.role}</p>
+                                              <p className="text-xs font-medium text-gray-800">{user.nombre} {user.apellido}</p>
+                                              <p className="text-[10px] text-gray-500">{user.rol_nombre}</p>
                                             </div>
                                           </div>
                                           <div className="flex items-center space-x-1">
                                             <input
                                               type="number"
                                               min="0"
-                                              max={project.totalHours}
-                                              value={hourAssignments[user.id] || user.assignedHours}
+                                              max={project.horas_totales}
+                                              value={hourAssignments[user.id_usuario_proyecto] || user.horas}
                                               onChange={(e) => setHourAssignments((prev: Record<string, number>) => ({
                                                 ...prev,
-                                                [user.id]: parseInt(e.target.value) || 0
+                                                [user.id_usuario_proyecto]: parseInt(e.target.value) || 0
                                               }))}
                                               className="w-12 px-1 py-1 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-[#3B82F620] focus:border-[#3B82F6]"
                                             />
@@ -329,16 +369,17 @@ export default function ProjectLeadPage() {
                                     {/* Save button with green styling */}
                                     <div className="mt-3 flex justify-end">
                                       <motion.button 
-                                        disabled={!isValidAssignment(project.id)}
+                                        onClick={() => saveHourAssignments(project.id_proyecto)}
+                                        disabled={!isValidAssignment(project.id_proyecto) || savingHours === project.id_proyecto}
                                         className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                                          isValidAssignment(project.id)
+                                          isValidAssignment(project.id_proyecto) && savingHours !== project.id_proyecto
                                             ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:border-green-300 shadow-sm'
                                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         }`}
-                                        whileHover={isValidAssignment(project.id) ? { scale: 1.05 } : {}}
-                                        whileTap={isValidAssignment(project.id) ? { scale: 0.95 } : {}}
+                                        whileHover={isValidAssignment(project.id_proyecto) && savingHours !== project.id_proyecto ? { scale: 1.05 } : {}}
+                                        whileTap={isValidAssignment(project.id_proyecto) && savingHours !== project.id_proyecto ? { scale: 0.95 } : {}}
                                       >
-                                        Guardar Asignación
+                                        {savingHours === project.id_proyecto ? 'Guardando...' : 'Guardar Asignación'}
                                       </motion.button>
                                     </div>
                                   </div>
@@ -346,7 +387,7 @@ export default function ProjectLeadPage() {
                               )}
                             </AnimatePresence>
                           </motion.div>
-                        ))}
+                        )))}
                       </div>
                     </div>
                   </motion.div>
@@ -415,8 +456,8 @@ export default function ProjectLeadPage() {
                         >
                           <option value="">Selecciona un proyecto</option>
                           {projects.map((project) => (
-                            <option key={project.id} value={project.id}>
-                              {project.name}
+                            <option key={project.id_proyecto} value={project.id_proyecto}>
+                              {project.titulo}
                             </option>
                           ))}
                         </motion.select>
@@ -435,23 +476,29 @@ export default function ProjectLeadPage() {
                         </label>
                         <div className="bg-white rounded-md border border-gray-200 shadow-inner p-3">
                           <div className="grid grid-cols-1 gap-1.5 max-h-20 overflow-y-auto">
-                            {getFilteredRecipients().slice(0, 3).map((recipient, index) => (
+                            {getFilteredRecipients().slice(0, 3).map((recipient: {id: string, name: string, role: string, avatar: string | null}, index: number) => (
                               <motion.div
                                 key={recipient.id}
                                 onClick={() => setSelectedRecipient(recipient.id)}
                                 className={`flex items-center p-1.5 rounded-md border text-xs ${
                                   selectedRecipient === recipient.id
-                                    ? "border-[#3B82F6] bg-[#3B82F608]" 
-                                    : "border-gray-200 hover:border-[#3B82F680] hover:bg-[#3B82F605]"
+                                    ? "border-[#14B8A6] bg-[#14B8A608]" 
+                                    : "border-gray-200 hover:border-[#14B8A640] hover:bg-[#14B8A605]"
                                 } cursor-pointer transition-all`}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3, delay: 0.9 + index * 0.1 }}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
                               >
                                 <div className="h-5 w-5 rounded-full bg-[#14B8A610] flex items-center justify-center overflow-hidden border border-gray-200">
-                                  <User className="h-3 w-3 text-[#14B8A6]" />
+                                  {recipient.avatar ? (
+                                    <img 
+                                      src={recipient.avatar} 
+                                      alt={recipient.name}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <User className="h-3 w-3 text-[#14B8A6]" />
+                                  )}
                                 </div>
                                 <div className="ml-1.5 overflow-hidden">
                                   <p className="text-xs font-medium text-gray-800 truncate">{recipient.name}</p>
@@ -459,6 +506,12 @@ export default function ProjectLeadPage() {
                                 </div>
                               </motion.div>
                             ))}
+                            {getFilteredRecipients().length === 0 && selectedProject && (
+                              <p className="text-xs text-gray-500 py-2 text-center">No hay usuarios asignados a este proyecto</p>
+                            )}
+                            {!selectedProject && (
+                              <p className="text-xs text-gray-500 py-2 text-center">Selecciona un proyecto primero</p>
+                            )}
                           </div>
                         </div>
                       </motion.div>

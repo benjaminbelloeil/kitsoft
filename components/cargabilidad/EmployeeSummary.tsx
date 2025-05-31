@@ -3,6 +3,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FiBarChart2 } from 'react-icons/fi';
+import { getProjectHexColor } from '../proyectos/utils/projectUtils';
 
 // -----------------------------------------------------------------------------
 // TYPES
@@ -14,6 +15,7 @@ export interface ProjectInfo {
   color?: string;
   load?: number;
   deadline?: string;
+  id?: string; // Project ID for consistent color generation
 }
 
 export interface HeaderCardProps {
@@ -122,13 +124,14 @@ export function HeaderCard({ projects = [], totalHours = 40, assignedHours, tota
               {projects.map((project) => {
                 const hoursPerWeek = projectHours(project);
                 const w = `${(hoursPerWeek / totalHours) * 100}%`;
+                const projectColor = getProjectHexColor(project.color, project.id || project.name);
                 return (
                   <div
                     key={project.name}
-                    className={`${typeof project.color === 'string' && project.color?.startsWith('bg-') ? project.color : ''} flex items-center justify-center relative group`}
+                    className="flex items-center justify-center relative group"
                     style={{ 
                       width: w, 
-                      backgroundColor: project.color && !project.color.startsWith('bg-') ? project.color : undefined 
+                      backgroundColor: projectColor
                     }}
                   >
                     <span className="text-[10px] font-semibold text-white truncate px-2">
@@ -172,13 +175,18 @@ export function HeaderCard({ projects = [], totalHours = 40, assignedHours, tota
               </span>
             </div>
             
-            {projects.map((project) => (
-              <div key={project.name} className="inline-flex items-center gap-1.5 bg-white rounded-full px-2.5 py-1 border border-gray-100 shadow-sm">
-                <div className={`w-2 h-2 rounded-full ${typeof project.color === 'string' && project.color?.startsWith('bg-') ? project.color : ''}`} 
-                     style={{ backgroundColor: project.color && !project.color.startsWith('bg-') ? project.color : undefined }}></div>
-                <span className="text-xs font-medium text-gray-700">{project.name}</span>
-              </div>
-            ))}
+            {projects.map((project) => {
+              const projectColor = getProjectHexColor(project.color, project.id || project.name);
+              return (
+                <div key={project.name} className="inline-flex items-center gap-1.5 bg-white rounded-full px-2.5 py-1 border border-gray-100 shadow-sm">
+                  <div 
+                    className="w-2 h-2 rounded-full" 
+                    style={{ backgroundColor: projectColor }}
+                  ></div>
+                  <span className="text-xs font-medium text-gray-700">{project.name}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
