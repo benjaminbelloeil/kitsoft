@@ -1,10 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ThumbsUp, CheckCircle, Clock, MessageSquare, Send, User, FolderOpen, Users, Clock as ClockIcon } from "lucide-react";
-import { feedbackRecipients } from "@/app/lib/data";
 import { useUser } from "@/context/user-context";
 import ProjectLeadHeader from '@/components/proyectos/project-lead/ProjectLeadHeader';
 import ProjectLeadSkeleton from '@/components/proyectos/project-lead/ProjectLeadSkeleton';
@@ -116,9 +116,19 @@ export default function ProjectLeadPage() {
 
   // Filter users based on selected project
   const getFilteredRecipients = () => {
-    if (!selectedProject) return feedbackRecipients;
-    // In a real app, filter users based on project assignment
-    return feedbackRecipients;
+    if (!selectedProject) return [];
+    
+    // Find the selected project and return its assigned users
+    const project = projects.find((p) => p.id_proyecto === selectedProject);
+    if (!project || !project.assignedUsers) return [];
+    
+    // Convert assigned users to the format expected by the feedback component
+    return project.assignedUsers.map((user: any) => ({
+      id: user.id_usuario,
+      name: `${user.nombre} ${user.apellido || ''}`.trim(),
+      role: user.rol_nombre,
+      avatar: user.url_avatar || null
+    }));
   };
 
   // Toggle category selection
@@ -322,8 +332,16 @@ export default function ProjectLeadPage() {
                                           transition={{ duration: 0.3, delay: userIndex * 0.1 }}
                                         >
                                           <div className="flex items-center">
-                                            <div className="h-6 w-6 rounded-full bg-[#3B82F610] flex items-center justify-center mr-2">
-                                              <User className="h-3 w-3 text-[#3B82F6]" />
+                                            <div className="h-6 w-6 rounded-full bg-[#3B82F610] flex items-center justify-center mr-2 overflow-hidden">
+                                              {user.url_avatar ? (
+                                                <img 
+                                                  src={user.url_avatar} 
+                                                  alt={`${user.nombre} ${user.apellido}`}
+                                                  className="h-full w-full object-cover"
+                                                />
+                                              ) : (
+                                                <User className="h-3 w-3 text-[#3B82F6]" />
+                                              )}
                                             </div>
                                             <div>
                                               <p className="text-xs font-medium text-gray-800">{user.nombre} {user.apellido}</p>
@@ -458,23 +476,29 @@ export default function ProjectLeadPage() {
                         </label>
                         <div className="bg-white rounded-md border border-gray-200 shadow-inner p-3">
                           <div className="grid grid-cols-1 gap-1.5 max-h-20 overflow-y-auto">
-                            {getFilteredRecipients().slice(0, 3).map((recipient, index) => (
+                            {getFilteredRecipients().slice(0, 3).map((recipient: {id: string, name: string, role: string, avatar: string | null}, index: number) => (
                               <motion.div
                                 key={recipient.id}
                                 onClick={() => setSelectedRecipient(recipient.id)}
                                 className={`flex items-center p-1.5 rounded-md border text-xs ${
                                   selectedRecipient === recipient.id
-                                    ? "border-[#3B82F6] bg-[#3B82F608]" 
-                                    : "border-gray-200 hover:border-[#3B82F680] hover:bg-[#3B82F605]"
+                                    ? "border-[#14B8A6] bg-[#14B8A608]" 
+                                    : "border-gray-200 hover:border-[#14B8A640] hover:bg-[#14B8A605]"
                                 } cursor-pointer transition-all`}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3, delay: 0.9 + index * 0.1 }}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
                               >
                                 <div className="h-5 w-5 rounded-full bg-[#14B8A610] flex items-center justify-center overflow-hidden border border-gray-200">
-                                  <User className="h-3 w-3 text-[#14B8A6]" />
+                                  {recipient.avatar ? (
+                                    <img 
+                                      src={recipient.avatar} 
+                                      alt={recipient.name}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <User className="h-3 w-3 text-[#14B8A6]" />
+                                  )}
                                 </div>
                                 <div className="ml-1.5 overflow-hidden">
                                   <p className="text-xs font-medium text-gray-800 truncate">{recipient.name}</p>
@@ -482,6 +506,12 @@ export default function ProjectLeadPage() {
                                 </div>
                               </motion.div>
                             ))}
+                            {getFilteredRecipients().length === 0 && selectedProject && (
+                              <p className="text-xs text-gray-500 py-2 text-center">No hay usuarios asignados a este proyecto</p>
+                            )}
+                            {!selectedProject && (
+                              <p className="text-xs text-gray-500 py-2 text-center">Selecciona un proyecto primero</p>
+                            )}
                           </div>
                         </div>
                       </motion.div>
