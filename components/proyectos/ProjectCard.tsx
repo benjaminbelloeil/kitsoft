@@ -63,24 +63,15 @@ export default function ProjectCard({ project, onProjectClick }: ProjectCardProp
           </div>
           
           <div className="flex -space-x-2 overflow-hidden">
-            {/* Project Lead Avatar */}
-            {project.project_lead && (
+            {/* Project Lead Avatar */}                {project.project_lead && project.project_lead.url_avatar && (
               <div className="inline-block h-8 w-8 rounded-full ring-2 ring-white" title={`Project Lead: ${project.project_lead.nombre} ${project.project_lead.apellido}`}>
-                {project.project_lead.url_avatar ? (
-                  <Image
-                    src={project.project_lead.url_avatar}
-                    alt={`${project.project_lead.nombre} ${project.project_lead.apellido}`}
-                    width={32}
-                    height={32}
-                    className="h-full w-full rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-medium text-blue-700">
-                      {project.project_lead.nombre?.charAt(0)}{project.project_lead.apellido?.charAt(0)}
-                    </span>
-                  </div>
-                )}
+                <Image
+                  src={project.project_lead.url_avatar}
+                  alt={`${project.project_lead.nombre} ${project.project_lead.apellido}`}
+                  width={32}
+                  height={32}
+                  className="h-full w-full rounded-full object-cover"
+                />
               </div>
             )}
             
@@ -88,8 +79,8 @@ export default function ProjectCard({ project, onProjectClick }: ProjectCardProp
             {project.assignedUsers && project.assignedUsers.length > 0 && (
               <>
                 {project.assignedUsers.slice(0, 3).map((user: any, index: number) => (
-                  <div key={user.id_usuario || index} className="inline-block h-8 w-8 rounded-full ring-2 ring-white" title={`${user.nombre} ${user.apellido}`}>
-                    {user.url_avatar ? (
+                  user.url_avatar ? (
+                    <div key={user.id_usuario || index} className="inline-block h-8 w-8 rounded-full ring-2 ring-white" title={`${user.nombre} ${user.apellido}`}>
                       <Image
                         src={user.url_avatar}
                         alt={`${user.nombre} ${user.apellido}`}
@@ -97,14 +88,8 @@ export default function ProjectCard({ project, onProjectClick }: ProjectCardProp
                         height={32}
                         className="h-full w-full rounded-full object-cover"
                       />
-                    ) : (
-                      <div className="h-full w-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-medium text-gray-600">
-                          {user.nombre?.charAt(0)}{user.apellido?.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  ) : null
                 ))}
                 {project.assignedUsers.length > 3 && (
                   <div className="h-8 w-8 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center">

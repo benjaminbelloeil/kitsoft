@@ -136,33 +136,33 @@ export const calculateCargabilidad = (project: {
 
 // Function to get cargabilidad status and color
 export const getCargabilidadStatus = (percentage: number) => {
-  if (percentage >= 90) {
+  if (percentage >= 80) {
     return {
       status: 'Sobrecargado',
       color: 'text-red-600',
       bgColor: 'bg-red-100',
       dotColor: 'bg-red-500'
     };
-  } else if (percentage >= 70) {
-    return {
-      status: 'Óptimo',
-      color: 'text-green-600',
-      bgColor: 'bg-green-100', 
-      dotColor: 'bg-green-500'
-    };
-  } else if (percentage >= 40) {
+  } else if (percentage >= 60 && percentage < 80) {
     return {
       status: 'Moderado',
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-100',
       dotColor: 'bg-yellow-500'
     };
+  } else if (percentage < 50) {
+    return {
+      status: 'Óptimo',
+      color: 'text-green-600',
+      bgColor: 'bg-green-100', 
+      dotColor: 'bg-green-500'
+    };
   } else {
     return {
-      status: 'Bajo',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-100',
-      dotColor: 'bg-gray-500'
+      status: 'Moderado',
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
+      dotColor: 'bg-yellow-500'
     };
   }
 };

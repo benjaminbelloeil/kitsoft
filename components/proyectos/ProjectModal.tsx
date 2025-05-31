@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef } from 'react';
@@ -14,7 +15,7 @@ import {
   FiUser,
   FiClipboard
 } from 'react-icons/fi';
-import { getProjectColor, calculateCargabilidad } from './utils/projectUtils';
+import { getProjectColor, calculateCargabilidad, getCargabilidadStatus } from './utils/projectUtils';
 
 interface ProjectModalProps {
   project: any;
@@ -115,13 +116,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               </div>
               Equipo asignado
             </h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {/* Real team members from project data */}
               {project.assignedUsers && project.assignedUsers.length > 0 ? (
                 project.assignedUsers.map((member: any) => (
                   <div key={member.id_usuario} className="flex flex-col items-center group">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md group-hover:border-[#A100FF20] transition-all">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md group-hover:border-[#A100FF20] transition-all">
                         {member.url_avatar ? (
                           <img 
                             src={member.url_avatar}
@@ -130,23 +131,15 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
-                              const placeholder = target.parentElement?.querySelector('.fallback-avatar') as HTMLElement;
-                              if (placeholder) {
-                                placeholder.style.display = 'flex';
-                              }
                             }}
                           />
-                        ) : null}
-                        <div className={`fallback-avatar w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ${member.url_avatar ? 'hidden' : ''}`}>
-                          <span className="text-xs font-medium text-gray-600">
-                            {member.nombre?.charAt(0) || ''}
-                            {member.apellido?.charAt(0) || ''}
-                          </span>
-                        </div>
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center"></div>
+                        )}
                       </div>
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
-                    <span className="text-xs text-gray-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center max-w-16 truncate">
+                    <span className="text-xs text-gray-800 mt-2 font-medium text-center max-w-20 truncate">
                       {member.nombre}
                     </span>
                     <span className="text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center max-w-16 truncate">
@@ -230,19 +223,49 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   </div>
                   
                   {/* Enhanced Cargabilidad with pulse animation */}
-                  <div className="flex flex-col bg-gradient-to-r from-green-50 to-transparent p-4 rounded-lg">
+                  <div className="flex flex-col bg-gradient-to-r from-gray-50 to-transparent p-4 rounded-lg">
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center">
-                        <div className="h-3 w-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                        <span className="text-gray-700 font-medium">Cargabilidad:</span>
+                        {(() => {
+                          const cargabilidad = calculateCargabilidad(project);
+                          const status = getCargabilidadStatus(cargabilidad);
+                          return (
+                            <>
+                              <div className={`h-3 w-3 ${status.dotColor} rounded-full mr-2 animate-pulse`}></div>
+                              <span className="text-gray-700 font-medium">Cargabilidad:</span>
+                            </>
+                          );
+                        })()}
                       </div>
-                      <span className="font-bold text-green-600">{calculateCargabilidad(project)}%</span>
+                      {(() => {
+                        const cargabilidad = calculateCargabilidad(project);
+                        const status = getCargabilidadStatus(cargabilidad);
+                        return (
+                          <span className={`font-bold ${status.color}`}>{cargabilidad}%</span>
+                        );
+                      })()}
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-inner transition-all duration-500" 
-                        style={{ width: `${calculateCargabilidad(project)}%` }}
-                      ></div>
+                      {(() => {
+                        const cargabilidad = calculateCargabilidad(project);
+                        const status = getCargabilidadStatus(cargabilidad);
+                        let gradientClass = "bg-gradient-to-r";
+                        
+                        if (cargabilidad >= 80) {
+                          gradientClass += " from-red-500 to-red-600";
+                        } else if (cargabilidad >= 60) {
+                          gradientClass += " from-yellow-500 to-yellow-600";
+                        } else {
+                          gradientClass += " from-green-500 to-green-600";
+                        }
+                        
+                        return (
+                          <div 
+                            className={`${gradientClass} h-3 rounded-full shadow-inner transition-all duration-500`} 
+                            style={{ width: `${cargabilidad}%` }}
+                          ></div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -260,7 +283,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 </h2>
                 
                 <div className="flex items-center mb-6">
-                  <div className="w-20 h-14 bg-gradient-to-r from-gray-100 to-gray-200 rounded-md flex items-center justify-center mr-4 overflow-hidden border border-gray-100 shadow-sm">
+                  <div className="mr-5">
                     {project.clientData?.url_logo ? (
                       <img 
                         src={project.clientData.url_logo.startsWith('http') 
@@ -268,23 +291,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                           : `https://${project.clientData.url_logo}/favicon.ico`
                         } 
                         alt={`Logo de ${project.cliente}`}
-                        className="max-h-full max-w-full object-contain p-1"
+                        className="h-16 max-w-[120px] object-contain border border-gray-200 rounded-md p-2"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-company.png';
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
                         }}
                       />
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
-                          <span className="text-xs font-semibold text-gray-600">
-                            {project.cliente.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="text-xs font-medium text-gray-600 truncate max-w-12">
-                          {project.cliente}
-                        </span>
-                      </div>
-                    )}
+                    ) : null}
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-1">{project.cliente}</h3>

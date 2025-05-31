@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FiChevronRight, FiUsers } from 'react-icons/fi';
-import { getProjectColor, getProjectHexColor, calculateCargabilidad } from './utils/projectUtils';
+import { getProjectColor, getProjectHexColor, calculateCargabilidad, getCargabilidadStatus } from './utils/projectUtils';
 import Image from 'next/image';
 
 interface ProjectListItemProps {
@@ -12,6 +12,7 @@ export default function ProjectListItem({ project, onProjectClick }: ProjectList
   const projectColor = getProjectColor(project.color || null, project.id_proyecto);
   const projectHexColor = getProjectHexColor(project.color || null, project.id_proyecto);
   const cargabilidadPercentage = calculateCargabilidad(project);
+  const cargabilidadStatus = getCargabilidadStatus(cargabilidadPercentage);
   
   return (
     <div 
@@ -49,8 +50,16 @@ export default function ProjectListItem({ project, onProjectClick }: ProjectList
               </span>
             </div>
             <div>
-              <span className="text-sm text-gray-500">
-                Cargabilidad: <b>{cargabilidadPercentage}%</b>
+              <span className="text-sm text-gray-500 flex items-center">
+                Cargabilidad: 
+                <div className="flex items-center ml-1">
+                  <div 
+                    className={`w-2.5 h-2.5 rounded-full mr-1 ${cargabilidadStatus.dotColor}`}
+                  ></div>
+                  <span className={cargabilidadStatus.color}>
+                    <b>{cargabilidadPercentage}%</b>
+                  </span>
+                </div>
               </span>
             </div>
           </div>
@@ -59,8 +68,8 @@ export default function ProjectListItem({ project, onProjectClick }: ProjectList
           <div className="mt-3 flex items-center justify-between">
             {project.project_lead ? (
               <div className="flex items-center">
-                <div className="w-6 h-6 rounded-full mr-2">
-                  {project.project_lead.url_avatar ? (
+                {project.project_lead.url_avatar && (
+                  <div className="w-6 h-6 rounded-full mr-2">
                     <Image
                       src={project.project_lead.url_avatar}
                       alt={`${project.project_lead.nombre} ${project.project_lead.apellido}`}
@@ -68,14 +77,8 @@ export default function ProjectListItem({ project, onProjectClick }: ProjectList
                       height={24}
                       className="w-full h-full rounded-full object-cover"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-medium text-blue-700">
-                        {project.project_lead.nombre?.charAt(0)}{project.project_lead.apellido?.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
                 <span className="text-sm text-gray-600">
                   {project.project_lead.nombre} {project.project_lead.apellido}
                 </span>
