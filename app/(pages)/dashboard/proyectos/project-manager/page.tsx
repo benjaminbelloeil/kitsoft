@@ -20,6 +20,8 @@ import {
   fetchProjectRoles,
   updateProjectRoles
 } from '@/utils/database/client/projectManagerSync';
+import UnauthorizedState from '@/components/auth/UnauhtorizedState';
+import { useUser } from "@/context/user-context";
 
 export default function ProjectManagementPage() {
   // State management
@@ -37,6 +39,7 @@ export default function ProjectManagementPage() {
   const { setNotifications } = useNotifications();
   const formRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const { isProjectManager, isLoading: userLoading } =  useUser();
   
   // Form state for creating/editing
   const [formData, setFormData] = useState<Partial<Project>>({
@@ -48,6 +51,10 @@ export default function ProjectManagementPage() {
     horas_totales: 0,
     activo: true,
   });
+
+  if (!isProjectManager) {
+    return <UnauthorizedState />;
+  }  
   
   // Load projects and clients on component mount
   useEffect(() => {
