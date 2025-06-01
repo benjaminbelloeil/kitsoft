@@ -25,34 +25,52 @@ export default function ProjectsHeader({
   }, []);
   
   // Función para calcular todas las métricas
-  const calculateMetrics = () => {
-    const activeProjects = getProjectsByStatus('active');
-    
-    // Obtener la fecha actual y la de 30 días en adelante
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endingSoon = new Date(today);
-    endingSoon.setDate(today.getDate() + 30);
-    
-    // Calcular métricas
-    let projectsEndingSoon = 0;
-    
-    // Procesar cada proyecto
-    activeProjects.forEach(project => {
-      // Proyectos que terminan pronto
-      if (project.endDate) {
-        const endDate = new Date(project.endDate);
-        if (endDate >= today && endDate <= endingSoon) {
-          projectsEndingSoon++;
-        }
+  const calculateMetrics = async () => {
+    try {
+      // Fetch actual active projects from API instead of static data
+      const response = await fetch('/api/user/proyectos?status=active');
+      if (!response.ok) {
+        console.error('Failed to fetch active projects for count');
+        return;
       }
-    });
-    
-    // Actualizar el estado con todas las métricas
-    setMetrics({
-      totalProjects: activeProjects.length,
-      nearEndDate: projectsEndingSoon
-    });
+      
+      const activeProjects = await response.json();
+      
+      // Obtener la fecha actual y la de 30 días en adelante
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endingSoon = new Date(today);
+      endingSoon.setDate(today.getDate() + 30);
+      
+      // Calcular métricas
+      let projectsEndingSoon = 0;
+      
+      // Procesar cada proyecto (adapt to API response structure)
+      activeProjects.forEach((projectAssignment: { proyectos: { fecha_fin?: string } }) => {
+        const project = projectAssignment.proyectos;
+        // Proyectos que terminan pronto
+        if (project?.fecha_fin) {
+          const endDate = new Date(project.fecha_fin);
+          if (endDate >= today && endDate <= endingSoon) {
+            projectsEndingSoon++;
+          }
+        }
+      });
+      
+      // Actualizar el estado con todas las métricas
+      setMetrics({
+        totalProjects: activeProjects.length,
+        nearEndDate: projectsEndingSoon
+      });
+    } catch (error) {
+      console.error('Error fetching active projects count:', error);
+      // Fallback to static data if API fails
+      const activeProjects = getProjectsByStatus('active');
+      setMetrics({
+        totalProjects: activeProjects.length,
+        nearEndDate: 0
+      });
+    }
   };
   
   // Desestructurar métricas para facilitar su uso

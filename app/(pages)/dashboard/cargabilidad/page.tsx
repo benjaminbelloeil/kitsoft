@@ -4,20 +4,89 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardTab } from '@/components/cargabilidad/DashboardTab';
-import { HistoryTab } from '@/components/cargabilidad/RecordTab';
 import { LoadAlert } from '@/components/cargabilidad/LoadAlert';
 import { HeaderCard } from '@/components/cargabilidad/EmployeeSummary';
 import CargabilidadSkeleton from '@/components/cargabilidad/CargabilidadSkeleton';
-import { Project, HistoryEntry, PROJECT_COLORS } from '@/interfaces/cargabilidad';
+import { Project } from '@/interfaces/cargabilidad';
+
+// Type for API project data
+interface ApiProject {
+  id_proyecto: string;
+  titulo: string;
+  user_hours: number;
+  horas_totales: number;
+  fecha_inicio: string;
+  fecha_fin: string | null;
+}
+
+// Calculate project duration in working days (Monday-Friday only)
+const calculateProjectWorkingDays = (fechaInicio: string, fechaFin: string | null): number => {
+  const startDate = new Date(fechaInicio);
+  const endDate = fechaFin ? new Date(fechaFin) : new Date(); // Use current date if no end date
+  
+  let workingDays = 0;
+  const currentDate = new Date(startDate);
+  
+  while (currentDate <= endDate) {
+    const dayOfWeek = currentDate.getDay();
+    // Count Monday (1) through Friday (5) only
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      workingDays++;
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return Math.max(workingDays, 1); // Minimum 1 working day
+};
+
+// Transform API project data to cargabilidad format
+const transformProjectData = (apiProjects: ApiProject[]): Project[] => {
+  return apiProjects.map((project) => {
+    const workingDays = calculateProjectWorkingDays(project.fecha_inicio, project.fecha_fin);
+    const hoursPerDay = project.user_hours / workingDays;
+    const hoursPerWeek = hoursPerDay * 5; // 5 working days per week
+    
+    // Calculate cargabilidad percentage (user's percentage of the total project)
+    const cargabilidadPercentage = project.user_hours && project.horas_totales > 0 
+      ? Math.round((project.user_hours / project.horas_totales) * 100)
+      : 0;
+
+    return {
+      id_proyecto: project.id_proyecto,
+      titulo: project.titulo,
+      name: project.titulo, // For backwards compatibility
+      load: cargabilidadPercentage, // User's percentage of the project
+      deadline: project.fecha_fin || undefined,
+      hoursPerWeek: Math.round(hoursPerWeek), // Round to whole number
+      color: null, // Let projectUtils.ts assign consistent colors based on project ID
+      user_hours: project.user_hours,
+      horas_totales: project.horas_totales,
+      fecha_inicio: project.fecha_inicio,
+      fecha_fin: project.fecha_fin
+    };
+  });
+};
+
+// Calculate daily hours for weekly load chart (distribute across Monday-Friday)
+const calculateWeeklyLoadChart = (projects: Project[]): number[] => {
+  const totalWeeklyHours = projects.reduce((sum, project) => sum + project.hoursPerWeek, 0);
+  const dailyHours = totalWeeklyHours / 5; // Distribute across 5 working days (Mon-Fri)
+  
+  // Return array for Monday through Sunday (last 2 days will be 0 for weekend)
+  return [
+    dailyHours, // Monday
+    dailyHours, // Tuesday  
+    dailyHours, // Wednesday
+    dailyHours, // Thursday
+    dailyHours, // Friday
+    0, // Saturday
+    0  // Sunday
+  ];
+};
 
 const PersonalLoadPage = () => {
-  const [projects, setProjects] = useState<Project[]>([
-    { name: 'Expediente Alfa', load: 15, deadline: '2025-05-15', hoursPerWeek: 10, color: PROJECT_COLORS[0] },
-    { name: 'Delta Zero', load: 25, deadline: '2025-06-30', hoursPerWeek: 10, color: PROJECT_COLORS[1] },
-  ]);
-
-  // Añadimos 'history' a las opciones de pestañas
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'history'>('dashboard');
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const employee = {
     name: "Carlos Rodríguez",
@@ -25,179 +94,35 @@ const PersonalLoadPage = () => {
     totalHoursPerWeek: 40
   };
 
+  // Fetch real project data
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/user/proyectos?status=active');
+        if (response.ok) {
+          const apiProjects = await response.json();
+          const transformedProjects = transformProjectData(apiProjects);
+          setProjects(transformedProjects);
+        } else {
+          console.error('Failed to fetch projects');
+          setProjects([]);
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setProjects([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []); // No dependencies needed since transformProjectData is now outside component
+
   const totalUsedHours = projects.reduce((sum, p) => sum + p.hoursPerWeek, 0);
   const availableHours = employee.totalHoursPerWeek - totalUsedHours;
-  const totalLoad = Math.min(100, (totalUsedHours / employee.totalHoursPerWeek) * 100);
-  const weeklyLoad = [45, 60, 78, 65, 70, 30, 20];
-
-  // Datos de historial de ejemplo para el componente HistoryTab
-  const historyData: HistoryEntry[] = [
-    {
-      week: '2025-01-05',
-      totalHours: 32,
-      availableHours: 8,
-      projects: [
-        { name: 'Expediente Alfa', hours: 15 },
-        { name: 'Delta Zero', hours: 8 },
-        { name: 'Omega UX', hours: 9 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-01-12',
-      totalHours: 38,
-      availableHours: 2,
-      projects: [
-        { name: 'Expediente Alfa', hours: 16 },
-        { name: 'Delta Zero', hours: 10 },
-        { name: 'Omega UX', hours: 12 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-01-19',
-      totalHours: 43,
-      availableHours: -3,
-      projects: [
-        { name: 'Expediente Alfa', hours: 18 },
-        { name: 'Delta Zero', hours: 8 },
-        { name: 'Omega UX', hours: 17 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-01-26',
-      totalLoad: 105,
-      totalHours: 42,
-      availableHours: -2,
-      projects: [
-        { name: 'Expediente Alfa', hours: 20 },
-        { name: 'Delta Zero', hours: 7 },
-        { name: 'Omega UX', hours: 15 }
-      ]
-    },
-    {
-      week: '2025-02-02',
-      totalHours: 39,
-      availableHours: 1,
-      projects: [
-        { name: 'Expediente Alfa', hours: 18 },
-        { name: 'Delta Zero', hours: 9 },
-        { name: 'Omega UX', hours: 12 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-02-09',
-      totalHours: 37,
-      availableHours: 3,
-      projects: [
-        { name: 'Expediente Alfa', hours: 17 },
-        { name: 'Delta Zero', hours: 10 },
-        { name: 'Omega UX', hours: 10 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-02-16',
-      totalHours: 35,
-      availableHours: 5,
-      projects: [
-        { name: 'Expediente Alfa', hours: 15 },
-        { name: 'Delta Zero', hours: 8 },
-        { name: 'Omega UX', hours: 12 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-02-23',
-      totalHours: 40,
-      availableHours: 0,
-      projects: [
-        { name: 'Expediente Alfa', hours: 18 },
-        { name: 'Delta Zero', hours: 10 },
-        { name: 'Omega UX', hours: 12 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-03-02',
-      totalHours: 42,
-      availableHours: -2,
-      projects: [
-        { name: 'Expediente Alfa', hours: 18 },
-        { name: 'Delta Zero', hours: 10 },
-        { name: 'Omega UX', hours: 14 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-03-09',
-      totalHours: 45,
-      availableHours: -5,
-      projects: [
-        { name: 'Expediente Alfa', hours: 20 },
-        { name: 'Delta Zero', hours: 10 },
-        { name: 'Omega UX', hours: 15 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-03-16',
-      totalHours: 42,
-      availableHours: -2,
-      projects: [
-        { name: 'Expediente Alfa', hours: 19 },
-        { name: 'Delta Zero', hours: 8 },
-        { name: 'Omega UX', hours: 15 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-03-23',
-      totalHours: 38,
-      availableHours: 2,
-      projects: [
-        { name: 'Expediente Alfa', hours: 18 },
-        { name: 'Delta Zero', hours: 8 },
-        { name: 'Omega UX', hours: 12 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-03-30',
-      totalHours: 40,
-      availableHours: 0,
-      projects: [
-        { name: 'Expediente Alfa', hours: 18 },
-        { name: 'Delta Zero', hours: 9 },
-        { name: 'Omega UX', hours: 13 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-04-06',
-      totalHours: 41,
-      availableHours: -1,
-      projects: [
-        { name: 'Expediente Alfa', hours: 18 },
-        { name: 'Delta Zero', hours: 9 },
-        { name: 'Omega UX', hours: 14 }
-      ],
-      totalLoad: 0
-    },
-    {
-      week: '2025-04-13',
-      totalHours: 50,
-      availableHours: -10,
-      projects: [
-        { name: 'Expediente Alfa', hours: 18 },
-        { name: 'Delta Zero', hours: 10 },
-        { name: 'Omega UX', hours: 22 }
-      ],
-      totalLoad: 0
-    }
-  ];
+  const totalLoad = Math.min(100, Math.round((totalUsedHours / employee.totalHoursPerWeek) * 100));
+  const weeklyLoad = calculateWeeklyLoadChart(projects);
 
   const AvailableHoursRatio = availableHours / employee.totalHoursPerWeek;
 
@@ -217,19 +142,8 @@ const PersonalLoadPage = () => {
   const utilBarColor = (u: number) =>
     u >= 90 ? '#F43F5E' : u >= 70 ? '#10B981' : '#F59E0B';
 
-  const [loading, setLoading] = useState(true);
-
-  // Use effect to simulate loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // If loading, show skeleton
-  if (loading) {
+  // Show loading skeleton while fetching data
+  if (isLoading) {
     return <CargabilidadSkeleton />;
   }
 
@@ -278,7 +192,7 @@ const PersonalLoadPage = () => {
             </motion.div>
           )}
           
-          {/* Improved tabs with more visual appeal - removed surrounding borders */}
+          {/* Dashboard content without tabs */}
           <motion.div 
             className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6"
             initial={{ opacity: 0, y: 20 }}
@@ -286,92 +200,18 @@ const PersonalLoadPage = () => {
             transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
             whileHover={{ scale: 1.01 }}
           >
-            {/* Updated tabs with cleaner styling - no surrounding borders */}
-            <motion.div 
-              className="flex px-4 pt-4 gap-2 border-b border-gray-200"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.4 }}
-            >
-              <motion.button
-                onClick={() => setActiveTab('dashboard')}
-                className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
-                  ${activeTab === 'dashboard'
-                    ? 'text-[#A100FF] bg-white'
-                    : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
-                  }
-                `}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span>Dashboard</span>
-                {activeTab === 'dashboard' && (
-                  <motion.span 
-                    className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"
-                    layoutId="activeTab"
-                    transition={{ duration: 0.2 }}
-                  />
-                )}
-              </motion.button>
-              <motion.button
-                onClick={() => setActiveTab('history')}
-                className={`px-5 py-2.5 rounded-t-lg font-medium text-sm transition-all duration-200 relative
-                  ${activeTab === 'history'
-                    ? 'text-[#A100FF] bg-white'
-                    : 'text-gray-600 hover:text-[#A100FF] hover:bg-[#A100FF05]'
-                  }
-                `}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span>Historial</span>
-                {activeTab === 'history' && (
-                  <motion.span 
-                    className="absolute bottom-0 left-0 w-full h-0.5 bg-[#A100FF]"
-                    layoutId="activeTab"
-                    transition={{ duration: 0.2 }}
-                  />
-                )}
-              </motion.button>
-            </motion.div>
-
             <motion.div 
               className="p-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.5 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
             >
-              <AnimatePresence mode="wait">
-                {activeTab === 'dashboard' ? (
-                  <motion.div
-                    key="dashboard"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <DashboardTab
-                      projects={projects}
-                      weeklyLoad={weeklyLoad}
-                      availableHours={availableHours}
-                      totalHoursPerWeek={employee.totalHoursPerWeek}
-                    />
-                  </motion.div>
-                ) : activeTab === 'history' ? (
-                  <motion.div
-                    key="history"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <HistoryTab
-                      historyData={historyData}
-                      maxWeeklyHours={employee.totalHoursPerWeek}
-                    />
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
+              <DashboardTab
+                projects={projects}
+                weeklyLoad={weeklyLoad}
+                availableHours={availableHours}
+                totalHoursPerWeek={employee.totalHoursPerWeek}
+              />
             </motion.div>
           </motion.div>
         </motion.div>

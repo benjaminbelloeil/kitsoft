@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { FiBarChart2 } from 'react-icons/fi';
+import { FiBarChart2, FiClock } from 'react-icons/fi';
 import { getProjectHexColor } from '../proyectos/utils/projectUtils';
 
 // -----------------------------------------------------------------------------
@@ -12,10 +12,11 @@ export interface ProjectInfo {
   name: string;
   hours?: number;
   hoursPerWeek?: number;
-  color?: string;
+  color?: string | null;
   load?: number;
   deadline?: string;
   id?: string; // Project ID for consistent color generation
+  id_proyecto?: string; // For cargabilidad compatibility
 }
 
 export interface HeaderCardProps {
@@ -113,8 +114,10 @@ export function HeaderCard({ projects = [], totalHours = 40, assignedHours, tota
           {/* Progress bar visualization of weekly hours */}
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-1">
-                <div className="h-2.5 w-2.5 rounded-full bg-[#A100FF]"></div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-[#A100FF08] flex items-center justify-center">
+                  <FiClock className="h-4 w-4 text-[#A100FF]" />
+                </div>
                 <span className="text-sm font-medium text-gray-700">Distribución Semanal</span>
               </div>
               <span className="text-sm text-gray-500">{assignedHours ?? 0}h / {totalHours}h</span>
@@ -124,7 +127,7 @@ export function HeaderCard({ projects = [], totalHours = 40, assignedHours, tota
               {projects.map((project) => {
                 const hoursPerWeek = projectHours(project);
                 const w = `${(hoursPerWeek / totalHours) * 100}%`;
-                const projectColor = getProjectHexColor(project.color, project.id || project.name);
+                const projectColor = getProjectHexColor(project.color, project.id_proyecto || project.id || project.name);
                 return (
                   <div
                     key={project.name}
@@ -176,7 +179,7 @@ export function HeaderCard({ projects = [], totalHours = 40, assignedHours, tota
             </div>
             
             {projects.map((project) => {
-              const projectColor = getProjectHexColor(project.color, project.id || project.name);
+              const projectColor = getProjectHexColor(project.color, project.id_proyecto || project.id || project.name);
               return (
                 <div key={project.name} className="inline-flex items-center gap-1.5 bg-white rounded-full px-2.5 py-1 border border-gray-100 shadow-sm">
                   <div 

@@ -1,17 +1,10 @@
 'use client';
 
 import { WeeklyLoadChart } from './WeeklyLoadChart';
-import { LinearProgress } from './LinearProgress';
+import { ProjectLoadChart } from './ProjectLoadChart';
 import { CircularProgress } from './CircularProgress';
 import { FiBarChart2, FiPieChart, FiCalendar, FiActivity } from 'react-icons/fi';
-
-interface Project {
-  name: string;
-  load: number;
-  deadline?: string;
-  hoursPerWeek: number;
-  color?: string;
-}
+import { Project } from '@/interfaces/cargabilidad';
 
 interface Props {
   projects: Project[];
@@ -30,7 +23,7 @@ export const DashboardTab = ({ projects, weeklyLoad, availableHours, totalHoursP
           </div>
           Mi Carga Semanal
         </h3>
-        <WeeklyLoadChart data={weeklyLoad} />
+        <WeeklyLoadChart data={weeklyLoad} projects={projects} />
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
@@ -40,17 +33,7 @@ export const DashboardTab = ({ projects, weeklyLoad, availableHours, totalHoursP
           </div>
           Cargabilidad por Proyecto
         </h3>
-        <div className="space-y-3.5">
-          {projects.map((project, index) => (
-            <LinearProgress
-              key={index}
-              value={project.load}
-              label={project.name}
-              projectId={project.name}
-              color={project.color}
-            />
-          ))}
-        </div>
+        <ProjectLoadChart projects={projects} />
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
@@ -83,7 +66,7 @@ export const DashboardTab = ({ projects, weeklyLoad, availableHours, totalHoursP
           </div>
           Próximos Plazos
         </h3>
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
           {projects
             .filter(p => p.deadline)
             .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())

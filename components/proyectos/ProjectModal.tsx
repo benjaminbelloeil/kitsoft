@@ -15,7 +15,7 @@ import {
   FiUser,
   FiClipboard
 } from 'react-icons/fi';
-import { getProjectColor, getCargabilidadStatus } from './utils/projectUtils';
+import { getProjectColor, getProjectHexColor, getCargabilidadStatus } from './utils/projectUtils';
 
 interface ProjectModalProps {
   project: any;
@@ -63,9 +63,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
       >
         {/* Encabezado del modal con color del proyecto - Improved UI */}
         <div 
-          className={`${getProjectColor(project.color)} p-6 rounded-t-xl relative overflow-hidden`}
+          className="p-6 rounded-t-xl relative overflow-hidden"
           style={{
-            background: `linear-gradient(135deg, ${getProjectColor(project.color).replace('bg-', '')} 0%, ${getProjectColor(project.color).replace('bg-', '')}/80 100%)`,
+            background: `linear-gradient(135deg, ${getProjectHexColor(project.color, project.id_proyecto?.toString())} 0%, ${getProjectHexColor(project.color, project.id_proyecto?.toString())}CC 100%)`,
           }}
         >
           {/* Decorative elements */}
@@ -96,8 +96,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           {/* Description section - Full width and scrollable */}
           <div className="mb-5">
             <h2 className="text-lg font-semibold mb-3 text-gray-800 flex items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#A100FF20] to-[#A100FF30] flex items-center justify-center mr-3 shadow-sm">
-                <FiInfo className="h-5 w-5 text-[#A100FF]" />
+              <div 
+                className="w-10 h-10 rounded-full flex items-center justify-center mr-3 shadow-sm"
+                style={{ 
+                  background: `linear-gradient(135deg, ${getProjectHexColor(project.color, project.id_proyecto?.toString())}20, ${getProjectHexColor(project.color, project.id_proyecto?.toString())}30)` 
+                }}
+              >
+                <FiInfo className="h-5 w-5" style={{ color: getProjectHexColor(project.color, project.id_proyecto?.toString()) }} />
               </div>
               Descripción del proyecto
             </h2>
@@ -122,7 +127,18 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 project.assignedUsers.map((member: any) => (
                   <div key={member.id_usuario} className="flex flex-col items-center group">
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md group-hover:border-[#A100FF20] transition-all">
+                      <div 
+                        className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md transition-all"
+                        style={{
+                          '--hover-border-color': `${getProjectHexColor(project.color, project.id_proyecto?.toString())}20`
+                        } as React.CSSProperties}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = `${getProjectHexColor(project.color, project.id_proyecto?.toString())}20`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = 'white';
+                        }}
+                      >
                         {member.url_avatar ? (
                           <img 
                             src={member.url_avatar}
@@ -285,8 +301,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             <div className="h-full flex flex-col">
               <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 flex-grow">
                 <h2 className="text-lg font-semibold mb-4 text-gray-800 flex items-center pb-2 border-b border-gray-100">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#A100FF10] to-[#A100FF20] flex items-center justify-center mr-3 shadow-sm">
-                    <FiUser className="h-5 w-5 text-[#A100FF]" />
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center mr-3 shadow-sm"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${getProjectHexColor(project.color, project.id_proyecto?.toString())}10, ${getProjectHexColor(project.color, project.id_proyecto?.toString())}20)` 
+                    }}
+                  >
+                    <FiUser className="h-5 w-5" style={{ color: getProjectHexColor(project.color, project.id_proyecto?.toString()) }} />
                   </div>
                   Información del cliente
                 </h2>
@@ -320,9 +341,31 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 <div className="space-y-3 text-sm bg-white p-4 rounded-lg border border-gray-100">
                   <h4 className="font-medium text-gray-700 mb-2">Información de contacto</h4>
                   {project.clientData?.correo ? (
-                    <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
-                      <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
-                        <FiMail className="h-4 w-4 text-[#A100FF]" />
+                    <div 
+                      className="flex items-center text-gray-700 transition-colors group cursor-pointer"
+                      style={{ 
+                        '--hover-color': getProjectHexColor(project.color, project.id_proyecto?.toString()) 
+                      } as React.CSSProperties}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = getProjectHexColor(project.color, project.id_proyecto?.toString());
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '';
+                      }}
+                    >
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center mr-3 transition-all"
+                        style={{ 
+                          background: `${getProjectHexColor(project.color, project.id_proyecto?.toString())}08` 
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = `${getProjectHexColor(project.color, project.id_proyecto?.toString())}15`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = `${getProjectHexColor(project.color, project.id_proyecto?.toString())}08`;
+                        }}
+                      >
+                        <FiMail className="h-4 w-4" style={{ color: getProjectHexColor(project.color, project.id_proyecto?.toString()) }} />
                       </div>
                       <span className="group-hover:font-medium">{project.clientData.correo}</span>
                     </div>
@@ -336,9 +379,31 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   )}
                   
                   {project.clientData?.telefono ? (
-                    <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
-                      <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
-                        <FiPhone className="h-4 w-4 text-[#A100FF]" />
+                    <div 
+                      className="flex items-center text-gray-700 transition-colors group cursor-pointer"
+                      style={{ 
+                        '--hover-color': getProjectHexColor(project.color, project.id_proyecto?.toString()) 
+                      } as React.CSSProperties}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = getProjectHexColor(project.color, project.id_proyecto?.toString());
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '';
+                      }}
+                    >
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center mr-3 transition-all"
+                        style={{ 
+                          background: `${getProjectHexColor(project.color, project.id_proyecto?.toString())}08` 
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = `${getProjectHexColor(project.color, project.id_proyecto?.toString())}15`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = `${getProjectHexColor(project.color, project.id_proyecto?.toString())}08`;
+                        }}
+                      >
+                        <FiPhone className="h-4 w-4" style={{ color: getProjectHexColor(project.color, project.id_proyecto?.toString()) }} />
                       </div>
                       <span className="group-hover:font-medium">{project.clientData.telefono}</span>
                     </div>
@@ -352,9 +417,31 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   )}
                   
                   {project.clientData?.direccion ? (
-                    <div className="flex items-center text-gray-700 hover:text-[#A100FF] transition-colors group">
-                      <div className="w-8 h-8 rounded-full bg-[#A100FF08] flex items-center justify-center mr-3 group-hover:bg-[#A100FF15] transition-all">
-                        <FiMapPin className="h-4 w-4 text-[#A100FF]" />
+                    <div 
+                      className="flex items-center text-gray-700 transition-colors group cursor-pointer"
+                      style={{ 
+                        '--hover-color': getProjectHexColor(project.color, project.id_proyecto?.toString()) 
+                      } as React.CSSProperties}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = getProjectHexColor(project.color, project.id_proyecto?.toString());
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '';
+                      }}
+                    >
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center mr-3 transition-all"
+                        style={{ 
+                          background: `${getProjectHexColor(project.color, project.id_proyecto?.toString())}08` 
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = `${getProjectHexColor(project.color, project.id_proyecto?.toString())}15`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = `${getProjectHexColor(project.color, project.id_proyecto?.toString())}08`;
+                        }}
+                      >
+                        <FiMapPin className="h-4 w-4" style={{ color: getProjectHexColor(project.color, project.id_proyecto?.toString()) }} />
                       </div>
                       <span className="group-hover:font-medium">{project.clientData.direccion}</span>
                     </div>

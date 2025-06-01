@@ -16,9 +16,26 @@ export default function ArchivedProjectsHeader({
   const [archivedCount, setArchivedCount] = useState(0);
   
   useEffect(() => {
-    // Obtener proyectos archivados
-    const archivedProjects = getProjectsByStatus('archived');
-    setArchivedCount(archivedProjects.length);
+    // Fetch actual archived projects from API instead of static data
+    const fetchArchivedCount = async () => {
+      try {
+        const response = await fetch('/api/user/proyectos?status=archived');
+        if (!response.ok) {
+          console.error('Failed to fetch archived projects for count');
+          return;
+        }
+        
+        const archivedProjects = await response.json();
+        setArchivedCount(archivedProjects.length);
+      } catch (error) {
+        console.error('Error fetching archived projects count:', error);
+        // Fallback to static data if API fails
+        const archivedProjects = getProjectsByStatus('archived');
+        setArchivedCount(archivedProjects.length);
+      }
+    };
+
+    fetchArchivedCount();
   }, []);
 
   return (

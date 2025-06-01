@@ -1,30 +1,14 @@
-// Colores disponibles para los proyectos
-export const PROJECT_COLORS = [
-  'bg-purple-500',
-  'bg-blue-500',
-  'bg-indigo-500',
-  'bg-pink-500',
-  'bg-teal-500',
-  'bg-green-500',
-  'bg-orange-500',
-  'bg-red-500',
-];
 
 export interface Project {
-  name: string;
-  load: number;
+  id_proyecto: string;
+  titulo: string;
+  name: string; // For backwards compatibility with existing components
+  load: number; // Cargabilidad percentage (user_hours / total_project_hours * 100)
   deadline?: string;
-  hoursPerWeek: number;
-  color?: string; // Color del proyecto, opcional
-}
-
-export interface HistoryEntry {
-  week: string;
-  totalLoad: number;
-  totalHours: number;
-  availableHours: number;
-  projects: {
-    name: string;
-    hours: number;
-  }[];
+  hoursPerWeek: number; // Calculated based on project duration
+  color?: string | null; // Color del proyecto, opcional
+  user_hours: number; // User's assigned hours for this project
+  horas_totales: number; // Total project hours
+  fecha_inicio: string;
+  fecha_fin: string | null;
 }

@@ -17,17 +17,24 @@ export const LinearProgress = ({ value, label, projectId, color }: Props) => {
   };
 
   const projectColor = color || (projectId ? getProjectHexColor(null, projectId) : getColor(value));
-
+  
+  // Ensure value is a valid number
+  const safeValue = typeof value === 'number' && !isNaN(value) ? Math.max(0, value) : 0;
+  
   return (
     <div className="w-full bg-gray-50 p-2 rounded-lg mb-4">
       <div className="flex justify-between mb-1">
         <span className="text-sm font-medium text-gray-700">{label}</span>
-        <span className="text-sm font-medium text-gray-700">{value.toFixed(1)}%</span>
+        <span className="text-sm font-medium text-gray-700">{Math.round(safeValue)}%</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2.5">
         <div 
           className="h-2.5 rounded-full transition-all duration-300"
-          style={{ width: `${value}%`, backgroundColor: projectColor }}
+          style={{ 
+            width: `${safeValue}%`, 
+            backgroundColor: projectColor,
+            minWidth: safeValue > 0 ? '16px' : '0px' // Ensure small percentages are clearly visible
+          }}
         />
       </div>
     </div>
