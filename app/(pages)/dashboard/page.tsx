@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { userData as staticUserData, projectsData, mockCourses } from "@/app/lib/data";
+import { userData as staticUserData, mockCourses } from "@/app/lib/data";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Sun, Moon, Sunrise } from "lucide-react";
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
@@ -17,7 +17,90 @@ import TasksSection from "@/components/dashboard/TasksSection";
 import WorkSummary from "@/components/dashboard/WorkSummary";
 import PerformanceCard from "@/components/dashboard/PerformanceCard";
 import TrainingCard from "@/components/dashboard/TrainingCard";
-import EventsCard from "@/components/dashboard/EventsCard";
+
+// Types for real project data
+interface ApiProject {
+  id_proyecto: string;
+  titulo: string;
+  user_hours: number;
+  horas_totales: number;
+  fecha_inicio: string;
+  fecha_fin: string | null;
+}
+
+interface DashboardProject {
+  id: string;
+  name: string;
+  cargabilidad: number;
+  dueDate: string | null;
+  hoursPerWeek: number;
+  priority: string;
+  color: string;
+}
+
+// Calculate project duration in working days (Monday-Friday only)
+const calculateProjectWorkingDays = (fechaInicio: string, fechaFin: string | null): number => {
+  const startDate = new Date(fechaInicio);
+  const endDate = fechaFin ? new Date(fechaFin) : new Date(); // Use current date if no end date
+  
+  let workingDays = 0;
+  const currentDate = new Date(startDate);
+  
+  while (currentDate <= endDate) {
+    const dayOfWeek = currentDate.getDay();
+    // Count Monday (1) through Friday (5) only
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      workingDays++;
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return Math.max(workingDays, 1); // Minimum 1 working day
+};
+
+// Transform API project data to dashboard format
+const transformProjectData = (apiProjects: ApiProject[]): DashboardProject[] => {
+  return apiProjects.map((project) => {
+    const workingDays = calculateProjectWorkingDays(project.fecha_inicio, project.fecha_fin);
+    const hoursPerDay = project.user_hours / workingDays;
+    const hoursPerWeek = hoursPerDay * 5; // 5 working days per week
+    
+    // Calculate cargabilidad percentage (user's percentage of the total project)
+    const cargabilidadPercentage = project.user_hours && project.horas_totales > 0 
+      ? Math.round((project.user_hours / project.horas_totales) * 100)
+      : 0;
+
+    // Determine priority based on cargabilidad percentage
+    const priority = cargabilidadPercentage >= 70 ? 'alta' : 
+                    cargabilidadPercentage >= 40 ? 'media' : 'baja';
+
+    return {
+      id: project.id_proyecto,
+      name: project.titulo,
+      cargabilidad: cargabilidadPercentage, // User's percentage of the project
+      dueDate: project.fecha_fin,
+      hoursPerWeek: Math.round(hoursPerWeek), // Round to whole number
+      priority: priority,
+      color: project.id_proyecto, // Pass project ID for consistent color assignment
+    };
+  });
+};
+
+// Calculate daily hours for weekly load chart (distribute across Monday-Friday)
+const calculateWeeklyWorkload = (dashboardProjects: DashboardProject[]) => {
+  const totalWeeklyHours = dashboardProjects.reduce((sum, project) => sum + project.hoursPerWeek, 0);
+  const dailyHours = totalWeeklyHours / 5; // Distribute across 5 working days (Mon-Fri)
+  
+  return [
+    { day: "Lun", hours: dailyHours, color: "bg-indigo-500" },
+    { day: "Mar", hours: dailyHours, color: "bg-indigo-500" },
+    { day: "Mié", hours: dailyHours, color: "bg-indigo-500" },
+    { day: "Jue", hours: dailyHours, color: "bg-indigo-500" },
+    { day: "Vie", hours: dailyHours, color: "bg-indigo-500" },
+    { day: "Sáb", hours: 0, color: "bg-gray-200" },
+    { day: "Dom", hours: 0, color: "bg-gray-200" },
+  ];
+};
 
 export default function DashboardPage() {
   // Update greeting state to include icon and class for animation
@@ -36,41 +119,45 @@ export default function DashboardPage() {
     avatar: null as string | null
   });
 
-  // Función para adaptar los datos de projectsData al formato esperado por ProjectsSection
-  const adaptProjectsData = (importedProjects: any[]) => {
-    return importedProjects.map(project => ({
-      id: project.id,
-      name: project.name,
-      progress: project.cargabilidad, // Mapear cargabilidad a progress
-      dueDate: project.endDate, // Mapear endDate a dueDate
-      tasks: project.tasks ? project.tasks.length : 0, // Contar tareas totales
-      completedTasks: project.tasks ? project.tasks.filter((task: any) => task.completed).length : 0, // Contar tareas completadas
-      priority: project.cargabilidad > 50 ? 'alta' : project.cargabilidad > 20 ? 'media' : 'baja', // Mapear cargabilidad a priority
-      color: project.color
-    }));
-  };
+  // State for real project data
+  const [projects, setProjects] = useState<DashboardProject[]>([]);
+  const [weeklyWorkload, setWeeklyWorkload] = useState<any[]>([]);
 
-  // Adaptar los datos de projectsData
-  const myProjects = adaptProjectsData(projectsData.filter(project => project.status === 'active'));
+  // Fetch real project data
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/user/proyectos?status=active');
+        if (response.ok) {
+          const apiProjects = await response.json();
+          const transformedProjects = transformProjectData(apiProjects);
+          setProjects(transformedProjects);
+          setWeeklyWorkload(calculateWeeklyWorkload(transformedProjects));
+        } else {
+          console.error('Failed to fetch projects');
+          setProjects([]);
+          setWeeklyWorkload(calculateWeeklyWorkload([]));
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setProjects([]);
+        setWeeklyWorkload(calculateWeeklyWorkload([]));
+      }
+    };
 
-  // Generar tareas urgentes desde los datos reales
-  const urgentTasks = projectsData
-    .filter(project => project.status === 'active')
-    .flatMap(project => 
-      project.tasks
-        .filter(task => !task.completed)
-        .slice(0, 2) // Tomar máximo 2 tareas por proyecto
-        .map(task => ({
-          id: task.id,
-          title: task.name,
-          projectName: project.name,
-          dueDate: task.dueDate,
-          status: task.assignedTo ? "in-progress" : "not-started",
-          projectColor: project.color,
-          description: task.description
-        }))
-    )
-    .slice(0, 3); // Limitar a 3 tareas urgentes totales
+    fetchProjects();
+  }, []);
+
+  // Mock urgent tasks (since we don't have task API yet)
+  const urgentTasks = projects.slice(0, 2).map(project => ({
+    id: `task-${project.id}`,
+    title: `Revisar avances de ${project.name}`,
+    projectName: project.name,
+    dueDate: project.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    status: "in-progress" as const,
+    projectColor: project.color,
+    description: `Revisión semanal del proyecto ${project.name}`
+  }));
 
   // Adaptar datos de cursos desde mockCourses
   const upcomingCourses = mockCourses
@@ -84,34 +171,6 @@ export default function DashboardPage() {
       image: course.category === 'cloud' ? "/courses/aws.svg" : "/courses/react.svg",
       type: "course" as const
     }));
-
-  // Get the upcoming week dates for the timeline
-  const upcomingWeekDates = Array.from({ length: 7 }).map((_, i) => {
-    const date = new Date();
-    date.setDate(currentDate.getDate() + i);
-    return date;
-  });
-
-  // Generar datos de carga de trabajo basados en los proyectos activos
-  const generateWorkloadFromProjects = () => {
-    const totalCargabilidad = projectsData
-      .filter(project => project.status === 'active')
-      .reduce((sum, project) => sum + project.cargabilidad, 0);
-    
-    const baseHours = Math.min(totalCargabilidad / 10, 9); // Convertir cargabilidad a horas (máximo 9h)
-    
-    return [
-      { day: "Lun", hours: Math.max(baseHours - 1, 0), color: "bg-indigo-500" },
-      { day: "Mar", hours: Math.max(baseHours - 0.5, 0), color: "bg-indigo-500" },
-      { day: "Mié", hours: Math.min(baseHours + 1, 9), color: "bg-indigo-500" },
-      { day: "Jue", hours: Math.max(baseHours - 1.5, 0), color: "bg-indigo-400" },
-      { day: "Vie", hours: baseHours, color: "bg-indigo-500" },
-      { day: "Sáb", hours: 0, color: "bg-gray-200" },
-      { day: "Dom", hours: 0, color: "bg-gray-200" },
-    ];
-  };
-
-  const weeklyWorkload = generateWorkloadFromProjects();
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -304,14 +363,14 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div 
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1920px] mx-auto px-4"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1920px] mx-auto px-4 lg:items-stretch h-full"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           {/* Left column - My Projects */}
           <motion.div 
-            className="lg:col-span-2 space-y-6"
+            className="lg:col-span-2 space-y-6 flex flex-col h-full"
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -323,7 +382,7 @@ export default function DashboardPage() {
               whileHover={{ y: -2 }}
             >
               <ProjectsSection 
-                projects={myProjects}
+                projects={projects}
                 getDateColor={getDateColor}
                 formatDate={formatDate}
                 getProjectColor={getProjectColor}
@@ -351,14 +410,15 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.7 }}
               whileHover={{ y: -2 }}
+              className="flex-grow"
             >
-              <WorkSummary workload={weeklyWorkload} />
+              <WorkSummary workload={weeklyWorkload} projects={projects} />
             </motion.div>
           </motion.div>
           
           {/* Right column - Skills, Timeline, Training */}
           <motion.div 
-            className="space-y-6"
+            className="space-y-6 flex flex-col h-full"
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -377,17 +437,9 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.6 }}
               whileHover={{ scale: 1.02 }}
+              className="flex-grow"
             >
               <TrainingCard courses={upcomingCourses} formatDate={formatDate} />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.7 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <EventsCard upcomingWeekDates={upcomingWeekDates} />
             </motion.div>
           </motion.div>
         </motion.div>

@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { Briefcase, Clock, ChevronRight } from "lucide-react";
+import { getProjectHexColor } from "../proyectos/utils/projectUtils";
 
 interface Project {
   id: string;
   name: string;
-  progress: number;
-  dueDate: string;
-  tasks: number;
-  completedTasks: number;
+  cargabilidad: number;
+  dueDate: string | null;
+  hoursPerWeek: number;
   priority: string;
   color: string;
 }
@@ -23,8 +23,7 @@ interface ProjectsSectionProps {
 
 export default function ProjectsSection({
   projects,
-  formatDate,
-  getProjectColor
+  formatDate
 }: ProjectsSectionProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -48,47 +47,46 @@ export default function ProjectsSection({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
                 <div>
                   <h3 className="font-medium text-gray-900">{project.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1 flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
-                    Fecha límite: <span className="ml-1 text-gray-500">{formatDate(project.dueDate)}</span>
-                  </p>
-                </div>
-                <div className="mt-2 sm:mt-0">
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                    project.priority === 'alta' ? 'bg-red-100 text-red-800' : 
-                    project.priority === 'media' ? 'bg-amber-100 text-amber-800' : 
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    Prioridad {project.priority}
-                  </span>
+                  {project.dueDate && (
+                    <p className="text-sm text-gray-500 mt-1 flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      Fecha límite: <span className="ml-1 text-gray-500">{formatDate(project.dueDate)}</span>
+                    </p>
+                  )}
+                  {!project.dueDate && (
+                    <p className="text-sm text-gray-500 mt-1">Sin fecha límite definida</p>
+                  )}
                 </div>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                {/* Project progress */}
+                {/* Cargabilidad percentage */}
                 <div className="sm:w-1/2">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-gray-700">Progreso</span>
-                    <span className="text-sm font-bold text-indigo-700">{project.progress}%</span>
+                    <span className="text-sm font-medium text-gray-700">Cargabilidad</span>
+                    <span className="text-sm font-bold text-indigo-700">{project.cargabilidad}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className={`${getProjectColor(project.color)} h-2 rounded-full`} 
-                      style={{ width: `${project.progress}%` }}
+                      className="h-2 rounded-full transition-all duration-500"
+                      style={{ 
+                        width: `${project.cargabilidad}%`,
+                        backgroundColor: getProjectHexColor(null, project.id)
+                      }}
                     ></div>
                   </div>
                 </div>
                 
-                {/* Tasks progress */}
+                {/* Hours per week */}
                 <div className="sm:w-1/2">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-gray-700">Tareas</span>
-                    <span className="text-sm text-gray-600">{project.completedTasks}/{project.tasks}</span>
+                    <span className="text-sm font-medium text-gray-700">Horas/semana</span>
+                    <span className="text-sm text-gray-600">{project.hoursPerWeek}h</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-gray-600 h-2 rounded-full" 
-                      style={{ width: `${(project.completedTasks / project.tasks) * 100}%` }}
+                      className="bg-green-500 h-2 rounded-full transition-all duration-500" 
+                      style={{ width: `${Math.min((project.hoursPerWeek / 40) * 100, 100)}%` }}
                     ></div>
                   </div>
                 </div>

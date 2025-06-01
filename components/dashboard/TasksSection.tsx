@@ -30,11 +30,14 @@ export default function TasksSection({
 }: TasksSectionProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-6 border-b border-gray-100">
+      <div className="p-6 border-b border-gray-100 flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900 flex items-center">
           <AlertCircle className="w-5 h-5 mr-2 text-amber-500" />
           Tareas Pendientes Prioritarias
         </h2>
+        <Link href="/dashboard/tareas" className="text-sm font-medium text-amber-500 hover:text-amber-600 flex items-center">
+          Ver todos <ChevronRight className="w-4 h-4 ml-1" />
+        </Link>
       </div>
       
       <div className="p-6">
@@ -64,16 +67,6 @@ export default function TasksSection({
               </button>
             </div>
           ))}
-        </div>
-        
-        <div className="mt-6 text-center">
-          <Link 
-            href="/dashboard/tasks" 
-            className="inline-flex items-center text-sm font-medium text-[#A100FF] hover:text-[#8A00FF]"
-          >
-            Ver todas mis tareas
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Link>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { BarChart2, ChevronRight } from "lucide-react";
 
 export default function PerformanceCard() {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col">
       <div className="p-6 border-b border-gray-100">
         <h2 className="text-xl font-bold text-gray-900 flex items-center">
           <BarChart2 className="w-5 h-5 mr-2 text-green-600" />
@@ -13,7 +13,7 @@ export default function PerformanceCard() {
         </h2>
       </div>
       
-      <div className="p-6">
+      <div className="p-6 flex-grow flex flex-col">
         {/* Circular Progress Chart */}
         <div className="flex justify-center mb-6">
           <div className="relative w-32 h-32">
@@ -67,7 +67,7 @@ export default function PerformanceCard() {
           </div>
         </div>
         
-        <div className="mt-6 text-center">
+        <div className="mt-auto text-center">
           <Link 
             href="/dashboard/retroalimentacion" 
             className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800"

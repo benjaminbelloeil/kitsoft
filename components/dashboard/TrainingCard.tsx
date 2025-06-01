@@ -19,7 +19,7 @@ interface TrainingCardProps {
 
 export default function TrainingCard({ courses, formatDate }: TrainingCardProps) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col min-h-[400px]">
       <div className="p-6 border-b border-gray-100">
         <h2 className="text-xl font-bold text-gray-900 flex items-center">
           <Award className="w-5 h-5 mr-2 text-amber-500" />
@@ -27,11 +27,11 @@ export default function TrainingCard({ courses, formatDate }: TrainingCardProps)
         </h2>
       </div>
       
-      <div className="p-6">
+      <div className="p-6 flex-grow flex flex-col">
         {/* Upcoming Courses */}
         <h3 className="text-sm font-medium text-gray-500 uppercase mb-4">Próximas Formaciones</h3>
         
-        <div className="space-y-4">
+        <div className="space-y-4 flex-grow">
           {courses.map(course => (
             <div 
               key={course.id}
@@ -67,15 +67,10 @@ export default function TrainingCard({ courses, formatDate }: TrainingCardProps)
           ))}
         </div>
         
-        <div className="mt-6 flex justify-between items-center">
-          <div>
-            <div className="text-sm font-bold text-gray-900">4 certificaciones</div>
-            <div className="text-xs text-gray-500">completadas en 2024</div>
-          </div>
-          
+        <div className="mt-auto flex justify-end items-center pt-4">
           <Link 
             href="/dashboard/cursos" 
-            className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800"
+            className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 mt-4"
           >
             Ver todas
             <ChevronRight className="w-4 h-4 ml-1" />
