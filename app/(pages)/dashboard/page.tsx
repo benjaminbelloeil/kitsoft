@@ -31,7 +31,10 @@ export default function DashboardPage() {
   const [timeString, setTimeString] = useState("");
   
   // Store user data from the database
-  const [userData, setUserData] = useState(staticUserData);
+  const [userData, setUserData] = useState({
+    ...staticUserData,
+    avatar: null as string | null
+  });
 
   // Función para adaptar los datos de projectsData al formato esperado por ProjectsSection
   const adaptProjectsData = (importedProjects: any[]) => {
@@ -123,12 +126,15 @@ export default function DashboardPage() {
           const profileData = await getUserCompleteProfile(user.id);
           
           if (profileData) {
+            console.log('Profile data fetched:', profileData);
             // Update user data with fetched profile
             setUserData({
               ...staticUserData, // Keep static data for other properties
               name: `${profileData.Nombre || ''} ${profileData.Apellido || ''}`.trim() || staticUserData.name,
               title: profileData.Titulo || staticUserData.title,
+              avatar: profileData.URL_Avatar || null,
             });
+            console.log('Updated userData with avatar:', profileData.URL_Avatar);
           }
         }
       } catch (error) {

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -11,12 +12,12 @@ import {
 } from "lucide-react";
 import { useNotifications } from '@/context/notification-context';
 import { useState } from 'react';
+import PlaceholderAvatar from "@/components/ui/placeholder-avatar";
 
 export default function Header({ userData }: { userData: any }) {
   // Access notifications from context
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
-
   // Handle notification bell click
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -180,9 +181,32 @@ export default function Header({ userData }: { userData: any }) {
             {/* User profile with enhanced styling */}
             <div className="border-l pl-3 ml-2">
               <Link href="/dashboard/perfil" className="flex items-center group">
-                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#A100FF] to-indigo-600 flex items-center justify-center text-white font-medium text-sm shadow-sm group-hover:shadow-md transition-all group-hover:scale-105">
-                  {userData.name.substring(0, 1)}
-                </div>
+                {userData.avatar ? (
+                  <div className="h-9 w-9 rounded-full overflow-hidden shadow-sm group-hover:shadow-md transition-all group-hover:scale-105">
+                    <img 
+                      src={userData.avatar} 
+                      alt={userData.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to PlaceholderAvatar if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        const parent = target.parentElement;
+                        if (parent) {
+                          target.style.display = 'none';
+                          // Create and insert placeholder avatar
+                          const placeholder = document.createElement('div');
+                          placeholder.className = 'w-full h-full';
+                          placeholder.innerHTML = `<div class="h-9 w-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-medium text-sm">${userData.name.substring(0, 1)}</div>`;
+                          parent.appendChild(placeholder);
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="h-9 w-9 rounded-full shadow-sm group-hover:shadow-md transition-all group-hover:scale-105">
+                    <PlaceholderAvatar size={36} className="w-full h-full" />
+                  </div>
+                )}
                 <div className="ml-2 hidden md:block">
                   <div className="text-sm font-medium text-gray-800 group-hover:text-gray-900 transition-colors">{userData.name}</div>
                   <div className="text-xs text-gray-500">{userData.title}</div>
