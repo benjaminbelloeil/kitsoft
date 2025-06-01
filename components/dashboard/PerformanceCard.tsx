@@ -41,7 +41,7 @@ export default function PerformanceCard() {
         </div>
         
         {/* Performance Metrics */}
-        <div className="space-y-4">
+        <div className="space-y-4 mb-6">
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium text-gray-700">Puntualidad en entregas</div>
             <div className="text-sm font-bold text-gray-900">95%</div>

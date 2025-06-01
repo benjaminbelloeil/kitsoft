@@ -38,7 +38,7 @@ export default function ProjectsSection({
       </div>
       
       <div className="p-6">
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[400px] overflow-y-auto">
           {projects.map(project => (
             <div 
               key={project.id}

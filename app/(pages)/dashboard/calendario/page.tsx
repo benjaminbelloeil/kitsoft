@@ -378,7 +378,7 @@ export default function CalendarPage() {
 
           {/* Main calendar */}
           <motion.div 
-            className="flex-1 flex flex-col min-h-[650px] overflow-hidden"
+            className="flex-1 flex flex-col overflow-hidden"
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
