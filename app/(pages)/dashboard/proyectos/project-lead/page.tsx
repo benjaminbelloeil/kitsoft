@@ -390,11 +390,6 @@ export default function ProjectLeadPage() {
                                           {project.horas_totales - getTotalAssignedHours(project.id_proyecto)}h
                                         </span>
                                         <span className="text-gray-600 ml-1">disponibles</span>
-                                        {!isValidAssignment(project.id_proyecto) && (
-                                          <div className="text-xs text-red-500 mt-1">
-                                            ⚠️ Horas excedidas
-                                          </div>
-                                        )}
                                       </div>
                                     </div>
                                     
@@ -404,198 +399,220 @@ export default function ProjectLeadPage() {
                                         <div key={user.id_usuario_proyecto}>
                                           {/* Normal user card - always visible */}
                                           <motion.div 
-                                            className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-200"
+                                            className={`flex flex-col rounded-lg border ${
+                                              editingUserAssignment === user.id_usuario_proyecto 
+                                                ? "border-gray-300 bg-white overflow-hidden" 
+                                                : "border-gray-200 bg-white"
+                                            }`}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ duration: 0.3, delay: userIndex * 0.1 }}
+                                            style={{ 
+                                              overflow: editingUserAssignment === user.id_usuario_proyecto ? "hidden" : "visible"
+                                            }}
                                           >
-                                            <div className="flex items-center">
-                                              <div className="h-6 w-6 rounded-full bg-[#3B82F610] flex items-center justify-center mr-2 overflow-hidden">
-                                                {user.url_avatar ? (
-                                                  <img 
-                                                    src={user.url_avatar} 
-                                                    alt={`${user.nombre} ${user.apellido}`}
-                                                    className="h-full w-full object-cover"
-                                                  />
-                                                ) : (
-                                                  <User className="h-3 w-3 text-[#3B82F6]" />
-                                                )}
-                                              </div>
-                                              <div className="flex-1">
-                                                <p className="text-xs font-medium text-gray-800">{user.nombre} {user.apellido}</p>
-                                                <div className="flex items-center space-x-2">
-                                                  <p className="text-[10px] text-gray-500">{user.rol_nombre}</p>
-                                                  {/* Show user's cargabilidad percentage - real-time calculation */}
-                                                  {(() => {
-                                                    const currentHours = hourAssignments[user.id_usuario_proyecto] ?? user.horas;
-                                                    const cargabilidad = calculateUserCargabilidad(currentHours, project.horas_totales);
-                                                    return cargabilidad > 0 ? (
-                                                      <span className="text-[10px] font-medium text-[#3B82F6] bg-[#3B82F610] px-1 py-0.5 rounded">
-                                                        {cargabilidad}% del proyecto
-                                                      </span>
-                                                    ) : null;
-                                                  })()}
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="flex items-center space-x-1">
-                                              <div className="relative user-dropdown-container">
-                                                <motion.button
-                                                  onClick={() => setEditingUserAssignment(
-                                                    editingUserAssignment === user.id_usuario_proyecto 
-                                                      ? null 
-                                                      : user.id_usuario_proyecto
+                                            {/* User info section - always visible */}
+                                            <div className="flex items-center justify-between p-2">
+                                              <div className="flex items-center">
+                                                <div className="h-6 w-6 rounded-full bg-[#3B82F610] flex items-center justify-center mr-2 overflow-hidden">
+                                                  {user.url_avatar ? (
+                                                    <img 
+                                                      src={user.url_avatar} 
+                                                      alt={`${user.nombre} ${user.apellido}`}
+                                                      className="h-full w-full object-cover"
+                                                    />
+                                                  ) : (
+                                                    <User className="h-3 w-3 text-[#3B82F6]" />
                                                   )}
-                                                  className="p-1 text-gray-400 hover:text-[#3B82F6] hover:bg-[#3B82F610] rounded transition-all"
-                                                  whileHover={{ scale: 1.1 }}
-                                                  whileTap={{ scale: 0.9 }}
-                                                  title="Cambiar usuario"
-                                                >
-                                                  <User className="h-3 w-3" />
-                                                </motion.button>
-                                              </div>
-                                              <input
-                                                type="text"
-                                                inputMode="numeric"
-                                                pattern="[0-9]*"
-                                                min="0"
-                                                max={project.horas_totales}
-                                                value={hourAssignments[user.id_usuario_proyecto] !== undefined 
-                                                  ? hourAssignments[user.id_usuario_proyecto].toString() 
-                                                  : user.horas.toString()}
-                                                onChange={(e) => {
-                                                  const value = e.target.value.replace(/[^0-9]/g, '');
-                                                  const numValue = value === '' ? 0 : parseInt(value);
-                                                  setHourAssignments((prev: Record<string, number>) => ({
-                                                    ...prev,
-                                                    [user.id_usuario_proyecto]: numValue
-                                                  }));
-                                                }}
-                                                onFocus={(e) => e.target.select()}
-                                                className="w-12 px-1 py-1 text-xs text-center border border-gray-300 rounded-md focus:ring-1 focus:ring-[#3B82F620] focus:border-[#3B82F6] focus:outline-none"
-                                                placeholder="0"
-                                              />
-                                              <span className="text-xs text-gray-600">h</span>
-                                            </div>
-                                          </motion.div>
-
-                                          {/* Dropdown user selection - appears below the card */}
-                                          <AnimatePresence>
-                                            {editingUserAssignment === user.id_usuario_proyecto && (
-                                              <motion.div
-                                                className="mt-2 bg-gray-50 rounded-lg border border-gray-300 p-3"
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: "auto" }}
-                                                exit={{ opacity: 0, height: 0 }}
-                                                transition={{ duration: 0.3 }}
-                                              >
-                                                <div className="mb-3">
-                                                  <div className="flex justify-between items-center mb-2">
-                                                    <h4 className="font-medium text-sm text-gray-800">Seleccionar Usuario</h4>
-                                                    <button
-                                                      onClick={() => setEditingUserAssignment(null)}
-                                                      className="text-gray-400 hover:text-gray-600 text-xs"
-                                                    >
-                                                      ✕ Cerrar
-                                                    </button>
+                                                </div>
+                                                <div className="flex-1">
+                                                  <p className="text-xs font-medium text-gray-800">{user.nombre} {user.apellido}</p>
+                                                  <div className="flex items-center space-x-2">
+                                                    <p className="text-[10px] text-gray-500">{user.rol_nombre}</p>
+                                                    {/* Show user's cargabilidad percentage - real-time calculation */}
+                                                    {(() => {
+                                                      const currentHours = hourAssignments[user.id_usuario_proyecto] ?? user.horas;
+                                                      const cargabilidad = calculateUserCargabilidad(currentHours, project.horas_totales);
+                                                      return cargabilidad > 0 ? (
+                                                        <span className="text-[10px] font-medium text-[#3B82F6] bg-[#3B82F610] px-1 py-0.5 rounded">
+                                                          {cargabilidad}% del proyecto
+                                                        </span>
+                                                      ) : null;
+                                                    })()}
                                                   </div>
                                                 </div>
-                                                
-                                                <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
-                                                  {availableUsers.map((availableUser: any) => {
-                                                    // Calculate current user's total hours across all projects
-                                                    const userTotalHours = projects.reduce((total: number, proj: any) => {
-                                                      const userInProject = proj.assignedUsers?.find((u: any) => u.id_usuario === availableUser.id_usuario);
-                                                      return total + (userInProject ? userInProject.horas : 0);
-                                                    }, 0);
+                                              </div>
+                                              <div className="flex items-center space-x-1">
+                                                <div className="relative user-dropdown-container">
+                                                  <motion.button
+                                                    onClick={() => setEditingUserAssignment(
+                                                      editingUserAssignment === user.id_usuario_proyecto 
+                                                        ? null 
+                                                        : user.id_usuario_proyecto
+                                                    )}
+                                                    className={`p-1 hover:bg-[#3B82F610] rounded transition-all ${
+                                                      editingUserAssignment === user.id_usuario_proyecto 
+                                                        ? "text-[#3B82F6] bg-[#3B82F610]" 
+                                                        : "text-gray-400 hover:text-[#3B82F6]"
+                                                    }`}
+                                                    whileHover={{ scale: 1.1 }}
+                                                    whileTap={{ scale: 0.9 }}
+                                                    title="Cambiar usuario"
+                                                  >
+                                                    <User className="h-3 w-3" />
+                                                  </motion.button>
+                                                </div>
+                                                <input
+                                                  type="text"
+                                                  inputMode="numeric"
+                                                  pattern="[0-9]*"
+                                                  min="0"
+                                                  max={project.horas_totales}
+                                                  value={hourAssignments[user.id_usuario_proyecto] !== undefined 
+                                                    ? hourAssignments[user.id_usuario_proyecto].toString() 
+                                                    : user.horas.toString()}
+                                                  onChange={(e) => {
+                                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                                    const numValue = value === '' ? 0 : parseInt(value);
+                                                    setHourAssignments((prev: Record<string, number>) => ({
+                                                      ...prev,
+                                                      [user.id_usuario_proyecto]: numValue
+                                                    }));
+                                                  }}
+                                                  onFocus={(e) => e.target.select()}
+                                                  className="w-12 px-1 py-1 text-xs text-center border border-gray-300 rounded-md focus:ring-1 focus:ring-[#3B82F620] focus:border-[#3B82F6] focus:outline-none"
+                                                  placeholder="0"
+                                                />
+                                                <span className="text-xs text-gray-600">h</span>
+                                              </div>
+                                            </div>
+
+                                            {/* Dropdown user selection - animated in the same card */}
+                                            <AnimatePresence initial={false}>
+                                              {editingUserAssignment === user.id_usuario_proyecto && (
+                                                <motion.div
+                                                  className="bg-gray-50 border-t border-gray-200 overflow-hidden"
+                                                  initial={{ height: 0, opacity: 0 }}
+                                                  animate={{ 
+                                                    height: "auto", 
+                                                    opacity: 1,
+                                                    transition: {
+                                                      height: { duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] },
+                                                      opacity: { duration: 0.2 }
+                                                    }
+                                                  }}
+                                                  exit={{ 
+                                                    height: 0, 
+                                                    opacity: 0,
+                                                    transition: {
+                                                      height: { duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] },
+                                                      opacity: { duration: 0.1, delay: 0 }
+                                                    }
+                                                  }}
+                                                >
+                                                  {/* Inner content that will only appear when container is expanded */}
+                                                  <div className="p-3">
+                                                    <div className="mb-3">
+                                                      <h4 className="font-medium text-sm text-gray-800">Seleccionar Usuario</h4>
+                                                    </div>
                                                     
-                                                    const isCurrentUser = availableUser.id_usuario === user.id_usuario;
-                                                    
-                                                    return (
-                                                      <motion.button
-                                                        key={availableUser.id_usuario}
-                                                        onClick={() => handleUserChange(
-                                                          project.id_proyecto, 
-                                                          user.id_usuario_proyecto, 
-                                                          availableUser.id_usuario
-                                                        )}
-                                                        className={`w-full p-3 text-left rounded-lg border transition-colors ${
-                                                          isCurrentUser
-                                                            ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                                                            : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:border-gray-300'
-                                                        }`}
-                                                        whileHover={{ backgroundColor: isCurrentUser ? '#dbeafe' : '#f9fafb' }}
-                                                        whileTap={{ scale: 0.99 }}
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        transition={{ duration: 0.2 }}
-                                                      >
-                                                        <div className="flex items-center space-x-3">
-                                                          {/* User Avatar */}
-                                                          <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                            {availableUser.url_avatar ? (
-                                                              <img 
-                                                                src={availableUser.url_avatar} 
-                                                                alt={`${availableUser.nombre} ${availableUser.apellido}`}
-                                                                className="h-full w-full object-cover"
-                                                              />
-                                                            ) : (
-                                                              <User className="h-4 w-4 text-gray-500" />
+                                                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                                                      {availableUsers.map((availableUser: any) => {
+                                                        // Calculate current user's total hours across all projects
+                                                        const userTotalHours = projects.reduce((total: number, proj: any) => {
+                                                          const userInProject = proj.assignedUsers?.find((u: any) => u.id_usuario === availableUser.id_usuario);
+                                                          return total + (userInProject ? userInProject.horas : 0);
+                                                        }, 0);
+                                                        
+                                                        const isCurrentUser = availableUser.id_usuario === user.id_usuario;
+                                                        
+                                                        return (
+                                                          <motion.button
+                                                            key={availableUser.id_usuario}
+                                                            onClick={() => handleUserChange(
+                                                              project.id_proyecto, 
+                                                              user.id_usuario_proyecto, 
+                                                              availableUser.id_usuario
                                                             )}
-                                                          </div>
-                                                          
-                                                          {/* User Info */}
-                                                          <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center justify-between">
-                                                              <div className="font-medium text-xs truncate">
-                                                                {availableUser.nombre} {availableUser.apellido}
-                                                              </div>
-                                                              {isCurrentUser && (
-                                                                <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
-                                                                  Actual
-                                                                </span>
-                                                              )}
-                                                            </div>
-                                                            
-                                                            <div className="text-xs text-gray-500 mt-0.5">
-                                                              {availableUser.rol_nombre}
-                                                            </div>
-                                                            
-                                                            {/* Hours and Workload */}
-                                                            <div className="flex items-center justify-between mt-1">
-                                                              <div className="text-xs">
-                                                                <span className="text-gray-500">Horas:</span>
-                                                                <span className={`ml-1 font-medium ${
-                                                                  userTotalHours > 40 ? 'text-red-600' : 
-                                                                  userTotalHours > 35 ? 'text-yellow-600' : 
-                                                                  'text-green-600'
-                                                                }`}>
-                                                                  {userTotalHours}h
-                                                                </span>
+                                                            className={`w-full p-3 text-left rounded-lg border transition-colors ${
+                                                              isCurrentUser
+                                                                ? 'bg-blue-50 border-blue-200 text-blue-700' 
+                                                                : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:border-gray-300'
+                                                            }`}
+                                                            whileHover={{ backgroundColor: isCurrentUser ? '#dbeafe' : '#f9fafb' }}
+                                                            whileTap={{ scale: 0.99 }}
+                                                            initial={{ opacity: 0 }}
+                                                            animate={{ opacity: 1 }}
+                                                            transition={{ duration: 0.2 }}
+                                                          >
+                                                            <div className="flex items-center space-x-3">
+                                                              {/* User Avatar */}
+                                                              <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                                {availableUser.url_avatar ? (
+                                                                  <img 
+                                                                    src={availableUser.url_avatar} 
+                                                                    alt={`${availableUser.nombre} ${availableUser.apellido}`}
+                                                                    className="h-full w-full object-cover"
+                                                                  />
+                                                                ) : (
+                                                                  <User className="h-4 w-4 text-gray-500" />
+                                                                )}
                                                               </div>
                                                               
-                                                              <div className="flex items-center space-x-1">
-                                                                <div className={`h-1.5 w-1.5 rounded-full ${
-                                                                  userTotalHours > 40 ? 'bg-red-400' : 
-                                                                  userTotalHours > 35 ? 'bg-yellow-400' : 
-                                                                  userTotalHours > 0 ? 'bg-green-400' : 'bg-gray-300'
-                                                                }`}></div>
-                                                                <span className="text-xs text-gray-500">
-                                                                  {userTotalHours > 40 ? 'No disponible' : 
-                                                                   userTotalHours > 35 ? 'Alto' : 
-                                                                   userTotalHours > 0 ? 'Normal' : 'Disponible'}
-                                                                </span>
+                                                              {/* User Info */}
+                                                              <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center justify-between">
+                                                                  <div className="font-medium text-xs truncate">
+                                                                    {availableUser.nombre} {availableUser.apellido}
+                                                                  </div>
+                                                                  {isCurrentUser && (
+                                                                    <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
+                                                                      Actual
+                                                                    </span>
+                                                                  )}
+                                                                </div>
+                                                                
+                                                                <div className="text-xs text-gray-500 mt-0.5">
+                                                                  {availableUser.rol_nombre}
+                                                                </div>
+                                                                
+                                                                {/* Hours and Workload */}
+                                                                <div className="flex items-center justify-between mt-1">
+                                                                  <div className="text-xs">
+                                                                    <span className="text-gray-500">Horas:</span>
+                                                                    <span className={`ml-1 font-medium ${
+                                                                      userTotalHours > 40 ? 'text-red-600' : 
+                                                                      userTotalHours > 35 ? 'text-yellow-600' : 
+                                                                      'text-green-600'
+                                                                    }`}>
+                                                                      {userTotalHours}h
+                                                                    </span>
+                                                                  </div>
+                                                                  
+                                                                  <div className="flex items-center space-x-1">
+                                                                    <div className={`h-1.5 w-1.5 rounded-full ${
+                                                                      userTotalHours > 40 ? 'bg-red-400' : 
+                                                                      userTotalHours > 35 ? 'bg-yellow-400' : 
+                                                                      userTotalHours > 0 ? 'bg-green-400' : 'bg-gray-300'
+                                                                    }`}></div>
+                                                                    <span className="text-xs text-gray-500">
+                                                                      {userTotalHours > 40 ? 'No disponible' : 
+                                                                       userTotalHours > 35 ? 'Alto' : 
+                                                                       userTotalHours > 0 ? 'Normal' : 'Disponible'}
+                                                                    </span>
+                                                                  </div>
+                                                                </div>
                                                               </div>
                                                             </div>
-                                                          </div>
-                                                        </div>
-                                                      </motion.button>
-                                                    );
-                                                  })}
-                                                </div>
-                                              </motion.div>
-                                            )}
-                                          </AnimatePresence>
+                                                          </motion.button>
+                                                        );
+                                                      })}
+                                                    </div>
+                                                  </div>
+                                                </motion.div>
+                                              )}
+                                            </AnimatePresence>
+                                          </motion.div>
                                         </div>
                                       ))}
                                     </div>
@@ -734,7 +751,7 @@ export default function ProjectLeadPage() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3, delay: 0.9 + index * 0.1 }}
                               >
-                                <div className="h-5 w-5 rounded-full bg-[#14B8A610] flex items-center justify-center overflow-hidden border border-gray-200">
+                                <div className="h-5 w-5 rounded-full bg-[#14B8A610] mr-2 flex items-center justify-center overflow-hidden border border-gray-200">
                                   {recipient.avatar ? (
                                     <img 
                                       src={recipient.avatar} 
@@ -912,7 +929,6 @@ export default function ProjectLeadPage() {
             }
           });
         }}
-      />
-    </div>
+      />    </div>
   );
 }
