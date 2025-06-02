@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@/context/user-context';
 import ArchivedProjectsHeader from '@/components/proyectos/archivados/ArchiveProjectsHeader';
 import ArchivedProjectsSkeleton from '@/components/proyectos/archivados/ArchivedSkeleton';
+import EmptyArchivedProjectsState from '@/components/proyectos/EmptyArchivedProjectsState';
 import PlaceholderAvatar from '@/components/ui/placeholder-avatar';
 import { 
   FiInfo, 
@@ -122,36 +123,12 @@ export default function ArchivedProjectsPage() {
         >
           {/* Content Section */}
           {archivedProjects.length === 0 ? (
-            <motion.div 
-              className="bg-white rounded-xl shadow-md p-6 text-center py-12"
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <motion.div 
-                className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.4 }}
-              >
-                <FiInfo className="h-8 w-8 text-gray-400" />
-              </motion.div>
-              <motion.h2 
-                className="text-xl font-medium mb-2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 }}
-              >
-                No hay proyectos archivados
-              </motion.h2>
-              <motion.p 
-                className="text-gray-500 mb-6"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.6 }}
-              >
-                No has archivado ningún proyecto todavía.
-              </motion.p>
+              <EmptyArchivedProjectsState />
             </motion.div>
           ) : (
             viewMode === 'grid' ? (
