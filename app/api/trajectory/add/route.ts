@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { runSimulation } from '@/utils/soft-agent/main';
 
 interface TrajectoryData {
   nombre: string;
@@ -116,6 +117,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Trigger SOFT agent simulation in the background (don't wait for it)
+    runSOFTSimulationAsync(pathId).catch(error => {
+      console.error('Background SOFT simulation failed:', error);
+    });
+
     return NextResponse.json({ 
       success: true, 
       message: 'Trayectoria creada exitosamente',
@@ -128,5 +134,22 @@ export async function POST(request: NextRequest) {
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
     );
+  }
+}
+
+// Helper function to run SOFT agent simulation in background
+async function runSOFTSimulationAsync(pathId: string) {
+  try {
+    console.log(`Starting SOFT simulation for path ${pathId}`);
+    const model = await runSimulation(pathId);
+    
+    if (model) {
+      console.log(`SOFT simulation completed successfully for path ${pathId}`);
+      console.log(`Best score: ${model.getMejorScore()}`);
+    } else {
+      console.log(`SOFT simulation failed for path ${pathId} - no model returned`);
+    }
+  } catch (error) {
+    console.error(`SOFT simulation error for path ${pathId}:`, error);
   }
 }

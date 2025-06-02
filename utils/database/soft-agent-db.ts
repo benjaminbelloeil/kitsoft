@@ -142,10 +142,8 @@ export async function saveSimulationResults(idPath: string, solution: any[]) {
         .from('path_nivel')
         .insert({
           id_path: idPath,
-          nivel: nivel.nivel,
-          nombre: `Nivel ${nivel.nivel}`,
-          descripcion: `Certificados del nivel ${nivel.nivel}`,
-          orden: nivel.nivel
+          numero: nivel.nivel,
+          status: 'pendiente'
         })
         .select()
         .single();
@@ -158,9 +156,8 @@ export async function saveSimulationResults(idPath: string, solution: any[]) {
           .from('nivel_certificados')
           .insert({
             id_nivel: nivelData.id_nivel,
-            id_certificado: certInfo.certificado.id_certificado,
-            orden: certInfo.certificado.orden || 1,
-            es_prerequisito: false
+            id_certificados: certInfo.certificado.id_certificado,
+            completado: false
           });
         
         if (certNivelError) throw certNivelError;

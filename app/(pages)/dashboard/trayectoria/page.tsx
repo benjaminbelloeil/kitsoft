@@ -35,46 +35,6 @@ const styles = `
   .progress-100 { width: 100%; }
 `;
 
-// Mock data for career paths
-const careerPaths = [
-  {
-    id: 1,
-    title: 'Consultor Tecnológico',
-    levels: [
-      { id: 'ct-1', name: 'Nivel 1', completed: true },
-      { id: 'ct-2', name: 'Nivel 2', completed: true },
-      { id: 'ct-3', name: 'Nivel 3', completed: false, current: true },
-      { id: 'ct-4', name: 'Nivel 4', completed: false },
-      { id: 'ct-5', name: 'Nivel 5', completed: false }
-    ],
-    description: 'Ruta especializada en consultoría tecnológica y soluciones digitales.',
-    color: '#A100FF'
-  },
-  {
-    id: 2,
-    title: 'Especialista en Cloud',
-    levels: [
-      { id: 'cl-1', name: 'Nivel 1', completed: true },
-      { id: 'cl-2', name: 'Nivel 2', completed: false },
-      { id: 'cl-3', name: 'Nivel 3', completed: false },
-      { id: 'cl-4', name: 'Nivel 4', completed: false }
-    ],
-    description: 'Especialización en tecnologías cloud y arquitectura de soluciones.',
-    color: '#0077B6'
-  },
-  {
-    id: 3,
-    title: 'Líder de Proyecto',
-    levels: [
-      { id: 'lp-1', name: 'Nivel 1', completed: false },
-      { id: 'lp-2', name: 'Nivel 2', completed: false },
-      { id: 'lp-3', name: 'Nivel 3', completed: false }
-    ],
-    description: 'Ruta para desarrollo de habilidades de gestión y liderazgo de proyectos.',
-    color: '#00B050'
-  }
-];
-
 // Mock data for courses
 const coursesData = [
   {
@@ -190,6 +150,37 @@ export default function TrayectoriaPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [activePath, setActivePath] = useState(1);
+  const [careerPaths, setCareerPaths] = useState<any[]>([]);
+  const [pathsLoading, setPathsLoading] = useState(true);
+  
+  // Fetch career paths from database
+  const fetchPaths = async () => {
+    try {
+      const response = await fetch('/api/trajectory/list');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.paths.length > 0) {
+          setCareerPaths(data.paths);
+          setActivePath(data.paths[0].id); // Set first path as active
+        } else {
+          // If no paths found, keep empty array but stop loading
+          setCareerPaths([]);
+        }
+      } else {
+        console.error('Failed to fetch paths:', response.statusText);
+        setCareerPaths([]);
+      }
+    } catch (error) {
+      console.error('Error fetching paths:', error);
+      setCareerPaths([]);
+    } finally {
+      setPathsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPaths();
+  }, []);
   
   // Get only completed courses with certificates
   const completedCourses = coursesData.filter(course => 
@@ -230,7 +221,8 @@ export default function TrayectoriaPage() {
     return () => clearTimeout(timer);
   }, []);
   
-  if (isLoading) {
+  // Show loading if either paths or general content is loading
+  if (isLoading || pathsLoading) {
     return (
       <PathSkeleton />
     );
@@ -289,7 +281,8 @@ export default function TrayectoriaPage() {
           <CareerPathVisualizer 
             paths={careerPaths} 
             activePath={activePath} 
-            onPathChange={setActivePath} 
+            onPathChange={setActivePath}
+            onPathCreated={fetchPaths}
           />
         </motion.div>
         
