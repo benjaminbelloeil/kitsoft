@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { colorClasses } from './CourseUtils';
+import { colorClasses } from './TrajectoryUtils';
 
 interface CourseCardProps {
   course: any;

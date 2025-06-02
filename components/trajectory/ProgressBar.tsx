@@ -1,6 +1,6 @@
 // app/dashboard/certificaciones/components/ProgressBar.tsx
 import React from 'react';
-import { colorClasses } from './CourseUtils';
+import { colorClasses } from './TrajectoryUtils';
 
 interface ProgressBarProps {
   progress: number;

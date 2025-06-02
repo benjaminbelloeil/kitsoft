@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Award, BookOpen, Check, Clock, Info, TrendingUp, MapPin, AlertCircle, Plus } from 'lucide-react';
-import TrajectoryFormModal from '@/components/courses/TrajectoryFormModal';
+import TrajectoryFormModal from '@/components/trajectory/TrajectoryFormModal';
 
 const CareerPathVisualizer = ({ 
   paths, 

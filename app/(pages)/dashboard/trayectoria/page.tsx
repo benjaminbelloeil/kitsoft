@@ -7,11 +7,11 @@ import {
   Award, 
   Search,
 } from 'lucide-react';
-import PathSkeleton from "@/components/courses/CoursesSkeleton";
-import CertificateItem from '@/components/courses/CertificateItem';
-import CourseDetailModal from '@/components/courses/CourseDetailModal';
-import NoCoursesFound from '@/components/courses/NoCoursesFound';
-import CareerPathVisualizer from '@/components/courses/CareerPathVisualizer';
+import PathSkeleton from "@/components/trajectory/TrajectorySkeleton";
+import CertificateItem from '@/components/trajectory/CertificateItem';
+import TrajectoryDetailModal from '@/components/trajectory/TrajectoryDetailModal';
+import NoTrajectoriesFound from '@/components/trajectory/NoTrajectoriesFound';
+import CareerPathVisualizer from '@/components/trajectory/CareerPathVisualizer';
 
 // CSS styles 
 const styles = `
@@ -185,7 +185,7 @@ const coursesData = [
 ];
 
 
-export default function CursosPage() {
+export default function TrayectoriaPage() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -418,7 +418,7 @@ export default function CursosPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
                 >
-                  <NoCoursesFound />
+                  <NoTrajectoriesFound />
                 </motion.div>
               )}
             </div>
@@ -428,7 +428,7 @@ export default function CursosPage() {
         {/* Course Detail Modal */}
         <AnimatePresence>
           {selectedCourse && (
-            <CourseDetailModal 
+            <TrajectoryDetailModal 
               course={selectedCourse}
               onClose={closeModal}
             />
