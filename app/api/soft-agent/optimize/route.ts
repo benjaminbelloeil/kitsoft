@@ -1,64 +1,83 @@
 // API route for SOFT agent certificate path optimization
+// Uses the simplified implementation that matches Python model.py
 
 import { NextRequest, NextResponse } from 'next/server';
-import { SOFTAgentSimulation } from '@/utils/soft-agent/simulation';
-import { softAgentDatabase } from '@/utils/database/soft-agent-db';
-import type { OptimizationRequest, PathOptimizationResult } from '@/interfaces/soft-agent';
-
-// Initialize simulation instance
-const softSimulation = new SOFTAgentSimulation(softAgentDatabase);
+import { runSimulation, showAvailablePaths, isValidUUID } from '@/utils/soft-agent/main';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
     // Validate required fields
-    const { usuario_id, trayectoria_id } = body;
-    if (!usuario_id || !trayectoria_id) {
+    const { id_path } = body;
+    if (!id_path) {
+      // Show available paths if no ID provided
+      await showAvailablePaths();
       return NextResponse.json(
-        { error: 'Missing required fields: usuario_id and trayectoria_id are required' },
+        { 
+          error: 'Missing required field: id_path is required',
+          message: 'Check console for available paths'
+        },
         { status: 400 }
       );
     }
 
-    // Create optimization request with defaults
-    const optimizationRequest: OptimizationRequest = {
-      usuario_id,
-      trayectoria_id,
-      num_niveles: body.num_niveles || 5,
-      max_certificados_por_nivel: body.max_certificados_por_nivel || 4,
-      considerar_tiempo: body.considerar_tiempo ?? true,
-      considerar_costo: body.considerar_costo ?? true
-    };
+    // Validate UUID format
+    if (!isValidUUID(id_path)) {
+      return NextResponse.json(
+        { 
+          error: 'Invalid id_path format. Must be a valid UUID',
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        },
+        { status: 400 }
+      );
+    }
 
-    console.log(`Starting SOFT optimization for user ${usuario_id}, path ${trayectoria_id}`);
+    console.log(`Starting SOFT optimization for path ${id_path}`);
     
-    // Run the optimization
+    // Run the simulation
     const startTime = Date.now();
-    const result: PathOptimizationResult = await softSimulation.optimizeCertificatePath(optimizationRequest);
+    const model = await runSimulation(id_path);
     const endTime = Date.now();
 
+    if (!model) {
+      return NextResponse.json(
+        { error: 'Simulation failed - model is null' },
+        { status: 500 }
+      );
+    }
+
+    const mejorSolucion = model.getMejorSolucion();
+    const mejorScore = model.getMejorScore();
+    const meta = model.getMeta();
+
     console.log(`SOFT optimization completed in ${endTime - startTime}ms`);
-    console.log(`Generated ${result.niveles.length} levels with ${result.niveles.reduce((sum, level) => sum + level.certificados.length, 0)} total certificates`);
+    console.log(`Best score: ${mejorScore}`);
 
     // Return the optimization result
     return NextResponse.json({
       success: true,
-      data: result,
+      data: {
+        id_path: id_path,
+        meta: meta,
+        score_total: mejorScore,
+        niveles: mejorSolucion || [],
+        processing_time_ms: endTime - startTime
+      },
       metadata: {
         processing_time_ms: endTime - startTime,
         agents_used: 10,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        python_compatible: true
       }
     });
 
   } catch (error) {
-    console.error('Error in SOFT agent optimization:', error);
+    console.error('SOFT optimization error:', error);
     
     return NextResponse.json(
       { 
-        success: false, 
-        error: 'Internal server error during path optimization',
+        error: 'Internal server error during optimization',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
@@ -66,56 +85,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const action = searchParams.get('action');
-
-    if (action === 'stats') {
-      // Return simulation statistics
-      const stats = softSimulation.getSimulationStats();
-      return NextResponse.json({
-        success: true,
-        data: {
-          ...stats,
-          status: 'active',
-          version: '1.0.0'
-        }
-      });
-    }
-
-    if (action === 'clear-cache') {
-      // Clear simulation cache
-      softSimulation.clearCache();
-      return NextResponse.json({
-        success: true,
-        message: 'Cache cleared successfully'
-      });
-    }
-
-    // Default: return API information
-    return NextResponse.json({
-      success: true,
-      message: 'SOFT Agent API for Certificate Path Optimization',
-      endpoints: {
-        'POST /api/soft-agent/optimize': 'Optimize certificate learning path',
-        'GET /api/soft-agent/optimize?action=stats': 'Get simulation statistics',
-        'GET /api/soft-agent/optimize?action=clear-cache': 'Clear simulation cache'
-      },
-      required_fields: ['usuario_id', 'trayectoria_id'],
-      optional_fields: ['num_niveles', 'max_certificados_por_nivel', 'considerar_tiempo', 'considerar_costo']
-    });
-
-  } catch (error) {
-    console.error('Error in SOFT agent GET request:', error);
-    
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    );
-  }
+export async function GET() {
+  return NextResponse.json({
+    message: 'SOFT Agent Certificate Path Optimization API',
+    description: 'This API matches the Python implementation structure exactly',
+    usage: {
+      method: 'POST',
+      required_fields: ['id_path'],
+      example_request: {
+        id_path: '123e4567-e89b-12d3-a456-426614174000'
+      }
+    },
+    python_compatible: true
+  });
 }

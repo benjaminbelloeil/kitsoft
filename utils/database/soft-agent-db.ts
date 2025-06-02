@@ -1,183 +1,173 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Database functions for SOFT agent certificate path optimization
+// This matches exactly the Python implementation structure
 
 import { createClient } from '@supabase/supabase-js';
-import type { 
-  Certificate, 
-  CareerPath, 
-  CertificateSkill, 
-  RequiredPathSkill,
-  PathOptimizationResult,
-  SOFTDatabaseFunctions 
-} from '@/interfaces/soft-agent';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-class SOFTAgentDatabase implements SOFTDatabaseFunctions {
+/**
+ * Get all available paths from the database
+ * Matches Python function: get_available_paths()
+ */
+export async function getAvailablePaths() {
+  const { data, error } = await supabase
+    .from('paths')
+    .select('*');
   
-  async getTrayectorias(): Promise<CareerPath[]> {
-    const { data, error } = await supabase
-      .from('trayectorias_carrera')
-      .select(`
-        id_trayectoria,
-        nombre,
-        descripcion,
-        nivel_inicial,
-        nivel_final,
-        duracion_estimada,
-        habilidades_requeridas:trayectoria_habilidades(
-          id_habilidad,
-          nivel_requerido,
-          peso,
-          prioridad
-        )
-      `)
-      .eq('activo', true);
+  if (error) throw error;
+  return data || [];
+}
 
-    if (error) throw error;
-    return data || [];
-  }
-
-  async getCertificadosDisponibles(): Promise<Certificate[]> {
-    const { data, error } = await supabase
-      .from('certificados')
-      .select(`
-        id_certificado,
-        nombre,
-        descripcion,
-        proveedor,
-        dificultad,
-        duracion_estimada,
-        costo,
-        fecha_actualizacion,
-        activo,
-        habilidades:certificado_habilidades(
-          id_habilidad,
-          nivel_experiencia,
-          peso,
-          es_prerequisito
-        )
-      `)
-      .eq('activo', true);
-
-    if (error) throw error;
-    return data || [];
-  }
-
-  async getHabilidadesCertificado(certificadoId: string): Promise<CertificateSkill[]> {
-    const { data, error } = await supabase
-      .from('certificado_habilidades')
-      .select(`
-        id_habilidad,
-        nivel_experiencia,
-        peso,
-        es_prerequisito
-      `)
-      .eq('id_certificado', certificadoId);
-
-    if (error) throw error;
-    return data || [];
-  }
-
-  async getHabilidadesRequeridas(trayectoriaId: string): Promise<RequiredPathSkill[]> {
-    const { data, error } = await supabase
-      .from('trayectoria_habilidades')
-      .select(`
-        id_habilidad,
-        nivel_requerido,
-        peso,
-        prioridad
-      `)
-      .eq('id_trayectoria', trayectoriaId);
-
-    if (error) throw error;
-    return data || [];
-  }
-
-  async getCertificadosUsuario(usuarioId: string): Promise<string[]> {
-    const { data, error } = await supabase
-      .from('usuario_certificados')
-      .select('id_certificado')
-      .eq('id_usuario', usuarioId)
-      .eq('obtenido', true);
-
-    if (error) throw error;
-    return data?.map(item => item.id_certificado) || [];
-  }
-
-  async savePathOptimization(result: PathOptimizationResult): Promise<void> {
-    const { error } = await supabase
-      .from('optimizaciones_trayectoria')
-      .insert({
-        trayectoria_id: result.trayectoria_id,
-        niveles: result.niveles,
-        score_total: result.score_total,
-        num_evaluaciones: result.num_evaluaciones,
-        tiempo_estimado: result.tiempo_estimado,
-        costo_estimado: result.costo_estimado,
-        fecha_creacion: new Date().toISOString()
-      });
-
-    if (error) throw error;
-  }
-
-  // Additional helper functions
-  async getSkillInfo(skillId: string): Promise<any> {
-    const { data, error } = await supabase
-      .from('habilidades')
+/**
+ * Get complete path data for a specific path
+ * Matches Python function: get_path_data(id_path)
+ */
+export async function getPathData(idPath: string) {
+  try {
+    // Get path basic info
+    const { data: pathData, error: pathError } = await supabase
+      .from('paths')
       .select('*')
-      .eq('id_habilidad', skillId)
+      .eq('id_path', idPath)
       .single();
-
-    if (error) throw error;
-    return data;
-  }
-
-  async getCertificatePrerequisites(certificadoId: string): Promise<string[]> {
-    const { data, error } = await supabase
-      .from('certificado_prerequisitos')
-      .select('id_certificado_prerequisito')
-      .eq('id_certificado', certificadoId);
-
-    if (error) throw error;
-    return data?.map(item => item.id_certificado_prerequisito) || [];
-  }
-
-  async getMarketDemandData(skillIds: string[]): Promise<Map<string, number>> {
-    const { data, error } = await supabase
-      .from('demanda_mercado_habilidades')
-      .select('id_habilidad, demanda_score')
-      .in('id_habilidad', skillIds);
-
-    if (error) throw error;
     
-    const demandMap = new Map<string, number>();
-    data?.forEach(item => {
-      demandMap.set(item.id_habilidad, item.demanda_score || 0.5);
-    });
-    
-    return demandMap;
-  }
+    if (pathError || !pathData) {
+      throw new Error(`Path with id ${idPath} not found`);
+    }
 
-  async getUserSkillLevels(usuarioId: string): Promise<Map<string, number>> {
-    const { data, error } = await supabase
-      .from('usuario_habilidades')
-      .select('id_habilidad, nivel_experiencia')
-      .eq('id_usuario', usuarioId)
-      .eq('validado', true);
+    // Get path_habilidades
+    const { data: pathHabilidades, error: pathHabError } = await supabase
+      .from('path_habilidades')
+      .select('*')
+      .eq('id_path', idPath);
+    
+    if (pathHabError) throw pathHabError;
 
-    if (error) throw error;
+    // Get path_roles
+    const { data: pathRoles, error: pathRolesError } = await supabase
+      .from('path_roles')
+      .select('*')
+      .eq('id_path', idPath);
     
-    const skillMap = new Map<string, number>();
-    data?.forEach(item => {
-      skillMap.set(item.id_habilidad, item.nivel_experiencia);
-    });
+    if (pathRolesError) throw pathRolesError;
+
+    // Get roles_habilidades for the roles in this path
+    const rolesIds = (pathRoles || []).map(r => r.id_rol);
+    let rolesHabilidades = [];
+    if (rolesIds.length > 0) {
+      const { data: rolesHabData, error: rolesHabError } = await supabase
+        .from('roles_habilidades')
+        .select('*')
+        .in('id_rol', rolesIds);
+      
+      if (rolesHabError) throw rolesHabError;
+      rolesHabilidades = rolesHabData || [];
+    }
+
+    // Get all certificados
+    const { data: certificados, error: certError } = await supabase
+      .from('certificados')
+      .select('*');
     
-    return skillMap;
+    if (certError) throw certError;
+
+    // Get certificados_habilidades
+    const { data: certificadosHabilidades, error: certHabError } = await supabase
+      .from('certificados_habilidades')
+      .select('*');
+    
+    if (certHabError) throw certHabError;
+
+    // Get user certificates and skills
+    const { data: usuarioCertificados, error: userCertError } = await supabase
+      .from('usuarios_certificados')
+      .select('*')
+      .eq('id_usuario', pathData.id_usuario);
+    
+    if (userCertError) throw userCertError;
+
+    const { data: usuarioHabilidades, error: userSkillError } = await supabase
+      .from('usuarios_habilidades')
+      .select('*')
+      .eq('id_usuario', pathData.id_usuario);
+    
+    if (userSkillError) throw userSkillError;
+
+    // Combine requisitos (path_habilidades + roles_habilidades)
+    const requisitos = [...(pathHabilidades || []), ...rolesHabilidades];
+
+    return {
+      path: pathData,
+      path_habilidades: pathHabilidades || [],
+      path_roles: pathRoles || [],
+      certificados: certificados || [],
+      certificados_habilidades: certificadosHabilidades || [],
+      usuario_certificados: usuarioCertificados || [],
+      usuario_habilidades: usuarioHabilidades || [],
+      requisitos
+    };
+  } catch (error) {
+    console.error('Error getting path data:', error);
+    throw error;
   }
 }
 
-export const softAgentDatabase = new SOFTAgentDatabase();
+/**
+ * Check if a path already has levels assigned
+ * Matches Python function: get_path_levels(id_path)
+ */
+export async function getPathLevels(idPath: string) {
+  const { data, error } = await supabase
+    .from('path_nivel')
+    .select('*')
+    .eq('id_path', idPath);
+  
+  if (error) throw error;
+  return data || [];
+}
+
+/**
+ * Save simulation results to the database
+ * Matches Python function: save_simulation_results(id_path, solution)
+ */
+export async function saveSimulationResults(idPath: string, solution: any[]) {
+  try {
+    // First, insert the levels into path_nivel
+    for (const nivel of solution) {
+      const { data: nivelData, error: nivelError } = await supabase
+        .from('path_nivel')
+        .insert({
+          id_path: idPath,
+          nivel: nivel.nivel,
+          nombre: `Nivel ${nivel.nivel}`,
+          descripcion: `Certificados del nivel ${nivel.nivel}`,
+          orden: nivel.nivel
+        })
+        .select()
+        .single();
+      
+      if (nivelError) throw nivelError;
+
+      // Then, insert the certificates for this level into nivel_certificados
+      for (const certInfo of nivel.certificados) {
+        const { error: certNivelError } = await supabase
+          .from('nivel_certificados')
+          .insert({
+            id_nivel: nivelData.id_nivel,
+            id_certificado: certInfo.certificado.id_certificado,
+            orden: certInfo.certificado.orden || 1,
+            es_prerequisito: false
+          });
+        
+        if (certNivelError) throw certNivelError;
+      }
+    }
+  } catch (error) {
+    console.error('Error saving simulation results:', error);
+    throw error;
+  }
+}
