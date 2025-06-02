@@ -5,6 +5,7 @@ import { ProjectLoadChart } from './ProjectLoadChart';
 import { CircularProgress } from './CircularProgress';
 import { FiBarChart2, FiPieChart, FiCalendar, FiActivity } from 'react-icons/fi';
 import { Project } from '@/interfaces/cargabilidad';
+import { motion } from 'framer-motion';
 
 interface Props {
   projects: Project[];
@@ -23,7 +24,9 @@ export const DashboardTab = ({ projects, weeklyLoad, availableHours, totalHoursP
           </div>
           Mi Carga Semanal
         </h3>
-        <WeeklyLoadChart data={weeklyLoad} projects={projects} />
+        <div className="h-48">
+          <WeeklyLoadChart data={weeklyLoad} projects={projects} />
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
@@ -33,7 +36,9 @@ export const DashboardTab = ({ projects, weeklyLoad, availableHours, totalHoursP
           </div>
           Cargabilidad por Proyecto
         </h3>
-        <ProjectLoadChart projects={projects} />
+        <div className="h-48">
+          <ProjectLoadChart projects={projects} />
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
@@ -91,6 +96,40 @@ export const DashboardTab = ({ projects, weeklyLoad, availableHours, totalHoursP
                 </div>
               );
             })}
+          
+          {projects.filter(p => p.deadline).length === 0 && (
+            <motion.div 
+              className="text-center py-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div 
+                className="w-16 h-16 bg-[#F59E0B08] rounded-full flex items-center justify-center mx-auto mb-4"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+              >
+                <FiCalendar className="h-8 w-8 text-[#F59E0B]" />
+              </motion.div>
+              <motion.h3 
+                className="text-gray-800 font-medium mb-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+              >
+                No hay plazos próximos
+              </motion.h3>
+              <motion.p 
+                className="text-gray-500 text-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.5 }}
+              >
+                Los proyectos con fechas límite aparecerán aquí
+              </motion.p>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>

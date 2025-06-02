@@ -2,6 +2,8 @@
 
 import { Project } from '@/interfaces/cargabilidad';
 import { getProjectHexColor } from '../proyectos/utils/projectUtils';
+import { motion } from 'framer-motion';
+import { FiPieChart } from 'react-icons/fi';
 
 interface Props {
   projects: Project[];
@@ -9,8 +11,9 @@ interface Props {
 
 export const ProjectLoadChart = ({ projects }: Props) => {
   return (
-    <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-      {projects.map((project) => {
+    <div className="h-full overflow-y-auto pr-2">
+      <div className="space-y-3">
+        {projects.map((project) => {
         const safeLoad = typeof project.load === 'number' && !isNaN(project.load) ? Math.max(0, project.load) : 0;
         // Use the same color function as project cards for consistency
         const projectColor = getProjectHexColor(project.color, project.id_proyecto);
@@ -36,10 +39,39 @@ export const ProjectLoadChart = ({ projects }: Props) => {
       })}
       
       {projects.length === 0 && (
-        <div className="text-center py-6 text-gray-400 text-sm">
-          No hay proyectos asignados
-        </div>
+        <motion.div 
+          className="text-center py-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div 
+            className="w-16 h-16 bg-[#6366F108] rounded-full flex items-center justify-center mx-auto mb-4"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <FiPieChart className="h-8 w-8 text-[#6366F1]" />
+          </motion.div>
+          <motion.h3 
+            className="text-gray-800 font-medium mb-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+          >
+            No hay proyectos asignados
+          </motion.h3>
+          <motion.p 
+            className="text-gray-500 text-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.5 }}
+          >
+            Los proyectos aparecerán aquí cuando sean asignados
+          </motion.p>
+        </motion.div>
       )}
+      </div>
     </div>
   );
 };
