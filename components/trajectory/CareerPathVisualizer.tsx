@@ -90,14 +90,34 @@ const CareerPathVisualizer = ({
   const getRecommendedCertifications = (path: any) => {
     if (!path?.levels) return [];
     
-    const nextLevel = getNextLevel(path);
-    if (!nextLevel || !nextLevel.certificates) return [];
+    // Find the current level instead of the next level
+    const currentLevelIndex = path.levels.findIndex((level: any) => level.current);
     
-    return nextLevel.certificates.slice(0, 4).map((cert: any) => ({
-      name: cert.name,
-      completed: cert.completed || false,
-      level: nextLevel.name || nextLevel.title
-    }));
+    if (currentLevelIndex >= 0) {
+      const currentLevel = path.levels[currentLevelIndex];
+      if (currentLevel && currentLevel.certificates) {
+        return currentLevel.certificates.slice(0, 4).map((cert: any) => ({
+          name: cert.name,
+          completed: cert.completed || false,
+          level: currentLevel.name || currentLevel.title
+        }));
+      }
+    }
+    
+    // Fallback to first incomplete level if no current level
+    const firstIncompleteLevelIndex = path.levels.findIndex((level: any) => !level.completed);
+    if (firstIncompleteLevelIndex >= 0) {
+      const level = path.levels[firstIncompleteLevelIndex];
+      if (level && level.certificates) {
+        return level.certificates.slice(0, 4).map((cert: any) => ({
+          name: cert.name,
+          completed: cert.completed || false,
+          level: level.name || level.title
+        }));
+      }
+    }
+    
+    return [];
   };
 
   const getNextSteps = (path: any) => {
@@ -396,7 +416,7 @@ const CareerPathVisualizer = ({
               {getNextSteps(currentPath).length > 0 ? (
                 <>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    Para alcanzar el nivel 3, considera estas certificaciones avanzadas:
+                    Próximas certificaciones que tendrás en el proximo nivel:
                   </p>
                   <ul className="space-y-3">
                     {getNextSteps(currentPath).map((cert: any, index: number) => (
