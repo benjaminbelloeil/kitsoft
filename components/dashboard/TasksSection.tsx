@@ -42,31 +42,43 @@ export default function TasksSection({
       
       <div className="p-6">
         <div className="space-y-4 max-h-[400px] overflow-y-auto">
-          {tasks.map(task => (
-            <div 
-              key={task.id}
-              className="flex items-center p-4 border border-gray-100 rounded-lg hover:border-gray-200 transition-all bg-white shadow-sm hover:shadow"
-            >
-              <div className={`${getProjectColor(task.projectColor)} w-2 h-14 rounded-full mr-4`}></div>
-              <div className="flex-1">
-                <h3 className="font-medium text-gray-900">{task.title}</h3>
-                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-1">
-                  <p className="text-sm text-gray-500">
-                    {task.projectName}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Vencimiento: {formatDate(task.dueDate)}
-                  </p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(task.status)}`}>
-                    {getStatusText(task.status)}
-                  </span>
+          {tasks.length > 0 ? (
+            tasks.map(task => (
+              <div 
+                key={task.id}
+                className="flex items-center p-4 border border-gray-100 rounded-lg hover:border-gray-200 transition-all bg-white shadow-sm hover:shadow"
+              >
+                <div className={`${getProjectColor(task.projectColor)} w-2 h-14 rounded-full mr-4`}></div>
+                <div className="flex-1">
+                  <h3 className="font-medium text-gray-900">{task.title}</h3>
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 mt-1">
+                    <p className="text-sm text-gray-500">
+                      {task.projectName}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Vencimiento: {formatDate(task.dueDate)}
+                    </p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(task.status)}`}>
+                      {getStatusText(task.status)}
+                    </span>
+                  </div>
                 </div>
+                <button className="ml-4 text-indigo-600 hover:text-indigo-800 p-2">
+                  <ChevronRight className="h-5 w-5" />
+                </button>
               </div>
-              <button className="ml-4 text-indigo-600 hover:text-indigo-800 p-2">
-                <ChevronRight className="h-5 w-5" />
-              </button>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 px-4">
+              <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-3 border border-amber-100">
+                <AlertCircle className="w-6 h-6 text-amber-500" />
+              </div>
+              <h3 className="text-base font-medium text-gray-900 mb-2">No hay tareas pendientes</h3>
+              <p className="text-sm text-gray-500 text-center max-w-sm">
+                ¡Excelente trabajo! No tienes tareas pendientes prioritarias en este momento.
+              </p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
