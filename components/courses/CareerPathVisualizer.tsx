@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/dashboard/certificaciones/components/ProgressBar.tsx
-import React from 'react';
-import { Award, BookOpen, Check, Clock, Info, TrendingUp, MapPin, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Award, BookOpen, Check, Clock, Info, TrendingUp, MapPin, AlertCircle, Plus } from 'lucide-react';
+import TrajectoryFormModal from '@/components/courses/TrajectoryFormModal';
 
 const CareerPathVisualizer = ({ 
   paths, 
@@ -13,10 +15,26 @@ const CareerPathVisualizer = ({
   onPathChange: (pathId: number) => void 
 }) => {
   const currentPath = paths.find(p => p.id === activePath);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddTrajectory = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleTrajectorySubmit = (trajectoryData: any) => {
+    // Handle the trajectory submission
+    console.log('Trajectory submitted:', trajectoryData);
+    setIsModalOpen(false);
+    // You can add additional logic here to refresh the paths or update the UI
+  };
   
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-4">
-      <div className="flex justify-between items-start mb-6 border-b border-gray-200 pb-4">
+      <div className="flex justify-between items-start border-b border-gray-200 pb-4">
         <div>
           <div className="flex items-center mb-2">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500/10 to-purple-500/20 rounded-full flex items-center justify-center mr-3 shadow-lg">
@@ -28,7 +46,7 @@ const CareerPathVisualizer = ({
             </div>
           </div>
         </div>
-        <div className="flex">
+        <div className="flex items-center space-x-2 relative">
           <label htmlFor="path-select" className="sr-only">Seleccionar trayectoria profesional</label>
           <select 
             id="path-select"
@@ -41,17 +59,42 @@ const CareerPathVisualizer = ({
               <option key={path.id} value={path.id}>{path.title}</option>
             ))}
           </select>
+          <button
+            onClick={handleAddTrajectory}
+            className="flex items-center justify-center w-10 h-10 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md border border-purple-200/50 backdrop-blur-sm"
+            title="Agregar nueva trayectoria"
+            aria-label="Agregar nueva trayectoria"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
         </div>
       </div>
       
-      {currentPath && (
-        <>
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-1 text-gray-800">
-              {currentPath.title}
-            </h3>
-            <p className="text-gray-600 text-sm">{currentPath.description}</p>
-          </div>
+      {/* Trajectory Form Extension */}
+      <AnimatePresence mode="wait">
+        {isModalOpen ? (
+          <TrajectoryFormModal
+            key="form"
+            isOpen={isModalOpen}
+            onClose={handleModalClose}
+            onSubmit={handleTrajectorySubmit}
+          />
+        ) : currentPath ? (
+          <motion.div
+            key="content"
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
+            className="mt-6 bg-gray-50/50 rounded-xl border border-gray-200 overflow-hidden"
+          >
+            <div className="p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-1 text-gray-800">
+                  {currentPath.title}
+                </h3>
+                <p className="text-gray-600 text-sm">{currentPath.description}</p>
+              </div>
           
           <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-100">
             {/* Compact Timeline Design */}
@@ -237,9 +280,11 @@ const CareerPathVisualizer = ({
                 </li>
               </ul>
             </div>
-          </div>
-        </>
-      )}
+            </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 };
