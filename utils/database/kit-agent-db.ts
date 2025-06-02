@@ -1,4 +1,4 @@
-// Database functions for the agent system
+// Database functions for the kit agent system
 import { createClient } from '@/utils/supabase/server';
 import type { 
   ProjectRole, 
@@ -8,7 +8,7 @@ import type {
   RequiredSkill, 
   EmployeeRole,
   DatabaseFunctions 
-} from '@/interfaces/agent';
+} from '@/interfaces/kit-agent';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second

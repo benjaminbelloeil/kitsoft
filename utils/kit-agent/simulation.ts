@@ -1,6 +1,6 @@
 // Main simulation logic for project team assignment
 import { AgenteSeleccion } from './selection-agent';
-import { agentDatabase } from '../database/agent-db';
+import { agentDatabase } from '../database/kit-agent-db';
 import type { 
   AgentWeights, 
   AssignmentResult, 
@@ -8,7 +8,7 @@ import type {
   ProjectRole, 
   AgentCache,
   DatabaseFunctions 
-} from '@/interfaces/agent';
+} from '@/interfaces/kit-agent';
 
 // Weights for the scoring system
 const PESOS: AgentWeights = {

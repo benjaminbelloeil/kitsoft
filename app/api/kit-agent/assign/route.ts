@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { executeAgentAssignment } from '@/utils/agent/assign';
+import { executeAgentAssignment } from '@/utils/kit-agent/assign';
 
 export async function POST(request: Request) {
   try {

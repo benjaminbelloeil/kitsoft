@@ -1,7 +1,7 @@
-// Utility functions for testing and debugging the agent system
-import { agentDatabase } from '../database/agent-db';
+// Utility functions for testing and debugging the kit agent system
+import { agentDatabase } from '../database/kit-agent-db';
 import { simular } from './simulation';
-import type { SimulationResponse } from '@/interfaces/agent';
+import type { SimulationResponse } from '@/interfaces/kit-agent';
 
 /**
  * Test the database connections and basic functionality

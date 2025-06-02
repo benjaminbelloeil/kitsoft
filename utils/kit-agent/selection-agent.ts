@@ -8,7 +8,7 @@ import type {
   ScoreBreakdown,
   EmployeeSkill,
   RequiredSkill
-} from '@/interfaces/agent';
+} from '@/interfaces/kit-agent';
 
 export class AgenteSeleccion {
   public id: number;
