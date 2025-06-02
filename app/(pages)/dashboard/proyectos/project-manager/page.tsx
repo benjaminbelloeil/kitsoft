@@ -310,8 +310,37 @@ export default function ProjectManagementPage() {
       // Use the sync function to update the project
       const updatedProject = await updateProject(selectedProject.id_proyecto, formData);
       
-      // Update project roles
-      await updateProjectRoles(selectedProject.id_proyecto, selectedRoles);
+      // Get current project roles to check if roles changed
+      const currentRoleIds = selectedProject.roles?.map(role => role.id_rol) || [];
+      const newRoleIds = selectedRoles;
+      const addedRoleIds = newRoleIds.filter(roleId => !currentRoleIds.includes(roleId));
+      
+      // Update project roles with agent assignment if new roles were added
+      const roleUpdateResult = await updateProjectRoles(
+        selectedProject.id_proyecto, 
+        selectedRoles, 
+        addedRoleIds.length > 0 // Trigger agent assignment only when new roles are added
+      );
+      
+      // Show notification if agent assignment was triggered
+      if (roleUpdateResult.agentResult && 
+          typeof roleUpdateResult.agentResult === 'object' && 
+          'success' in roleUpdateResult.agentResult && 
+          roleUpdateResult.agentResult.success && 
+          roleUpdateResult.rolesAdded > 0) {
+        const agentResult = roleUpdateResult.agentResult as { success: boolean; assignments?: unknown[] };
+        setNotifications(prev => [
+          {
+            id: (Date.now() + 2).toString(),
+            title: 'Equipo actualizado automáticamente',
+            message: `Se asignaron ${agentResult.assignments?.length || 0} nuevos miembros para los roles agregados`,
+            date: new Date(),
+            read: false,
+            type: 'project'
+          },
+          ...prev
+        ]);
+      }
       
       // Add client name for display
       const client = clients.find((c: Client) => c.id_cliente === updatedProject.id_cliente);
@@ -459,6 +488,7 @@ export default function ProjectManagementPage() {
       titulo: project.titulo,
       descripcion: project.descripcion || '',
       id_cliente: project.id_cliente,
+      id_projectlead: project.id_projectlead || '',
       fecha_inicio: project.fecha_inicio,
       fecha_fin: project.fecha_fin || '',
       horas_totales: project.horas_totales,

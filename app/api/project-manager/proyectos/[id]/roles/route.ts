@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
+import { executeAgentAssignment } from '@/utils/agent/assign';
 
 export async function GET(
   request: Request,
@@ -59,10 +60,41 @@ export async function POST(
     }
 
     // Get role IDs from request body
-    const { roleIds } = await request.json();
+    const { roleIds, triggerAgentAssignment = false } = await request.json();
     
     if (!Array.isArray(roleIds)) {
       return NextResponse.json({ error: 'Invalid roleIds. Expected array.' }, { status: 400 });
+    }
+
+    // Get current roles for comparison to determine what changed
+    const { data: currentRoles } = await supabase
+      .from('proyectos_roles')
+      .select('id_rol')
+      .eq('id_proyecto', id);
+    
+    const currentRoleIds = currentRoles?.map(r => r.id_rol) || [];
+    const newRoleIds = roleIds;
+    
+    // Find roles that were removed (exist in current but not in new)
+    const removedRoleIds = currentRoleIds.filter(roleId => !newRoleIds.includes(roleId));
+    
+    // Find roles that were added (exist in new but not in current)
+    const addedRoleIds = newRoleIds.filter(roleId => !currentRoleIds.includes(roleId));
+
+    // Clean up user assignments for removed roles
+    if (removedRoleIds.length > 0) {
+      console.log(`🧹 Cleaning up user assignments for removed roles: ${removedRoleIds.join(', ')}`);
+      
+      const { error: cleanupError } = await supabase
+        .from('usuarios_proyectos')
+        .delete()
+        .eq('id_proyecto', id)
+        .in('id_rol', removedRoleIds);
+        
+      if (cleanupError) {
+        console.error('Error cleaning up user assignments:', cleanupError);
+        throw cleanupError;
+      }
     }
 
     // Start a transaction to update project roles
@@ -87,8 +119,32 @@ export async function POST(
         
       if (insertError) throw insertError;
     }
+
+    // Trigger agent assignment if new roles were added and triggerAgentAssignment is true
+    let agentResult = null;
+    if (addedRoleIds.length > 0 && triggerAgentAssignment) {
+      try {
+        console.log(`🤖 Triggering agent assignment for ${addedRoleIds.length} new roles`);
+        
+        agentResult = await executeAgentAssignment(id);
+        
+        if (agentResult.success) {
+          console.log(`✅ Agent assignment completed: ${agentResult.new_assignments || 0} new assignments made`);
+        } else {
+          console.warn('⚠️ Agent assignment failed but continuing with role update:', agentResult.error);
+        }
+      } catch (agentError) {
+        console.error('Error triggering agent assignment:', agentError);
+        // Don't fail the role update if agent assignment fails
+      }
+    }
     
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true, 
+      rolesAdded: addedRoleIds.length,
+      rolesRemoved: removedRoleIds.length,
+      agentResult 
+    });
   } catch (error: any) {
     console.error('Error updating project roles:', error);
     return NextResponse.json(

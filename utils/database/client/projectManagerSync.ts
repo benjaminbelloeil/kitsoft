@@ -175,22 +175,25 @@ export async function fetchProjectRoles(projectId: string): Promise<Role[]> {
  * Update the roles for a project
  * @param {string} projectId - ID of the project to update roles for
  * @param {string[]} roleIds - Array of role IDs to assign to the project
- * @returns {Promise<void>}
+ * @param {boolean} triggerAgentAssignment - Whether to trigger automatic agent assignment for new roles
+ * @returns {Promise<{success: boolean, rolesAdded: number, rolesRemoved: number, agentResult?: unknown}>} Response from the role update operation
  */
-export async function updateProjectRoles(projectId: string, roleIds: string[]): Promise<void> {
+export async function updateProjectRoles(projectId: string, roleIds: string[], triggerAgentAssignment: boolean = false): Promise<{success: boolean, rolesAdded: number, rolesRemoved: number, agentResult?: unknown}> {
   try {
     const response = await fetch(`/api/project-manager/proyectos/${projectId}/roles`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ roleIds }),
+      body: JSON.stringify({ roleIds, triggerAgentAssignment }),
     });
     
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Error updating project roles');
     }
+    
+    return await response.json();
   } catch (error) {
     console.error('Error updating project roles:', error);
     throw error;
