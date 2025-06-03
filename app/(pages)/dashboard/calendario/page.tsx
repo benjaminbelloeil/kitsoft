@@ -341,9 +341,9 @@ export default function CalendarPage() {
               
               {eventsForSelectedDate.length > 0 ? (
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {eventsForSelectedDate.map((event, i) => (
-                    <div 
-                      key={i}
+                  {eventsForSelectedDate.map((event) => (
+                    <button 
+                      key={event.id}
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         selectEvent(event, {
@@ -352,7 +352,7 @@ export default function CalendarPage() {
                           width: rect.width
                         });
                       }}
-                      className={`p-3 rounded-md border-l-4 ${colorClasses[event.color].border} shadow-sm hover:shadow-md fast-transition cursor-pointer bg-white`}
+                      className={`p-3 rounded-md border-l-4 ${colorClasses[event.color].border} shadow-sm hover:shadow-md fast-transition cursor-pointer bg-white text-left w-full`}
                     >
                       <h3 className="font-medium">{event.title}</h3>
                       <div className="flex flex-wrap gap-2 mt-1 text-sm text-gray-500">
@@ -365,7 +365,7 @@ export default function CalendarPage() {
                           </div>
                         )}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : (
