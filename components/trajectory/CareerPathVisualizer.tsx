@@ -2,7 +2,7 @@
 // app/dashboard/certificaciones/components/ProgressBar.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Award, BookOpen, Check, Clock, Info, TrendingUp, MapPin, AlertCircle, Plus, Star } from 'lucide-react';
+import { Award, BookOpen, Check, Clock, Info, TrendingUp, MapPin, AlertCircle, Plus, Star, ChevronDown } from 'lucide-react';
 import TrajectoryFormModal from '@/components/trajectory/TrajectoryFormModal';
 
 const CareerPathVisualizer = ({ 
@@ -20,6 +20,7 @@ const CareerPathVisualizer = ({
 }) => {
   const currentPath = paths.find(p => p.id === activePath);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expandedLevels, setExpandedLevels] = useState<Set<string>>(new Set());
   
   // Add debugging log and check completion status
   const [allLevelsCompleted, setAllLevelsCompleted] = useState(false);
@@ -43,6 +44,18 @@ const CareerPathVisualizer = ({
 
   const handleAddTrajectory = () => {
     setIsModalOpen(!isModalOpen);
+  };
+
+  const toggleLevelExpansion = (levelId: string) => {
+    setExpandedLevels(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(levelId)) {
+        newSet.delete(levelId);
+      } else {
+        newSet.add(levelId);
+      }
+      return newSet;
+    });
   };
 
   const handleModalClose = () => {
@@ -289,46 +302,133 @@ const CareerPathVisualizer = ({
                   }
                   
                   const StatusIcon = statusConfig.statusIcon;
+                  const isExpanded = expandedLevels.has(level.id);
+                  const hasCertificates = level.certificates && level.certificates.length > 0;
                   
                   return (
-                    <div key={level.id} className="relative flex items-center">
-                      {/* Icon */}
-                      <div className={`relative z-10 flex-shrink-0 w-12 h-12 ${statusConfig.iconBg} rounded-full flex items-center justify-center border-4 border-white shadow-md`}>
-                        {level.completed ? (
-                          <Check size={18} className={statusConfig.iconColor} />
-                        ) : level.current ? (
-                          <MapPin size={18} className={statusConfig.iconColor} />
-                        ) : (
-                          <span className={`text-sm font-bold ${statusConfig.iconColor}`}>{index + 1}</span>
-                        )}
-                      </div>
-                      
-                      {/* Content */}
-                      <div className={`ml-4 flex-1 p-4 rounded-lg border ${statusConfig.borderColor} ${statusConfig.bgColor} transition-all duration-200 ${level.current ? 'shadow-md ring-2 ring-blue-200/50' : 'hover:shadow-sm'}`}>
-                        <div className="flex items-center justify-between">
-                          <h4 className={`text-base font-semibold ${statusConfig.textColor}`}>
-                            {level.name}
-                            {level.current && <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Actual</span>}
-                          </h4>
-                          <div className={`flex items-center text-xs px-2 py-1 rounded-full font-medium ${
-                            level.completed 
-                              ? 'bg-green-100 text-green-700' 
-                              : level.current 
-                                ? 'bg-blue-100 text-blue-700' 
-                                : 'bg-gray-100 text-gray-600'
-                          }`}>
-                            <StatusIcon size={12} className="mr-1" />
-                            {statusConfig.statusText}
-                          </div>
+                    <div key={level.id} className="relative">
+                      <div className="flex items-start">
+                        {/* Icon */}
+                        <div className={`relative z-10 flex-shrink-0 w-12 h-12 ${statusConfig.iconBg} rounded-full flex items-center justify-center border-4 border-white shadow-md`}>
+                          {level.completed ? (
+                            <Check size={18} className={statusConfig.iconColor} />
+                          ) : level.current ? (
+                            <MapPin size={18} className={statusConfig.iconColor} />
+                          ) : (
+                            <span className={`text-sm font-bold ${statusConfig.iconColor}`}>{index + 1}</span>
+                          )}
                         </div>
-                        <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                          {level.completed 
-                            ? 'Has completado exitosamente este nivel de tu carrera profesional.' 
-                            : level.current 
-                              ? 'Estás trabajando actualmente en este nivel. ¡Sigue así!' 
-                              : 'Este nivel estará disponible una vez que completes los anteriores.'
-                          }
-                        </p>
+                        
+                        {/* Content */}
+                        <div className="ml-4 flex-1">
+                          <div 
+                            className={`p-4 rounded-lg border ${statusConfig.borderColor} ${statusConfig.bgColor} transition-all duration-200 ${
+                              level.current ? 'shadow-md ring-2 ring-blue-200/50' : 'hover:shadow-sm'
+                            } ${hasCertificates ? 'cursor-pointer hover:bg-opacity-80' : ''}`}
+                            onClick={hasCertificates ? () => toggleLevelExpansion(level.id) : undefined}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <h4 className={`text-base font-semibold ${statusConfig.textColor}`}>
+                                  {level.name}
+                                  {level.current && <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Actual</span>}
+                                </h4>
+                                {hasCertificates && (
+                                  <motion.div
+                                    animate={{ rotate: isExpanded ? 180 : 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="ml-2 text-gray-400"
+                                  >
+                                    <ChevronDown size={16} />
+                                  </motion.div>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                {hasCertificates && (
+                                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                    {level.certificates.length} certificación{level.certificates.length !== 1 ? 'es' : ''}
+                                  </span>
+                                )}
+                                <div className={`flex items-center text-xs px-2 py-1 rounded-full font-medium ${
+                                  level.completed 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : level.current 
+                                      ? 'bg-blue-100 text-blue-700' 
+                                      : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  <StatusIcon size={12} className="mr-1" />
+                                  {statusConfig.statusText}
+                                </div>
+                              </div>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                              {level.completed 
+                                ? 'Has completado exitosamente este nivel de tu carrera profesional.' 
+                                : level.current 
+                                  ? 'Estás trabajando actualmente en este nivel. ¡Sigue así!' 
+                                  : 'Este nivel estará disponible una vez que completes los anteriores.'
+                              }
+                            </p>
+                          </div>
+                          
+                          {/* Certificate Dropdown */}
+                          <AnimatePresence>
+                            {isExpanded && hasCertificates && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                                  <h5 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                                    <Award size={16} className="mr-2 text-purple-600" />
+                                    Certificaciones de este nivel
+                                  </h5>
+                                  <div className="space-y-2">
+                                    {level.certificates.map((certificate: any, certIndex: number) => (
+                                      <motion.div
+                                        key={certificate.id || certIndex}
+                                        initial={{ x: -20, opacity: 0 }}
+                                        animate={{ x: 0, opacity: 1 }}
+                                        transition={{ delay: certIndex * 0.1 }}
+                                        className="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                                      >
+                                        <div className={`flex-shrink-0 w-8 h-8 ${
+                                          certificate.completed ? 'bg-green-100' : 'bg-yellow-100'
+                                        } rounded-full flex items-center justify-center mr-3`}>
+                                          {certificate.completed ? (
+                                            <Check className="text-green-600" size={16} />
+                                          ) : (
+                                            <Clock className="text-yellow-600" size={16} />
+                                          )}
+                                        </div>
+                                        <div className="flex-1">
+                                          <h6 className="text-sm font-medium text-gray-800">
+                                            {certificate.name || `Certificación ${certIndex + 1}`}
+                                          </h6>
+                                          {certificate.description && (
+                                            <p className="text-xs text-gray-600 mt-1">
+                                              {certificate.description}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                          certificate.completed 
+                                            ? 'bg-green-100 text-green-700' 
+                                            : 'bg-yellow-100 text-yellow-700'
+                                        }`}>
+                                          {certificate.completed ? 'Completado' : 'Pendiente'}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </div>
                     </div>
                   );
@@ -444,7 +544,7 @@ const CareerPathVisualizer = ({
               {allLevelsCompleted ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Check className="text-green-600" size={24} />
+                    <Check className="text-green-600" size={32} />
                   </div>
                   <h5 className="font-semibold text-gray-800 mb-2">¡Trayectoria Completada!</h5>
                   <p className="text-sm text-gray-600">Has completado todos los niveles de esta trayectoria profesional.</p>
