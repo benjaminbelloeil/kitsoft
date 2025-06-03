@@ -26,11 +26,7 @@ const CareerPathVisualizer = ({
   
   useEffect(() => {
     if (currentPath) {
-      console.log("Current path ID:", currentPath.id_path);
-      console.log("Levels data:", currentPath.levels);
-      currentPath.levels.forEach((level: any, index: number) => {
-        console.log(`Level ${index + 1} - Name: ${level.name}, Completed: ${level.completed}, Current: ${level.current}`);
-      });
+
 
       // Check if all levels are completed and trigger completion check
       const completed = currentPath.levels.length > 0 && 
@@ -39,7 +35,7 @@ const CareerPathVisualizer = ({
       setAllLevelsCompleted(completed);
       
       if (completed && !currentPath.completed && onPathCompleted) {
-        console.log("All levels completed for path:", currentPath.id_path);
+
         onPathCompleted();
       }
     }
@@ -53,9 +49,10 @@ const CareerPathVisualizer = ({
     setIsModalOpen(false);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleTrajectorySubmit = (trajectoryData: any) => {
     // Handle the trajectory submission
-    console.log('Trajectory submitted:', trajectoryData);
+
     setIsModalOpen(false);
     // Trigger refresh of paths
     if (onPathCreated) {
@@ -445,12 +442,12 @@ const CareerPathVisualizer = ({
                 Próximos Pasos
               </h4>
               {allLevelsCompleted ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                    <Check className="text-green-600" size={32} />
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Check className="text-green-600" size={24} />
                   </div>
-                  <h5 className="font-semibold text-gray-800 mb-2">¡Trayectoria Finalizada!</h5>
-                  <p className="text-sm text-gray-600">Has completado todos los pasos de esta trayectoria profesional. ¡Felicitaciones!</p>
+                  <h5 className="font-semibold text-gray-800 mb-2">¡Trayectoria Completada!</h5>
+                  <p className="text-sm text-gray-600">Has completado todos los niveles de esta trayectoria profesional.</p>
                 </div>
               ) : getNextSteps(currentPath).length > 0 ? (
                 <>

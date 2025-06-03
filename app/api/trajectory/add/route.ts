@@ -140,14 +140,12 @@ export async function POST(request: NextRequest) {
 // Helper function to run SOFT agent simulation in background
 async function runSOFTSimulationAsync(pathId: string) {
   try {
-    console.log(`Starting SOFT simulation for path ${pathId}`);
     const model = await runSimulation(pathId);
     
     if (model) {
-      console.log(`SOFT simulation completed successfully for path ${pathId}`);
-      console.log(`Best score: ${model.getMejorScore()}`);
+      // SOFT simulation completed successfully
     } else {
-      console.log(`SOFT simulation failed for path ${pathId} - no model returned`);
+      // SOFT simulation failed - no model returned
     }
   } catch (error) {
     console.error(`SOFT simulation error for path ${pathId}:`, error);

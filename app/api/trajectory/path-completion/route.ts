@@ -29,7 +29,7 @@ export async function POST() {
       `)
       .eq('id_usuario', user.id);
 
-    console.log('Fetched paths for user:', user.id, paths);
+
 
     if (pathsError) {
       console.error('Error fetching paths:', pathsError);
@@ -42,11 +42,6 @@ export async function POST() {
     const completedPathCards = [];
     
     for (const path of paths || []) {
-      console.log(`Checking path ${path.id_path}:`, {
-        meta: path.meta,
-        completado: path.completado,
-        levels: path.path_nivel
-      });
       
       const levels = path.path_nivel || [];
       const allLevelsCompleted = levels.length > 0 && 
@@ -54,7 +49,6 @@ export async function POST() {
 
       // Handle newly completed paths
       if (!path.completado && allLevelsCompleted) {
-        console.log(`🎉 Path ${path.id_path} is newly completed! Marking as completed...`);
         
         // Mark the path as completed
         const { error: updateError } = await supabase
@@ -65,14 +59,12 @@ export async function POST() {
         if (updateError) {
           console.error(`Error updating path ${path.id_path}:`, updateError);
         } else {
-          console.log(`Successfully marked path ${path.id_path} as completed`);
           path.completado = true; // Update local object
         }
       }
 
       // Process all completed paths (both newly completed and previously completed)
       if (path.completado || allLevelsCompleted) {
-        console.log(`Processing completed path ${path.id_path}...`);
         
         // Get all certificates from all levels of this path and count completed ones
         const { data: pathCertificates, error: certError } = await supabase
@@ -119,12 +111,6 @@ export async function POST() {
           }
         }
 
-        console.log(`Path ${path.id_path} certificate stats:`, {
-          totalAvailable: totalCertificatesAvailable,
-          completed: completedCertificatesCount,
-          certificateNames: obtainedCertificateNames
-        });
-
         // Generate a realistic credential ID with shorter format
         const generateCredentialID = () => {
           const year = new Date().getFullYear();
@@ -168,13 +154,9 @@ export async function POST() {
         };
 
         completedPathCards.push(pathCard);
-        console.log(`Created path completion card for ${path.id_path}:`, pathCard.title);
       } else {
-        console.log(`Path ${path.id_path} not yet completed - ${levels.filter((l: any) => l.status === 'completado').length}/${levels.length} levels completed`);
       }
     }
-
-    console.log(`Final result: Found ${completedPathCards.length} completed paths`);
     
     return NextResponse.json({
       success: true,
