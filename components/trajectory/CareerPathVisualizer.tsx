@@ -21,7 +21,9 @@ const CareerPathVisualizer = ({
   const currentPath = paths.find(p => p.id === activePath);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Add debugging log
+  // Add debugging log and check completion status
+  const [allLevelsCompleted, setAllLevelsCompleted] = useState(false);
+  
   useEffect(() => {
     if (currentPath) {
       console.log("Current path ID:", currentPath.id_path);
@@ -31,10 +33,12 @@ const CareerPathVisualizer = ({
       });
 
       // Check if all levels are completed and trigger completion check
-      const allLevelsCompleted = currentPath.levels.length > 0 && 
+      const completed = currentPath.levels.length > 0 && 
         currentPath.levels.every((level: any) => level.completed);
       
-      if (allLevelsCompleted && !currentPath.completed && onPathCompleted) {
+      setAllLevelsCompleted(completed);
+      
+      if (completed && !currentPath.completed && onPathCompleted) {
         console.log("All levels completed for path:", currentPath.id_path);
         onPathCompleted();
       }
@@ -345,7 +349,15 @@ const CareerPathVisualizer = ({
                 </div>
                 Habilidades Clave
               </h4>
-              {getKeySkills(currentPath).length > 0 ? (
+              {allLevelsCompleted ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <Check className="text-green-600" size={32} />
+                  </div>
+                  <h5 className="font-semibold text-gray-800 mb-2">¡Trayectoria Completada!</h5>
+                  <p className="text-sm text-gray-600">Has dominado todas las habilidades clave de esta trayectoria profesional.</p>
+                </div>
+              ) : getKeySkills(currentPath).length > 0 ? (
                 <>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                     Habilidades clave que aprenderás en el nivel actual:
@@ -380,7 +392,15 @@ const CareerPathVisualizer = ({
                 </div>
                 Certificaciones
               </h4>
-              {getRecommendedCertifications(currentPath).length > 0 ? (
+              {allLevelsCompleted ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <Award className="text-green-600" size={32} />
+                  </div>
+                  <h5 className="font-semibold text-gray-800 mb-2">¡Certificaciones Completadas!</h5>
+                  <p className="text-sm text-gray-600">Has obtenido todas las certificaciones disponibles en esta trayectoria.</p>
+                </div>
+              ) : getRecommendedCertifications(currentPath).length > 0 ? (
                 <>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                     Certificaciones para el nivel actual:
@@ -424,7 +444,15 @@ const CareerPathVisualizer = ({
                 </div>
                 Próximos Pasos
               </h4>
-              {getNextSteps(currentPath).length > 0 ? (
+              {allLevelsCompleted ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <Check className="text-green-600" size={32} />
+                  </div>
+                  <h5 className="font-semibold text-gray-800 mb-2">¡Trayectoria Finalizada!</h5>
+                  <p className="text-sm text-gray-600">Has completado todos los pasos de esta trayectoria profesional. ¡Felicitaciones!</p>
+                </div>
+              ) : getNextSteps(currentPath).length > 0 ? (
                 <>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                     Próximas certificaciones que tendrás en el proximo nivel:
