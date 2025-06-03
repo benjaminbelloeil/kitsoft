@@ -15,12 +15,11 @@ interface Task {
 }
 
 interface TasksSectionProps {
-  tasks: Task[];
-  getDateColor: (dateStr: string) => string;
-  formatDate: (dateStr: string) => string;
-  getProjectColor: (color: string) => string;
-  getStatusColor: (status: string) => string;
-  getStatusText: (status: string) => string;
+  readonly tasks: Task[];
+  readonly formatDate: (dateStr: string) => string;
+  readonly getProjectColor: (color: string) => string;
+  readonly getStatusColor: (status: string) => string;
+  readonly getStatusText: (status: string) => string;
 }
 
 export default function TasksSection({
@@ -54,9 +53,9 @@ export default function TasksSection({
         <div className="space-y-4 max-h-[400px] overflow-y-auto">
           {tasks.length > 0 ? (
             tasks.map(task => (
-              <div 
+              <button 
                 key={task.id}
-                className="flex items-center p-4 border border-gray-100 rounded-lg hover:border-gray-200 transition-all bg-white shadow-sm hover:shadow cursor-pointer"
+                className="flex items-center p-4 border border-gray-100 rounded-lg hover:border-gray-200 transition-all bg-white shadow-sm hover:shadow cursor-pointer text-left w-full"
                 onClick={() => handleTaskClick(task)}
               >
                 <div className={`${getProjectColor(task.projectColor)} w-2 h-14 rounded-full mr-4`}></div>
@@ -83,7 +82,7 @@ export default function TasksSection({
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
-              </div>
+              </button>
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-8 px-4">
