@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Award, 
@@ -35,116 +35,6 @@ const styles = `
   .progress-100 { width: 100%; }
 `;
 
-// Mock data for courses
-const coursesData = [
-  {
-    id: 1,
-    title: 'Fundamentos de Cloud Computing',
-    description: 'Introducción a servicios y arquitecturas cloud',
-    progress: 75,
-    status: 'in-progress',
-    dueDate: '2025-06-15',
-    category: 'Tecnología',
-    modules: [
-      { name: 'Introducción a Cloud', completed: true },
-      { name: 'Servicios IaaS', completed: true },
-      { name: 'Servicios PaaS', completed: true },
-      { name: 'Servicios SaaS', completed: false },
-      { name: 'Seguridad en la Nube', completed: false }
-    ],
-    relatedPath: 'Especialista en Cloud',
-    imgUrl: '/api/placeholder/150/150'
-  },
-  {
-    id: 2,
-    title: 'Gestión Ágil de Proyectos',
-    description: 'Metodologías Scrum y aplicación en proyectos reales',
-    progress: 40,
-    status: 'in-progress',
-    dueDate: '2025-05-30',
-    category: 'Gestión',
-    modules: [
-      { name: 'Introducción a Agile', completed: true },
-      { name: 'Fundamentos de Scrum', completed: true },
-      { name: 'Roles y Responsabilidades', completed: false },
-      { name: 'Implementación Práctica', completed: false },
-      { name: 'Casos de Estudio', completed: false }
-    ],
-    relatedPath: 'Líder de Proyecto',
-    imgUrl: '/api/placeholder/150/150'
-  },
-  {
-    id: 3,
-    title: 'Arquitectura de Soluciones',
-    description: 'Diseño y planificación de arquitecturas empresariales',
-    progress: 100,
-    status: 'completed',
-    completionDate: '2025-04-10',
-    category: 'Tecnología',
-    modules: [
-      { name: 'Principios de Arquitectura', completed: true },
-      { name: 'Diseño de Sistemas', completed: true },
-      { name: 'Arquitecturas Distribuidas', completed: true },
-      { name: 'Patrones de Diseño', completed: true }
-    ],
-    relatedPath: 'Consultor Tecnológico',
-    imgUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    certificate: {
-      id: 'cert-arch-001',
-      issueDate: '2025-04-12',
-      validUntil: '2027-04-12',
-      credentialID: 'ACC-AS-2025-04321'
-    }
-  },
-  {
-    id: 4,
-    title: 'Inteligencia Artificial y ML',
-    description: 'Fundamentos y aplicaciones de IA en entornos empresariales',
-    progress: 100,
-    status: 'completed',
-    completionDate: '2025-03-25',
-    category: 'Tecnología',
-    modules: [
-      { name: 'Fundamentos de IA', completed: true },
-      { name: 'Machine Learning', completed: true },
-      { name: 'Redes Neuronales', completed: true },
-      { name: 'Implementación en Proyectos', completed: true }
-    ],
-    relatedPath: 'Consultor Tecnológico',
-    imgUrl: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    certificate: {
-      id: 'cert-ai-002',
-      issueDate: '2025-03-28',
-      validUntil: '2027-03-28',
-      credentialID: 'ACC-AI-2025-08752'
-    }
-  },
-  {
-    id: 5,
-    title: 'Liderazgo y Gestión de Equipos',
-    description: 'Desarrollo de habilidades de liderazgo efectivo',
-    progress: 100,
-    status: 'completed',
-    completionDate: '2025-02-15',
-    category: 'Liderazgo',
-    modules: [
-      { name: 'Principios de Liderazgo', completed: true },
-      { name: 'Comunicación Efectiva', completed: true },
-      { name: 'Gestión de Conflictos', completed: true },
-      { name: 'Desarrollo de Equipos', completed: true }
-    ],
-    relatedPath: 'Líder de Proyecto',
-    imgUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    certificate: {
-      id: 'cert-lead-003',
-      issueDate: '2025-02-18',
-      validUntil: '2027-02-18',
-      credentialID: 'ACC-LD-2025-12453'
-    }
-  }
-];
-
-
 export default function TrayectoriaPage() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
@@ -152,9 +42,10 @@ export default function TrayectoriaPage() {
   const [activePath, setActivePath] = useState(1);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
   const [pathsLoading, setPathsLoading] = useState(true);
+  const [pathCompletionCertificates, setPathCompletionCertificates] = useState<any[]>([]);
   
   // Fetch career paths from database
-  const fetchPaths = async () => {
+  const fetchPaths = useCallback(async () => {
     try {
       const response = await fetch('/api/trajectory/list');
       if (response.ok) {
@@ -176,16 +67,40 @@ export default function TrayectoriaPage() {
     } finally {
       setPathsLoading(false);
     }
-  };
+  }, []);
+
+  // Check for path completion and create certificates
+  const checkPathCompletion = useCallback(async () => {
+    try {
+      const response = await fetch('/api/trajectory/path-completion', {
+        method: 'POST',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.certificates.length > 0) {
+          setPathCompletionCertificates(data.certificates);
+          // Refresh paths to update completion status
+          fetchPaths();
+        }
+      }
+    } catch (error) {
+      console.error('Error checking path completion:', error);
+    }
+  }, [fetchPaths]);
+
+  const fetchPathsAndCertificates = useCallback(async () => {
+    await Promise.all([
+      fetchPaths(),
+      checkPathCompletion()
+    ]);
+  }, [fetchPaths, checkPathCompletion]);
 
   useEffect(() => {
-    fetchPaths();
-  }, []);
+    fetchPathsAndCertificates();
+  }, [fetchPathsAndCertificates]);
   
-  // Get only completed courses with certificates
-  const completedCourses = coursesData.filter(course => 
-    course.status === 'completed' && course.certificate
-  );
+  // Get only path completion certificates (not individual certificates)
+  const completedCourses = pathCompletionCertificates;
   
   // Apply filters and sorting
   const filterAndSortCourses = (courses: any[]) => {
@@ -283,6 +198,7 @@ export default function TrayectoriaPage() {
             activePath={activePath} 
             onPathChange={setActivePath}
             onPathCreated={fetchPaths}
+            onPathCompleted={checkPathCompletion}
           />
         </motion.div>
         

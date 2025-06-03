@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 import React from 'react';
-import { Award, Star, Check } from 'lucide-react';
+import { Award, Check } from 'lucide-react';
 
 
 
@@ -44,18 +44,14 @@ const CertificateDetail = ({ certificate, course }: { certificate: any, course: 
           <p className="font-medium text-green-600">Activo</p>
         </div>
       </div>
-      
-      <div className="mt-4 text-center">
-        <button className="text-purple-600 font-medium text-sm hover:text-purple-800 flex items-center justify-center w-full">
-          <Star className="mr-1" size={16} /> Ver Credencial Completa
-        </button>
-      </div>
     </div>
   );
 };
 
 // Course detail modal component
 const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => void }) => {
+  const isPathCompletion = course.pathInfo && course.certificates;
+  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div 
@@ -77,39 +73,104 @@ const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => vo
           <div className="grid md:grid-cols-4 gap-6">
             <div className="md:col-span-2 space-y-6">
               <div>
-                <h3 className="font-semibold text-lg mb-3">Información del Curso</h3>
+                <h3 className="font-semibold text-lg mb-3">
+                  {isPathCompletion ? 'Información de la Trayectoria' : 'Información del Curso'}
+                </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="font-medium">Categoría:</p>
                     <p className="text-gray-500">{course.category}</p>
                   </div>
-                  <div>
-                    <p className="font-medium">Ruta Relacionada:</p>
-                    <p className="text-gray-500">{course.relatedPath}</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Fecha Completado:</p>
-                    <p className="text-gray-500">{new Date(course.completionDate).toLocaleDateString()}</p>
-                  </div>
+                  {isPathCompletion ? (
+                    <>
+                      <div>
+                        <p className="font-medium">Niveles Completados:</p>
+                        <p className="text-gray-500">{course.pathInfo.completedLevels}/{course.pathInfo.totalLevels}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Fecha Inicio:</p>
+                        <p className="text-gray-500">
+                          {course.pathInfo.startDate ? new Date(course.pathInfo.startDate).toLocaleDateString() : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Certificados Obtenidos:</p>
+                        <p className="text-gray-500">{course.pathInfo?.totalCertificatesAvailable || course.certificates.length}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <p className="font-medium">Ruta Relacionada:</p>
+                        <p className="text-gray-500">{course.relatedPath}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Fecha Completado:</p>
+                        <p className="text-gray-500">{new Date(course.completionDate).toLocaleDateString()}</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
               
               <div>
-                <h3 className="font-semibold text-lg mb-3">Módulos del Curso</h3>
+                <h3 className="font-semibold text-lg mb-3">
+                  {isPathCompletion ? 'Niveles de la Trayectoria' : 'Módulos del Curso'}
+                </h3>
                 <div className="space-y-3">
-                  {course.modules.map((module: { name: string; completed: boolean }, idx: number) => (
-                    <div key={idx} className="flex items-center">
-                      <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-green-100 text-green-600">
-                        <Check size={16} />
+                  {isPathCompletion ? (
+                    course.levels?.map((level: any, idx: number) => (
+                      <div key={idx} className="flex items-center">
+                        <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
+                          level.completed 
+                            ? 'bg-green-100 text-green-600' 
+                            : 'bg-gray-100 text-gray-400'
+                        }`}>
+                          <Check size={16} />
+                        </div>
+                        <div className="ml-3 flex-grow">
+                          <div className="text-sm font-medium">Nivel {level.number}</div>
+                          <div className={`text-xs ${
+                            level.completed 
+                              ? 'text-green-600' 
+                              : 'text-gray-400'
+                          }`}>
+                            {level.completed ? 'Completado' : 'Pendiente'}
+                          </div>
+                        </div>
                       </div>
-                      <div className="ml-3 flex-grow">
-                        <div className="text-sm font-medium">{module.name}</div>
-                        <div className="text-xs text-green-600">Completado</div>
+                    ))
+                  ) : (
+                    course.modules?.map((module: { name: string; completed: boolean }, idx: number) => (
+                      <div key={idx} className="flex items-center">
+                        <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-green-100 text-green-600">
+                          <Check size={16} />
+                        </div>
+                        <div className="ml-3 flex-grow">
+                          <div className="text-sm font-medium">{module.name}</div>
+                          <div className="text-xs text-green-600">Completado</div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
+
+              {isPathCompletion && course.certificates.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-3">Certificaciones Obtenidas</h3>
+                  <div className="space-y-2">
+                    {course.certificates.map((certName: string, idx: number) => (
+                      <div key={idx} className="bg-gray-50 rounded-lg p-3">
+                        <div className="flex items-center">
+                          <Award className="text-purple-600 mr-2" size={16} />
+                          <span className="text-sm font-medium">{certName}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="md:col-span-2">
@@ -121,12 +182,6 @@ const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => vo
                 )}
             </div>
           </div>
-        </div>
-        
-        <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end">
-          <button className="bg-purple-600 rounded-md px-4 py-2 text-sm font-medium text-white hover:bg-purple-700">
-            Descargar Certificado
-          </button>
         </div>
       </div>
     </div>

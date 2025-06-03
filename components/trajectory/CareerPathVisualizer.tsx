@@ -9,12 +9,14 @@ const CareerPathVisualizer = ({
   paths, 
   activePath, 
   onPathChange,
-  onPathCreated 
+  onPathCreated,
+  onPathCompleted 
 }: { 
   paths: any[], 
   activePath: number, 
   onPathChange: (pathId: number) => void,
-  onPathCreated?: () => void 
+  onPathCreated?: () => void,
+  onPathCompleted?: () => void 
 }) => {
   const currentPath = paths.find(p => p.id === activePath);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,8 +29,17 @@ const CareerPathVisualizer = ({
       currentPath.levels.forEach((level: any, index: number) => {
         console.log(`Level ${index + 1} - Name: ${level.name}, Completed: ${level.completed}, Current: ${level.current}`);
       });
+
+      // Check if all levels are completed and trigger completion check
+      const allLevelsCompleted = currentPath.levels.length > 0 && 
+        currentPath.levels.every((level: any) => level.completed);
+      
+      if (allLevelsCompleted && !currentPath.completed && onPathCompleted) {
+        console.log("All levels completed for path:", currentPath.id_path);
+        onPathCompleted();
+      }
     }
-  }, [currentPath]);
+  }, [currentPath, onPathCompleted]);
 
   const handleAddTrajectory = () => {
     setIsModalOpen(!isModalOpen);
