@@ -2,6 +2,58 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
+// Function to generate dynamic Unsplash images based on path title
+function generateDynamicImage(pathTitle: string): string {
+  // Curated list of high-quality technology-focused Unsplash images
+  const technologyImages = [
+    // Programming & Coding
+    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Code on laptop
+    'https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Web development
+    'https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Frontend code
+    'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Programming setup
+    'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Coding workspace
+    
+    // Data & Analytics
+    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Data analytics
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Charts dashboard
+    'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Data visualization
+    'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Analytics screen
+    
+    // Mobile & App Development
+    'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Mobile app design
+    'https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // App development
+    'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Mobile interface
+    
+    // AI & Machine Learning
+    'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // AI/ML concept
+    'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Machine learning
+    'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Technology concept
+    
+    // Cloud & DevOps
+    'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Server/cloud
+    'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Database/server
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // API development
+    
+    // Cybersecurity
+    'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Cybersecurity
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Binary code security
+    
+    // General Technology
+    'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Technology workspace
+    'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Education tech
+    'https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Digital workspace
+    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'  // Programming environment
+  ];
+  
+  // Generate a consistent seed based on the path title
+  const seed = pathTitle.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  // Select image based on seed for consistency
+  const imageIndex = seed % technologyImages.length;
+  
+  return technologyImages[imageIndex];
+}
+
 export async function POST() {
   try {
     const supabase = await createClient();
@@ -144,7 +196,7 @@ export async function POST() {
             status: level.status,
             completed: level.status === 'completado'
           })),
-          imgUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+          imgUrl: generateDynamicImage(path.meta ?? 'Trayectoria Profesional'),
           certificate: {
             id: `path-cert-${path.id_path}`,
             issueDate: new Date().toISOString().split('T')[0],

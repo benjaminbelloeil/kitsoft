@@ -36,7 +36,6 @@ const styles = `
 `;
 
 export default function TrayectoriaPage() {
-  const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [activePath, setActivePath] = useState(1);
@@ -243,32 +242,7 @@ export default function TrayectoriaPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
             >
-              <div className="flex space-x-2">
-                <motion.button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                  aria-label="Ver como cuadrícula"
-                  title="Ver como cuadrícula"
-                  whileHover={{ scale: 1.05, backgroundColor: viewMode === 'grid' ? '#A100FF20' : '#f3f4f6' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </motion.button>
-                <motion.button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                  aria-label="Ver como lista"
-                  title="Ver como lista"
-                  whileHover={{ scale: 1.05, backgroundColor: viewMode === 'list' ? '#A100FF20' : '#f3f4f6' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </motion.button>
-              </div>
+              {/* Removed view toggle - keeping only grid view */}
             </motion.div>
           </motion.div>
           
@@ -303,7 +277,7 @@ export default function TrayectoriaPage() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.7 }}
           >
-            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filterAndSortCourses(completedCourses).map((course, index) => (
                 <motion.div
                   key={course.id}
@@ -315,7 +289,7 @@ export default function TrayectoriaPage() {
                   <CertificateItem 
                     course={course} 
                     onClick={handleCourseClick}
-                    viewMode={viewMode}
+                    viewMode="grid"
                   />
                 </motion.div>
               ))}
