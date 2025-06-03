@@ -69,7 +69,7 @@ export default function TrainingCard({ courses, formatDate }: TrainingCardProps)
         
         <div className="flex justify-end items-center pt-4">
           <Link 
-            href="/dashboard/cursos" 
+            href="/dashboard/trayectoria" 
             className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 mt-4"
           >
             Ver todas

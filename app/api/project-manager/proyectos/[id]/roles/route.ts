@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
-import { executeAgentAssignment } from '@/utils/agent/assign';
+import { executeAgentAssignment } from '@/utils/kit-agent/assign';
 
 export async function GET(
   request: Request,
@@ -82,9 +82,8 @@ export async function POST(
     const addedRoleIds = newRoleIds.filter(roleId => !currentRoleIds.includes(roleId));
 
     // Clean up user assignments for removed roles
-    if (removedRoleIds.length > 0) {
-      console.log(`🧹 Cleaning up user assignments for removed roles: ${removedRoleIds.join(', ')}`);
-      
+    if (removedRoleIds.length > 0) {  
+          
       const { error: cleanupError } = await supabase
         .from('usuarios_proyectos')
         .delete()

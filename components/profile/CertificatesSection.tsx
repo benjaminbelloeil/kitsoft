@@ -127,13 +127,17 @@ export default function CertificatesSection({ userID, loading = false, className
 				/>
 			) : (
 				<div className="flex-col flex gap-2">
-					{certificates.length > 0 ? (
-						certificates.map(cert => (
-							<CertificateCard key={cert.certificados.id_certificado} cert={cert} onRemove={handleRemoveCertificate} />
-						))
-					) : (
-						<NoCertificatesPlaceholder />
-					)}
+					<div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2">
+						{certificates.length > 0 ? (
+							certificates.map(cert => (
+								<div key={cert.certificados.id_certificado} className="mb-2">
+									<CertificateCard cert={cert} onRemove={handleRemoveCertificate} />
+								</div>
+							))
+						) : (
+							<NoCertificatesPlaceholder />
+						)}
+					</div>
 					<div className="mt-4">
 						<AddCertificateButton onClick={() => setShowForm(true)} />
 					</div>

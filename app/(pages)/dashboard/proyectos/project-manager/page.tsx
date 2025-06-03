@@ -200,7 +200,7 @@ export default function ProjectManagementPage() {
         try {
           console.log(`🚀 Triggering automatic team assignment for project: ${newProject.titulo}`);
           
-          const agentResponse = await fetch('/api/agent/assign', {
+          const agentResponse = await fetch('/api/kit-agent/assign', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Award, 
   Search,
 } from 'lucide-react';
-import PathSkeleton from "@/components/courses/CoursesSkeleton";
-import CertificateItem from '@/components/courses/CertificateItem';
-import CourseDetailModal from '@/components/courses/CourseDetailModal';
-import NoCoursesFound from '@/components/courses/NoCoursesFound';
-import CareerPathVisualizer from '@/components/courses/CareerPathVisualizer';
+import PathSkeleton from "@/components/trajectory/TrajectorySkeleton";
+import CertificateItem from '@/components/trajectory/CertificateItem';
+import TrajectoryDetailModal from '@/components/trajectory/TrajectoryDetailModal';
+import NoTrajectoriesFound from '@/components/trajectory/NoTrajectoriesFound';
+import CareerPathVisualizer from '@/components/trajectory/CareerPathVisualizer';
 
 // CSS styles 
 const styles = `
@@ -35,166 +35,71 @@ const styles = `
   .progress-100 { width: 100%; }
 `;
 
-// Mock data for career paths
-const careerPaths = [
-  {
-    id: 1,
-    title: 'Consultor Tecnológico',
-    levels: [
-      { id: 'ct-1', name: 'Nivel 1', completed: true },
-      { id: 'ct-2', name: 'Nivel 2', completed: true },
-      { id: 'ct-3', name: 'Nivel 3', completed: false, current: true },
-      { id: 'ct-4', name: 'Nivel 4', completed: false },
-      { id: 'ct-5', name: 'Nivel 5', completed: false }
-    ],
-    description: 'Ruta especializada en consultoría tecnológica y soluciones digitales.',
-    color: '#A100FF'
-  },
-  {
-    id: 2,
-    title: 'Especialista en Cloud',
-    levels: [
-      { id: 'cl-1', name: 'Nivel 1', completed: true },
-      { id: 'cl-2', name: 'Nivel 2', completed: false },
-      { id: 'cl-3', name: 'Nivel 3', completed: false },
-      { id: 'cl-4', name: 'Nivel 4', completed: false }
-    ],
-    description: 'Especialización en tecnologías cloud y arquitectura de soluciones.',
-    color: '#0077B6'
-  },
-  {
-    id: 3,
-    title: 'Líder de Proyecto',
-    levels: [
-      { id: 'lp-1', name: 'Nivel 1', completed: false },
-      { id: 'lp-2', name: 'Nivel 2', completed: false },
-      { id: 'lp-3', name: 'Nivel 3', completed: false }
-    ],
-    description: 'Ruta para desarrollo de habilidades de gestión y liderazgo de proyectos.',
-    color: '#00B050'
-  }
-];
-
-// Mock data for courses
-const coursesData = [
-  {
-    id: 1,
-    title: 'Fundamentos de Cloud Computing',
-    description: 'Introducción a servicios y arquitecturas cloud',
-    progress: 75,
-    status: 'in-progress',
-    dueDate: '2025-06-15',
-    category: 'Tecnología',
-    modules: [
-      { name: 'Introducción a Cloud', completed: true },
-      { name: 'Servicios IaaS', completed: true },
-      { name: 'Servicios PaaS', completed: true },
-      { name: 'Servicios SaaS', completed: false },
-      { name: 'Seguridad en la Nube', completed: false }
-    ],
-    relatedPath: 'Especialista en Cloud',
-    imgUrl: '/api/placeholder/150/150'
-  },
-  {
-    id: 2,
-    title: 'Gestión Ágil de Proyectos',
-    description: 'Metodologías Scrum y aplicación en proyectos reales',
-    progress: 40,
-    status: 'in-progress',
-    dueDate: '2025-05-30',
-    category: 'Gestión',
-    modules: [
-      { name: 'Introducción a Agile', completed: true },
-      { name: 'Fundamentos de Scrum', completed: true },
-      { name: 'Roles y Responsabilidades', completed: false },
-      { name: 'Implementación Práctica', completed: false },
-      { name: 'Casos de Estudio', completed: false }
-    ],
-    relatedPath: 'Líder de Proyecto',
-    imgUrl: '/api/placeholder/150/150'
-  },
-  {
-    id: 3,
-    title: 'Arquitectura de Soluciones',
-    description: 'Diseño y planificación de arquitecturas empresariales',
-    progress: 100,
-    status: 'completed',
-    completionDate: '2025-04-10',
-    category: 'Tecnología',
-    modules: [
-      { name: 'Principios de Arquitectura', completed: true },
-      { name: 'Diseño de Sistemas', completed: true },
-      { name: 'Arquitecturas Distribuidas', completed: true },
-      { name: 'Patrones de Diseño', completed: true }
-    ],
-    relatedPath: 'Consultor Tecnológico',
-    imgUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    certificate: {
-      id: 'cert-arch-001',
-      issueDate: '2025-04-12',
-      validUntil: '2027-04-12',
-      credentialID: 'ACC-AS-2025-04321'
-    }
-  },
-  {
-    id: 4,
-    title: 'Inteligencia Artificial y ML',
-    description: 'Fundamentos y aplicaciones de IA en entornos empresariales',
-    progress: 100,
-    status: 'completed',
-    completionDate: '2025-03-25',
-    category: 'Tecnología',
-    modules: [
-      { name: 'Fundamentos de IA', completed: true },
-      { name: 'Machine Learning', completed: true },
-      { name: 'Redes Neuronales', completed: true },
-      { name: 'Implementación en Proyectos', completed: true }
-    ],
-    relatedPath: 'Consultor Tecnológico',
-    imgUrl: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    certificate: {
-      id: 'cert-ai-002',
-      issueDate: '2025-03-28',
-      validUntil: '2027-03-28',
-      credentialID: 'ACC-AI-2025-08752'
-    }
-  },
-  {
-    id: 5,
-    title: 'Liderazgo y Gestión de Equipos',
-    description: 'Desarrollo de habilidades de liderazgo efectivo',
-    progress: 100,
-    status: 'completed',
-    completionDate: '2025-02-15',
-    category: 'Liderazgo',
-    modules: [
-      { name: 'Principios de Liderazgo', completed: true },
-      { name: 'Comunicación Efectiva', completed: true },
-      { name: 'Gestión de Conflictos', completed: true },
-      { name: 'Desarrollo de Equipos', completed: true }
-    ],
-    relatedPath: 'Líder de Proyecto',
-    imgUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    certificate: {
-      id: 'cert-lead-003',
-      issueDate: '2025-02-18',
-      validUntil: '2027-02-18',
-      credentialID: 'ACC-LD-2025-12453'
-    }
-  }
-];
-
-
-export default function CursosPage() {
-  const [viewMode, setViewMode] = useState('grid');
+export default function TrayectoriaPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [activePath, setActivePath] = useState(1);
+  const [careerPaths, setCareerPaths] = useState<any[]>([]);
+  const [pathsLoading, setPathsLoading] = useState(true);
+  const [pathCompletionCertificates, setPathCompletionCertificates] = useState<any[]>([]);
   
-  // Get only completed courses with certificates
-  const completedCourses = coursesData.filter(course => 
-    course.status === 'completed' && course.certificate
-  );
+  // Fetch career paths from database
+  const fetchPaths = useCallback(async () => {
+    try {
+      const response = await fetch('/api/trajectory/list');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.paths.length > 0) {
+          setCareerPaths(data.paths);
+          setActivePath(data.paths[0].id); // Set first path as active
+        } else {
+          // If no paths found, keep empty array but stop loading
+          setCareerPaths([]);
+        }
+      } else {
+        console.error('Failed to fetch paths:', response.statusText);
+        setCareerPaths([]);
+      }
+    } catch (error) {
+      console.error('Error fetching paths:', error);
+      setCareerPaths([]);
+    } finally {
+      setPathsLoading(false);
+    }
+  }, []);
+
+  // Check for path completion and create certificates
+  const checkPathCompletion = useCallback(async () => {
+    try {
+      const response = await fetch('/api/trajectory/path-completion', {
+        method: 'POST',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.certificates.length > 0) {
+          setPathCompletionCertificates(data.certificates);
+          // Refresh paths to update completion status
+          fetchPaths();
+        }
+      }
+    } catch (error) {
+      console.error('Error checking path completion:', error);
+    }
+  }, [fetchPaths]);
+
+  const fetchPathsAndCertificates = useCallback(async () => {
+    await Promise.all([
+      fetchPaths(),
+      checkPathCompletion()
+    ]);
+  }, [fetchPaths, checkPathCompletion]);
+
+  useEffect(() => {
+    fetchPathsAndCertificates();
+  }, [fetchPathsAndCertificates]);
+  
+  // Get only path completion certificates (not individual certificates)
+  const completedCourses = pathCompletionCertificates;
   
   // Apply filters and sorting
   const filterAndSortCourses = (courses: any[]) => {
@@ -230,7 +135,8 @@ export default function CursosPage() {
     return () => clearTimeout(timer);
   }, []);
   
-  if (isLoading) {
+  // Show loading if either paths or general content is loading
+  if (isLoading || pathsLoading) {
     return (
       <PathSkeleton />
     );
@@ -289,7 +195,9 @@ export default function CursosPage() {
           <CareerPathVisualizer 
             paths={careerPaths} 
             activePath={activePath} 
-            onPathChange={setActivePath} 
+            onPathChange={setActivePath}
+            onPathCreated={fetchPaths}
+            onPathCompleted={checkPathCompletion}
           />
         </motion.div>
         
@@ -334,32 +242,7 @@ export default function CursosPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
             >
-              <div className="flex space-x-2">
-                <motion.button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                  aria-label="Ver como cuadrícula"
-                  title="Ver como cuadrícula"
-                  whileHover={{ scale: 1.05, backgroundColor: viewMode === 'grid' ? '#A100FF20' : '#f3f4f6' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </motion.button>
-                <motion.button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                  aria-label="Ver como lista"
-                  title="Ver como lista"
-                  whileHover={{ scale: 1.05, backgroundColor: viewMode === 'list' ? '#A100FF20' : '#f3f4f6' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </motion.button>
-              </div>
+              {/* Removed view toggle - keeping only grid view */}
             </motion.div>
           </motion.div>
           
@@ -394,7 +277,7 @@ export default function CursosPage() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.7 }}
           >
-            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filterAndSortCourses(completedCourses).map((course, index) => (
                 <motion.div
                   key={course.id}
@@ -406,7 +289,7 @@ export default function CursosPage() {
                   <CertificateItem 
                     course={course} 
                     onClick={handleCourseClick}
-                    viewMode={viewMode}
+                    viewMode="grid"
                   />
                 </motion.div>
               ))}
@@ -418,7 +301,7 @@ export default function CursosPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
                 >
-                  <NoCoursesFound />
+                  <NoTrajectoriesFound />
                 </motion.div>
               )}
             </div>
@@ -428,7 +311,7 @@ export default function CursosPage() {
         {/* Course Detail Modal */}
         <AnimatePresence>
           {selectedCourse && (
-            <CourseDetailModal 
+            <TrajectoryDetailModal 
               course={selectedCourse}
               onClose={closeModal}
             />

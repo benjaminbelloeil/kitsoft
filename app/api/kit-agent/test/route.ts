@@ -1,6 +1,6 @@
-// Test endpoint for the agent system
+// Test endpoint for the kit agent system
 import { NextResponse } from 'next/server';
-import { testAgentSystem, getProjectInfo } from '@/utils/agent/test-utils';
+import { testAgentSystem, getProjectInfo } from '@/utils/kit-agent/test-utils';
 
 export async function GET(request: Request) {
   try {

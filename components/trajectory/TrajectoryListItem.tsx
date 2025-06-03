@@ -1,4 +1,4 @@
-import { colorClasses } from '../ui/CourseUtils';
+import { colorClasses } from './TrajectoryUtils';
 import StatusBadge from './StatusBadge';
 
 interface Course {

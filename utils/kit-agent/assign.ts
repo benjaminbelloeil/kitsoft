@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { simular } from '@/utils/agent/simulation';
+import { simular } from '@/utils/kit-agent/simulation';
 import { createClient } from '@/utils/supabase/server';
 
 export interface AgentAssignmentResult {
