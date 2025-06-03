@@ -74,31 +74,56 @@ export async function POST() {
       if (path.completado || allLevelsCompleted) {
         console.log(`Processing completed path ${path.id_path}...`);
         
-        // Get all certificates that should be available for this path
-        // For now, we'll simulate a realistic number of certificates per path (3-5 certificates)
-        const simulatedCertificateCount = Math.floor(Math.random() * 3) + 3; // Random between 3-5 certificates
-        
-        // Get user certificates related to this path or general certificates
-        const { data: userCertificates, error: certError } = await supabase
-          .from('usuarios_certificados')
+        // Get all certificates from all levels of this path and count completed ones
+        const { data: pathCertificates, error: certError } = await supabase
+          .from('path_nivel')
           .select(`
-            fecha_obtencion,
-            certificados (
-              nombre,
-              descripcion,
-              tipo
+            id_nivel,
+            numero,
+            nivel_certificados (
+              id_certificados,
+              completado,
+              certificados!inner (
+                id_certificado,
+                curso,
+                descripcion
+              )
             )
           `)
-          .eq('id_usuario', user.id);
+          .eq('id_path', path.id_path)
+          .order('numero');
 
         if (certError) {
-          console.error(`Error fetching certificates for user ${user.id}:`, certError);
+          console.error(`Error fetching certificates for path ${path.id_path}:`, certError);
         }
 
-        // Extract certificate names - handle the array structure properly
-        const obtainedCertificateNames = userCertificates?.map(uc => {
-          return uc.certificados?.[0]?.nombre;
-        }).filter(Boolean) ?? [];
+        // Count total certificates and completed certificates across all levels
+        let totalCertificatesAvailable = 0;
+        let completedCertificatesCount = 0;
+        const obtainedCertificateNames: string[] = [];
+
+        if (pathCertificates) {
+          for (const level of pathCertificates) {
+            if (level.nivel_certificados) {
+              for (const cert of level.nivel_certificados) {
+                totalCertificatesAvailable++;
+                if (cert.completado) {
+                  completedCertificatesCount++;
+                  const certData = cert.certificados as any;
+                  if (certData?.curso) {
+                    obtainedCertificateNames.push(certData.curso);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        console.log(`Path ${path.id_path} certificate stats:`, {
+          totalAvailable: totalCertificatesAvailable,
+          completed: completedCertificatesCount,
+          certificateNames: obtainedCertificateNames
+        });
 
         // Generate a realistic credential ID with shorter format
         const generateCredentialID = () => {
@@ -112,7 +137,7 @@ export async function POST() {
         const pathCard = {
           id: `path-completion-${path.id_path}`,
           title: path.meta ?? 'Trayectoria Profesional',
-          description: path.descripcion || `Has completado exitosamente todos los niveles de la trayectoria: ${path.meta}`,
+          description: path.descripcion ?? `Has completado exitosamente todos los niveles de la trayectoria: ${path.meta}`,
           progress: 100,
           status: 'completed',
           completionDate: new Date().toISOString().split('T')[0],
@@ -124,8 +149,8 @@ export async function POST() {
             startDate: path.fecha_inicio,
             totalLevels: levels.length,
             completedLevels: levels.filter((l: any) => l.status === 'completado').length,
-            totalCertificatesAvailable: simulatedCertificateCount, // Total certificates available in this path
-            certificatesObtained: obtainedCertificateNames.length // Certificates the user actually obtained
+            totalCertificatesAvailable: totalCertificatesAvailable, // Actual certificates available in this path
+            certificatesObtained: completedCertificatesCount // Actual certificates the user completed
           },
           certificates: obtainedCertificateNames,
           levels: levels.map((level: any, index: number) => ({

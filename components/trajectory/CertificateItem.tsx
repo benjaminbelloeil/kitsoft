@@ -37,25 +37,8 @@ const CertificateItem = ({ course, onClick, viewMode }: { course: any, onClick: 
               </div>
               <div className="flex items-center mt-1">
                 <Users className="mr-1" size={12} />
-                <span>Certificados: {course.pathInfo?.totalCertificatesAvailable || course.certificates.length}</span>
+                <span>Certificados: {course.pathInfo?.certificatesObtained || 0} de {course.pathInfo?.totalCertificatesAvailable || 0}</span>
               </div>
-              {course.certificates.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-xs font-medium text-gray-700 mb-1">Certificaciones obtenidas:</p>
-                  <div className="space-y-1">
-                    {course.certificates.slice(0, 2).map((certName: string, index: number) => (
-                      <div key={index} className="text-xs bg-gray-100 rounded px-2 py-1 truncate">
-                        {certName}
-                      </div>
-                    ))}
-                    {course.certificates.length > 2 && (
-                      <div className="text-xs text-gray-500">
-                        +{course.certificates.length - 2} más...
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <div className="text-xs text-gray-600 mb-2">
@@ -109,7 +92,7 @@ const CertificateItem = ({ course, onClick, viewMode }: { course: any, onClick: 
                 </div>
                 <div className="flex items-center">
                   <Users className="mr-1" size={12} />
-                  <span>Certificados: {course.pathInfo?.totalCertificatesAvailable || course.certificates.length}</span>
+                  <span>Certificados: {course.pathInfo?.certificatesObtained || 0} de {course.pathInfo?.totalCertificatesAvailable || 0}</span>
                 </div>
               </div>
             ) : (

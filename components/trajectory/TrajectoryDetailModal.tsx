@@ -95,7 +95,7 @@ const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => vo
                       </div>
                       <div>
                         <p className="font-medium">Certificados Obtenidos:</p>
-                        <p className="text-gray-500">{course.pathInfo?.totalCertificatesAvailable || course.certificates.length}</p>
+                        <p className="text-gray-500">{course.pathInfo?.certificatesObtained || 0} de {course.pathInfo?.totalCertificatesAvailable || 0}</p>
                       </div>
                     </>
                   ) : (
@@ -155,22 +155,6 @@ const CourseDetailModal = ({ course, onClose }: { course: any, onClose: () => vo
                   )}
                 </div>
               </div>
-
-              {isPathCompletion && course.certificates.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-lg mb-3">Certificaciones Obtenidas</h3>
-                  <div className="space-y-2">
-                    {course.certificates.map((certName: string, idx: number) => (
-                      <div key={idx} className="bg-gray-50 rounded-lg p-3">
-                        <div className="flex items-center">
-                          <Award className="text-purple-600 mr-2" size={16} />
-                          <span className="text-sm font-medium">{certName}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
             
             <div className="md:col-span-2">
