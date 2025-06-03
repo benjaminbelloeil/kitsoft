@@ -2,5 +2,15 @@
     "a-file-icon-vscode.activeIconPacks": [
         "angular",
         "rails"
-    ]
+    ],
+    "sonarlint.connectedMode.connections.sonarcloud": [
+        {
+            "organizationKey": "benjaminbelloeil",
+            "token": "5eac67ed1f090133eb164ee10d949ccdafb5fb57"
+        }
+    ],
+    "sonarlint.connectedMode.project": {
+        "connectionId": "benjaminbelloeil",
+        "projectKey": "benjaminbelloeil_kitsoft"
+    }
 }
