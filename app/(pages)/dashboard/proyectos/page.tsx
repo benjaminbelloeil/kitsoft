@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@/context/user-context';
 import ProjectsHeader from '@/components/proyectos/projectsheader';
@@ -11,11 +11,12 @@ import ProjectList from '@/components/proyectos/ProjectList';
 import ProjectModal from '@/components/proyectos/ProjectModal';
 import EmptyProjectsState from '@/components/proyectos/EmptyProjectsState';
 
-export default function ProjectsPage() {
+function ProjectsContent() {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeProjects, setActiveProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const { userRole } = useUser();
 
   // Fetch user's active projects
@@ -43,6 +44,38 @@ export default function ProjectsPage() {
     }
   }, [userRole]);
 
+  // Separate effect to handle project selection after data loads and animations complete
+  useEffect(() => {
+    if (!loading && activeProjects.length > 0 && isAnimationComplete) {
+      // Check localStorage for project ID to open
+      const projectId = localStorage.getItem('openProjectId');
+      if (projectId) {
+        // Small additional delay to ensure everything is settled
+        const timer = setTimeout(() => {
+          const project = activeProjects.find((p: any) => p.id_proyecto === projectId);
+          if (project) {
+            setSelectedProject(project);
+            // Clear the localStorage after opening the project
+            localStorage.removeItem('openProjectId');
+          }
+        }, 200); // Short delay since animations are already complete
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [loading, activeProjects, isAnimationComplete]);
+
+  // Effect to track when page animations should be complete
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => {
+        setIsAnimationComplete(true);
+      }, 800); // Mark animations as complete after 0.8s
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
   // If loading, show skeleton
   if (loading) {
     return <ProyectosSkeleton />;
@@ -54,6 +87,7 @@ export default function ProjectsPage() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
+        onAnimationComplete={() => setIsAnimationComplete(true)}
       >
         {/* Header Card */}
         {/* Header simplificado con botones de cambio de vista integrados */}
@@ -121,5 +155,13 @@ export default function ProjectsPage() {
         </motion.div>
       </motion.div>
     </AnimatePresence>
+  );
+}
+
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={<ProyectosSkeleton />}>
+      <ProjectsContent />
+    </Suspense>
   );
 }

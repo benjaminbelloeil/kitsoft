@@ -55,6 +55,7 @@ export async function GET() {
       title: path.meta || 'Trayectoria sin nombre',
       description: path.descripcion || 'Sin descripción',
       completed: path.completado || false,
+      fecha_inicio: path.fecha_inicio, // Include start date
       levels: path.path_nivel?.sort((a, b) => (a.numero || 0) - (b.numero || 0)).map((nivel, levelIndex) => ({
         id: nivel.id_nivel,
         name: `Nivel ${nivel.numero || levelIndex + 1}`,

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { userData as staticUserData, mockCourses } from "@/app/lib/data";
+import { userData as staticUserData } from "@/app/lib/data";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Sun, Moon, Sunrise } from "lucide-react";
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
@@ -153,24 +153,12 @@ export default function DashboardPage() {
     id: `task-${project.id}`,
     title: `Revisar avances de ${project.name}`,
     projectName: project.name,
+    projectId: project.id,
     dueDate: project.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     status: "in-progress" as const,
     projectColor: project.color,
     description: `Revisión semanal del proyecto ${project.name}`
   }));
-
-  // Adaptar datos de cursos desde mockCourses
-  const upcomingCourses = mockCourses
-    .filter(course => course.status === 'in-progress')
-    .slice(0, 2)
-    .map(course => ({
-      id: course.id,
-      name: course.name,
-      date: course.expirationDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Si no hay fecha, usar 30 días desde hoy
-      completed: course.modules ? Math.round((course.modules.filter(m => m.completed).length / course.modules.length) * 100) : 0,
-      image: course.category === 'cloud' ? "/courses/aws.svg" : "/courses/react.svg",
-      type: "course" as const
-    }));
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -439,7 +427,7 @@ export default function DashboardPage() {
               whileHover={{ scale: 1.02 }}
               className="flex-grow"
             >
-              <TrainingCard courses={upcomingCourses} formatDate={formatDate} />
+              <TrainingCard />
             </motion.div>
           </motion.div>
         </motion.div>
