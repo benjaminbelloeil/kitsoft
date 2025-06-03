@@ -383,7 +383,7 @@ const CareerPathVisualizer = ({
                               >
                                 <div className="mt-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
                                   <h5 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                                    <Award size={16} className="mr-2 text-purple-600" />
+                                    <Award size={16} className="mr-2 text-black" />
                                     Certificaciones de este nivel
                                   </h5>
                                   <div className="space-y-2">
