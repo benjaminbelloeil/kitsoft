@@ -345,7 +345,13 @@ const CareerPathVisualizer = ({
                               </div>
                               <div className="flex items-center space-x-2">
                                 {hasCertificates && (
-                                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                  <span className={`text-xs px-2 py-1 rounded-full ${
+                                    level.completed 
+                                      ? 'bg-green-100 text-green-700' 
+                                      : level.current 
+                                        ? 'bg-blue-100 text-blue-700' 
+                                        : 'bg-gray-100 text-gray-600'
+                                  }`}>
                                     {level.certificates.length} certificación{level.certificates.length !== 1 ? 'es' : ''}
                                   </span>
                                 )}
