@@ -143,11 +143,15 @@ async function runSOFTSimulationAsync(pathId: string) {
     const model = await runSimulation(pathId);
     
     if (model) {
-      // SOFT simulation completed successfully
+      const mejorScore = model.getMejorScore();
+      const mejorSolucion = model.getMejorSolucion();
+      console.log(`✅ SOFT simulation completed successfully`);
+      console.log(`📊 Best score achieved: ${mejorScore}`);
+      console.log(`🎯 Solution levels generated: ${mejorSolucion?.length ?? 0}`);
     } else {
-      // SOFT simulation failed - no model returned
+      console.warn(`⚠️ SOFT simulation failed - no model returned`);
     }
   } catch (error) {
-    console.error(`SOFT simulation error for path ${pathId}:`, error);
+    console.error(`❌ SOFT simulation error:`, error);
   }
 }
