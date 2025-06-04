@@ -36,7 +36,7 @@ export default function ProjectsSection({
       </div>
       
       <div className="p-4">
-        <div className="space-y-3 max-h-[240px] overflow-y-auto">
+        <div className="space-y-3 max-h-[280px] overflow-y-auto">
           {projects.length > 0 ? (
             projects.map(project => (
               <div 

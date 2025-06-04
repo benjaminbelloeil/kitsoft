@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertCircle, ChevronRight } from "lucide-react";
+import { getProjectHexColor } from "../proyectos/utils/projectUtils";
 
 interface Task {
   id: string;
@@ -17,7 +18,6 @@ interface Task {
 interface TasksSectionProps {
   readonly tasks: Task[];
   readonly formatDate: (dateStr: string) => string;
-  readonly getProjectColor: (color: string) => string;
   readonly getStatusColor: (status: string) => string;
   readonly getStatusText: (status: string) => string;
 }
@@ -25,7 +25,6 @@ interface TasksSectionProps {
 export default function TasksSection({
   tasks,
   formatDate,
-  getProjectColor,
   getStatusColor,
   getStatusText
 }: TasksSectionProps) {
@@ -49,19 +48,22 @@ export default function TasksSection({
         </Link>
       </div>
       
-      <div className="p-6">
-        <div className="space-y-4 max-h-[400px] overflow-y-auto">
+      <div className="p-4">
+        <div className="space-y-3 max-h-[280px] overflow-y-auto">
           {tasks.length > 0 ? (
             tasks.map(task => (
               <button 
                 key={task.id}
-                className="flex items-center p-4 border border-gray-100 rounded-lg hover:border-gray-200 transition-all bg-white shadow-sm hover:shadow cursor-pointer text-left w-full"
+                className="flex items-center p-3 border border-gray-100 rounded-lg hover:border-gray-200 transition-all bg-white shadow-sm hover:shadow cursor-pointer text-left w-full"
                 onClick={() => handleTaskClick(task)}
               >
-                <div className={`${getProjectColor(task.projectColor)} w-2 h-14 rounded-full mr-4`}></div>
+                <div 
+                  className="w-2 h-12 rounded-full mr-3"
+                  style={{ backgroundColor: getProjectHexColor(null, task.projectId) }}
+                ></div>
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900">{task.title}</h3>
-                  <div className="flex flex-wrap gap-x-4 gap-y-2 mt-1">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                     <p className="text-sm text-gray-500">
                       {task.projectName}
                     </p>
@@ -74,13 +76,13 @@ export default function TasksSection({
                   </div>
                 </div>
                 <button 
-                  className="ml-4 text-indigo-600 hover:text-indigo-800 p-2"
+                  className="ml-3 text-indigo-600 hover:text-indigo-800 p-1"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleTaskClick(task);
                   }}
                 >
-                  <ChevronRight className="h-5 w-5" />
+                  <ChevronRight className="h-4 w-4" />
                 </button>
               </button>
             ))

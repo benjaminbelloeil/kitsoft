@@ -154,8 +154,23 @@ export default function DashboardPage() {
     fetchProjects();
   }, []);
 
-  // Mock urgent tasks (since we don't have task API yet)
-  const urgentTasks = projects.slice(0, 2).map(project => ({
+  // Sort projects by due date (closest first) and limit to 2
+  const sortProjectsByDueDate = (projects: DashboardProject[]) => {
+    return projects
+      .filter(project => project.dueDate) // Only projects with due dates
+      .sort((a, b) => {
+        const dateA = new Date(a.dueDate!).getTime();
+        const dateB = new Date(b.dueDate!).getTime();
+        return dateA - dateB; // Ascending order (closest dates first)
+      })
+      .slice(0, 2); // Limit to 2 projects
+  };
+
+  // Get the 2 projects closest to their end dates
+  const priorityProjects = sortProjectsByDueDate(projects);
+
+  // Mock urgent tasks (since we don't have task API yet) - only for priority projects
+  const urgentTasks = priorityProjects.map(project => ({
     id: `task-${project.id}`,
     title: `Revisar avances de ${project.name}`,
     projectName: project.name,
@@ -279,18 +294,6 @@ export default function DashboardPage() {
     });
   };
 
-  const getProjectColor = (color: string) => {
-    switch(color) {
-      case "indigo": return "bg-indigo-600";
-      case "emerald": return "bg-emerald-600";
-      case "blue": return "bg-blue-600";
-      case "purple": return "bg-purple-600";
-      case "amber": return "bg-amber-600";
-      case "accenture": return "bg-purple-600"; // Fallback para accenture
-      default: return "bg-indigo-600";
-    }
-  };
-  
   const getStatusColor = (status: string) => {
     switch(status) {
       case "completed": return "bg-green-100 text-green-800";
@@ -365,7 +368,7 @@ export default function DashboardPage() {
               whileHover={{ y: -2 }}
             >
               <ProjectsSection 
-                projects={projects}
+                projects={priorityProjects}
                 formatDate={formatDate}
               />
             </motion.div>
@@ -379,7 +382,6 @@ export default function DashboardPage() {
               <TasksSection 
                 tasks={urgentTasks}
                 formatDate={formatDate}
-                getProjectColor={getProjectColor}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}
               />
