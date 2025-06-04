@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
@@ -20,7 +19,7 @@ interface ProfileModalProps {
 }
 
 // Profile Modal Component
-export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalProps) {
+export default function ProfileModal({ isOpen, onClose, userId }: Readonly<ProfileModalProps>) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [skills, setSkills] = useState<any[]>([]);
   const [experience, setExperience] = useState<any[]>([]);
@@ -30,12 +29,26 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
   const [error, setError] = useState<string | null>(null);
   const [profileDataLoaded, setProfileDataLoaded] = useState<{ [key: string]: boolean }>({});
 
-  useEffect(() => {
-    if (isOpen && userId && !profileDataLoaded[userId]) {
+  const loadProfileData = () => {
+    if (!userId) return;
+    
+    if (!profileDataLoaded[userId]) {
       fetchCompleteProfile();
-    } else if (isOpen && userId && profileDataLoaded[userId]) {
+    } else {
       // Load from cache if available
       loadCachedProfileData();
+    }
+  };
+
+  const handleModalOpen = () => {
+    if (userId) {
+      loadProfileData();
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      handleModalOpen();
     }
   }, [isOpen, userId]);
 
@@ -52,11 +65,11 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
         const age = Date.now() - parseInt(cacheTimestamp);
         if (age < cacheExpiry) {
           const parsedData = JSON.parse(cachedData);
-          setProfile(parsedData.profile || null);
-          setSkills(parsedData.skills || []);
-          setExperience(parsedData.experience || []);
-          setCertificates(parsedData.certificates || []);
-          setResume(parsedData.resume || null);
+          setProfile(parsedData.profile ?? null);
+          setSkills(parsedData.skills ?? []);
+          setExperience(parsedData.experience ?? []);
+          setCertificates(parsedData.certificates ?? []);
+          setResume(parsedData.resume ?? null);
           return;
         }
       }
@@ -114,49 +127,49 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
         const skillsResponse = await fetch(`/api/people-lead/skills?userId=${userId}`);
         if (skillsResponse.ok) {
           skillsData = await skillsResponse.json();
-          setSkills(skillsData || []);
+          setSkills(skillsData ?? []);
         }
       } catch (err) {
-        console.log('Skills not available');
+        console.warn('Skills not available:', err);
         setSkills([]);
       }
 
-      // Fetch experience using people-lead endpoint
-      try {
-        const experienceResponse = await fetch(`/api/people-lead/experience?userId=${userId}`);
-        if (experienceResponse.ok) {
-          experienceData = await experienceResponse.json();
-          setExperience(experienceData || []);
+        // Fetch experience using people-lead endpoint
+        try {
+          const experienceResponse = await fetch(`/api/people-lead/experience?userId=${userId}`);
+          if (experienceResponse.ok) {
+            experienceData = await experienceResponse.json();
+            setExperience(experienceData ?? []);
+          }
+        } catch (err) {
+          console.warn('Experience not available:', err);
+          setExperience([]);
         }
-      } catch (err) {
-        console.log('Experience not available');
-        setExperience([]);
-      }
 
-      // Fetch certificates using people-lead endpoint
-      try {
-        const certificatesResponse = await fetch(`/api/people-lead/certificates?userId=${userId}`);
-        if (certificatesResponse.ok) {
-          certificatesData = await certificatesResponse.json();
-          setCertificates(certificatesData || []);
+        // Fetch certificates using people-lead endpoint
+        try {
+          const certificatesResponse = await fetch(`/api/people-lead/certificates?userId=${userId}`);
+          if (certificatesResponse.ok) {
+            certificatesData = await certificatesResponse.json();
+            setCertificates(certificatesData ?? []);
+          }
+        } catch (err) {
+          console.warn('Certificates not available:', err);
+          setCertificates([]);
         }
-      } catch (err) {
-        console.log('Certificates not available');
-        setCertificates([]);
-      }
 
-      // Fetch resume using people-lead endpoint
-      try {
-        const resumeResponse = await fetch(`/api/people-lead/curriculum?userId=${userId}`);
-        if (resumeResponse.ok) {
-          const resumeResponseData = await resumeResponse.json();
-          resumeData = resumeResponseData?.url || null;
-          setResume(resumeData);
+        // Fetch resume using people-lead endpoint
+        try {
+          const resumeResponse = await fetch(`/api/people-lead/curriculum?userId=${userId}`);
+          if (resumeResponse.ok) {
+            const resumeResponseData = await resumeResponse.json();
+            resumeData = resumeResponseData?.url ?? null;
+            setResume(resumeData);
+          }
+        } catch (err) {
+          console.warn('Resume not available:', err);
+          setResume(null);
         }
-      } catch (err) {
-        console.log('Resume not available');
-        setResume(null);
-      }
 
       // Save to cache
       saveProfileDataToCache(profileData, skillsData, experienceData, certificatesData, resumeData);
@@ -268,7 +281,7 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
 
           {/* Content with animations */}
           <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-            {loading ? (
+            {loading && (
               <motion.div 
                 className="flex items-center justify-center py-12"
                 initial={{ opacity: 0 }}
@@ -278,7 +291,9 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
                 <div className="w-8 h-8 border-2 border-[#A100FF] border-t-transparent rounded-full animate-spin"></div>
                 <span className="ml-3 text-gray-600">Cargando perfil...</span>
               </motion.div>
-            ) : error ? (
+            )}
+            
+            {error && (
               <motion.div 
                 className="text-center py-12"
                 variants={contentVariants}
@@ -295,7 +310,9 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
                   Reintentar
                 </motion.button>
               </motion.div>
-            ) : profile ? (
+            )}
+            
+            {profile && (
               <motion.div 
                 className="grid grid-cols-1 lg:grid-cols-3 gap-6"
                 variants={contentVariants}
@@ -339,7 +356,7 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
                     <div className="space-y-3">
                       <div className="flex items-center text-sm text-gray-600">
                         <FiMail className="w-4 h-4 mr-3 text-gray-400" />
-                        <span className="truncate">{profile.correo?.Correo || 'No especificado'}</span>
+                        <span className="truncate">{profile.correo?.Correo ?? 'No especificado'}</span>
                       </div>
                       
                       <div className="flex items-center text-sm text-gray-600">
@@ -405,10 +422,10 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
                   {/* Experience Section */}
                   <ReadOnlyExperienceSection 
                     experiences={experience.map(exp => ({
-                      company: exp.empresa || exp.compañia || '',
-                      position: exp.cargo || exp.puesto || exp.posicion || '',
+                      company: exp.empresa ?? exp.compañia ?? '',
+                      position: exp.cargo ?? exp.puesto ?? exp.posicion ?? '',
                       period: `${exp.fecha_inicio ? new Date(exp.fecha_inicio).toLocaleDateString('es-ES') : ''} - ${exp.fecha_fin ? new Date(exp.fecha_fin).toLocaleDateString('es-ES') : 'Presente'}`,
-                      description: exp.descripcion || ''
+                      description: exp.descripcion ?? ''
                     }))}
                     loading={loading}
                   />
@@ -416,9 +433,9 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
                   {/* Skills Section */}
                   <ReadOnlySkillsSection 
                     skills={skills.map(skill => ({
-                      id: skill.id_habilidad?.toString() || Math.random().toString(),
-                      name: skill.titulo || skill.name || '',
-                      level: skill.nivel_experiencia || 1
+                      id: skill.id_habilidad?.toString() ?? Math.random().toString(),
+                      name: skill.titulo ?? skill.name ?? '',
+                      level: skill.nivel_experiencia ?? 1
                     }))}
                     loading={loading}
                   />
@@ -426,17 +443,17 @@ export default function ProfileModal({ isOpen, onClose, userId }: ProfileModalPr
                   {/* Certificates Section */}
                   <ReadOnlyCertificatesSection 
                     certificates={certificates.map(cert => ({
-                      titulo: cert.titulo || cert.nombre || '',
-                      institucion: cert.institucion || cert.organismo || '',
-                      fecha_obtencion: cert.fecha_obtencion || cert.fecha_emision || '',
-                      fecha_expiracion: cert.fecha_expiracion || undefined,
-                      url: cert.url || cert.URL_Certificado || undefined
+                      titulo: cert.titulo ?? cert.nombre ?? '',
+                      institucion: cert.institucion ?? cert.organismo ?? '',
+                      fecha_obtencion: cert.fecha_obtencion ?? cert.fecha_emision ?? '',
+                      fecha_expiracion: cert.fecha_expiracion ?? undefined,
+                      url: cert.url ?? cert.URL_Certificado ?? undefined
                     }))}
                     loading={loading}
                   />
                 </motion.div>
               </motion.div>
-            ) : null}
+            )}
           </div>
         </motion.div>
       </motion.div>
