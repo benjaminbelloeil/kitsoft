@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Award, ChevronRight, Calendar, BookOpen, Target } from "lucide-react";
+import { Award, Calendar, BookOpen, Target, ChevronRight } from "lucide-react";
 
 interface PathLevel {
   id: string;
@@ -90,13 +90,12 @@ export default function TrainingCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center">
-            <Award className="w-5 h-5 mr-2 text-amber-500" />
-            Desarrollo Profesional
-          </h2>
-        </div>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">      <div className="p-6 border-b border-gray-100">
+        <h2 className="text-xl font-bold text-gray-900 flex items-center">
+          <Award className="w-5 h-5 mr-2 text-blue-500" />
+          Desarrollo Profesional
+        </h2>
+      </div>
         <div className="p-6 flex flex-col">
           <h3 className="text-sm font-medium text-gray-500 uppercase mb-4">Cargando...</h3>
           <div className="space-y-3 flex-grow">
@@ -113,101 +112,91 @@ export default function TrainingCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="p-6 border-b border-gray-100">
         <h2 className="text-xl font-bold text-gray-900 flex items-center">
-          <Award className="w-5 h-5 mr-2 text-amber-500" />
+          <Award className="w-5 h-5 mr-2 text-blue-500" />
           Desarrollo Profesional
         </h2>
       </div>
       
-      <div className="p-6 flex flex-col">
-        {/* Trajectory Progress */}
-        <h3 className="text-sm font-medium text-gray-500 uppercase mb-4">Tus Trayectorias</h3>
-        
-        {trajectories.length === 0 && !loading ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center flex-grow">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-              <Award className="w-6 h-6 text-gray-400" />
-            </div>
-            <p className="text-sm text-gray-600 mb-3">No hay trayectorias activas</p>
-            <Link 
-              href="/dashboard/trayectoria" 
-              className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800"
-            >
-              Explorar trayectorias
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className="space-y-4 flex-grow">
-              {trajectories.map(trajectory => (
-                <div 
-                  key={trajectory.id}
-                  className="border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-all shadow-sm hover:shadow-md bg-gradient-to-br from-white to-gray-50/30"
+      <div className="p-4">
+        <div className="space-y-3 max-h-[280px] overflow-y-auto">
+          {trajectories.length === 0 && !loading ? (
+            <div className="flex flex-col items-center justify-center py-8 px-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3 border border-blue-100">
+                <Award className="w-6 h-6 text-blue-500" />
+              </div>
+              <h3 className="text-base font-medium text-gray-900 mb-2">Comienza tu desarrollo profesional</h3>
+              <p className="text-sm text-gray-500 text-center max-w-sm mb-4">
+                Descubre nuestras trayectorias profesionales diseñadas para impulsar tu carrera y desarrollar nuevas habilidades.
+              </p>
+              <div className="flex justify-center">
+                <Link 
+                  href="/dashboard/trayectoria" 
+                  className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 text-base mb-1">{trajectory.title}</h4>
-                      <p className="text-gray-600 text-sm line-clamp-2">{trajectory.description}</p>
-                    </div>
-                    <div className="ml-3 flex-shrink-0">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
-                        <Target className="w-3 h-3 mr-1" />
-                        {trajectory.completedLevels}/{trajectory.totalLevels} niveles
-                      </span>
-                    </div>
+                  Explorar trayectorias
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Link>
+              </div>
+            </div>
+          ) : (
+            trajectories.map(trajectory => (
+              <div 
+                key={trajectory.id}
+                className="border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-all shadow-sm hover:shadow-md bg-gradient-to-br from-white to-gray-50/30"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 text-base mb-1">{trajectory.title}</h4>
+                    <p className="text-gray-600 text-sm line-clamp-2">{trajectory.description}</p>
                   </div>
-                  
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center">
-                        <BookOpen className="w-3 h-3 mr-1" />
-                        <span>{trajectory.completedCertificates}/{trajectory.totalCertificates} certificados</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        <span>Iniciado {trajectory.startDate 
-                          ? new Date(trajectory.startDate).toLocaleDateString('es-ES', { 
-                              day: '2-digit',
-                              month: '2-digit', 
-                              year: 'numeric' 
-                            })
-                          : 'Fecha no disponible'
-                        }</span>
-                      </div>
-                    </div>
+                  <div className="ml-3 flex-shrink-0">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                      <Target className="w-3 h-3 mr-1" />
+                      {trajectory.completedLevels}/{trajectory.totalLevels} niveles
+                    </span>
                   </div>
-                  
-                  {/* Progress Bar */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600">Progreso</span>
-                      <span className="font-medium text-indigo-600">{trajectory.completionPercentage}%</span>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
+                      <BookOpen className="w-3 h-3 mr-1" />
+                      <span>{trajectory.completedCertificates}/{trajectory.totalCertificates} certificados</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-indigo-500 h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${trajectory.completionPercentage}%` }}
-                      ></div>
+                    <div className="flex items-center">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      <span>Iniciado {trajectory.startDate 
+                        ? new Date(trajectory.startDate).toLocaleDateString('es-ES', { 
+                            day: '2-digit',
+                            month: '2-digit', 
+                            year: 'numeric' 
+                          })
+                        : 'Fecha no disponible'
+                      }</span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-            
-            <div className="flex justify-end items-center pt-4">
-              <Link 
-                href="/dashboard/trayectoria" 
-                className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 mt-4"
-              >
-                Ver todas
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Link>
-            </div>
-          </>
-        )}
+                
+                {/* Progress Bar */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Progreso</span>
+                    <span className="font-medium text-indigo-600">{trajectory.completionPercentage}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-indigo-500 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${trajectory.completionPercentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
