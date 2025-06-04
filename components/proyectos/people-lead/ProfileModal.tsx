@@ -29,6 +29,14 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
   const [error, setError] = useState<string | null>(null);
   const [profileDataLoaded, setProfileDataLoaded] = useState<{ [key: string]: boolean }>({});
 
+  // Cryptographically secure random ID generator
+  const generateSecureId = (): string => {
+    const crypto = window.crypto || (window as any).msCrypto;
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    return array[0].toString(36);
+  };
+
   const loadProfileData = () => {
     if (!userId) return;
     
@@ -433,7 +441,7 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
                   {/* Skills Section */}
                   <ReadOnlySkillsSection 
                     skills={skills.map(skill => ({
-                      id: skill.id_habilidad?.toString() ?? Math.random().toString(),
+                      id: skill.id_habilidad?.toString() ?? generateSecureId(),
                       name: skill.titulo ?? skill.name ?? '',
                       level: skill.nivel_experiencia ?? 1
                     }))}
