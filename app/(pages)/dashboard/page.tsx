@@ -71,8 +71,14 @@ const transformProjectData = (apiProjects: ApiProject[]): DashboardProject[] => 
       : 0;
 
     // Determine priority based on cargabilidad percentage
-    const priority = cargabilidadPercentage >= 70 ? 'alta' : 
-                    cargabilidadPercentage >= 40 ? 'media' : 'baja';
+    let priority: string;
+    if (cargabilidadPercentage >= 70) {
+      priority = 'alta';
+    } else if (cargabilidadPercentage >= 40) {
+      priority = 'media';
+    } else {
+      priority = 'baja';
+    }
 
     return {
       id: project.id_proyecto,
@@ -266,17 +272,6 @@ export default function DashboardPage() {
   }, []); // Empty dependency array means this runs once on mount
 
   // Utility functions
-  const getDateColor = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const diffTime = date.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) return "text-red-600";
-    if (diffDays <= 2) return "text-amber-600";
-    return "text-green-600";
-  };
-  
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('es-ES', {
       day: 'numeric',
@@ -371,9 +366,7 @@ export default function DashboardPage() {
             >
               <ProjectsSection 
                 projects={projects}
-                getDateColor={getDateColor}
                 formatDate={formatDate}
-                getProjectColor={getProjectColor}
               />
             </motion.div>
             
@@ -385,7 +378,6 @@ export default function DashboardPage() {
             >
               <TasksSection 
                 tasks={urgentTasks}
-                getDateColor={getDateColor}
                 formatDate={formatDate}
                 getProjectColor={getProjectColor}
                 getStatusColor={getStatusColor}

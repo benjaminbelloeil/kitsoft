@@ -15,10 +15,8 @@ interface Project {
 }
 
 interface ProjectsSectionProps {
-  projects: Project[];
-  getDateColor: (dateStr: string) => string;
-  formatDate: (dateStr: string) => string;
-  getProjectColor: (color: string) => string;
+  readonly projects: readonly Project[];
+  readonly formatDate: (dateStr: string) => string;
 }
 
 export default function ProjectsSection({
@@ -37,15 +35,15 @@ export default function ProjectsSection({
         </Link>
       </div>
       
-      <div className="p-6">
-        <div className="space-y-4 max-h-[400px] overflow-y-auto">
+      <div className="p-4">
+        <div className="space-y-3 max-h-[240px] overflow-y-auto">
           {projects.length > 0 ? (
             projects.map(project => (
               <div 
                 key={project.id}
-                className="p-4 border border-gray-100 rounded-lg hover:border-gray-200 transition-all bg-white shadow-sm hover:shadow"
+                className="p-3 border border-gray-100 rounded-lg hover:border-gray-200 transition-all bg-white shadow-sm hover:shadow"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
                   <div>
                     <h3 className="font-medium text-gray-900">{project.name}</h3>
                     {project.dueDate && (
