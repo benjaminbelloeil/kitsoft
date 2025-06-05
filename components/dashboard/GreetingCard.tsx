@@ -54,7 +54,7 @@ export default function GreetingCard({
                 <h1 className="text-3xl font-bold text-gray-900">
                   {greetingState.text}, <span className="text-black">{userName}</span>
                 </h1>
-                <p className="text-gray-500 mt-1">¡Bienvenido de nuevo! Aquí tienes un resumen de tus actividades.</p>
+                <p className="text-gray-500 mt-1">¡Bienvenido! Aquí tienes un resumen de tus actividades.</p>
               </div>
             </div>
             

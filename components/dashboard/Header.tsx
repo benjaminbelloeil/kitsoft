@@ -196,7 +196,7 @@ export default function Header({ userData }: { userData: any }) {
                           // Create and insert placeholder avatar
                           const placeholder = document.createElement('div');
                           placeholder.className = 'w-full h-full';
-                          placeholder.innerHTML = `<div class="h-9 w-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-medium text-sm">${userData.name.substring(0, 1)}</div>`;
+                          placeholder.innerHTML = `<div class="h-9 w-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-medium text-sm">${(userData.name || 'U').substring(0, 1)}</div>`;
                           parent.appendChild(placeholder);
                         }
                       }}
@@ -208,8 +208,12 @@ export default function Header({ userData }: { userData: any }) {
                   </div>
                 )}
                 <div className="ml-2 hidden md:block">
-                  <div className="text-sm font-medium text-gray-800 group-hover:text-gray-900 transition-colors">{userData.name}</div>
-                  <div className="text-xs text-gray-500">{userData.title}</div>
+                  <div className="text-sm font-medium text-gray-800 group-hover:text-gray-900 transition-colors">
+                    {userData.name || "Usuario"}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {userData.title || "Completar perfil"}
+                  </div>
                 </div>
               </Link>
             </div>

@@ -90,8 +90,15 @@ export default function FeedbackPage() {
             // Update user data with fetched profile
             setUserData({
               ...staticUserData, // Keep static data for other properties
-              name: `${profileData.Nombre || ''} ${profileData.Apellido || ''}`.trim() || staticUserData.name,
-              title: profileData.Titulo || staticUserData.title
+              name: `${profileData.Nombre || ''} ${profileData.Apellido || ''}`.trim() || "Usuario",
+              title: profileData.Titulo || "Completar perfil"
+            });
+          } else {
+            // New user - set appropriate fallback values
+            setUserData({
+              ...staticUserData, // Keep static data for other properties
+              name: "Usuario",
+              title: "Completar perfil"
             });
           }
         }
