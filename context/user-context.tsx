@@ -11,6 +11,7 @@ type UserRole = {
 };
 
 type UserContextType = {
+	userId: string | null
   userRole: UserRole | null;
   isAdmin: boolean;
   isProjectLead: boolean;
@@ -23,6 +24,7 @@ type UserContextType = {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
+  const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isProjectLead, setIsProjectLead] = useState(false);
@@ -67,6 +69,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       } else {
         const levelData = await levelResponse.json();
         setUserRole(levelData as UserRole);
+		setUserId(user.id);
         
         // Explicitly check if user is admin (nivel.numero === 1)
         if (levelData && levelData.numero === 1) {
@@ -142,6 +145,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   
   return (
     <UserContext.Provider value={{ 
+		userId,
       userRole, 
       isAdmin, 
       isProjectLead,

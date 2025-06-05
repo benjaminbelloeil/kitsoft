@@ -20,7 +20,7 @@ export default function ProjectLeadPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const { isProjectLead } = useUser();
+  const { userId, isProjectLead } = useUser();
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [hourAssignments, setHourAssignments] = useState<Record<string, number>>({});
   const [projects, setProjects] = useState<any[]>([]);
@@ -209,9 +209,10 @@ export default function ProjectLeadPage() {
   };
 
   // Handle feedback submission
-  const handleSubmitFeedback = (e: React.FormEvent) => {
+  const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This would connect to your backend in a real app
+	// TODO: connect to backend!!
+	console.log('This is where I work.')
     console.log({
       project: selectedProject,
       recipient: selectedRecipient,
@@ -219,6 +220,14 @@ export default function ProjectLeadPage() {
       categories,
       message
     });
+
+	console.log({
+		mensaje: message,
+		valoracion: rating,
+		id_usuario: selectedRecipient,
+		id_autor: userId,
+		id_proyecto: selectedProject
+	});
     
     // Reset form
     setSelectedProject("");
