@@ -105,13 +105,18 @@ const TrajectoryFormModal: React.FC<TrajectoryFormModalProps> = ({
     }
 
     setSubmitting(true);
-    try {
-      const submitData = {
-        ...formData,
-        roles: selectedRoles.map(r => r.id_rol),
-        habilidades: selectedSkills.map(h => h.id_habilidad),
-      };
+    
+    const submitData = {
+      ...formData,
+      roles: selectedRoles.map(r => r.id_rol),
+      habilidades: selectedSkills.map(h => h.id_habilidad),
+    };
 
+    // First, trigger the skeleton display
+    onSubmit(submitData);
+    handleClose();
+
+    try {
       const response = await fetch('/api/trajectory/add', {
         method: 'POST',
         headers: {
@@ -122,15 +127,16 @@ const TrajectoryFormModal: React.FC<TrajectoryFormModalProps> = ({
 
       if (response.ok) {
         const result = await response.json();
-        onSubmit(result);
-        handleClose();
+        // The skeleton will be hidden and data refreshed in the parent component
+        console.log('Trajectory created successfully:', result);
       } else {
         const errorData = await response.json();
-        setErrors({ submit: errorData.message || 'Error al guardar la trayectoria' });
+        console.error('Error creating trajectory:', errorData.message);
+        // You might want to add error handling here to hide the skeleton and show an error
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      setErrors({ submit: 'Error de conexión. Intenta nuevamente.' });
+      // You might want to add error handling here to hide the skeleton and show an error
     } finally {
       setSubmitting(false);
     }

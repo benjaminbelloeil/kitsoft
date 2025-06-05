@@ -19,13 +19,41 @@
  * }
  */
 import { Award } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function NoCoursesFound() {
   return (
-    <div className=" rounded-lg p-12 text-center bg-gray-50 rounded-lg p-8">
-      <Award className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-      <h3 className="text-lg font-medium text-gray-500 mb-1">No hay certificaciones</h3>
-      <p className="text-gray-500">No se encontraron certificaciones con los filtros actuales.</p>
-    </div>
+    <motion.div 
+      className="w-full py-10 flex flex-col items-center justify-center"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, delay: 0.3 }}
+    >
+      <motion.div 
+        className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-3"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.4, delay: 0.4 }}
+        whileHover={{ scale: 1.1, rotate: 10 }}
+      >
+        <Award className="h-6 w-6 text-[#A100FF]" />
+      </motion.div>
+      <motion.h3 
+        className="text-base font-medium text-gray-700 mb-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.5 }}
+      >
+        No hay certificaciones
+      </motion.h3>
+      <motion.p 
+        className="text-gray-500 text-center text-sm"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.6 }}
+      >
+        No se encontraron certificaciones con los filtros actuales
+      </motion.p>
+    </motion.div>
   );
 }

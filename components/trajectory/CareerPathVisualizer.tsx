@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Award, BookOpen, Check, Clock, Info, TrendingUp, MapPin, AlertCircle, Plus, Star, ChevronDown } from 'lucide-react';
 import TrajectoryFormModal from '@/components/trajectory/TrajectoryFormModal';
+import TrajectorySkeletonLoader from '@/components/trajectory/TrajectorySkeletonLoader';
 
 // Helper function to get status configuration
 const getStatusConfig = (level: any) => {
@@ -298,14 +299,38 @@ const SkillsSection = ({ currentPath, allLevelsCompleted, getKeySkills }: {
     
     if (skills.length === 0) {
       return (
-        <ul className="space-y-3">
-          <li className="flex items-center p-2 rounded-lg">
-            <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-              <AlertCircle className="text-gray-600" size={14} />
-            </div>
-            <span className="text-sm text-gray-500">No hay habilidades definidas aún</span>
-          </li>
-        </ul>
+        <motion.div 
+          className="w-full py-10 flex flex-col items-center justify-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <motion.div 
+            className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-3"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            whileHover={{ scale: 1.1, rotate: 10 }}
+          >
+            <BookOpen className="h-6 w-6 text-[#A100FF]" />
+          </motion.div>
+          <motion.h3 
+            className="text-base font-medium text-gray-700 mb-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.5 }}
+          >
+            Sin habilidades definidas
+          </motion.h3>
+          <motion.p 
+            className="text-gray-500 text-center text-sm"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.6 }}
+          >
+            Las habilidades se definirán según el progreso de la trayectoria
+          </motion.p>
+        </motion.div>
       );
     }
 
@@ -362,14 +387,38 @@ const CertificationsSection = ({ currentPath, allLevelsCompleted, getRecommended
     
     if (certifications.length === 0) {
       return (
-        <ul className="space-y-3">
-          <li className="flex items-center p-2 rounded-lg">
-            <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-              <AlertCircle className="text-gray-600" size={14} />
-            </div>
-            <span className="text-sm text-gray-500">No hay certificaciones definidas aún</span>
-          </li>
-        </ul>
+        <motion.div 
+          className="w-full py-10 flex flex-col items-center justify-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <motion.div 
+            className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-3"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            whileHover={{ scale: 1.1, rotate: 10 }}
+          >
+            <Award className="h-6 w-6 text-[#A100FF]" />
+          </motion.div>
+          <motion.h3 
+            className="text-base font-medium text-gray-700 mb-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.5 }}
+          >
+            Sin certificaciones disponibles
+          </motion.h3>
+          <motion.p 
+            className="text-gray-500 text-center text-sm"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.6 }}
+          >
+            Las certificaciones aparecerán según el nivel actual de la trayectoria
+          </motion.p>
+        </motion.div>
       );
     }
 
@@ -435,12 +484,38 @@ const NextStepsSection = ({ currentPath, allLevelsCompleted, getNextSteps }: {
     
     if (nextSteps.length === 0) {
       return (
-        <div className="flex items-center p-2 rounded-lg">
-          <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-            <AlertCircle className="text-gray-600" size={14} />
-          </div>
-          <span className="text-sm text-gray-500">No hay próximos pasos definidos aún</span>
-        </div>
+        <motion.div 
+          className="w-full py-10 flex flex-col items-center justify-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <motion.div 
+            className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-3"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            whileHover={{ scale: 1.1, rotate: 10 }}
+          >
+            <TrendingUp className="h-6 w-6 text-[#A100FF]" />
+          </motion.div>
+          <motion.h3 
+            className="text-base font-medium text-gray-700 mb-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.5 }}
+          >
+            Sin próximos pasos definidos
+          </motion.h3>
+          <motion.p 
+            className="text-gray-500 text-center text-sm"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.6 }}
+          >
+            Los próximos pasos se mostrarán según el progreso en la trayectoria
+          </motion.p>
+        </motion.div>
       );
     }
 
@@ -497,6 +572,8 @@ const CareerPathVisualizer = ({
   const currentPath = paths.find(p => p.id === activePath);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedLevels, setExpandedLevels] = useState<Set<string>>(new Set());
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [skeletonData, setSkeletonData] = useState<any>(null);
   
   // Add debugging log and check completion status
   const [allLevelsCompleted, setAllLevelsCompleted] = useState(false);
@@ -538,14 +615,27 @@ const CareerPathVisualizer = ({
     setIsModalOpen(false);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleTrajectorySubmit = (trajectoryData: any) => {
-    // Handle the trajectory submission
-
+  const handleTrajectorySubmit = async (trajectoryData: any) => {
+    // Show skeleton immediately
+    setSkeletonData(trajectoryData);
+    setShowSkeleton(true);
     setIsModalOpen(false);
-    // Trigger refresh of paths
-    if (onPathCreated) {
-      onPathCreated();
+    
+    try {
+      // Simulate AI processing time (in real implementation, this would be the actual API call)
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Hide skeleton and trigger refresh of paths
+      setShowSkeleton(false);
+      setSkeletonData(null);
+      
+      if (onPathCreated) {
+        onPathCreated();
+      }
+    } catch (error) {
+      console.error('Error creating trajectory:', error);
+      setShowSkeleton(false);
+      setSkeletonData(null);
     }
   };
 
@@ -703,6 +793,15 @@ const CareerPathVisualizer = ({
             );
           }
           
+          if (showSkeleton && skeletonData) {
+            return (
+              <TrajectorySkeletonLoader
+                key="skeleton"
+                trajectoryData={skeletonData}
+              />
+            );
+          }
+          
           if (paths.length === 0) {
             return (
               <motion.div
@@ -713,17 +812,38 @@ const CareerPathVisualizer = ({
                 transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
                 className="mt-6 bg-gray-50/50 rounded-xl border border-gray-200 overflow-hidden"
               >
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Award className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                    ¡Comienza tu trayectoria profesional!
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Haz clic en el botón <span className="inline-flex items-center mx-1 px-1 py-0.5 bg-purple-100 text-purple-600 rounded text-sm"><Plus className="w-3 h-3" /></span> para crear tu primera trayectoria y la IA generara automáticamente los niveles de aprendizaje.
-                  </p>
-                </div>
+                <motion.div 
+                  className="w-full py-10 flex flex-col items-center justify-center"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
+                >
+                  <motion.div 
+                    className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-3"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.4, delay: 0.4 }}
+                    whileHover={{ scale: 1.1, rotate: 10 }}
+                  >
+                    <TrendingUp className="h-6 w-6 text-[#A100FF]" />
+                  </motion.div>
+                  <motion.h3 
+                    className="text-base font-medium text-gray-700 mb-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.5 }}
+                  >
+                    No hay trayectorias profesionales
+                  </motion.h3>
+                  <motion.p 
+                    className="text-gray-500 text-center text-sm mb-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.6 }}
+                  >
+                    Haz clic en el botón <span className="inline-flex items-center mx-1 px-1 py-0.5 bg-purple-100 text-purple-600 rounded text-sm"><Plus className="w-3 h-3" /></span> para crear tu primera trayectoria
+                  </motion.p>
+                </motion.div>
               </motion.div>
             );
           }
