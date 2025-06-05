@@ -409,23 +409,53 @@ export default function ExperienceSection({ initialExperiences, loading = false,
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:border-[#A100FF20] transition-all duration-300">
-      <div className="flex justify-between items-center mb-6 pb-3 border-b border-gray-100">
-        <h2 className="text-xl font-bold flex items-center">
-          <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
+    <motion.div 
+      className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:border-[#A100FF20] transition-all duration-300"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      whileHover={{ y: -2 }}
+    >
+      <motion.div 
+        className="flex justify-between items-center mb-6 pb-3 border-b border-gray-100"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <motion.h2 
+          className="text-xl font-bold flex items-center"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <motion.span 
+            className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ duration: 0.2 }}
+          >
             <FiBriefcase className="h-6 w-6 text-[#A100FF]" />
-          </span>
+          </motion.span>
           Experiencia
-        </h2>
-        <button 
+        </motion.h2>
+        <motion.button 
           className="px-3 py-2 bg-gradient-to-r from-[#A100FF] to-[#8A00E3] rounded-md hover:from-[#8A00E3] hover:to-[#7500C0] transition-all duration-300 flex items-center gap-2 shadow-sm"
           onClick={() => setIsAddingExperience(true)}
           disabled={isAddingExperience}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <FiPlus size={16} className="text-white" />
+          <motion.div
+            animate={{ rotate: isAddingExperience ? 45 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FiPlus size={16} className="text-white" />
+          </motion.div>
           <span className="text-white font-medium">Añadir Experiencia</span>
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
       
       <AnimatePresence mode="wait" onExitComplete={handleAnimationComplete}>
         {isAddingExperience && (
@@ -449,7 +479,12 @@ export default function ExperienceSection({ initialExperiences, loading = false,
             }}
             className="overflow-hidden"
           >
-            <div ref={formRef}>
+            <motion.div 
+              ref={formRef}
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
               <ExperienceEditForm
                 formData={newExperience}
                 onFormChange={setNewExperience}
@@ -458,19 +493,25 @@ export default function ExperienceSection({ initialExperiences, loading = false,
                 isEditing={isEditingExperience}
                 isSaving={isSaving}
               />
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
       
       {!isAddingExperience && (
-        <ExperienceList
-          experiences={experiences}
-          onEdit={handleEditExperience}
-          onRemove={handleRemoveExperience}
-          isAddingExperience={isAddingExperience}
-        />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <ExperienceList
+            experiences={experiences}
+            onEdit={handleEditExperience}
+            onRemove={handleRemoveExperience}
+            isAddingExperience={isAddingExperience}
+          />
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -191,14 +191,14 @@ export default function ProfilePage() {
           className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
         >
           {/* Resume section */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            whileHover={{ y: -2 }}
+            transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+            whileHover={{ y: -2, boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)" }}
           >
             <ResumeUpload 
               userId={userProfile.ID_Usuario}
@@ -211,8 +211,8 @@ export default function ProfilePage() {
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            whileHover={{ y: -2 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
+            whileHover={{ y: -2, boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)" }}
           >
             <CertificatesSection userID={userProfile.ID_Usuario} loading={!fullyLoaded} />
           </motion.div>
@@ -221,8 +221,8 @@ export default function ProfilePage() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
-          whileHover={{ y: -2 }}
+          transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
+          whileHover={{ y: -2, boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)" }}
         >
           <SkillsSection 
             loading={!fullyLoaded}
@@ -233,8 +233,8 @@ export default function ProfilePage() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
-          whileHover={{ y: -2 }}
+          transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
+          whileHover={{ y: -2, boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)" }}
         >
           <ExperienceSection 
             initialExperiences={[]} 

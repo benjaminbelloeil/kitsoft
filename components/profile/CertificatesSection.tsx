@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // components/profile/certificados/CertificatesSection.tsx
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { addUsuarioCertificado, uploadCertificadoFile, deleteUsuarioCertificado, getUserCertificates } from "@/utils/database/client/certificateSync";
 import { CertificateVisualData, usuario_certificado } from "@/interfaces/certificate";
 import { SkeletonCertificates } from "./SkeletonProfile";
@@ -108,41 +109,112 @@ export default function CertificatesSection({ userID, loading = false, className
 	if (loading) return <SkeletonCertificates />;
 
 	return (
-		<div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 flex flex-col h-full w-full ${className}`}>
-			<h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
-				<span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
+		<motion.div 
+			className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 flex flex-col h-full w-full hover:border-[#A100FF20] transition-colors duration-300 ${className}`}
+			initial={{ opacity: 0, y: 20 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ duration: 0.6 }}
+			whileHover={{ y: -2 }}
+		>
+			<motion.h2 
+				className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100"
+				initial={{ opacity: 0, x: -20 }}
+				animate={{ opacity: 1, x: 0 }}
+				transition={{ duration: 0.6, delay: 0.1 }}
+			>
+				<motion.span 
+					className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm"
+					whileHover={{ scale: 1.1, rotate: 5 }}
+					transition={{ duration: 0.2 }}
+				>
 					<FiCheckCircle className="h-6 w-6 text-[#A100FF]" />
-				</span>
+				</motion.span>
 				Certificados
-			</h2>
-			{showForm ? (
-				<CertificateUploadForm
-					newCertificate={newCertificate}
-					setNewCertificate={setNewCertificate}
-					selectedCert={selectedCert}
-					setSelectedCert={setSelectedCert}
-					handleSubmit={handleCertificateSubmit}
-					resetForm={resetForm}
-					isSubmitting={isSubmitting}
-				/>
-			) : (
-				<div className="flex-col flex gap-2">
-					<div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2">
-						{certificates.length > 0 ? (
-							certificates.map(cert => (
-								<div key={cert.certificados.id_certificado} className="mb-2">
-									<CertificateCard cert={cert} onRemove={handleRemoveCertificate} />
-								</div>
-							))
-						) : (
-							<NoCertificatesPlaceholder />
-						)}
-					</div>
-					<div className="mt-4">
-						<AddCertificateButton onClick={() => setShowForm(true)} />
-					</div>
-				</div>
-			)}
-		</div>
+			</motion.h2>
+			
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: 0.6, delay: 0.2 }}
+			>
+				<AnimatePresence mode="wait">
+					{showForm ? (
+						<motion.div
+							key="certificate-form"
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -20 }}
+							transition={{ duration: 0.3 }}
+						>
+							<CertificateUploadForm
+								newCertificate={newCertificate}
+								setNewCertificate={setNewCertificate}
+								selectedCert={selectedCert}
+								setSelectedCert={setSelectedCert}
+								handleSubmit={handleCertificateSubmit}
+								resetForm={resetForm}
+								isSubmitting={isSubmitting}
+							/>
+						</motion.div>
+					) : (
+						<motion.div 
+							key="certificate-list"
+							className="flex-col flex gap-2"
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -20 }}
+							transition={{ duration: 0.3 }}
+						>
+							<div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2">
+								{certificates.length > 0 ? (
+									<motion.div
+										initial="hidden"
+										animate="visible"
+										variants={{
+											hidden: {},
+											visible: {
+												transition: {
+													staggerChildren: 0.1
+												}
+											}
+										}}
+									>
+										{certificates.map((cert, index) => (
+											<motion.div 
+												key={cert.certificados.id_certificado} 
+												className="mb-2"
+												variants={{
+													hidden: { opacity: 0, y: 20 },
+													visible: { opacity: 1, y: 0 }
+												}}
+												transition={{ duration: 0.4, delay: index * 0.1 }}
+											>
+												<CertificateCard cert={cert} onRemove={handleRemoveCertificate} />
+											</motion.div>
+										))}
+									</motion.div>
+								) : (
+									<motion.div
+										initial={{ opacity: 0, scale: 0.9 }}
+										animate={{ opacity: 1, scale: 1 }}
+										transition={{ duration: 0.4, delay: 0.2 }}
+									>
+										<NoCertificatesPlaceholder />
+									</motion.div>
+								)}
+							</div>
+							<motion.div 
+								className="mt-4"
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.4, delay: 0.3 }}
+							>
+								<AddCertificateButton onClick={() => setShowForm(true)} />
+							</motion.div>
+						</motion.div>
+					)}
+				</AnimatePresence>
+			</motion.div>
+		</motion.div>
 	);
 }

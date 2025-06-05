@@ -349,25 +349,51 @@ export function SkeletonExperience() {
         <div className="h-10 w-24 rounded-md bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" style={shimmer}></div>
       </motion.div>
       
-      <div className="space-y-6">
+      <div className="space-y-4">
         {[1, 2].map((_, index) => (
           <motion.div 
             key={index} 
-            className="border-l-3 border-gray-200 pl-6 relative p-4 rounded-r-lg mb-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
+            className="mb-4 last:mb-0"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="absolute -left-1.5 top-6 h-4 w-4 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" style={shimmer}></div>
-            <div className="flex flex-col md:flex-row md:justify-between md:items-start">
-              <div className="w-full">
-                <div className="h-5 w-48 mb-2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded" style={shimmer}></div>
-                <div className="h-4 w-32 mb-2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded" style={shimmer}></div>
-                <div className="h-3 w-24 mb-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded" style={shimmer}></div>
-                <div className="h-4 w-full max-w-md bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded" style={shimmer}></div>
-              </div>
-              <div className="mt-2 md:mt-0 md:ml-4">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" style={shimmer}></div>
+            <div className="group">
+              <div className="flex flex-col md:flex-row items-start rounded-lg overflow-hidden bg-white transition-all duration-300 ease-in-out hover:shadow-md border border-gray-100">
+                <div className="w-full md:w-1 md:h-auto bg-gray-200 transition-colors duration-300 md:self-stretch flex-shrink-0"></div>
+                
+                <div className="flex-grow p-4">
+                  <div className="flex flex-col mb-3">
+                    <div className="h-5 w-48 mb-2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded" style={shimmer}></div>
+                    <div className="h-4 w-32 mb-2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded" style={shimmer}></div>
+                    <div className="h-3 w-24 mb-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded" style={shimmer}></div>
+                  </div>
+                  
+                  <div className="pt-1 border-t border-gray-100">
+                    <div className="h-16 w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mt-2" style={shimmer}></div>
+                  </div>
+                  
+                  {/* Skills tags */}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {[1, 2, 3].map((_, skillIndex) => (
+                      <motion.div
+                        key={skillIndex}
+                        className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-xs"
+                        style={shimmer}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, delay: 0.5 + index * 0.1 + skillIndex * 0.05 }}
+                      >
+                        <div className="h-3 w-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded" style={shimmer}></div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="self-start p-3 flex flex-col gap-2">
+                  <div className="h-6 w-6 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" style={shimmer}></div>
+                  <div className="h-6 w-6 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" style={shimmer}></div>
+                </div>
               </div>
             </div>
           </motion.div>
