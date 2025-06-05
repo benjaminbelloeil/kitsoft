@@ -7,7 +7,7 @@ export default function ProyectosSkeleton() {
             backgroundPosition: '200% 0',
         },
         transition: {
-            duration: 1.5,
+            duration: 2.5,
             repeat: Infinity,
             ease: 'linear',
         },
@@ -25,6 +25,7 @@ export default function ProyectosSkeleton() {
                 <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
                     <div className="flex flex-col md:flex-row gap-6 justify-between">
                         <div className="flex items-center">
+                            {/* Folder icon placeholder */}
                             <motion.div 
                                 className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 w-12 h-12 rounded-lg mr-4"
                                 style={{ backgroundSize: '200% 100%' }}
@@ -32,14 +33,24 @@ export default function ProyectosSkeleton() {
                                 transition={shimmer.transition}
                             />
                             <div>
+                                {/* Title with badge placeholder */}
+                                <div className="flex items-center mb-2">
+                                    <motion.div 
+                                        className="h-7 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-32 mr-2"
+                                        style={{ backgroundSize: '200% 100%' }}
+                                        animate={shimmer.animate}
+                                        transition={shimmer.transition}
+                                    />
+                                    <motion.div 
+                                        className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full w-20"
+                                        style={{ backgroundSize: '200% 100%' }}
+                                        animate={shimmer.animate}
+                                        transition={shimmer.transition}
+                                    />
+                                </div>
+                                {/* Description placeholder */}
                                 <motion.div 
-                                    className="h-7 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-48 mb-2"
-                                    style={{ backgroundSize: '200% 100%' }}
-                                    animate={shimmer.animate}
-                                    transition={shimmer.transition}
-                                />
-                                <motion.div 
-                                    className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-64"
+                                    className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-96"
                                     style={{ backgroundSize: '200% 100%' }}
                                     animate={shimmer.animate}
                                     transition={shimmer.transition}
@@ -47,58 +58,28 @@ export default function ProyectosSkeleton() {
                             </div>
                         </div>
                         
-                        <div className="flex flex-col gap-3">
-                            <div className="flex gap-3">
+                        {/* View mode buttons placeholder */}
+                        <div className="flex items-center">
+                            <div className="flex bg-gray-100 p-1 rounded-lg">
                                 <motion.div 
-                                    className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-20"
+                                    className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-10 mr-1"
                                     style={{ backgroundSize: '200% 100%' }}
                                     animate={shimmer.animate}
                                     transition={shimmer.transition}
                                 />
                                 <motion.div 
-                                    className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-20"
+                                    className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-10"
                                     style={{ backgroundSize: '200% 100%' }}
                                     animate={shimmer.animate}
                                     transition={shimmer.transition}
                                 />
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="space-y-4">
-                    {/* Footer Skeleton */}
-                    <div className="bg-gray-50 shadow-md rounded-b-xl p-4 flex flex-col md:flex-row justify-between border-t border-x border-gray-200">
-                        {/* Tareas Completadas */}
-                        <div className="mb-4 md:mb-0 space-y-2">
-                            <div className="bg-gray-200 h-4 w-32 rounded" />
-                            <div className="flex items-center space-x-2">
-                                <div className="bg-gray-200 h-6 w-20 rounded" />
-                                <div className="bg-gray-200 h-5 w-12 rounded" />
-                            </div>
-                        </div>
-
-                        {/* Vencimientos Próximos */}
-                        <div className="mb-4 md:mb-0 space-y-2">
-                            <div className="bg-gray-200 h-4 w-32 rounded" />
-                            <div className="bg-gray-200 h-6 w-24 rounded" />
-                        </div>
-
-                        {/* Cargabilidad Media */}
-                        <div className="mb-4 md:mb-0 space-y-2">
-                            <div className="bg-gray-200 h-4 w-32 rounded" />
-                            <div className="bg-gray-200 h-6 w-20 rounded" />
-                        </div>
-
-                        {/* Botones de Vista */}
-                        <div className="flex items-center justify-end space-x-2">
-                            <div className="bg-gray-200 h-8 w-12 rounded" />
-                            <div className="bg-gray-200 h-8 w-12 rounded" />
                         </div>
                     </div>
                 </div>
             </motion.div>
 
-            {/* Content skeleton - Matching actual projects grid */}
+            {/* Content skeleton - Matching actual projects grid structure */}
             <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -116,11 +97,32 @@ export default function ProyectosSkeleton() {
                         >
                             {/* Project color header */}
                             <motion.div 
-                                className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 p-4 rounded-t-xl h-20"
+                                className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 p-4 rounded-t-xl"
                                 style={{ backgroundSize: '200% 100%' }}
                                 animate={shimmer.animate}
                                 transition={shimmer.transition}
-                            />
+                            >
+                                <div className="flex justify-between items-center mb-2">
+                                    <motion.div 
+                                        className="h-5 w-32 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded"
+                                        style={{ backgroundSize: '200% 100%' }}
+                                        animate={shimmer.animate}
+                                        transition={shimmer.transition}
+                                    />
+                                    <motion.div 
+                                        className="h-5 w-16 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-full"
+                                        style={{ backgroundSize: '200% 100%' }}
+                                        animate={shimmer.animate}
+                                        transition={shimmer.transition}
+                                    />
+                                </div>
+                                <motion.div 
+                                    className="h-4 w-24 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded"
+                                    style={{ backgroundSize: '200% 100%' }}
+                                    animate={shimmer.animate}
+                                    transition={shimmer.transition}
+                                />
+                            </motion.div>
                             
                             <div className="p-5">
                                 {/* Description */}
@@ -146,12 +148,20 @@ export default function ProyectosSkeleton() {
                                             animate={shimmer.animate}
                                             transition={shimmer.transition}
                                         />
-                                        <motion.div 
-                                            className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-12"
-                                            style={{ backgroundSize: '200% 100%' }}
-                                            animate={shimmer.animate}
-                                            transition={shimmer.transition}
-                                        />
+                                        <div className="flex items-center">
+                                            <motion.div 
+                                                className="w-3 h-3 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 mr-1.5"
+                                                style={{ backgroundSize: '200% 100%' }}
+                                                animate={shimmer.animate}
+                                                transition={shimmer.transition}
+                                            />
+                                            <motion.div 
+                                                className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-12"
+                                                style={{ backgroundSize: '200% 100%' }}
+                                                animate={shimmer.animate}
+                                                transition={shimmer.transition}
+                                            />
+                                        </div>
                                     </div>
                                     <div>
                                         <motion.div 
@@ -169,17 +179,25 @@ export default function ProyectosSkeleton() {
                                     </div>
                                 </div>
                                 
-                                {/* Team avatars */}
-                                <div className="flex -space-x-2 overflow-hidden">
-                                    {[1, 2, 3, 4].map((member, index) => (
-                                        <motion.div 
-                                            key={index}
-                                            className="inline-block h-7 w-7 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 ring-2 ring-white"
-                                            style={{ backgroundSize: '200% 100%' }}
-                                            animate={shimmer.animate}
-                                            transition={shimmer.transition}
-                                        />
-                                    ))}
+                                {/* Team members section */}
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                    <div className="flex -space-x-2 overflow-hidden">
+                                        {[1, 2, 3, 4].map((_, index) => (
+                                            <motion.div 
+                                                key={index}
+                                                className="inline-block h-7 w-7 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 ring-2 ring-white"
+                                                style={{ backgroundSize: '200% 100%' }}
+                                                animate={shimmer.animate}
+                                                transition={shimmer.transition}
+                                            />
+                                        ))}
+                                    </div>
+                                    <motion.div 
+                                        className="h-4 w-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
+                                        style={{ backgroundSize: '200% 100%' }}
+                                        animate={shimmer.animate}
+                                        transition={shimmer.transition}
+                                    />
                                 </div>
                             </div>
                         </motion.div>
