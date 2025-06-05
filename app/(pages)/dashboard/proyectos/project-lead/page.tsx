@@ -218,7 +218,8 @@ export default function ProjectLeadPage() {
 		valoracion: rating,
 		id_usuario: selectedRecipient,
 		id_autor: userId,
-		id_proyecto: selectedProject
+		id_proyecto: selectedProject,
+		categorias: categories
 	}
 
 	const response = await fetch('/api/retroalimentacion',

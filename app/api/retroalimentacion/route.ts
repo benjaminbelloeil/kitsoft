@@ -19,7 +19,8 @@ export async function POST(request: NextRequest) {
 			valoracion: number,
 			id_usuario: string,
 			id_autor: string,
-			id_proyecto: string
+			id_proyecto: string,
+			categorias: string[]
 		} = await request.json();
 
 		if (!reqData.mensaje || !reqData.valoracion || !reqData.id_usuario || !reqData.id_proyecto || !reqData.id_autor) {
@@ -30,9 +31,16 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		// Adding single feedback to table
 		const {data, error} = await supabase
 			.from('retroalimentaciones')
-			.insert(reqData)
+			.insert({
+				mensaje: reqData.mensaje,
+				valoracion: reqData.valoracion,
+				id_usuario: reqData.id_usuario,
+				id_autor: reqData.id_autor,
+				id_proyecto: reqData.id_proyecto,
+			})
 			.select();
 
 		if (error) {
@@ -43,12 +51,30 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		// Adding to retro_categoria table
+
+		reqData.categorias.forEach(async (category) => {
+			const categoryId = await supabase
+				.from('categoria')
+				.select()
+				.eq('nombre', category)
+
+			console.log("FOR DEBUGGING:", categoryId.data);
+
+			await supabase
+			.from('retro_categoria')
+			.insert({
+				id_retroalimentacion: data[0].id_retroalimentacion,
+				id_categoria: categoryId.data![0].id_categoria
+			})
+		});
+
 		return NextResponse.json({
 			success: true,
 			id: data && data[0] ? data[0].id_retroalimentacion : 'NO ID'
 		});
 	} 
-	catch (error) {
+	catch (error: any) {
 		console.error('Unexpected error in add certificate API:', error);
 		return NextResponse.json(
 			{ error: 'Internal server error' },
