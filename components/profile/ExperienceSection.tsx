@@ -413,7 +413,7 @@ export default function ExperienceSection({ initialExperiences, loading = false,
       <div className="flex justify-between items-center mb-6 pb-3 border-b border-gray-100">
         <h2 className="text-xl font-bold flex items-center">
           <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
-            <FiBriefcase className="h-5 w-5 text-[#A100FF]" />
+            <FiBriefcase className="h-6 w-6 text-[#A100FF]" />
           </span>
           Experiencia
         </h2>

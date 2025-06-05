@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useRef, useEffect } from "react";
-import { FiTrash2, FiCalendar, FiEdit2, FiAward, FiStar, FiTrendingUp, FiChevronDown } from "react-icons/fi";
+import { FiTrash2, FiCalendar, FiEdit2, FiAward, FiStar, FiTrendingUp, FiChevronDown, FiBriefcase } from "react-icons/fi";
 import { RiBuilding4Line } from "react-icons/ri";
 import { motion } from "framer-motion";
 import { ExperienceSkill, skillLevelClasses, skillLevelLabels } from "./ExperienceEditForm";
@@ -170,22 +170,13 @@ const EmptyState = () => (
     exit={{ opacity: 0 }}
     className="text-center py-10 text-gray-500"
   >
-    <svg 
-      className="mx-auto h-10 w-10 text-gray-300 mb-3"
-      xmlns="http://www.w3.org/2000/svg" 
-      fill="none" 
-      viewBox="0 0 24 24" 
-      stroke="currentColor"
-    >
-      <path 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        strokeWidth={1.5} 
-        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" 
-      />
-    </svg>
-    <p>No has añadido ninguna experiencia laboral.</p>
-    <p className="text-sm">Haz clic en &ldquo;Añadir Experiencia&rdquo; para empezar.</p>
+    <div className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-3 mx-auto">
+      <FiBriefcase className="h-6 w-6 text-[#A100FF]" />
+    </div>
+    <h3 className="text-base font-medium text-gray-700 mb-2">No has añadido ninguna experiencia laboral</h3>
+    <p className="text-gray-500 text-center text-sm">
+      Haz clic en &ldquo;Añadir Experiencia&rdquo; para empezar.
+    </p>
   </motion.div>
 );
 

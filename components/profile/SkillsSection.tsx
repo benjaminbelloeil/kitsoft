@@ -90,7 +90,7 @@ export default function SkillsSection({ loading = false, externalSkills = [], in
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:border-[#A100FF20] transition-colors duration-300">
       <h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
         <span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#A100FF]" viewBox="0 0 20 20" fill="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#A100FF]" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
           </svg>
         </span>
@@ -177,8 +177,8 @@ export default function SkillsSection({ loading = false, externalSkills = [], in
           animate={{ opacity: 1 }}
           className="w-full py-10 flex flex-col items-center justify-center"
         >
-          <div className="bg-gradient-to-r from-[#A100FF10] to-transparent p-4 rounded-full mb-3">
-            <FiTool size={36} className="text-[#A100FF60]" />
+          <div className="bg-[#A100FF08] rounded-full p-3 inline-flex mb-3">
+            <FiTool className="h-6 w-6 text-[#A100FF]" />
           </div>
           <h3 className="text-base font-medium text-gray-700 mb-2">Sin habilidades registradas</h3>
           <p className="text-gray-500 text-center text-sm">

@@ -93,7 +93,7 @@ export default function ResumeUpload({ userId, notificationState, loading = fals
           whileHover={{ scale: 1.1, rotate: 5 }}
           transition={{ duration: 0.2 }}
         >
-          <FiFile className="h-5 w-5 text-[#A100FF]" />
+          <FiFile className="h-6 w-6 text-[#A100FF]" />
         </motion.span>
         Currículum
       </motion.h2>

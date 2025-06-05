@@ -111,7 +111,7 @@ export default function CertificatesSection({ userID, loading = false, className
 		<div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-100 flex flex-col h-full w-full ${className}`}>
 			<h2 className="text-xl font-bold mb-6 flex items-center pb-3 border-b border-gray-100">
 				<span className="bg-[#A100FF20] p-2 rounded-md mr-2 shadow-sm">
-					<FiCheckCircle className="h-5 w-5 text-[#A100FF]" />
+					<FiCheckCircle className="h-6 w-6 text-[#A100FF]" />
 				</span>
 				Certificados
 			</h2>
