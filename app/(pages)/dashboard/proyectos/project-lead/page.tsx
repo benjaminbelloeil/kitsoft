@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ThumbsUp, CheckCircle, Clock, MessageSquare, Send, User, FolderOpen, Users, Clock as ClockIcon } from "lucide-react";
 import { useUser } from "@/context/user-context";
+import { createClient } from "@/utils/supabase/client";
 import ProjectLeadHeader from '@/components/proyectos/project-lead/ProjectLeadHeader';
 import ProjectLeadSkeleton from '@/components/proyectos/project-lead/ProjectLeadSkeleton';
 import UnauthorizedState from '@/components/auth/UnauhtorizedState';
@@ -28,8 +29,28 @@ export default function ProjectLeadPage() {
   const [savingHours, setSavingHours] = useState<string | null>(null);
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [editingUserAssignment, setEditingUserAssignment] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   // Use the toast notification system
   const notifications = useNotificationState();
+  const supabase = createClient();
+  
+  // Fetch current user ID
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setCurrentUserId(user.id);
+        }
+      } catch (error) {
+        console.error('Error getting current user:', error);
+      }
+    };
+
+    if (isProjectLead) {
+      getCurrentUser();
+    }
+  }, [isProjectLead, supabase.auth]);
   
   // Fetch projects data
   useEffect(() => {
@@ -191,12 +212,15 @@ export default function ProjectLeadPage() {
     if (!project || !project.assignedUsers) return [];
     
     // Convert assigned users to the format expected by the feedback component
-    return project.assignedUsers.map((user: any) => ({
+    const allRecipients = project.assignedUsers.map((user: any) => ({
       id: user.id_usuario,
       name: `${user.nombre} ${user.apellido || ''}`.trim(),
       role: user.rol_nombre,
       avatar: user.url_avatar || null
     }));
+    
+    // Filter out the current user (project lead) from the recipient list
+    return allRecipients.filter((recipient: any) => recipient.id !== currentUserId);
   };
 
   // Toggle category selection
@@ -737,8 +761,8 @@ export default function ProjectLeadPage() {
                           Seleccionar destinatario:
                         </label>
                         <div className="bg-white rounded-md border border-gray-200 shadow-inner p-3">
-                          <div className="grid grid-cols-1 gap-1.5 max-h-20 overflow-y-auto">
-                            {getFilteredRecipients().slice(0, 3).map((recipient: {id: string, name: string, role: string, avatar: string | null}, index: number) => (
+                          <div className="grid grid-cols-1 gap-1.5 max-h-32 overflow-y-auto">
+                            {getFilteredRecipients().map((recipient: {id: string, name: string, role: string, avatar: string | null}, index: number) => (
                               <motion.div
                                 key={recipient.id}
                                 onClick={() => setSelectedRecipient(recipient.id)}
