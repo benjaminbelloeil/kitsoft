@@ -29,79 +29,19 @@ const categories = [
 ] as const;
 
 // Mock data for notes (will be replaced with database later)
-const mockNotes: Note[] = [
-  {
-    id: "1",
-    title: "Reunión de equipo - Sprint Planning",
-    content: "Discutir objetivos del próximo sprint, revisar backlog y asignar tareas. Recordar mencionar el nuevo framework de testing.",
-    category: "reunión",
-    priority: "alta",
-    tags: ["sprint", "planning", "equipo"],
-    createdAt: new Date("2025-06-05T10:00:00"),
-    updatedAt: new Date("2025-06-05T14:30:00"),
-    isPinned: true,
-    color: "#FEF3C7"
-  },
-  {
-    id: "2",
-    title: "Ideas para mejorar UX",
-    content: "- Implementar feedback visual en botones\n- Mejorar navegación móvil\n- Añadir tooltips explicativos\n- Optimizar tiempo de carga",
-    category: "idea",
-    priority: "media",
-    tags: ["ux", "diseño", "mejoras"],
-    createdAt: new Date("2025-06-04T15:20:00"),
-    updatedAt: new Date("2025-06-04T15:20:00"),
-    isPinned: false,
-    color: "#E0E7FF"
-  },
-  {
-    id: "3",
-    title: "Notas proyecto KitSoft",
-    content: "Revisar integración con base de datos Supabase. Pendiente implementar autenticación JWT y configurar roles de usuario.",
-    category: "proyecto",
-    priority: "alta",
-    tags: ["kitsoft", "database", "auth"],
-    createdAt: new Date("2025-06-03T09:15:00"),
-    updatedAt: new Date("2025-06-05T11:45:00"),
-    isPinned: true,
-    color: "#DCFCE7"
-  },
-  {
-    id: "4",
-    title: "Lista de compras personal",
-    content: "- Café para la oficina\n- Cuaderno nuevo\n- Auriculares bluetooth\n- Plantas para el escritorio",
-    category: "personal",
-    priority: "baja",
-    tags: ["compras", "personal"],
-    createdAt: new Date("2025-06-02T18:30:00"),
-    updatedAt: new Date("2025-06-02T18:30:00"),
-    isPinned: false,
-    color: "#FDE7F3"
-  },
-  {
-    id: "5",
-    title: "Aprendizaje React Avanzado",
-    content: "Estudiar:\n- Context API avanzado\n- Custom hooks\n- Performance optimization\n- Server components",
-    category: "trabajo",
-    priority: "media",
-    tags: ["react", "aprendizaje", "frontend"],
-    createdAt: new Date("2025-06-01T12:00:00"),
-    updatedAt: new Date("2025-06-03T16:20:00"),
-    isPinned: false,
-    color: "#E0F2FE"
-  }
-];
+const mockNotes: Note[] = [];
 
 export default function NotasPage() {
   const [notes, setNotes] = useState<Note[]>(mockNotes);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<'todas' | 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea'>('todas');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['personal', 'trabajo', 'proyecto', 'reunión', 'idea']));
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['todas']));
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [newNoteTitle, setNewNoteTitle] = useState("");
   const [newNoteContent, setNewNoteContent] = useState("");
   const [newNoteCategory, setNewNoteCategory] = useState<'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea'>('personal');
   const [newNotePriority, setNewNotePriority] = useState<'alta' | 'media' | 'baja'>('media');
+  const [newNotePinned, setNewNotePinned] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isPriorityDropdownOpen, setIsPriorityDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -177,7 +117,7 @@ export default function NotasPage() {
         tags: [],
         createdAt: new Date(),
         updatedAt: new Date(),
-        isPinned: false,
+        isPinned: newNotePinned,
         color: "#F3F4F6"
       };
       
@@ -222,7 +162,8 @@ export default function NotasPage() {
       default: return "text-gray-700 bg-gray-50";
     }
   };
-
+  
+  // Functions to handle category management
   return (
     <div className="h-screen bg-gray-50 overflow-hidden">
       {/* Restored Original Header */}
@@ -234,7 +175,7 @@ export default function NotasPage() {
       />
 
       {/* Main Apple Notes Style Layout */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-230px)] py-4">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full">
           <div className="flex h-full">
             
@@ -243,10 +184,12 @@ export default function NotasPage() {
               
               {/* Apple Notes Style Categories - Scrollable */}
               <div className="p-4 border-b border-gray-200 flex-1 overflow-y-auto">
-                <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                  <FolderOpen className="h-4 w-4 text-gray-600" />
-                  Categorías
-                </h3>
+                <div className="flex items-center justify-between mb-4 px-2">
+                  <h3 className="text-base font-medium text-gray-800 tracking-wide flex items-center gap-2">
+                    <FolderOpen className="h-5 w-5 text-gray-600" />
+                    Categorías
+                  </h3>
+                </div>
                 <div className="space-y-1">
                   {categoriesWithCounts.map((category) => {
                     const Icon = category.icon;
@@ -255,10 +198,10 @@ export default function NotasPage() {
                     const categoryNotes = category.id === 'todas' ? filteredNotes : filteredNotes.filter(note => note.category === category.id);
                     
                     return (
-                      <div key={category.id}>
+                      <div key={category.id} className="mb-1">
                         {/* Category Header */}
                         <div 
-                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${
+                          className={`flex items-center justify-between px-3 py-2.5 rounded-md transition-colors cursor-pointer ${
                             isSelected 
                               ? 'bg-purple-100 text-purple-700' 
                               : 'text-gray-700 hover:bg-gray-100'
@@ -269,19 +212,22 @@ export default function NotasPage() {
                           }}
                         >
                           <div className="flex items-center gap-3">
-                            {category.id !== 'todas' && (
-                              <div className="w-4 h-4 flex items-center justify-center">
-                                {isExpanded ? (
-                                  <ChevronDown className="h-3 w-3" />
-                                ) : (
-                                  <ChevronRight className="h-3 w-3" />
-                                )}
-                              </div>
-                            )}
-                            <Icon className={`h-4 w-4 ${isSelected ? 'text-purple-600' : 'text-gray-500'}`} />
-                            <span className="font-medium text-sm">{category.name}</span>
+                            <div className="flex items-center gap-3 flex-grow">
+                              {category.id !== 'todas' && (
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                  {isExpanded ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                  )}
+                                </div>
+                              )}
+                              <Icon className={`h-5 w-5 ${isSelected ? 'text-purple-600' : 'text-gray-500'}`} />
+                              <span className="font-medium text-sm">{category.name}</span>
+                            </div>
                           </div>
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                          
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                             isSelected 
                               ? 'bg-purple-200 text-purple-800' 
                               : 'bg-gray-200 text-gray-600'
@@ -292,38 +238,38 @@ export default function NotasPage() {
 
                         {/* Notes List for Expanded Category */}
                         {isExpanded && categoryNotes.length > 0 && (
-                          <div className="ml-6 mt-1 space-y-2 mb-4">
+                          <div className="ml-6 mt-1 space-y-1 mb-3">
                             {categoryNotes.map((note) => (
                               <div
                                 key={note.id}
                                 onClick={() => handleSelectNote(note)}
-                                className={`p-3 rounded-md cursor-pointer transition-colors ${
+                                className={`p-2 rounded-md cursor-pointer transition-colors ${
                                   selectedNote?.id === note.id 
                                     ? 'bg-purple-50 border-l-2 border-purple-500' 
                                     : 'hover:bg-gray-100'
                                 }`}
                               >
-                                <div className="flex items-start justify-between mb-2">
-                                  <h4 className="font-medium text-gray-800 text-sm line-clamp-1 flex-1">
+                                <div className="flex items-start justify-between mb-1">
+                                  <h4 className="font-medium text-gray-800 text-xs line-clamp-1 flex-1">
                                     {note.title}
                                   </h4>
                                   {note.isPinned && (
-                                    <Pin className="h-3 w-3 text-purple-600 ml-2 flex-shrink-0" />
+                                    <Pin className="h-3 w-3 text-purple-600 ml-1.5 flex-shrink-0" />
                                   )}
                                 </div>
                                 
-                                <p className="text-xs text-gray-600 line-clamp-2 mb-2 leading-relaxed">
+                                <p className="text-[10px] text-gray-500 line-clamp-1 mb-1.5 leading-relaxed">
                                   {note.content}
                                 </p>
                                 
                                 <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPriorityColor(note.priority)}`}>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getPriorityColor(note.priority)}`}>
                                       {note.priority}
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-1 text-xs text-gray-400">
-                                    <Calendar className="h-3 w-3" />
+                                  <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                    <Calendar className="h-2.5 w-2.5" />
                                     <span>
                                       {new Date(note.createdAt).toLocaleDateString()}
                                     </span>
@@ -430,21 +376,21 @@ export default function NotasPage() {
                   {/* Note Title and Content Area */}
                   <div className="flex-1 flex flex-col bg-white">
                     {/* Note Title */}
-                    <div className="p-6 pb-4">
+                    <div className="p-6 pb-3">
                       <input
                         type="text"
                         value={selectedNote.title}
                         onChange={(e) => handleEditNote('title', e.target.value)}
-                        className="w-full text-3xl font-bold text-gray-800 bg-transparent border-none outline-none placeholder-gray-400"
+                        className="w-full text-2xl font-semibold text-gray-800 bg-transparent border-none outline-none placeholder-gray-400"
                         placeholder="Título de la nota"
                       />
                     </div>
                     
                     {/* Divider */}
-                    <div className="border-t border-gray-300 mx-6"></div>
+                    <div className="border-t border-gray-200 mx-6"></div>
                     
                     {/* Note Content */}
-                    <div className="flex-1 p-6 pt-4">
+                    <div className="flex-1 p-6 pt-3">
                       <textarea
                         value={selectedNote.content}
                         onChange={(e) => handleEditNote('content', e.target.value)}
@@ -546,6 +492,19 @@ export default function NotasPage() {
                             </div>
                           )}
                         </div>
+
+                        {/* Pin Button */}
+                        <button 
+                          onClick={() => setNewNotePinned(!newNotePinned)}
+                          className={`flex items-center justify-center p-2 rounded-lg border ${
+                            newNotePinned 
+                              ? 'bg-purple-100 border-purple-200 text-purple-600' 
+                              : 'border-gray-200 bg-white text-gray-500 hover:text-purple-500'
+                          }`}
+                          title={newNotePinned ? 'Desanclar nota' : 'Anclar nota'}
+                        >
+                          <Pin className={`h-4 w-4 ${newNotePinned ? 'text-purple-600' : 'text-gray-500'}`} />
+                        </button>
                       </div>
                       
                       <div className="flex items-center gap-2">
@@ -586,22 +545,22 @@ export default function NotasPage() {
                   {/* Note Title and Content Area */}
                   <div className="flex-1 flex flex-col bg-white">
                     {/* Note Title Input */}
-                    <div className="p-6 pb-4">
+                    <div className="p-6 pb-3">
                       <input
                         type="text"
                         value={newNoteTitle}
                         onChange={(e) => setNewNoteTitle(e.target.value)}
-                        className="w-full text-3xl font-bold text-gray-800 bg-transparent border-none outline-none placeholder-gray-400"
+                        className="w-full text-2xl font-semibold text-gray-800 bg-transparent border-none outline-none placeholder-gray-400"
                         placeholder="Título sin título"
                         autoFocus
                       />
                     </div>
                     
                     {/* Divider */}
-                    <div className="border-t border-gray-300 mx-6"></div>
+                    <div className="border-t border-gray-200 mx-6"></div>
                     
                     {/* Note Content */}
-                    <div className="flex-1 p-6 pt-4">
+                    <div className="flex-1 p-6 pt-3">
                       <textarea
                         value={newNoteContent}
                         onChange={(e) => setNewNoteContent(e.target.value)}
@@ -616,6 +575,8 @@ export default function NotasPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Category Confirmation Modal */}
     </div>
   );
 }

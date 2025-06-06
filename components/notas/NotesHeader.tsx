@@ -17,7 +17,7 @@ export default function NotesHeader({
   pinnedNotes
 }: NotesHeaderProps) {
   return (
-    <div className="max-w-[1400px] mx-auto py-6 px-4 sm:px-6 lg:px-8 mb-8">
+    <div className="max-w-[1400px] mx-auto py-6 px-4 sm:px-6 lg:px-8 mb-2">
       {/* Header card with white background and enhanced styling */}
       <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
         {/* Decorative elements */}
