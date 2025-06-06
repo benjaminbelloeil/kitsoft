@@ -21,7 +21,7 @@ export default function ProjectLeadPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const { isProjectLead } = useUser();
+  const { userId, isProjectLead } = useUser();
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [hourAssignments, setHourAssignments] = useState<Record<string, number>>({});
   const [projects, setProjects] = useState<any[]>([]);
@@ -233,26 +233,43 @@ export default function ProjectLeadPage() {
   };
 
   // Handle feedback submission
-  const handleSubmitFeedback = (e: React.FormEvent) => {
+  const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This would connect to your backend in a real app
-    console.log({
-      project: selectedProject,
-      recipient: selectedRecipient,
-      rating,
-      categories,
-      message
-    });
-    
-    // Reset form
-    setSelectedProject("");
-    setSelectedRecipient("");
-    setRating(0);
-    setCategories([]);
-    setMessage("");
-    
-    // Show success notification using the toast system
-    notifications.showSuccess("Retroalimentación enviada con éxito!");
+	// TODO: connect to backend!!
+
+	const values = {
+		mensaje: message,
+		valoracion: rating,
+		id_usuario: selectedRecipient,
+		id_autor: userId,
+		id_proyecto: selectedProject,
+		categorias: categories
+	}
+
+	const response = await fetch('/api/retroalimentacion',
+		{
+			method: "POST",
+			headers: {
+	          'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(values)
+		}
+	)
+
+	if (response.ok) {
+	    // Reset form
+	    setSelectedProject("");
+	    setSelectedRecipient("");
+	    setRating(0);
+	    setCategories([]);
+	    setMessage("");
+	    
+	    // Show success notification using the toast system
+	    notifications.showSuccess("Retroalimentación enviada con éxito!");
+	}
+	else {
+	    notifications.showError("Error enviando la retroalimentación");
+	}
   };
 
   // Helper function to calculate real-time user cargabilidad percentage
