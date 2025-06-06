@@ -8,5 +8,6 @@ export * from './userLevelSync';
 export * from './userManagementSync';
 export * from './certificateSync';
 export * from './avatarSync';
+export * from './notesSync';
 
 // Additional helper functions can be defined here if needed

@@ -3,20 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import NotesHeader from "@/components/notas/NotesHeader";
 import { Pin, Trash2, ChevronDown, ChevronRight, Bold, Italic, Underline, List, AlignLeft, ImageIcon, User, Briefcase, Rocket, Users, Lightbulb, FileText, FolderOpen, Calendar, Check } from "lucide-react";
-
-// Interface for Note structure
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  category: 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea';
-  priority: 'alta' | 'media' | 'baja';
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  isPinned: boolean;
-  color: string;
-}
+import { Note } from "@/interfaces/note";
+import { getUserNotes, createNote, updateNote, deleteNote } from "@/utils/database/client/notesSync";
+import { createClient } from "@/utils/supabase/client";
 
 // Category definitions with icons for Apple Notes style
 const categories = [
@@ -29,10 +18,11 @@ const categories = [
 ] as const;
 
 // Mock data for notes (will be replaced with database later)
-const mockNotes: Note[] = [];
+// const mockNotes: Note[] = [];
 
 export default function NotasPage() {
-  const [notes, setNotes] = useState<Note[]>(mockNotes);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<'todas' | 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea'>('todas');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['todas']));
@@ -46,6 +36,32 @@ export default function NotasPage() {
   const [isPriorityDropdownOpen, setIsPriorityDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const priorityDropdownRef = useRef<HTMLDivElement>(null);
+  const supabase = createClient();
+
+  // Load notes on component mount
+  useEffect(() => {
+    const loadNotes = async () => {
+      try {
+        setLoading(true);
+        
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.error('User not authenticated');
+          return;
+        }
+
+        const fetchedNotes = await getUserNotes();
+        setNotes(fetchedNotes || []);
+      } catch (error) {
+        console.error('Error loading notes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNotes();
+  }, [supabase.auth]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -106,51 +122,89 @@ export default function NotasPage() {
     setSelectedNote(note);
   };
 
-  const handleSaveNewNote = () => {
+  const handleSaveNewNote = async () => {
     if (newNoteTitle.trim() || newNoteContent.trim()) {
-      const newNote: Note = {
-        id: Date.now().toString(),
-        title: newNoteTitle.trim() || "Nueva nota",
-        content: newNoteContent,
-        category: newNoteCategory,
-        priority: newNotePriority,
-        tags: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isPinned: newNotePinned,
-        color: "#F3F4F6"
-      };
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.error('User not authenticated');
+          return;
+        }
+
+        const newNoteData = {
+          title: newNoteTitle.trim() || "Nueva nota",
+          content: newNoteContent,
+          category: newNoteCategory,
+          priority: newNotePriority,
+          tags: [],
+          isPinned: newNotePinned,
+          color: "#F3F4F6"
+        };
+        
+        const createdNote = await createNote(newNoteData);
+        if (createdNote) {
+          setNotes(prev => [createdNote, ...prev]);
+          setSelectedNote(createdNote);
+          setNewNoteTitle("");
+          setNewNoteContent("");
+        }
+      } catch (error) {
+        console.error('Error creating note:', error);
+      }
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      await deleteNote(noteId);
+      setNotes(prev => prev.filter(note => note.id !== noteId));
+      if (selectedNote?.id === noteId) {
+        setSelectedNote(null);
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    }
+  };
+
+  const handleTogglePin = async (noteId: string) => {
+    try {
+      const noteToUpdate = notes.find(note => note.id === noteId);
+      if (!noteToUpdate) return;
+
+      const updatedNote = await updateNote(noteId, { 
+        isPinned: !noteToUpdate.isPinned 
+      });
       
-      setNotes(prev => [newNote, ...prev]);
-      setSelectedNote(newNote);
-      setNewNoteTitle("");
-      setNewNoteContent("");
+      if (updatedNote) {
+        setNotes(prev => prev.map(note =>
+          note.id === noteId ? updatedNote : note
+        ));
+        if (selectedNote?.id === noteId) {
+          setSelectedNote(updatedNote);
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling pin:', error);
     }
   };
 
-  const handleDeleteNote = (noteId: string) => {
-    setNotes(prev => prev.filter(note => note.id !== noteId));
-    if (selectedNote?.id === noteId) {
-      setSelectedNote(null);
-    }
-  };
-
-  const handleTogglePin = (noteId: string) => {
-    setNotes(prev => prev.map(note =>
-      note.id === noteId ? { ...note, isPinned: !note.isPinned } : note
-    ));
-    if (selectedNote?.id === noteId) {
-      setSelectedNote(prev => prev ? { ...prev, isPinned: !prev.isPinned } : null);
-    }
-  };
-
-  const handleEditNote = (field: 'title' | 'content', value: string) => {
+  const handleEditNote = async (field: 'title' | 'content', value: string) => {
     if (selectedNote) {
-      const updatedNote = { ...selectedNote, [field]: value, updatedAt: new Date() };
-      setNotes(prev => prev.map(note =>
-        note.id === selectedNote.id ? updatedNote : note
-      ));
-      setSelectedNote(updatedNote);
+      try {
+        const updatedNote = await updateNote(selectedNote.id, { 
+          [field]: value 
+        });
+        
+        if (updatedNote) {
+          setNotes(prev => prev.map(note =>
+            note.id === selectedNote.id ? updatedNote : note
+          ));
+          setSelectedNote(updatedNote);
+        }
+      } catch (error) {
+        console.error('Error updating note:', error);
+      }
     }
   };
 
@@ -174,10 +228,20 @@ export default function NotasPage() {
         pinnedNotes={notes.filter(n => n.isPinned).length}
       />
 
-      {/* Main Apple Notes Style Layout */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full">
-          <div className="flex h-full">
+      {/* Loading State */}
+      {loading ? (
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+              <p className="mt-2 text-gray-600">Cargando notas...</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full">
+            <div className="flex h-full">
             
             {/* Left Sidebar - Categories and Notes List */}
             <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
@@ -577,6 +641,7 @@ export default function NotasPage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Delete Category Confirmation Modal */}
     </div>
