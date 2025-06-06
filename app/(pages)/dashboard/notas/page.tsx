@@ -185,8 +185,10 @@ export default function NotasPage() {
               {/* Apple Notes Style Categories - Scrollable */}
               <div className="p-4 border-b border-gray-200 flex-1 overflow-y-auto">
                 <div className="flex items-center justify-between mb-4 px-2">
-                  <h3 className="text-base font-medium text-gray-800 tracking-wide flex items-center gap-2">
-                    <FolderOpen className="h-5 w-5 text-gray-600" />
+                  <h3 className="text-lg font-bold text-gray-800 tracking-wide flex items-center gap-3">
+                    <div className="bg-gradient-to-br from-[#A100FF10] to-[#A100FF20] p-2 rounded-lg shadow-sm border border-[#A100FF10]">
+                      <FolderOpen className="h-4 w-4 text-[#A100FF]" />
+                    </div>
                     Categorías
                   </h3>
                 </div>
