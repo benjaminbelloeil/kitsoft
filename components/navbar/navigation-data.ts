@@ -52,9 +52,9 @@ export const navLinks: NavItem[] = [
     hasDropdown: false
   },
   {
-    name: "Calendario",
+    name: "Notas",
     icon: "calendar",
-    href: "/dashboard/calendario",
+    href: "/dashboard/notas",
     hasDropdown: false
   },
   {
