@@ -35,6 +35,19 @@ const categoryLabels = {
   idea: 'Idea'
 };
 
+// Helper function to get category colors
+const getCategoryColors = (category: string) => {
+  const colorMap: Record<string, string> = {
+    personal: '#60A5FA', // blue-400
+    trabajo: '#4ADE80',   // green-400
+    proyecto: '#A78BFA',  // purple-400
+    reunión: '#FB923C',   // orange-400
+    idea: '#FACC15'       // yellow-400
+  };
+  
+  return colorMap[category] || '#9CA3AF'; // gray-400
+};
+
 export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: NoteCardProps) {
   const [showActions, setShowActions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -43,17 +56,10 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
   const [editContent, setEditContent] = useState(note.content);
 
   const formatDate = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Hoy';
-    if (diffDays === 1) return 'Ayer';
-    if (diffDays < 7) return `Hace ${diffDays} días`;
-    
     return date.toLocaleDateString('es-ES', { 
       day: 'numeric', 
-      month: 'short' 
+      month: 'short',
+      year: 'numeric'
     });
   };
 
@@ -94,7 +100,10 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
       transition={{ duration: 0.2 }}
     >
       <div 
-        className="bg-white rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 overflow-hidden relative shadow-sm"
+        className="bg-white rounded-lg transition-all duration-200 overflow-hidden relative shadow-sm"
+        style={{ 
+          border: `2px solid ${getCategoryColors(note.category)}`,
+        }}
         onMouseEnter={() => setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
@@ -207,10 +216,43 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
                 <h3 className="font-semibold text-gray-900 leading-tight mb-2 text-base">
                   {note.title}
                 </h3>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-gray-600 font-medium">{categoryLabels[note.category]}</span>
-                  <span className="text-gray-400">•</span>
-                  <span className="capitalize text-gray-600 font-medium">{note.priority}</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 ${
+                    note.category === 'personal' 
+                      ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                      : note.category === 'trabajo'
+                      ? 'bg-green-50 text-green-700 border-green-200'
+                      : note.category === 'proyecto'
+                      ? 'bg-purple-50 text-purple-700 border-purple-200'
+                      : note.category === 'reunión'
+                      ? 'bg-orange-50 text-orange-700 border-orange-200'
+                      : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      note.category === 'personal' 
+                        ? 'bg-blue-500' 
+                        : note.category === 'trabajo'
+                        ? 'bg-green-500'
+                        : note.category === 'proyecto'
+                        ? 'bg-purple-500'
+                        : note.category === 'reunión'
+                        ? 'bg-orange-500'
+                        : 'bg-yellow-500'
+                    }`}></span>
+                    {categoryLabels[note.category]}
+                  </span>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 ${
+                    note.priority === 'alta' 
+                      ? 'bg-red-50 text-red-700 border-red-200' 
+                      : note.priority === 'media'
+                      ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                      : 'bg-green-50 text-green-700 border-green-200'
+                  }`}>
+                    {note.priority === 'alta' && <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
+                    {note.priority === 'media' && <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>}
+                    {note.priority === 'baja' && <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>}
+                    {note.priority}
+                  </span>
                 </div>
               </div>
 
@@ -220,8 +262,9 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
               </div>
 
               {/* Footer */}
-              <div className="text-xs text-gray-500 pt-2 border-t border-gray-200 font-medium">
-                {formatDate(note.updatedAt)}
+              <div className="flex items-center gap-1.5 text-xs text-gray-400 pt-2 border-t border-gray-200 font-medium">
+                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <span>{formatDate(note.updatedAt)}</span>
               </div>
             </>
           )}

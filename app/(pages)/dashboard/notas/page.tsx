@@ -9,15 +9,99 @@ import { Note } from "@/interfaces/note";
 import { getUserNotes, createNote, updateNote, deleteNote } from "@/utils/database/client/notesSync";
 import { createClient } from "@/utils/supabase/client";
 
-// Category definitions with icons for Apple Notes style
+// Category definitions with icons and colors for Apple Notes style
 const categories = [
-  { id: 'todas', name: 'Todas las notas', icon: FileText, count: 0 },
-  { id: 'personal', name: 'Personal', icon: User, count: 0 },
-  { id: 'trabajo', name: 'Trabajo', icon: Briefcase, count: 0 },
-  { id: 'proyecto', name: 'Proyectos', icon: Rocket, count: 0 },
-  { id: 'reunión', name: 'Reuniones', icon: Users, count: 0 },
-  { id: 'idea', name: 'Ideas', icon: Lightbulb, count: 0 },
+  { id: 'todas', name: 'Todas las notas', icon: FileText, count: 0, color: 'gray' },
+  { id: 'personal', name: 'Personal', icon: User, count: 0, color: 'blue' },
+  { id: 'trabajo', name: 'Trabajo', icon: Briefcase, count: 0, color: 'green' },
+  { id: 'proyecto', name: 'Proyectos', icon: Rocket, count: 0, color: 'purple' },
+  { id: 'reunión', name: 'Reuniones', icon: Users, count: 0, color: 'orange' },
+  { id: 'idea', name: 'Ideas', icon: Lightbulb, count: 0, color: 'yellow' },
 ] as const;
+
+// Helper function to get category color classes
+const getCategoryColors = (color: string) => {
+  const colorMap: Record<string, {
+    bg: string;
+    border: string;
+    text: string;
+    icon: string;
+    cardBg: string;
+    cardBorder: string;
+    cardHover: string;
+    dot: string;
+    dotBorder: string;
+  }> = {
+    gray: {
+      bg: 'bg-gray-50',
+      border: 'border-gray-200',
+      text: 'text-gray-700',
+      icon: 'text-gray-600',
+      cardBg: 'bg-gray-50/50',
+      cardBorder: 'border-gray-200',
+      cardHover: 'hover:border-gray-300',
+      dot: 'bg-gray-500',
+      dotBorder: 'border-gray-300'
+    },
+    blue: {
+      bg: 'bg-blue-50',
+      border: 'border-blue-200',
+      text: 'text-blue-700',
+      icon: 'text-blue-600',
+      cardBg: 'bg-blue-50/50',
+      cardBorder: 'border-blue-200',
+      cardHover: 'hover:border-blue-300',
+      dot: 'bg-blue-500',
+      dotBorder: 'border-blue-300'
+    },
+    green: {
+      bg: 'bg-green-50',
+      border: 'border-green-200',
+      text: 'text-green-700',
+      icon: 'text-green-600',
+      cardBg: 'bg-green-50/50',
+      cardBorder: 'border-green-200',
+      cardHover: 'hover:border-green-300',
+      dot: 'bg-green-500',
+      dotBorder: 'border-green-300'
+    },
+    purple: {
+      bg: 'bg-purple-50',
+      border: 'border-purple-200',
+      text: 'text-purple-700',
+      icon: 'text-purple-600',
+      cardBg: 'bg-purple-50/50',
+      cardBorder: 'border-purple-200',
+      cardHover: 'hover:border-purple-300',
+      dot: 'bg-purple-500',
+      dotBorder: 'border-purple-300'
+    },
+    orange: {
+      bg: 'bg-orange-50',
+      border: 'border-orange-200',
+      text: 'text-orange-700',
+      icon: 'text-orange-600',
+      cardBg: 'bg-orange-50/50',
+      cardBorder: 'border-orange-200',
+      cardHover: 'hover:border-orange-300',
+      dot: 'bg-orange-500',
+      dotBorder: 'border-orange-300'
+    },
+    yellow: {
+      bg: 'bg-yellow-50',
+      border: 'border-yellow-200',
+      text: 'text-yellow-700',
+      icon: 'text-yellow-600',
+      cardBg: 'bg-yellow-50/50',
+      cardBorder: 'border-yellow-200',
+      cardHover: 'hover:border-yellow-300',
+      dot: 'bg-yellow-500',
+      dotBorder: 'border-yellow-300'
+    }
+  };
+  
+  return colorMap[color] || colorMap.gray;
+};
 
 // Mock data for notes (will be replaced with database later)
 // const mockNotes: Note[] = [];
@@ -110,6 +194,8 @@ export default function NotasPage() {
     if (newExpanded.has(categoryId)) {
       newExpanded.delete(categoryId);
     } else {
+      // Close all other categories when opening a new one
+      newExpanded.clear();
       newExpanded.add(categoryId);
     }
     setExpandedCategories(newExpanded);
@@ -281,10 +367,10 @@ export default function NotasPage() {
                       <div key={category.id} className="mb-1">
                         {/* Category Header */}
                         <div 
-                          className={`flex items-center justify-between px-3 py-2.5 rounded-md transition-colors cursor-pointer ${
+                          className={`flex items-center justify-between px-3 py-2.5 rounded-md transition-colors cursor-pointer border-l-4 ${
                             isSelected 
-                              ? 'bg-gray-100 text-gray-700' 
-                              : 'text-gray-700 hover:bg-gray-100'
+                              ? `bg-gray-100 text-gray-700 ${getCategoryColors(category.color).border}` 
+                              : `text-gray-700 hover:bg-gray-100 ${getCategoryColors(category.color).border}`
                           }`}
                           onClick={() => {
                             handleSelectCategory(category.id as 'todas' | 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea');
@@ -319,19 +405,23 @@ export default function NotasPage() {
                         {/* Notes List for Expanded Category */}
                         {isExpanded && categoryNotes.length > 0 && (
                           <div className="ml-6 mt-1 space-y-1 mb-3">
-                            {categoryNotes.map((note) => (
-                              <motion.div
-                                key={note.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.2 }}
-                                onClick={() => handleSelectNote(note)}
-                                className={`p-3 rounded-lg cursor-pointer transition-all duration-200 border ${
-                                  selectedNote?.id === note.id 
-                                    ? 'bg-gray-100 border-gray-400 shadow-sm' 
-                                    : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm'
-                                }`}
-                              >
+                            {categoryNotes.map((note) => {
+                              const noteCategoryColor = categories.find(cat => cat.id === note.category)?.color || 'gray';
+                              const categoryColors = getCategoryColors(noteCategoryColor);
+                              
+                              return (
+                                <motion.div
+                                  key={note.id}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  onClick={() => handleSelectNote(note)}
+                                  className={`p-3 rounded-lg cursor-pointer transition-all duration-200 border-2 ${
+                                    selectedNote?.id === note.id 
+                                      ? `bg-gray-100 shadow-sm ${categoryColors.cardBorder}` 
+                                      : `bg-white hover:shadow-sm ${categoryColors.cardBorder}`
+                                  }`}
+                                >
                                 <div className="flex items-start justify-between mb-2">
                                   <h4 className="font-semibold text-gray-900 text-sm line-clamp-1 flex-1">
                                     {note.title}
@@ -346,20 +436,34 @@ export default function NotasPage() {
                                 </p>
                                 
                                 <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getPriorityColor(note.priority)}`}>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`px-2 py-1 rounded-full text-[10px] font-semibold border flex items-center gap-1 ${getPriorityColor(note.priority)} ${
+                                      note.priority === 'alta' 
+                                        ? 'border-red-200' 
+                                        : note.priority === 'media'
+                                        ? 'border-yellow-200'
+                                        : 'border-green-200'
+                                    }`}>
+                                      {note.priority === 'alta' && <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
+                                      {note.priority === 'media' && <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>}
+                                      {note.priority === 'baja' && <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>}
                                       {note.priority}
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                                    <Calendar className="h-3 w-3" />
-                                    <span>
-                                      {new Date(note.createdAt).toLocaleDateString()}
+                                  <div className="flex items-center gap-1.5 text-[10px] text-gray-400 bg-gray-50 border border-gray-200 px-2 py-1 rounded-full">
+                                    <Calendar className="h-3 w-3 text-gray-400" />
+                                    <span className="font-semibold text-gray-500">
+                                      {new Date(note.createdAt).toLocaleDateString('es-ES', { 
+                                        day: 'numeric', 
+                                        month: 'short',
+                                        year: 'numeric'
+                                      })}
                                     </span>
                                   </div>
                                 </div>
                               </motion.div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -380,23 +484,56 @@ export default function NotasPage() {
                 /* Selected Note Viewer - Clean Style */
                 <div className="h-full flex flex-col">
                   {/* Note Toolbar */}
-                  <div className="p-4 border-b border-gray-200 bg-gray-50">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className={`px-3 py-1 rounded-lg font-medium ${getPriorityColor(selectedNote.priority)}`}>
-                          {selectedNote.priority} prioridad
-                        </span>
-                        <span className="px-3 py-1 bg-gray-100 rounded-lg font-medium flex items-center gap-2">
+                  <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        {/* Priority Badge */}
+                        <div className={`px-4 py-2 rounded-full font-semibold text-sm shadow-sm border-2 ${getPriorityColor(selectedNote.priority)} ${
+                          selectedNote.priority === 'alta' 
+                            ? 'border-red-200 ring-2 ring-red-100' 
+                            : selectedNote.priority === 'media'
+                            ? 'border-yellow-200 ring-2 ring-yellow-100'
+                            : 'border-green-200 ring-2 ring-green-100'
+                        }`}>
+                          <span className="flex items-center gap-1.5">
+                            {selectedNote.priority === 'alta' && <span className="w-2 h-2 bg-red-500 rounded-full"></span>}
+                            {selectedNote.priority === 'media' && <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>}
+                            {selectedNote.priority === 'baja' && <span className="w-2 h-2 bg-green-500 rounded-full"></span>}
+                            {selectedNote.priority} prioridad
+                          </span>
+                        </div>
+                        
+                        {/* Category Badge */}
+                        <div className={`px-4 py-2 rounded-full font-semibold text-sm shadow-sm border-2 flex items-center gap-2 ${
+                          (() => {
+                            const categoryColor = categories.find(cat => cat.id === selectedNote.category)?.color || 'gray';
+                            const colors = getCategoryColors(categoryColor);
+                            return `${colors.bg} ${colors.text} ${colors.border}`;
+                          })()
+                        }`}>
+                          <div className={`w-2 h-2 rounded-full ${
+                            (() => {
+                              const categoryColor = categories.find(cat => cat.id === selectedNote.category)?.color || 'gray';
+                              const colors = getCategoryColors(categoryColor);
+                              return colors.dot;
+                            })()
+                          }`}></div>
                           {(() => {
                             const categoryIcon = categories.find(cat => cat.id === selectedNote.category)?.icon;
                             const CategoryIcon = categoryIcon || FileText;
-                            return <CategoryIcon className="h-3 w-3" />;
+                            return <CategoryIcon className="h-4 w-4" />;
                           })()}
-                          {selectedNote.category}
-                        </span>
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <Calendar className="h-3 w-3" />
-                          <span>{new Date(selectedNote.updatedAt).toLocaleDateString()}</span>
+                          <span className="capitalize">{selectedNote.category}</span>
+                        </div>
+                        
+                        {/* Date Badge */}
+                        <div className="px-4 py-2 bg-white rounded-full font-medium text-sm text-gray-700 shadow-sm border border-gray-200 flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <span>{new Date(selectedNote.updatedAt).toLocaleDateString('es-ES', { 
+                            day: 'numeric', 
+                            month: 'short', 
+                            year: 'numeric' 
+                          })}</span>
                         </div>
                       </div>
                       
@@ -487,6 +624,13 @@ export default function NotasPage() {
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm bg-white hover:border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent cursor-pointer shadow-sm transition-colors"
                           >
+                            <div className={`w-2 h-2 rounded-full ${
+                              (() => {
+                                const categoryColor = categories.find(cat => cat.id === newNoteCategory)?.color || 'gray';
+                                const colors = getCategoryColors(categoryColor);
+                                return colors.dot;
+                              })()
+                            }`}></div>
                             {(() => {
                               const categoryIcon = categories.find(cat => cat.id === newNoteCategory)?.icon;
                               const CategoryIcon = categoryIcon || User;
@@ -501,6 +645,7 @@ export default function NotasPage() {
                             <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                               {categories.slice(1).map((category) => {
                                 const Icon = category.icon;
+                                const colors = getCategoryColors(category.color);
                                 return (
                                   <button
                                     key={category.id}
@@ -512,8 +657,9 @@ export default function NotasPage() {
                                       newNoteCategory === category.id ? 'bg-purple-100 text-purple-700' : 'text-gray-700'
                                     }`}
                                   >
+                                    <div className={`w-2 h-2 rounded-full ${colors.dot}`}></div>
                                     <Icon className={`h-4 w-4 ${newNoteCategory === category.id ? 'text-purple-600' : 'text-gray-500'}`} />
-                                    <span>{category.name}</span>
+                                    <span className="font-medium">{category.name}</span>
                                     {newNoteCategory === category.id && (
                                       <Check className="h-4 w-4 text-purple-600 ml-auto" />
                                     )}

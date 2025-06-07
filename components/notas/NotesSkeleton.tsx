@@ -15,351 +15,293 @@ export default function NotesSkeleton() {
     ease: "easeInOut"
   };
 
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   const staggerContainer = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.1
+        staggerChildren: 0.1
       }
     }
   };
 
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.5 }
-    }
+  const slideInLeft = {
+    hidden: { opacity: 0, x: -30 },
+    visible: { opacity: 1, x: 0 }
+  };
+
+  const slideInRight = {
+    hidden: { opacity: 0, x: 30 },
+    visible: { opacity: 1, x: 0 }
   };
 
   return (
-    <div className="h-screen bg-gray-50 overflow-hidden">
-      {/* Header Skeleton - Matching NotesHeader layout */}
+    <motion.div 
+      className="h-screen bg-gray-50 overflow-hidden"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      {/* Header Skeleton */}
       <motion.div 
         className="max-w-[1400px] mx-auto py-6 px-4 sm:px-6 lg:px-8 mb-2"
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
+        variants={fadeInUp}
       >
-        <motion.div 
-          className="bg-white rounded-xl shadow-md border border-gray-100 p-6"
-          variants={fadeInUp}
-        >
-          <div className="flex flex-col md:flex-row gap-6 justify-between">
-            <div className="flex items-center">
-              <motion.div 
-                className="bg-gray-200 p-3 rounded-lg mr-4 shadow-sm border border-gray-200"
-                variants={shimmer}
-                initial="hidden"
-                animate="visible"
-                transition={shimmerTransition}
-              >
-                <div className="h-6 w-6 bg-gray-400 rounded"></div>
-              </motion.div>
-              <div>
-                <div className="flex items-center gap-3 mb-2">
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+          <div>
+            <div className="flex flex-col md:flex-row gap-6 justify-between">
+              <div className="flex items-center">
+                {/* Icon placeholder */}
+                <motion.div 
+                  className="h-12 w-12 bg-gray-300 rounded-lg mr-4"
+                  variants={shimmer}
+                  initial="hidden"
+                  animate="visible"
+                  transition={shimmerTransition}
+                />
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    {/* Title */}
+                    <motion.div 
+                      className="h-8 w-32 bg-gray-300 rounded"
+                      variants={shimmer}
+                      initial="hidden"
+                      animate="visible"
+                      transition={shimmerTransition}
+                    />
+                    {/* Badge placeholders */}
+                    <div className="flex gap-2">
+                      <motion.div 
+                        className="h-6 w-16 bg-gray-300 rounded-full"
+                        variants={shimmer}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ ...shimmerTransition, delay: 0.1 }}
+                      />
+                      <motion.div 
+                        className="h-6 w-16 bg-gray-300 rounded-full"
+                        variants={shimmer}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ ...shimmerTransition, delay: 0.15 }}
+                      />
+                    </div>
+                  </div>
+                  {/* Description */}
                   <motion.div 
-                    className="h-8 w-32 bg-gray-300 rounded"
+                    className="h-4 w-80 bg-gray-300 rounded mt-2"
+                    variants={shimmer}
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ ...shimmerTransition, delay: 0.1 }}
+                  />
+                </div>
+              </div>
+              
+              {/* Search bar */}
+              <div className="flex-1 max-w-md">
+                <motion.div 
+                  className="h-10 w-full bg-gray-300 rounded-lg"
+                  variants={shimmer}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ ...shimmerTransition, delay: 0.2 }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Main Content */}
+      <motion.div 
+        className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2"
+        variants={fadeInUp}
+        transition={{ delay: 0.2 }}
+      >
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full">
+          <div className="flex h-full">
+            
+            {/* Left Sidebar */}
+            <motion.div 
+              className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col"
+              variants={slideInLeft}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="p-4 border-b border-gray-200 flex-1 overflow-y-auto">
+                
+                {/* Categories Header */}
+                <div className="flex items-center gap-3 mb-4 px-2">
+                  <motion.div 
+                    className="h-8 w-8 bg-gray-300 rounded-lg"
                     variants={shimmer}
                     initial="hidden"
                     animate="visible"
                     transition={shimmerTransition}
                   />
-                  <div className="flex gap-2">
-                    <motion.div 
-                      className="h-6 w-16 bg-gray-300 rounded-full"
-                      variants={shimmer}
-                      initial="hidden"
-                      animate="visible"
-                      transition={{ ...shimmerTransition, delay: 0.1 }}
-                    />
-                    <motion.div 
-                      className="h-6 w-20 bg-gray-300 rounded-full"
-                      variants={shimmer}
-                      initial="hidden"
-                      animate="visible"
-                      transition={{ ...shimmerTransition, delay: 0.2 }}
-                    />
-                  </div>
+                  <motion.div 
+                    className="h-6 w-24 bg-gray-300 rounded"
+                    variants={shimmer}
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ ...shimmerTransition, delay: 0.1 }}
+                  />
                 </div>
-                <motion.div 
-                  className="h-4 w-96 bg-gray-300 rounded mt-2"
-                  variants={shimmer}
-                  initial="hidden"
-                  animate="visible"
-                  transition={{ ...shimmerTransition, delay: 0.3 }}
-                />
-              </div>
-            </div>
-            
-            {/* Search bar skeleton */}
-            <motion.div 
-              className="flex items-center gap-4"
-              variants={fadeInUp}
-            >
-              <motion.div 
-                className="h-12 w-80 bg-gray-300 rounded-lg"
-                variants={shimmer}
-                initial="hidden"
-                animate="visible"
-                transition={{ ...shimmerTransition, delay: 0.4 }}
-              />
-            </motion.div>
-          </div>
-        </motion.div>
-      </motion.div>
 
-      {/* Main Content Container */}
-      <motion.div 
-        className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2"
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
-      >
-        <motion.div 
-          className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full"
-          variants={fadeInUp}
-        >
-          <div className="flex h-full">
-            
-            {/* Left Sidebar Skeleton */}
-            <motion.div 
-              className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col"
-              variants={fadeInUp}
-            >
-              
-              {/* Categories Section */}
-              <div className="p-4 border-b border-gray-200 flex-1 overflow-y-auto">
-                {/* Categories Header */}
-                <div className="flex items-center justify-between mb-4 px-2">
-                  <div className="flex items-center gap-3">
-                    <motion.div 
-                      className="bg-gray-200 p-2 rounded-lg shadow-sm border border-gray-200"
-                      variants={shimmer}
-                      initial="hidden"
-                      animate="visible"
-                      transition={shimmerTransition}
-                    >
-                      <div className="h-4 w-4 bg-gray-400 rounded"></div>
-                    </motion.div>
-                    <motion.div 
-                      className="h-5 w-24 bg-gray-300 rounded"
-                      variants={shimmer}
-                      initial="hidden"
-                      animate="visible"
-                      transition={{ ...shimmerTransition, delay: 0.1 }}
-                    />
-                  </div>
-                </div>
-                
-                {/* Separator line */}
                 <div className="border-b border-gray-200 mb-4"></div>
                 
-                {/* Categories List */}
+                {/* Category Items - All Closed */}
                 <motion.div 
                   className="space-y-1"
                   variants={staggerContainer}
                 >
-                  {[...Array(6)].map((_, categoryIndex) => (
+                  {Array.from({ length: 6 }, (_, i) => (
                     <motion.div 
-                      key={categoryIndex}
+                      key={i} 
+                      className="mb-1"
                       variants={fadeInUp}
+                      transition={{ delay: i * 0.1 }}
                     >
-                      {/* Category Header */}
-                      <div className="flex items-center justify-between px-3 py-2.5 rounded-md bg-gray-100">
-                        <div className="flex items-center gap-3">
-                          {categoryIndex !== 0 && (
-                            <motion.div 
-                              className="h-4 w-4 bg-gray-300 rounded"
-                              variants={shimmer}
-                              initial="hidden"
-                              animate="visible"
-                              transition={{ ...shimmerTransition, delay: categoryIndex * 0.1 }}
-                            />
+                      {/* Category Header with border-l-4 style */}
+                      <motion.div 
+                        className="flex items-center justify-between px-3 py-2.5 rounded-md border-l-4 border-gray-300"
+                        variants={shimmer}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ ...shimmerTransition, delay: 0.1 * i }}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          {/* Chevron for expandable categories (skip first one - "Todas") */}
+                          {i !== 0 && (
+                            <div className="w-5 h-5 flex items-center justify-center">
+                              <div className="h-4 w-4 bg-gray-300 rounded"></div>
+                            </div>
                           )}
-                          <motion.div 
-                            className="h-5 w-5 bg-gray-300 rounded"
-                            variants={shimmer}
-                            initial="hidden"
-                            animate="visible"
-                            transition={{ ...shimmerTransition, delay: categoryIndex * 0.1 + 0.05 }}
-                          />
-                          <motion.div 
-                            className="h-4 w-20 bg-gray-300 rounded"
-                            variants={shimmer}
-                            initial="hidden"
-                            animate="visible"
-                            transition={{ ...shimmerTransition, delay: categoryIndex * 0.1 + 0.1 }}
-                          />
+                          <div className="h-5 w-5 bg-gray-300 rounded"></div>
+                          <div className="h-4 w-20 bg-gray-300 rounded"></div>
                         </div>
-                        <motion.div 
-                          className="h-5 w-6 bg-gray-300 rounded-full"
-                          variants={shimmer}
-                          initial="hidden"
-                          animate="visible"
-                          transition={{ ...shimmerTransition, delay: categoryIndex * 0.1 + 0.15 }}
-                        />
-                      </div>
+                        <div className="h-5 w-6 bg-gray-300 rounded-full"></div>
+                      </motion.div>
 
-                      {/* Notes List for expanded categories */}
-                      {categoryIndex < 2 && (
-                        <div className="ml-6 mt-1 space-y-1 mb-3">
-                          {[...Array(2)].map((_, noteIndex) => (
-                            <motion.div 
-                              key={noteIndex}
-                              className="p-3 rounded-lg bg-white border border-gray-200"
-                              variants={fadeInUp}
-                            >
-                              <div className="flex items-start justify-between mb-2">
-                                <motion.div 
-                                  className="h-4 w-32 bg-gray-300 rounded"
-                                  variants={shimmer}
-                                  initial="hidden"
-                                  animate="visible"
-                                  transition={{ ...shimmerTransition, delay: (categoryIndex * 2 + noteIndex) * 0.1 }}
-                                />
-                                <motion.div 
-                                  className="h-3 w-3 bg-gray-300 rounded"
-                                  variants={shimmer}
-                                  initial="hidden"
-                                  animate="visible"
-                                  transition={{ ...shimmerTransition, delay: (categoryIndex * 2 + noteIndex) * 0.1 + 0.05 }}
-                                />
-                              </div>
-                              
-                              <div className="space-y-1 mb-2">
-                                <motion.div 
-                                  className="h-3 w-full bg-gray-300 rounded"
-                                  variants={shimmer}
-                                  initial="hidden"
-                                  animate="visible"
-                                  transition={{ ...shimmerTransition, delay: (categoryIndex * 2 + noteIndex) * 0.1 + 0.1 }}
-                                />
-                                <motion.div 
-                                  className="h-3 w-3/4 bg-gray-300 rounded"
-                                  variants={shimmer}
-                                  initial="hidden"
-                                  animate="visible"
-                                  transition={{ ...shimmerTransition, delay: (categoryIndex * 2 + noteIndex) * 0.1 + 0.15 }}
-                                />
-                              </div>
-                              
-                              <div className="flex items-center justify-between">
-                                <motion.div 
-                                  className="h-3 w-12 bg-gray-300 rounded-full"
-                                  variants={shimmer}
-                                  initial="hidden"
-                                  animate="visible"
-                                  transition={{ ...shimmerTransition, delay: (categoryIndex * 2 + noteIndex) * 0.1 + 0.2 }}
-                                />
-                                <motion.div 
-                                  className="h-3 w-16 bg-gray-300 rounded"
-                                  variants={shimmer}
-                                  initial="hidden"
-                                  animate="visible"
-                                  transition={{ ...shimmerTransition, delay: (categoryIndex * 2 + noteIndex) * 0.1 + 0.25 }}
-                                />
-                              </div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      )}
+                      {/* No expanded notes - all categories closed */}
                     </motion.div>
                   ))}
                 </motion.div>
               </div>
             </motion.div>
 
-            {/* Right Main Content Skeleton */}
+            {/* Right Main Content - New Note Creation Interface */}
             <motion.div 
-              className="flex-1 bg-white flex flex-col"
-              variants={fadeInUp}
+              className="flex-1 bg-white"
+              variants={slideInRight}
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
-              {/* Note Editor Header */}
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-4 text-sm">
+              <div className="h-full flex flex-col">
+                
+                {/* New Note Toolbar */}
+                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                  <div className="flex items-center justify-between mb-3">
+                    {/* Category and Priority Dropdowns */}
+                    <div className="flex items-center gap-3">
+                      <motion.div 
+                        className="h-10 w-32 bg-gray-300 rounded-lg"
+                        variants={shimmer}
+                        initial="hidden"
+                        animate="visible"
+                        transition={shimmerTransition}
+                      />
+                      <motion.div 
+                        className="h-10 w-24 bg-gray-300 rounded-lg"
+                        variants={shimmer}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ ...shimmerTransition, delay: 0.1 }}
+                      />
+                      <motion.div 
+                        className="h-10 w-10 bg-gray-300 rounded-lg"
+                        variants={shimmer}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ ...shimmerTransition, delay: 0.2 }}
+                      />
+                    </div>
+                    
+                    {/* Save button */}
                     <motion.div 
-                      className="h-6 w-24 bg-gray-300 rounded-lg"
-                      variants={shimmer}
-                      initial="hidden"
-                      animate="visible"
-                      transition={shimmerTransition}
-                    />
-                    <motion.div 
-                      className="h-6 w-20 bg-gray-300 rounded-lg"
-                      variants={shimmer}
-                      initial="hidden"
-                      animate="visible"
-                      transition={{ ...shimmerTransition, delay: 0.1 }}
-                    />
-                    <motion.div 
-                      className="h-6 w-24 bg-gray-300 rounded-lg"
-                      variants={shimmer}
-                      initial="hidden"
-                      animate="visible"
-                      transition={{ ...shimmerTransition, delay: 0.2 }}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <motion.div 
-                      className="h-8 w-8 bg-gray-300 rounded"
+                      className="h-10 w-20 bg-gray-300 rounded-lg"
                       variants={shimmer}
                       initial="hidden"
                       animate="visible"
                       transition={{ ...shimmerTransition, delay: 0.3 }}
                     />
+                  </div>
+                  
+                  {/* Rich Text Toolbar */}
+                  <motion.div 
+                    className="flex items-center gap-1 p-2 bg-white rounded-lg border border-gray-200"
+                    variants={shimmer}
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ ...shimmerTransition, delay: 0.2 }}
+                  >
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <motion.div 
+                        key={i} 
+                        className="h-6 w-6 bg-gray-300 rounded"
+                        variants={shimmer}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ ...shimmerTransition, delay: 0.3 + i * 0.05 }}
+                      />
+                    ))}
+                  </motion.div>
+                </div>
+                
+                {/* Note Content Area */}
+                <div className="flex-1 flex flex-col bg-white">
+                  {/* Title */}
+                  <div className="p-6 pb-3">
                     <motion.div 
-                      className="h-8 w-8 bg-gray-300 rounded"
+                      className="h-8 w-1/2 bg-gray-300 rounded"
                       variants={shimmer}
                       initial="hidden"
                       animate="visible"
                       transition={{ ...shimmerTransition, delay: 0.4 }}
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Note Content Area */}
-              <div className="flex-1 p-6">
-                <motion.div 
-                  className="space-y-4"
-                  variants={staggerContainer}
-                >
-                  {/* Title */}
-                  <motion.div 
-                    className="h-8 w-1/2 bg-gray-300 rounded"
-                    variants={shimmer}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ ...shimmerTransition, delay: 0.3 }}
-                  />
+                  
+                  {/* Divider */}
+                  <div className="border-t border-gray-200 mx-6"></div>
                   
                   {/* Content lines */}
-                  <div className="space-y-3 mt-8">
-                    {Array.from({ length: 8 }, (_, i) => (
-                      <motion.div 
-                        key={i} 
-                        className={`h-4 bg-gray-300 rounded ${
-                          i === 7 ? 'w-2/3' : i === 5 ? 'w-4/5' : 'w-full'
-                        }`}
-                        variants={shimmer}
-                        initial="hidden"
-                        animate="visible"
-                        transition={{ ...shimmerTransition, delay: 0.4 + i * 0.1 }}
-                      />
-                    ))}
+                  <div className="flex-1 p-6 pt-3">
+                    <motion.div 
+                      className="space-y-3"
+                      variants={staggerContainer}
+                    >
+                      {Array.from({ length: 8 }, (_, i) => (
+                        <motion.div 
+                          key={i} 
+                          className={`h-4 bg-gray-300 rounded ${
+                            i === 7 ? 'w-2/3' : i === 5 ? 'w-4/5' : 'w-full'
+                          }`}
+                          variants={fadeInUp}
+                          transition={{ delay: 0.5 + i * 0.1 }}
+                        />
+                      ))}
+                    </motion.div>
                   </div>
-                </motion.div>
+                </div>
               </div>
             </motion.div>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
