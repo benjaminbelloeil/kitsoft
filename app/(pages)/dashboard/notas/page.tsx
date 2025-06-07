@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import NotesHeader from "@/components/notas/NotesHeader";
 import NotesSkeleton from "@/components/notas/NotesSkeleton";
-import { Pin, Trash2, ChevronDown, ChevronRight, Bold, Italic, Underline, List, AlignLeft, ImageIcon, User, Briefcase, Rocket, Users, Lightbulb, FileText, FolderOpen, Calendar, Check } from "lucide-react";
+import { Pin, Trash2, ChevronDown, ChevronRight, User, Briefcase, Rocket, Users, Lightbulb, FileText, FolderOpen, Calendar, Check } from "lucide-react";
 import { Note } from "@/interfaces/note";
 import { getUserNotes, createNote, updateNote, deleteNote } from "@/utils/database/client/notesSync";
 import { createClient } from "@/utils/supabase/client";
@@ -483,7 +483,7 @@ export default function NotasPage() {
               {selectedNote ? (
                 /* Selected Note Viewer - Clean Style */
                 <div className="h-full flex flex-col">
-                  {/* Note Toolbar */}
+                    {/* Note Toolbar */}
                   <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -557,30 +557,6 @@ export default function NotasPage() {
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                    </div>
-                    
-                    {/* Rich Text Toolbar */}
-                    <div className="flex items-center gap-1 p-2 bg-white rounded-lg border border-gray-200">
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Negrita">
-                        <Bold className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Cursiva">
-                        <Italic className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Subrayado">
-                        <Underline className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Lista">
-                        <List className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Alineación">
-                        <AlignLeft className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Imagen">
-                        <ImageIcon className="h-4 w-4 text-gray-600" />
-                      </button>
                     </div>
                   </div>
                   
@@ -746,30 +722,6 @@ export default function NotasPage() {
                           )}
                         </button>
                       </div>
-                    </div>
-                    
-                    {/* Rich Text Toolbar */}
-                    <div className="flex items-center gap-1 p-2 bg-white rounded-lg border border-gray-200">
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Negrita">
-                        <Bold className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Cursiva">
-                        <Italic className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Subrayado">
-                        <Underline className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Lista">
-                        <List className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Alineación">
-                        <AlignLeft className="h-4 w-4 text-gray-600" />
-                      </button>
-                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Imagen">
-                        <ImageIcon className="h-4 w-4 text-gray-600" />
-                      </button>
                     </div>
                   </div>
                   
