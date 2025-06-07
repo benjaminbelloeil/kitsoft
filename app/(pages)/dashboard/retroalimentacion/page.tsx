@@ -587,13 +587,13 @@ export default function FeedbackPage() {
                 </div>
                 
                 <div className="flex-grow flex items-center justify-center p-4 bg-[#10B98102]">
-                  <div className="relative h-[250px] w-[250px]">
+                  <div className="relative h-[300px] w-[300px]">
                     <svg width="100%" height="100%" viewBox="0 0 100 100" className="absolute inset-0">
                       {/* Grid pentagons */}
                       {[1, 2, 3, 4, 5].map((level) => {
                         const pentagonPoints = Array.from({ length: 5 }, (_, i) => {
                           const angle = (i / 5) * 2 * Math.PI - Math.PI / 2;
-                          const radius = level * 8;
+                          const radius = level * 8.5;
                           const x = 50 + radius * Math.cos(angle);
                           const y = 50 + radius * Math.sin(angle);
                           return `${x},${y}`;
@@ -619,8 +619,8 @@ export default function FeedbackPage() {
                             key={i}
                             x1="50"
                             y1="50"
-                            x2={50 + 40 * Math.cos(angle)}
-                            y2={50 + 40 * Math.sin(angle)}
+                            x2={50 + 42.5 * Math.cos(angle)}
+                            y2={50 + 42.5 * Math.sin(angle)}
                             stroke="#e5e7eb"
                             strokeWidth="1"
                           />
@@ -632,7 +632,7 @@ export default function FeedbackPage() {
                         points={
                           skillRatings.map((skill, i) => {
                             const angle = (i / skillRatings.length) * 2 * Math.PI - Math.PI / 2;
-                            const radius = (skill.value / 5) * 40;
+                            const radius = (skill.value / 5) * 42.5;
                             return `${50 + radius * Math.cos(angle)},${50 + radius * Math.sin(angle)}`;
                           }).join(' ')
                         }
@@ -644,7 +644,7 @@ export default function FeedbackPage() {
                       {/* Data points */}
                       {skillRatings.map((skill, i) => {
                         const angle = (i / skillRatings.length) * 2 * Math.PI - Math.PI / 2;
-                        const radius = (skill.value / 5) * 40;
+                        const radius = (skill.value / 5) * 42.5;
                         return (
                           <g key={i}>
                             <circle
@@ -678,15 +678,15 @@ export default function FeedbackPage() {
                     {/* Skill labels */}
                     {skillRatings.map((skill, i) => {
                       const angle = (i / skillRatings.length) * 2 * Math.PI - Math.PI / 2;
-                      // Adjust radius based on specific skills
-                      let radius = 48; // Default position
+                      // Adjust radius based on specific skills for larger pentagon
+                      let radius = 50; // Default position (increased from 48)
                       
                       // Specific adjustments for each skill
-                      if (skill.name === 'Comunicación') radius = 45; // Closer to pentagon
-                      else if (skill.name === 'Colaboración') radius = 50; // Slightly more space
-                      else if (skill.name === 'Cumplimiento') radius = 48; // Default
-                      else if (skill.name === 'Calidad') radius = 54; // Further out
-                      else if (skill.name === 'General') radius = 54; // Further out
+                      if (skill.name === 'Comunicación') radius = 47; // Closer to pentagon (increased from 45)
+                      else if (skill.name === 'Colaboración') radius = 52; // Slightly more space (increased from 50)
+                      else if (skill.name === 'Cumplimiento') radius = 50; // Default (increased from 48)
+                      else if (skill.name === 'Calidad') radius = 56; // Further out (increased from 54)
+                      else if (skill.name === 'General') radius = 56; // Further out (increased from 54)
                       
                       const x = 50 + radius * Math.cos(angle);
                       const y = 50 + radius * Math.sin(angle);
