@@ -35,16 +35,16 @@ export default function FeedbackList({
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <div 
-        className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col hover:shadow-md transition-shadow duration-300"
+        className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col"
       >
         <div 
-          className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center"
+          className="p-4 border-b border-gray-100 bg-white flex items-center"
         >
           <div className="flex items-center">
             <div
-              className="w-8 h-8 bg-gradient-to-br from-[#F59E0B10] to-[#F59E0B20] rounded-full flex items-center justify-center mr-3 shadow-sm border border-[#F59E0B10]"
+              className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center mr-3"
             >
-              <Star className="w-4 h-4 text-[#F59E0B]" />
+              <Star className="w-4 h-4 text-orange-500" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-800">
@@ -87,21 +87,24 @@ export default function FeedbackList({
               ))}
             </motion.div>
           ) : (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center min-h-[400px]">
               <motion.div 
                 className="text-center p-8"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
               >
-                <FiStar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500 text-xs">Los comentarios de tu equipo aparecerán aquí cuando recibas retroalimentación</p>
+                <div className="bg-orange-500/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <FiStar className="h-8 w-8 text-orange-500" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">¡Próximamente tendrás feedback!</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">Los comentarios de tu equipo aparecerán aquí cuando recibas retroalimentación</p>
               </motion.div>
             </div>
           )}
         </div>
         
-        <div className="p-3 border-t border-gray-100 bg-[#F59E0B05] flex justify-center">
+        <div className="p-3 border-t border-gray-100 bg-white flex justify-center">
           {totalPages > 1 && (
             <div 
               className="flex items-center gap-2"

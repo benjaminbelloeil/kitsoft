@@ -18,8 +18,6 @@ export default function FeedbackHeader({ avgRating, getCurrentPeriod }: Feedback
     >
       <motion.div 
         className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden"
-        whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
-        transition={{ duration: 0.3 }}
       >
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row gap-6 justify-between">
@@ -31,8 +29,6 @@ export default function FeedbackHeader({ avgRating, getCurrentPeriod }: Feedback
             >
               <motion.div 
                 className="bg-gradient-to-br from-[#A100FF20] to-[#A100FF10] p-3 rounded-lg mr-4 shadow-sm"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ duration: 0.3 }}
               >
                 <FiStar size={24} className="text-[#A100FF]" />
               </motion.div>
@@ -64,8 +60,6 @@ export default function FeedbackHeader({ avgRating, getCurrentPeriod }: Feedback
             >
               <motion.div 
                 className="bg-gray-50 px-4 py-2 rounded-lg border border-gray-200"
-                whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
-                transition={{ duration: 0.3 }}
               >
                 <p className="text-sm text-gray-600">Último periodo evaluado</p>
                 <p className="text-lg font-bold text-gray-900">{getCurrentPeriod()}</p>

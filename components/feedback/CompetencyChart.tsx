@@ -77,6 +77,50 @@ export default function CompetencyChart({
     }
   };
 
+  // If no feedback data, show empty state like FeedbackList
+  if (feedbackItemsLength === 0) {
+    return (
+      <motion.div 
+        className="lg:col-span-5"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+      >
+        <motion.div 
+          className="bg-white rounded-lg shadow-sm border border-gray-100 h-full overflow-hidden flex flex-col"
+        >
+          <div className="p-4 border-b border-gray-100 bg-white">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center mr-3">
+                <TrendingUp className="w-4 h-4 text-green-500" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Evolución de competencias
+                </h2>
+                <p className="text-xs text-gray-500">
+                  Seguimiento de tu progreso profesional
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex-grow flex flex-col items-center justify-center p-8 bg-white min-h-[400px]">
+            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+              <TrendingUp className="w-8 h-8 text-green-500" />
+            </div>
+            <h3 className="text-sm font-semibold text-gray-800 mb-2">
+              Sin retroalimentación
+            </h3>
+            <p className="text-gray-500 text-center max-w-sm text-sm leading-relaxed">
+              Aún no tienes evaluaciones de competencias. Cuando recibas tu primera retroalimentación, aquí verás tu evolución profesional.
+            </p>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div 
       className="lg:col-span-5"
@@ -86,13 +130,11 @@ export default function CompetencyChart({
     >
       <motion.div 
         className="bg-white rounded-lg shadow-sm border border-gray-100 h-full overflow-hidden flex flex-col"
-        whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
-        transition={{ duration: 0.3 }}
       >
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#10B98110] to-[#10B98120] rounded-full flex items-center justify-center mr-3 shadow-sm border border-[#10B98110]">
-              <TrendingUp className="w-4 h-4 text-[#10B981]" />
+            <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center mr-3">
+              <TrendingUp className="w-4 h-4 text-green-500" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-800">
@@ -105,7 +147,7 @@ export default function CompetencyChart({
           </div>
         </div>
         
-        <div className="flex-grow flex items-center justify-center p-4 bg-[#10B98102]">
+        <div className="flex-grow flex items-center justify-center p-4 bg-[#10B98102] min-h-[400px]">
           <div className="relative h-[300px] w-[300px]">
             <svg width="100%" height="100%" viewBox="0 0 100 100" className="absolute inset-0">
               {/* Grid pentagons */}
