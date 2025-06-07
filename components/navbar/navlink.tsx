@@ -49,6 +49,8 @@ export default function NavLink() {
                 return <FiFolder className="size-5 shrink-0" />;
             case "calendar":
                 return <FiCalendar className="size-5 shrink-0" />;
+            case "notes":
+                return <FiFileText className="size-5 shrink-0" />;
             case "profile":
                 return <FiUser className="size-5 shrink-0" />;
             case "settings":

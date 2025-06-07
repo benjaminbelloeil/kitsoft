@@ -5,8 +5,6 @@
 import Link from "next/link";
 import { 
   SearchIcon, 
-  MessageSquare, 
-  HelpCircle, 
   Bell,
   X as CloseIcon
 } from "lucide-react";
@@ -14,7 +12,13 @@ import { useNotifications } from '@/context/notification-context';
 import { useState } from 'react';
 import PlaceholderAvatar from "@/components/ui/placeholder-avatar";
 
-export default function Header({ userData }: { userData: any }) {
+interface HeaderProps {
+  userData: any;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+}
+
+export default function Header({ userData, searchQuery = "", onSearchChange }: HeaderProps) {
   // Access notifications from context
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
@@ -53,30 +57,22 @@ export default function Header({ userData }: { userData: any }) {
             </div>
           </div>
           
-          {/* Search bar with enhanced styling */}
-          <div className="flex-1 ml-auto md:mr-auto max-w-md relative">
+          {/* Extended Search bar with enhanced styling */}
+          <div className="flex-1 ml-auto md:mr-auto max-w-2xl relative">
             <div className="relative group">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#A100FF] transition-colors" />
               <input
                 type="search"
-                placeholder="Buscar..."
-                className="w-full py-1.5 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF80] transition-colors"
+                placeholder="Buscar proyectos, tareas, notas..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                className="w-full py-2 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF80] transition-all duration-200 hover:bg-gray-100 focus:bg-white"
               />
             </div>
           </div>
           
           {/* Navigation controls with improved hover effects */}
           <div className="flex items-center space-x-3">
-            {/* Message icon */}
-            <button className="p-2 text-gray-500 hover:text-[#A100FF] hover:bg-[#A100FF10] rounded-lg transition-colors">
-              <MessageSquare className="h-5 w-5" />
-            </button>
-            
-            {/* Help icon */}
-            <button className="p-2 text-gray-500 hover:text-[#A100FF] hover:bg-[#A100FF10] rounded-lg transition-colors">
-              <HelpCircle className="h-5 w-5" />
-            </button>
-            
             {/* Enhanced Notification Bell */}
             <div className="relative">
               <button 
