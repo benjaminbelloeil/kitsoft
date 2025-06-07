@@ -30,6 +30,7 @@ export default function ProjectLeadPage() {
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [editingUserAssignment, setEditingUserAssignment] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
   // Use the toast notification system
   const notifications = useNotificationState();
   const supabase = createClient();
@@ -235,41 +236,54 @@ export default function ProjectLeadPage() {
   // Handle feedback submission
   const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
-	// TODO: connect to backend!!
+    
+    if (!selectedProject || !selectedRecipient || !rating || categories.length === 0 || !message) {
+      notifications.showError("Por favor completa todos los campos requeridos");
+      return;
+    }
 
-	const values = {
-		mensaje: message,
-		valoracion: rating,
-		id_usuario: selectedRecipient,
-		id_autor: userId,
-		id_proyecto: selectedProject,
-		categorias: categories
-	}
+    setSubmittingFeedback(true);
 
-	const response = await fetch('/api/retroalimentacion',
-		{
-			method: "POST",
-			headers: {
-	          'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(values)
-		}
-	)
+    try {
+      const values = {
+        mensaje: message,
+        valoracion: rating,
+        id_usuario: selectedRecipient,
+        id_autor: userId,
+        id_proyecto: selectedProject,
+        categorias: categories
+      }
 
-	if (response.ok) {
-	    // Reset form
-	    setSelectedProject("");
-	    setSelectedRecipient("");
-	    setRating(0);
-	    setCategories([]);
-	    setMessage("");
-	    
-	    // Show success notification using the toast system
-	    notifications.showSuccess("Retroalimentación enviada con éxito!");
-	}
-	else {
-	    notifications.showError("Error enviando la retroalimentación");
-	}
+      const response = await fetch('/api/retroalimentacion',
+        {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values)
+        }
+      )
+
+      if (response.ok) {
+        // Reset form
+        setSelectedProject("");
+        setSelectedRecipient("");
+        setRating(0);
+        setCategories([]);
+        setMessage("");
+        
+        // Show success notification using the toast system
+        notifications.showSuccess("Retroalimentación enviada con éxito!");
+      }
+      else {
+        notifications.showError("Error enviando la retroalimentación");
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      notifications.showError("Error enviando la retroalimentación");
+    } finally {
+      setSubmittingFeedback(false);
+    }
   };
 
   // Helper function to calculate real-time user cargabilidad percentage
@@ -735,7 +749,7 @@ export default function ProjectLeadPage() {
                     
                     <motion.form 
                       onSubmit={handleSubmitFeedback} 
-                      className="p-6 flex flex-col h-full"
+                      className={`p-6 flex flex-col h-full ${submittingFeedback ? 'pointer-events-none opacity-75' : ''}`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5, delay: 0.6 }}
@@ -934,20 +948,31 @@ export default function ProjectLeadPage() {
                       {/* Submit button */}
                       <motion.button
                         type="submit"
-                        disabled={!selectedProject || !selectedRecipient || !rating || categories.length === 0 || !message}
+                        disabled={!selectedProject || !selectedRecipient || !rating || categories.length === 0 || !message || submittingFeedback}
                         className={`w-full py-3 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                           selectedProject && selectedRecipient && rating && categories.length > 0 && message
-                            ? "bg-gradient-to-r from-[#3B82F6] to-[#6366F1] hover:from-[#2563EB] hover:to-[#4F46E5] shadow-md text-white" 
+                            ? submittingFeedback
+                              ? "bg-gradient-to-r from-[#3B82F6] to-[#6366F1] shadow-md text-white cursor-wait"
+                              : "bg-gradient-to-r from-[#3B82F6] to-[#6366F1] hover:from-[#2563EB] hover:to-[#4F46E5] shadow-md text-white" 
                             : "bg-gray-200 cursor-not-allowed text-gray-500"
                         }`}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 1.7 }}
-                        whileHover={selectedProject && selectedRecipient && rating && categories.length > 0 && message ? { scale: 1.02 } : {}}
-                        whileTap={selectedProject && selectedRecipient && rating && categories.length > 0 && message ? { scale: 0.98 } : {}}
+                        whileHover={selectedProject && selectedRecipient && rating && categories.length > 0 && message && !submittingFeedback ? { scale: 1.02 } : {}}
+                        whileTap={selectedProject && selectedRecipient && rating && categories.length > 0 && message && !submittingFeedback ? { scale: 0.98 } : {}}
                       >
-                        <Send className="h-4 w-4" />
-                        <span>Enviar Retroalimentación</span>
+                        {submittingFeedback ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            <span>Enviando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4" />
+                            <span>Enviar Retroalimentación</span>
+                          </>
+                        )}
                       </motion.button>
                     </motion.form>
                   </motion.div>

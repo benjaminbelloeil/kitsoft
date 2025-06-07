@@ -416,28 +416,32 @@ export default function DashboardPage() {
 
   // Filter components based on search
   const showProjects = shouldShowComponent("proyectos", [
-    "proyectos", "mis proyectos", "carga", "horas", "trabajo", "deadlines",
+    "proyectos", "mis proyectos", "carga", "horas", "trabajo", "deadlines", "projects",
     ...projects.map(p => p.name.toLowerCase())
   ]);
 
   const showTasks = shouldShowComponent("tareas", [
-    "tareas", "pendientes", "urgentes", "trabajo", "asignaciones", "to-do"
+    "tareas", "pendientes", "urgentes", "trabajo", "asignaciones", "to-do", "tasks", "tareas urgentes"
   ]);
 
   const showWorkSummary = shouldShowComponent("resumen", [
-    "resumen", "trabajo", "semanal", "carga", "horas", "rendimiento", "productividad"
+    "resumen", "trabajo", "semanal", "carga", "horas", "rendimiento", "productividad",
+    "resumen semanal", "work summary", "workload", "semana"
   ]);
 
   const showPerformance = shouldShowComponent("rendimiento", [
-    "rendimiento", "performance", "métricas", "estadísticas", "kpis", "resultados"
+    "rendimiento", "performance", "métricas", "estadísticas", "kpis", "resultados",
+    "feedback", "retroalimentacion", "retroalimentación", "desempeño"
   ]);
 
   const showTraining = shouldShowComponent("desarrollo", [
-    "desarrollo", "entrenamiento", "capacitación", "cursos", "aprendizaje", "formación"
+    "desarrollo", "entrenamiento", "capacitación", "cursos", "aprendizaje", "formación",
+    "training", "capacitacion", "educacion", "educación"
   ]);
 
   const showNotes = shouldShowComponent("notas", [
-    "notas", "mis notas", "apuntes", "recordatorios", "documentos"
+    "notas", "mis notas", "apuntes", "recordatorios", "documentos", "notes", 
+    "añadir nota", "crear nota", "note"
   ]);
 
   if (loading) {
@@ -595,6 +599,37 @@ export default function DashboardPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* No results message */}
+        {searchQuery.trim() && !showProjects && !showTasks && !showWorkSummary && !showPerformance && !showTraining && !showNotes && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="max-w-[1920px] mx-auto px-4 mt-12"
+          >
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No se encontraron resultados
+              </h3>
+              <p className="text-gray-500 mb-4">
+                No hay tarjetas que coincidan con &quot;{searchQuery}&quot;
+              </p>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="inline-flex items-center px-4 py-2 bg-purple-600/20 text-purple-700 rounded-lg hover:bg-purple-600/30 transition-colors border border-purple-200"
+              >
+                Mostrar todas las tarjetas
+              </button>
+            </div>
+          </motion.div>
+        )}
       </motion.div>
     </AnimatePresence>
   );
