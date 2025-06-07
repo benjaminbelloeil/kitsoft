@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
 import NotesHeader from "@/components/notas/NotesHeader";
@@ -108,6 +108,14 @@ const getCategoryColors = (color: string) => {
 // const mockNotes: Note[] = [];
 
 export default function NotasPage() {
+  return (
+    <Suspense fallback={<NotesSkeleton />}>
+      <NotasPageContent />
+    </Suspense>
+  );
+}
+
+function NotasPageContent() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<'todas' | 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea'>('todas');
