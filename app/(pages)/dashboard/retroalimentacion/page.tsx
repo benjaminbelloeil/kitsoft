@@ -6,22 +6,22 @@ import { createClient } from '@/utils/supabase/client';
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
 import { getUserFeedbackEnhanced, getFeedbackStats, type EnhancedFeedbackItem, type FeedbackStats } from '@/utils/database/client/feedbackSync';
 import { userData as staticUserData } from "@/app/lib/data";
-import { Star, Award, ThumbsUp, Calendar, TrendingUp, TrendingDown, User } from "lucide-react";
+import { Star, Award, ThumbsUp, Calendar, TrendingUp, TrendingDown } from "lucide-react";
 import { FiStar } from "react-icons/fi";
 import FeedbackSkeleton from "@/components/feedback/FeedbackSkeleton";
+import UserAvatar from "@/components/feedback/UserAvatar";
 
 export default function FeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [, setUserData] = useState(staticUserData);
   const [feedbackItems, setFeedbackItems] = useState<EnhancedFeedbackItem[]>([]);
   const [feedbackStats, setFeedbackStats] = useState<FeedbackStats[]>([]);
-  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 4; // Always show exactly 4 cards
 
-  // Calculate rating average from data
-  const avgRating = feedbackItems.length > 0 
-    ? parseFloat((feedbackItems.reduce((sum, item) => sum + item.rating, 0) / feedbackItems.length).toFixed(1))
+  // Calculate rating average from category stats (matches pentagon chart)
+  const avgRating = feedbackStats.length > 0 
+    ? parseFloat((feedbackStats.reduce((sum, stat) => sum + parseFloat(stat.value), 0) / feedbackStats.length).toFixed(1))
     : 0;
 
   // Default stats when no feedback is available
@@ -114,6 +114,62 @@ export default function FeedbackPage() {
     name: "General",
     value: parseFloat(generalAverage.toFixed(1))
   });
+
+  // Function to determine color based on average score
+  const getCompetencyColor = (average: number) => {
+    if (average === 0) {
+      return {
+        fill: "rgba(156, 163, 175, 0.10)", // Gray tint
+        stroke: "#9CA3AF", // Gray stroke
+        pointFill: "#9CA3AF" // Gray points
+      };
+    } else if (average >= 4.0) {
+      return {
+        fill: "rgba(16, 185, 129, 0.10)", // Green tint
+        stroke: "#10B981", // Green stroke
+        pointFill: "#10B981" // Green points
+      };
+    } else if (average >= 3.0) {
+      return {
+        fill: "rgba(245, 158, 11, 0.10)", // Yellow tint
+        stroke: "#F59E0B", // Yellow stroke
+        pointFill: "#F59E0B" // Yellow points
+      };
+    } else {
+      return {
+        fill: "rgba(239, 68, 68, 0.10)", // Red tint
+        stroke: "#EF4444", // Red stroke
+        pointFill: "#EF4444" // Red points
+      };
+    }
+  };
+
+  const competencyColors = getCompetencyColor(generalAverage);
+
+  // Function to get color classes for text and background based on score
+  const getColorClasses = (average: number) => {
+    if (average === 0) {
+      return {
+        text: "text-gray-600",
+        bg: "bg-gray-500"
+      };
+    } else if (average >= 4.0) {
+      return {
+        text: "text-green-600",
+        bg: "bg-green-500"
+      };
+    } else if (average >= 3.0) {
+      return {
+        text: "text-yellow-600", 
+        bg: "bg-yellow-500"
+      };
+    } else {
+      return {
+        text: "text-red-600",
+        bg: "bg-red-500"
+      };
+    }
+  };
 
   // Fetch user data and feedback when component mounts
   useEffect(() => {
@@ -294,9 +350,6 @@ export default function FeedbackPage() {
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-[#A100FF20] text-[#A100FF] font-medium">
                         Promedio: {avgRating}
                       </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700 font-medium">
-                        Participación: 92%
-                      </span>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -314,9 +367,9 @@ export default function FeedbackPage() {
           {/* Stats row */}
           <motion.div 
             className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
           >
             {formattedStats.map((stat, index) => {
               // Create a varied color scheme
@@ -333,10 +386,10 @@ export default function FeedbackPage() {
                 <motion.div 
                   key={index} 
                   className="bg-white rounded-lg p-3.5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
-                  whileHover={{ y: -3, boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)" }}
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.05, ease: "easeOut" }}
+                  whileHover={{ y: -2, scale: 1.02, boxShadow: "0 8px 12px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)" }}
                 >
                   <div className="flex justify-between items-center mb-1.5">
                     <div className={`${bgColor} p-2 rounded-md shadow-sm`}>
@@ -368,9 +421,9 @@ export default function FeedbackPage() {
           {/* Main content area */}
           <motion.div 
             className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
           >
             {/* Feedback list */}
             <motion.div 
@@ -416,87 +469,102 @@ export default function FeedbackPage() {
                   transition={{ duration: 0.6, delay: 0.9 }}
                 >
                   {feedbackItems.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 flex-1">
-                      <AnimatePresence>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 flex-1 min-h-[400px]">
+                      <AnimatePresence mode="popLayout">
                         {currentItems.map((item, index) => (
                           <motion.div 
                             key={item.id} 
-                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                            transition={{ duration: 0.4, delay: 1.0 + index * 0.1 }}
-                            whileHover={{ y: -3, scale: 1.02 }}
-                            className="p-3 hover:bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all group"
+                            layout
+                            initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                            animate={{ 
+                              opacity: 1, 
+                              y: 0, 
+                              scale: 1,
+                              transition: {
+                                duration: 0.3,
+                                delay: index * 0.05,
+                                ease: [0.25, 0.46, 0.45, 0.94]
+                              }
+                            }}
+                            exit={{ 
+                              opacity: 0, 
+                              y: -10, 
+                              scale: 0.98,
+                              transition: {
+                                duration: 0.2,
+                                ease: [0.25, 0.46, 0.45, 0.94]
+                              }
+                            }}
+                            whileHover={{ 
+                              y: -2, 
+                              scale: 1.01,
+                              transition: { duration: 0.2, ease: "easeOut" }
+                            }}
+                            className="h-[180px] p-3 hover:bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all group cursor-pointer flex flex-col"
                           >
-                            <div className="flex justify-between items-start mb-2">
+                            <div className="flex justify-between items-start mb-2 flex-shrink-0">
                               <motion.div 
                                 className="flex items-center"
-                                initial={{ opacity: 0, x: -10 }}
+                                initial={{ opacity: 0, x: -5 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
+                                transition={{ duration: 0.2, delay: 0.1 + index * 0.02 }}
                               >
                                 <motion.div 
-                                  className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 shadow-sm overflow-hidden"
-                                  whileHover={{ scale: 1.1 }}
-                                  transition={{ duration: 0.3 }}
+                                  whileHover={{ scale: 1.05 }}
+                                  transition={{ duration: 0.15 }}
                                 >
-                                  <User className="h-4.5 w-4.5 text-gray-600" />
+                                  <UserAvatar 
+                                    name={item.from.name}
+                                    avatarUrl={item.from.avatar}
+                                    size="md"
+                                  />
                                 </motion.div>
-                                <div className="ml-2">
-                                  <div className="text-sm font-medium text-gray-900">{item.from.name}</div>
-                                  <div className="text-[11px] text-gray-500">{formatDate(item.date)}</div>
+                                <div className="ml-2 min-w-0">
+                                  <div className="text-xs font-medium text-gray-900 truncate">{item.from.name}</div>
+                                  <div className="text-[10px] text-gray-500">{formatDate(item.date)}</div>
                                 </div>
                               </motion.div>
                               
-                              <div className="flex items-center bg-gray-100 rounded-md px-2 py-1 border border-gray-200 shadow-sm">
+                              <div className="flex items-center bg-gray-100 rounded-md px-1.5 py-0.5 border border-gray-200 shadow-sm flex-shrink-0">
                                 {[...Array(5)].map((_, i) => (
                                   <Star 
                                     key={i}
-                                    className={`h-3 w-3 ${
+                                    className={`h-2.5 w-2.5 ${
                                       i < Math.floor(item.rating) 
                                         ? "text-[#F59E0B] fill-[#F59E0B]" 
                                         : "text-gray-300"
                                     }`}
                                   />
                                 ))}
-                                <span className="text-xs font-medium ml-1 text-gray-700">
+                                <span className="text-[10px] font-medium ml-1 text-gray-700">
                                   {item.rating.toFixed(1)}
                                 </span>
                               </div>
                             </div>
                             
-                            <div className="flex flex-wrap gap-1.5 mb-2.5">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#6366F110] text-[#6366F1] border border-[#6366F120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
+                            <div className="flex flex-wrap gap-1 mb-2 flex-shrink-0">
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-[#6366F110] text-[#6366F1] border border-[#6366F120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
                                 {item.category}
                               </span>
                               {item.project && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#10B98110] text-[#10B981] border border-[#10B98120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-[#10B98110] text-[#10B981] border border-[#10B98120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
                                   {item.project}
                                 </span>
                               )}
                             </div>
                             
-                            <div className="bg-gray-50 rounded-md p-3 border border-gray-200 shadow-inner relative">
-                              <p className={`text-xs text-gray-600 ${expandedMessages.has(item.id) ? '' : 'line-clamp-3'}`}>
+                            <div className="bg-gray-50 rounded-md p-2 border border-gray-200 shadow-inner relative flex-1 overflow-hidden">
+                              <p 
+                                className="text-[10px] text-gray-600 leading-tight"
+                                style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 4,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden'
+                                }}
+                              >
                                 {item.message}
                               </p>
-                              
-                              {item.message.length > 150 && (
-                                <button 
-                                  onClick={() => {
-                                    const newExpanded = new Set(expandedMessages);
-                                    if (expandedMessages.has(item.id)) {
-                                      newExpanded.delete(item.id);
-                                    } else {
-                                      newExpanded.add(item.id);
-                                    }
-                                    setExpandedMessages(newExpanded);
-                                  }}
-                                  className="absolute bottom-1.5 right-1.5 text-[10px] font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-2 py-0.5 rounded-full border border-gray-200 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  {expandedMessages.has(item.id) ? 'Leer menos' : 'Leer más'}
-                                </button>
-                              )}
                             </div>
                           </motion.div>
                         ))}
@@ -518,41 +586,52 @@ export default function FeedbackPage() {
                   )}
                 </motion.div>
                 
-                <div className="p-3 border-t border-gray-100 bg-[#3B82F605] flex justify-center">
-                  {feedbackItems.length > itemsPerPage && (
-                    <div className="flex items-center gap-2">
-                      <button 
+                <div className="p-3 border-t border-gray-100 bg-[#F59E0B05] flex justify-center">
+                  {totalPages > 1 && (
+                    <motion.div 
+                      className="flex items-center gap-2"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.2 }}
+                    >
+                      <motion.button 
                         onClick={handlePreviousPage}
                         disabled={currentPage === 1}
-                        className="text-xs font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-3 py-1.5 rounded-md border border-[#3B82F620] hover:border-[#3B82F640] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-xs font-medium text-[#F59E0B] hover:text-[#EA580C] bg-white px-3 py-1.5 rounded-md border border-[#F59E0B20] hover:border-[#F59E0B40] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         ←
-                      </button>
+                      </motion.button>
                       
                       <div className="flex items-center gap-1">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <button
+                          <motion.button
                             key={page}
                             onClick={() => handlePageClick(page)}
                             className={`text-xs font-medium px-2 py-1.5 rounded-md border shadow-sm transition-all ${
                               currentPage === page
-                                ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
-                                : 'text-[#3B82F6] hover:text-[#2563EB] bg-white border-[#3B82F620] hover:border-[#3B82F640]'
+                                ? 'bg-[#F59E0B] text-white border-[#F59E0B]'
+                                : 'text-[#F59E0B] hover:text-[#EA580C] bg-white border-[#F59E0B20] hover:border-[#F59E0B40]'
                             }`}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                           >
                             {page}
-                          </button>
+                          </motion.button>
                         ))}
                       </div>
                       
-                      <button 
+                      <motion.button 
                         onClick={handleNextPage}
                         disabled={currentPage === totalPages}
-                        className="text-xs font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-3 py-1.5 rounded-md border border-[#3B82F620] hover:border-[#3B82F640] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-xs font-medium text-[#F59E0B] hover:text-[#EA580C] bg-white px-3 py-1.5 rounded-md border border-[#F59E0B20] hover:border-[#F59E0B40] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         →
-                      </button>
-                    </div>
+                      </motion.button>
+                    </motion.div>
                   )}
                 </div>
               </motion.div>
@@ -636,8 +715,8 @@ export default function FeedbackPage() {
                             return `${50 + radius * Math.cos(angle)},${50 + radius * Math.sin(angle)}`;
                           }).join(' ')
                         }
-                        fill="rgba(16, 185, 129, 0.10)" // Green tint
-                        stroke="#10B981" // Green stroke
+                        fill={competencyColors.fill}
+                        stroke={competencyColors.stroke}
                         strokeWidth="1.5"
                       />
                       
@@ -651,7 +730,7 @@ export default function FeedbackPage() {
                               cx={50 + radius * Math.cos(angle)}
                               cy={50 + radius * Math.sin(angle)}
                               r="2"
-                              fill="#10B981" // Green fill
+                              fill={competencyColors.pointFill}
                               stroke="#ffffff"
                               strokeWidth="1.5"
                             />
@@ -672,7 +751,7 @@ export default function FeedbackPage() {
                       })}
                       
                       {/* Central point */}
-                      <circle cx="50" cy="50" r="2.5" fill="#10B981" />
+                      <circle cx="50" cy="50" r="2.5" fill={competencyColors.pointFill} />
                     </svg>
                     
                     {/* Skill labels */}
@@ -710,7 +789,7 @@ export default function FeedbackPage() {
                     
                     {/* Center score */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-[#10B981] rounded-full w-16 h-16 flex flex-col items-center justify-center shadow-lg">
+                      <div className={`${getColorClasses(generalAverage).bg} rounded-full w-16 h-16 flex flex-col items-center justify-center shadow-lg`}>
                         <div className="text-2xl font-bold text-white leading-none mt-0.5">{avgRating}</div>
                         <div className="text-[8px] uppercase tracking-wider text-white opacity-80">Promedio</div>
                       </div>
