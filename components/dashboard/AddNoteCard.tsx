@@ -52,10 +52,10 @@ export default function AddNoteCard() {
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="p-6 border-b border-gray-100 flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900 flex items-center">
-          <FileText className="w-5 h-5 mr-2 text-yellow-600" />
+          <FileText className="w-5 h-5 mr-2 text-amber-500" />
           Mis Notas
         </h2>
-        <Link href="/dashboard/notas" className="text-sm font-medium text-yellow-600 hover:text-yellow-700 flex items-center">
+        <Link href="/dashboard/notas" className="text-sm font-medium text-amber-500 hover:text-amber-600 flex items-center">
           Ver todas <ChevronRight className="w-4 h-4 ml-1" />
         </Link>
       </div>
@@ -130,8 +130,8 @@ export default function AddNoteCard() {
         ) : (
           /* Empty State - Matching other cards' style */
           <div className="flex flex-col items-center justify-center py-8 px-4 mb-4">
-            <div className="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-3 border border-yellow-100">
-              <FileText className="w-6 h-6 text-yellow-600" />
+            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-3 border border-amber-100">
+              <FileText className="w-6 h-6 text-amber-500" />
             </div>
             <h3 className="text-base font-medium text-gray-900 mb-2">No hay notas aún</h3>
             <p className="text-sm text-gray-500 text-center max-w-sm">

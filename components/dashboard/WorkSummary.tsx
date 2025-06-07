@@ -22,6 +22,10 @@ interface WorkSummaryProps {
 }
 
 export default function WorkSummary({ workload, projects = [] }: WorkSummaryProps) {
+  // Check if there are any hours assigned
+  const totalHours = workload.reduce((sum, day) => sum + day.hours, 0);
+  const hasHours = totalHours > 0;
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col min-h-[300px]">
       <div className="p-3 border-b border-gray-100">
@@ -32,7 +36,20 @@ export default function WorkSummary({ workload, projects = [] }: WorkSummaryProp
       </div>
       
       <div className="p-4 pb-4 pl-4 pr-4 pt-0 flex-grow flex flex-col justify-start">
-        <div className="grid grid-cols-7 gap-2 flex-grow my-4">
+        {!hasHours ? (
+          /* Empty State - No hours assigned */
+          <div className="flex flex-col items-center justify-center py-8 px-4 mb-4 flex-grow">
+            <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mb-3 border border-indigo-100">
+              <BarChart2 className="w-6 h-6 text-indigo-600" />
+            </div>
+            <h3 className="text-base font-medium text-gray-900 mb-2">Sin horas asignadas</h3>
+            <p className="text-sm text-gray-500 text-center max-w-sm">
+              Cuando tengas horas de trabajo asignadas, aquí verás tu resumen semanal.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-7 gap-2 flex-grow my-4">
           {workload.map((day, index) => {
             const isWorkingDay = index < 5; // Monday to Friday
             const maxHours = 8; // Fixed 8 hours for scaling
@@ -82,8 +99,7 @@ export default function WorkSummary({ workload, projects = [] }: WorkSummaryProp
                 </div>
                 <div className="text-xs font-medium text-gray-700 py-1 border-l border-r border-b border-gray-200 rounded-b-sm bg-gray-50 text-center">{day.hours}h</div>
               </div>
-            );
-          })}
+            );            })}
         </div>
         
         <div className="mt-auto bg-indigo-50 rounded-lg p-2 border border-indigo-100">
@@ -120,6 +136,8 @@ export default function WorkSummary({ workload, projects = [] }: WorkSummaryProp
             </div>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

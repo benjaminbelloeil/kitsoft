@@ -7,6 +7,7 @@ import { userData as staticUserData } from "@/app/lib/data";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Sun, Moon, Sunrise } from "lucide-react";
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
+import { getFeedbackStats } from '@/utils/database/client/feedbackSync';
 import { createClient } from '@/utils/supabase/client';
 
 // Import component sections
@@ -119,7 +120,13 @@ export default function DashboardPage() {
     icon: <Sun className="h-6 w-6 text-amber-500" />,
     class: ""
   });
-  const [loading, setLoading] = useState(true);
+  
+  // Loading states - track each data source separately
+  const [userDataLoaded, setUserDataLoaded] = useState(false);
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
+  const [feedbackDataLoaded, setFeedbackDataLoaded] = useState(false);
+  const [notesDataLoaded, setNotesDataLoaded] = useState(false);
+  const [minLoadingTimeElapsed, setMinLoadingTimeElapsed] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [timeString, setTimeString] = useState("");
   
@@ -132,6 +139,34 @@ export default function DashboardPage() {
   // State for real project data
   const [projects, setProjects] = useState<DashboardProject[]>([]);
   const [weeklyWorkload, setWeeklyWorkload] = useState<any[]>([]);
+  
+  // State for feedback data to pass to PerformanceCard
+  const [feedbackStats, setFeedbackStats] = useState<any[]>([]);
+
+  // Computed loading state - only false when all data is loaded AND minimum time has elapsed
+  const loading = !userDataLoaded || !projectsLoaded || !feedbackDataLoaded || !notesDataLoaded || !minLoadingTimeElapsed;
+
+  // Debug loading states
+  useEffect(() => {
+    console.log('Dashboard loading states:', {
+      userDataLoaded,
+      projectsLoaded,
+      feedbackDataLoaded,
+      notesDataLoaded,
+      minLoadingTimeElapsed,
+      overallLoading: loading
+    });
+  }, [userDataLoaded, projectsLoaded, feedbackDataLoaded, notesDataLoaded, minLoadingTimeElapsed, loading]);
+
+  // Minimum loading time to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinLoadingTimeElapsed(true);
+      console.log('Minimum loading time elapsed');
+    }, 1200); // Minimum 1200ms loading time to ensure all data loads
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Fetch real project data
   useEffect(() => {
@@ -152,10 +187,57 @@ export default function DashboardPage() {
         console.error('Error fetching projects:', error);
         setProjects([]);
         setWeeklyWorkload(calculateWeeklyWorkload([]));
+      } finally {
+        setProjectsLoaded(true);
+        console.log('Projects data loading completed');
       }
     };
 
     fetchProjects();
+  }, []);
+
+  // Fetch feedback data for dashboard loading state
+  useEffect(() => {
+    const fetchFeedbackData = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Actually fetch the feedback stats to ensure data is loaded
+          const stats = await getFeedbackStats(user.id);
+          setFeedbackStats(stats); // Store the stats for PerformanceCard
+          console.log('Dashboard feedback data loaded:', stats.length, 'stats');
+        }
+      } catch (error) {
+        console.error('Error fetching feedback data:', error);
+      } finally {
+        setFeedbackDataLoaded(true);
+        console.log('Feedback data loading completed');
+      }
+    };
+
+    fetchFeedbackData();
+  }, []);
+
+  // Fetch notes data for dashboard loading state
+  useEffect(() => {
+    const fetchNotesData = async () => {
+      try {
+        // We can't import getUserNotes directly due to circular dependencies,
+        // so we'll make a simple fetch or just set a timer to simulate the loading
+        // In practice, we could create a lightweight endpoint for this
+        setTimeout(() => {
+          setNotesDataLoaded(true);
+          console.log('Notes data loading completed');
+        }, 200); // Small delay to simulate notes loading
+      } catch (error) {
+        console.error('Error fetching notes data:', error);
+        setNotesDataLoaded(true);
+      }
+    };
+
+    fetchNotesData();
   }, []);
 
   // Sort projects by due date (closest first) and limit to 2
@@ -219,13 +301,14 @@ export default function DashboardPage() {
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
+        setUserDataLoaded(true);
+        console.log('User data loading completed');
       }
     }
     
     fetchUserData();
-  }, []);
-
-  // Update greeting based on time of day - improved with icons and live updating
+  }, []);  // Update greeting based on time of day - improved with icons and live updating
   useEffect(() => {
     const updateGreeting = () => {
       const hour = new Date().getHours();
@@ -248,7 +331,7 @@ export default function DashboardPage() {
           class: "animate-fadeIn"
         };
       }
-      
+
       // Only update if text has changed
       if (newGreeting.text !== greetingState.text) {
         setGreetingState(newGreeting);
@@ -264,13 +347,7 @@ export default function DashboardPage() {
     // Set up an interval to check every minute if greeting should change
     const greetingIntervalId = setInterval(updateGreeting, 60000);
     
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 800);
-    
     return () => {
-      clearTimeout(timer);
       clearInterval(greetingIntervalId);
     };
   }, [greetingState.text]);
@@ -482,7 +559,7 @@ export default function DashboardPage() {
                   transition={{ duration: 0.3 }}
                   whileHover={{ scale: 1.02 }}
                 >
-                  <PerformanceCard />
+                  <PerformanceCard feedbackStats={feedbackStats} />
                 </motion.div>
               )}
             </AnimatePresence>

@@ -14,12 +14,12 @@ export function DashboardSkeleton() {
   };
 
   return (
-    <div>
-      {/* Header skeleton */}
+    <div className="animate-pulse min-h-screen bg-gray-50">
+      {/* Header skeleton - render immediately */}
       <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1 }}
         className="sticky top-0 z-30 w-full mb-6"
       >
         <div className="bg-white shadow-md border-b border-gray-100">
@@ -79,43 +79,109 @@ export function DashboardSkeleton() {
         </div>
       </motion.div>
       
-      {/* Greeting header skeleton */}
+      {/* Greeting header skeleton - render immediately */}
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="relative mb-6 max-w-[1920px] mx-auto px-4 md:px-6"
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="max-w-[1920px] mx-auto mb-10 px-4"
       >
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center mb-2">
-            <motion.div 
-              className="h-5 w-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full mr-3"
-              style={{ backgroundSize: '200% 100%' }}
-              animate={shimmer.animate}
-              transition={shimmer.transition}
-            />
-            <motion.div 
-              className="h-7 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
-              style={{ backgroundSize: '200% 100%' }}
-              animate={shimmer.animate}
-              transition={shimmer.transition}
-            />
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+          {/* Content with decorative elements */}
+          <div className="relative px-6 py-8">
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-gray-100 to-transparent rounded-full -mt-48 -mr-48"></div>
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-gray-100 to-transparent rounded-full -mb-40 -ml-40"></div>
+            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-br from-gray-100 to-transparent rounded-full"></div>
+            
+            <div className="relative z-10">
+              {/* Greeting section */}
+              <motion.div 
+                className="flex items-center mb-3"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+              >
+                <span className="mr-3 relative">
+                  <div className="p-2 bg-gradient-to-br from-gray-100 to-white rounded-xl shadow-sm">
+                    <motion.div 
+                      className="h-6 w-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full"
+                      style={{ backgroundSize: '200% 100%' }}
+                      animate={shimmer.animate}
+                      transition={shimmer.transition}
+                    />
+                  </div>
+                  <span className="absolute top-0 right-0 h-2 w-2 bg-gray-300 rounded-full animate-pulse"></span>
+                </span>
+                <div>
+                  <motion.div 
+                    className="h-8 w-80 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mb-2"
+                    style={{ backgroundSize: '200% 100%' }}
+                    animate={shimmer.animate}
+                    transition={shimmer.transition}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                  />
+                  <motion.div 
+                    className="h-5 w-96 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
+                    style={{ backgroundSize: '200% 100%' }}
+                    animate={shimmer.animate}
+                    transition={shimmer.transition}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                  />
+                </div>
+              </motion.div>
+              
+              {/* Date and time section */}
+              <motion.div 
+                className="flex flex-wrap items-center mt-4 gap-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.4 }}
+              >
+                <motion.div 
+                  className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full shadow-sm border border-gray-100"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <motion.div 
+                    className="h-4 w-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mr-2"
+                    style={{ backgroundSize: '200% 100%' }}
+                    animate={shimmer.animate}
+                    transition={shimmer.transition}
+                  />
+                  <motion.div 
+                    className="h-4 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
+                    style={{ backgroundSize: '200% 100%' }}
+                    animate={shimmer.animate}
+                    transition={shimmer.transition}
+                  />
+                </motion.div>
+                <div className="mx-2 text-gray-400 hidden sm:block">•</div>
+                <motion.div 
+                  className="bg-gray-50 px-3 py-1.5 rounded-full shadow-sm border border-gray-100"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <motion.div 
+                    className="h-4 w-16 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
+                    style={{ backgroundSize: '200% 100%' }}
+                    animate={shimmer.animate}
+                    transition={shimmer.transition}
+                  />
+                </motion.div>
+              </motion.div>
+            </div>
           </div>
-          
-          <motion.div 
-            className="h-5 w-96 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
-            style={{ backgroundSize: '200% 100%' }}
-            animate={shimmer.animate}
-            transition={shimmer.transition}
-          />
         </div>
       </motion.div>
 
-      {/* Main content skeleton */}
+      {/* Main content skeleton - render immediately */}
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1 }}
         className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1920px] mx-auto px-4 md:px-6"
       >
         {/* Left column - spans 2 cols */}
@@ -392,7 +458,7 @@ export function DashboardSkeleton() {
                   transition={shimmer.transition}
                 />
                 <motion.div 
-                  className="h-6 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
+                  className="h-6 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
                   style={{ backgroundSize: '200% 100%' }}
                   animate={shimmer.animate}
                   transition={shimmer.transition}
@@ -400,43 +466,66 @@ export function DashboardSkeleton() {
               </div>
             </div>
             
-            <div className="p-6">
-              {/* Circular chart */}
-              <div className="flex justify-center mb-6">
-                <motion.div 
-                  className="w-32 h-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full"
-                  style={{ backgroundSize: '200% 100%' }}
-                  animate={shimmer.animate}
-                  transition={shimmer.transition}
-                />
-              </div>
-              
-              {/* Progress bars */}
-              <div className="space-y-4 mb-6">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="space-y-2">
-                    <div className="flex justify-between">
-                      <motion.div 
-                        className="h-4 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
-                        style={{ backgroundSize: '200% 100%' }}
-                        animate={shimmer.animate}
-                        transition={shimmer.transition}
-                      />
-                      <motion.div 
-                        className="h-4 w-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
-                        style={{ backgroundSize: '200% 100%' }}
-                        animate={shimmer.animate}
-                        transition={shimmer.transition}
-                      />
-                    </div>
+            <div className="p-6 flex-grow flex flex-col">
+              {/* Pentagon chart skeleton */}
+              <div className="flex justify-center mb-6 flex-1">
+                <div className="relative h-[260px] w-[260px]">
+                  {/* Main pentagon shape */}
+                  <motion.div 
+                    className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
+                    style={{ 
+                      backgroundSize: '200% 100%',
+                      clipPath: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)'
+                    }}
+                    animate={shimmer.animate}
+                    transition={shimmer.transition}
+                  />
+                  
+                  {/* Skill labels around pentagon - matching PerformanceCard positioning */}
+                  {[
+                    { name: 'Comunicación', radius: 47 },
+                    { name: 'Calidad', radius: 56 },
+                    { name: 'Colaboración', radius: 58 }, // Increased from 52 to avoid overlap
+                    { name: 'Cumplimiento', radius: 58 }, // Increased from 50 to avoid overlap
+                    { name: 'General', radius: 56 }
+                  ].map((skill, i) => {
+                    const angle = (i / 5) * 2 * Math.PI - Math.PI / 2;
+                    const x = 50 + skill.radius * Math.cos(angle);
+                    const y = 50 + skill.radius * Math.sin(angle);
+                    
+                    return (
+                      <motion.div
+                        key={i}
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                        style={{
+                          left: `${x}%`,
+                          top: `${y}%`,
+                        }}
+                      >
+                        <motion.div 
+                          className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded border border-gray-100"
+                          style={{ 
+                            backgroundSize: '200% 100%',
+                            width: skill.name === 'Comunicación' ? '60px' : '50px',
+                            minWidth: skill.name === 'Comunicación' ? '60px' : '50px'
+                          }}
+                          animate={shimmer.animate}
+                          transition={shimmer.transition}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                  
+                  {/* Center score circle */}
+                  <div className="absolute inset-0 flex items-center justify-center">
                     <motion.div 
-                      className="h-1.5 w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full"
+                      className="w-16 h-16 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full shadow-lg"
                       style={{ backgroundSize: '200% 100%' }}
                       animate={shimmer.animate}
                       transition={shimmer.transition}
                     />
                   </div>
-                ))}
+                </div>
               </div>
               
               {/* Bottom link */}
