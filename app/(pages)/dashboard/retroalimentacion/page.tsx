@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from '@/utils/supabase/client';
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
+import { getUserFeedbackEnhanced, getFeedbackStats, type EnhancedFeedbackItem, type FeedbackStats } from '@/utils/database/client/feedbackSync';
 import { userData as staticUserData } from "@/app/lib/data";
-import { feedbackData, feedbackStats } from "@/app/lib/data";
 import { Star, Award, ThumbsUp, Calendar, TrendingUp, TrendingDown, User } from "lucide-react";
 import { FiStar } from "react-icons/fi";
 import FeedbackSkeleton from "@/components/feedback/FeedbackSkeleton";
@@ -13,14 +13,30 @@ import FeedbackSkeleton from "@/components/feedback/FeedbackSkeleton";
 export default function FeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [, setUserData] = useState(staticUserData);
-  const [feedbackItems] = useState(feedbackData);
+  const [feedbackItems, setFeedbackItems] = useState<EnhancedFeedbackItem[]>([]);
+  const [feedbackStats, setFeedbackStats] = useState<FeedbackStats[]>([]);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   // Calculate rating average from data
-  const avgRating = parseFloat((feedbackItems.reduce((sum, item) => sum + item.rating, 0) / feedbackItems.length).toFixed(1)) || 4.5;
+  const avgRating = feedbackItems.length > 0 
+    ? parseFloat((feedbackItems.reduce((sum, item) => sum + item.rating, 0) / feedbackItems.length).toFixed(1))
+    : 0;
+
+  // Default stats when no feedback is available
+  const defaultStats = [
+    { title: "Comunicación", value: "0.0", trend: "0.0", color: "blue" },
+    { title: "Calidad", value: "0.0", trend: "0.0", color: "indigo" },
+    { title: "Colaboración", value: "0.0", trend: "0.0", color: "cyan" },
+    { title: "Cumplimiento", value: "0.0", trend: "0.0", color: "emerald" }
+  ];
+
+  // Get current stats or use defaults
+  const currentStats = feedbackStats.length > 0 ? feedbackStats : defaultStats;
 
   // Convert feedback stats to expected format with icons
-  const formattedStats = feedbackStats.map(stat => {
+  const formattedStats = currentStats.map(stat => {
     let icon;
     switch(stat.title) {
       case "Comunicación":
@@ -39,42 +55,67 @@ export default function FeedbackPage() {
         icon = <Star className="h-5 w-5 text-white" />;
     }
     
-    // Map color strings to actual gradient values for icon backgrounds
-    let bgGradient;
-    switch(stat.color) {
-      case "blue":
-        bgGradient = "bg-blue-500";
-        break;
-      case "indigo":
-        bgGradient = "bg-indigo-500";
-        break;
-      case "cyan":
-        bgGradient = "bg-cyan-500";
-        break;
-      case "emerald":
-        bgGradient = "bg-emerald-500";
-        break;
-      default:
-        bgGradient = "bg-gray-500";
-    }
-    
     return {
       ...stat,
-      icon,
-      bgGradient
+      icon
     };
   });
 
-  // Example skill ratings for radar chart
-  const skillRatings = [
-    { name: "Calidad", value: 4.8 },
-    { name: "Colaboración", value: 4.6 },
-    { name: "Cumplimiento", value: 4.2 },
-    { name: "Comunicación", value: 4.5 },
-    { name: "General", value: 4.7 }
-  ];
+  // Calculate strength (highest scoring) and improvement (lowest scoring) categories
+  // Only show when there are actual feedback scores (not 0)
+  const getStrengthAndImprovement = () => {
+    if (feedbackStats.length === 0) {
+      return { strength: null, improvement: null };
+    }
 
-  // Fetch user data when component mounts
+    // Filter out categories with 0 scores
+    const nonZeroStats = feedbackStats.filter(stat => parseFloat(stat.value) > 0);
+    
+    if (nonZeroStats.length === 0) {
+      return { strength: null, improvement: null };
+    }
+
+    // Find highest and lowest scoring categories
+    const sortedStats = [...nonZeroStats].sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+    const strength = sortedStats[0];
+    const improvement = sortedStats[sortedStats.length - 1];
+
+    // Only show improvement if it's different from strength (i.e., we have multiple categories)
+    return {
+      strength: strength,
+      improvement: sortedStats.length > 1 ? improvement : null
+    };
+  };
+
+  const { strength, improvement } = getStrengthAndImprovement();
+
+  // Calculate skill ratings for pentagon chart (always 5 points)
+  const mainSkills = [
+    "Comunicación",
+    "Calidad", 
+    "Colaboración",
+    "Cumplimiento"
+  ];
+  
+  const skillRatings = mainSkills.map(skillName => {
+    const stat = feedbackStats.find(s => s.title === skillName);
+    return {
+      name: skillName,
+      value: stat ? parseFloat(stat.value) : 0
+    };
+  });
+
+  // Add "General" as the average of the 4 main areas
+  const generalAverage = skillRatings.length > 0 
+    ? skillRatings.reduce((sum, skill) => sum + skill.value, 0) / skillRatings.length 
+    : 0;
+  
+  skillRatings.push({
+    name: "General",
+    value: parseFloat(generalAverage.toFixed(1))
+  });
+
+  // Fetch user data and feedback when component mounts
   useEffect(() => {
     async function fetchUserData() {
       try {
@@ -101,6 +142,20 @@ export default function FeedbackPage() {
               title: "Completar perfil"
             });
           }
+
+          // Fetch real feedback data
+          try {
+            const realFeedback = await getUserFeedbackEnhanced(user.id);
+            setFeedbackItems(realFeedback);
+            
+            const realStats = await getFeedbackStats(user.id);
+            setFeedbackStats(realStats);
+          } catch (feedbackError) {
+            console.error("Error fetching feedback data:", feedbackError);
+            // Keep empty arrays if there's an error
+            setFeedbackItems([]);
+            setFeedbackStats([]);
+          }
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -121,6 +176,45 @@ export default function FeedbackPage() {
       month: 'short',
       year: 'numeric'
     });
+  };
+
+  // Function to get current quarter and year
+  const getCurrentPeriod = () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // getMonth() returns 0-11, so add 1
+    
+    let quarter;
+    if (currentMonth >= 1 && currentMonth <= 3) {
+      quarter = 'Q1';
+    } else if (currentMonth >= 4 && currentMonth <= 6) {
+      quarter = 'Q2';
+    } else if (currentMonth >= 7 && currentMonth <= 9) {
+      quarter = 'Q3';
+    } else {
+      quarter = 'Q4';
+    }
+    
+    return `${quarter} ${currentYear}`;
+  };
+
+  // Calculate pagination
+  const totalPages = Math.ceil(feedbackItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = feedbackItems.slice(startIndex, endIndex);
+
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
   };
 
   if (loading) {
@@ -195,7 +289,7 @@ export default function FeedbackPage() {
                     transition={{ duration: 0.3 }}
                   >
                     <p className="text-sm text-gray-600">Último periodo evaluado</p>
-                    <p className="text-lg font-bold text-gray-900">Q1 2023</p>
+                    <p className="text-lg font-bold text-gray-900">{getCurrentPeriod()}</p>
                     <div className="mt-1 flex items-center gap-2">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-[#A100FF20] text-[#A100FF] font-medium">
                         Promedio: {avgRating}
@@ -286,7 +380,7 @@ export default function FeedbackPage() {
               transition={{ duration: 0.6, delay: 0.7 }}
             >
               <motion.div 
-                className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden h-full"
+                className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col"
                 whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
                 transition={{ duration: 0.3 }}
               >
@@ -316,101 +410,150 @@ export default function FeedbackPage() {
                 </motion.div>
 
                 <motion.div 
-                  className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4"
+                  className="flex-1 flex flex-col"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.9 }}
                 >
-                  <AnimatePresence>
-                    {feedbackItems.slice(0, 4).map((item, index) => (
-                      <motion.div 
-                        key={item.id} 
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        transition={{ duration: 0.4, delay: 1.0 + index * 0.1 }}
-                        whileHover={{ y: -3, scale: 1.02 }}
-                        className="p-3 hover:bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all group"
-                      >
-                        <div className="flex justify-between items-start mb-2">
+                  {feedbackItems.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 flex-1">
+                      <AnimatePresence>
+                        {currentItems.map((item, index) => (
                           <motion.div 
-                            className="flex items-center"
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
+                            key={item.id} 
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                            transition={{ duration: 0.4, delay: 1.0 + index * 0.1 }}
+                            whileHover={{ y: -3, scale: 1.02 }}
+                            className="p-3 hover:bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all group"
                           >
-                            <motion.div 
-                              className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 shadow-sm overflow-hidden"
-                              whileHover={{ scale: 1.1 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <User className="h-4.5 w-4.5 text-gray-600" />
-                            </motion.div>
-                            <div className="ml-2">
-                              <div className="text-sm font-medium text-gray-900">{item.from.name}</div>
-                              <div className="text-[11px] text-gray-500">{formatDate(item.date)}</div>
+                            <div className="flex justify-between items-start mb-2">
+                              <motion.div 
+                                className="flex items-center"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
+                              >
+                                <motion.div 
+                                  className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 shadow-sm overflow-hidden"
+                                  whileHover={{ scale: 1.1 }}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  <User className="h-4.5 w-4.5 text-gray-600" />
+                                </motion.div>
+                                <div className="ml-2">
+                                  <div className="text-sm font-medium text-gray-900">{item.from.name}</div>
+                                  <div className="text-[11px] text-gray-500">{formatDate(item.date)}</div>
+                                </div>
+                              </motion.div>
+                              
+                              <div className="flex items-center bg-gray-100 rounded-md px-2 py-1 border border-gray-200 shadow-sm">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i}
+                                    className={`h-3 w-3 ${
+                                      i < Math.floor(item.rating) 
+                                        ? "text-[#F59E0B] fill-[#F59E0B]" 
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                ))}
+                                <span className="text-xs font-medium ml-1 text-gray-700">
+                                  {item.rating.toFixed(1)}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-1.5 mb-2.5">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#6366F110] text-[#6366F1] border border-[#6366F120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
+                                {item.category}
+                              </span>
+                              {item.project && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#10B98110] text-[#10B981] border border-[#10B98120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
+                                  {item.project}
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="bg-gray-50 rounded-md p-3 border border-gray-200 shadow-inner relative">
+                              <p className={`text-xs text-gray-600 ${expandedMessages.has(item.id) ? '' : 'line-clamp-3'}`}>
+                                {item.message}
+                              </p>
+                              
+                              {item.message.length > 150 && (
+                                <button 
+                                  onClick={() => {
+                                    const newExpanded = new Set(expandedMessages);
+                                    if (expandedMessages.has(item.id)) {
+                                      newExpanded.delete(item.id);
+                                    } else {
+                                      newExpanded.add(item.id);
+                                    }
+                                    setExpandedMessages(newExpanded);
+                                  }}
+                                  className="absolute bottom-1.5 right-1.5 text-[10px] font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-2 py-0.5 rounded-full border border-gray-200 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  {expandedMessages.has(item.id) ? 'Leer menos' : 'Leer más'}
+                                </button>
+                              )}
                             </div>
                           </motion.div>
-                          
-                          <div className="flex items-center bg-gray-100 rounded-md px-2 py-1 border border-gray-200 shadow-sm">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i}
-                                className={`h-3 w-3 ${
-                                  i < Math.floor(item.rating) 
-                                    ? "text-[#F59E0B] fill-[#F59E0B]" 
-                                    : "text-gray-300"
-                                }`}
-                              />
-                            ))}
-                            <span className="text-xs font-medium ml-1 text-gray-700">
-                              {item.rating.toFixed(1)}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-1.5 mb-2.5">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#6366F110] text-[#6366F1] border border-[#6366F120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
-                            {item.category}
-                          </span>
-                          {item.project && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#10B98110] text-[#10B981] border border-[#10B98120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
-                              {item.project}
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="bg-gray-50 rounded-md p-3 border border-gray-200 shadow-inner relative">
-                          <p className={`text-xs text-gray-600 ${expandedMessages.has(item.id) ? '' : 'line-clamp-3'}`}>
-                            {item.message}
-                          </p>
-                          
-                          {item.message.length > 150 && (
-                            <button 
-                              onClick={() => {
-                                const newExpanded = new Set(expandedMessages);
-                                if (expandedMessages.has(item.id)) {
-                                  newExpanded.delete(item.id);
-                                } else {
-                                  newExpanded.add(item.id);
-                                }
-                                setExpandedMessages(newExpanded);
-                              }}
-                              className="absolute bottom-1.5 right-1.5 text-[10px] font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-2 py-0.5 rounded-full border border-gray-200 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              {expandedMessages.has(item.id) ? 'Leer menos' : 'Leer más'}
-                            </button>
-                          )}
-                        </div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    // Show placeholder when no feedback available  
+                    <div className="flex-1 flex items-center justify-center">
+                      <motion.div 
+                        className="text-center p-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 1.0 }}
+                      >
+                        <FiStar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                        <p className="text-gray-500 text-xs">Los comentarios de tu equipo aparecerán aquí cuando recibas retroalimentación</p>
                       </motion.div>
-                    ))}
-                  </AnimatePresence>
+                    </div>
+                  )}
                 </motion.div>
                 
-                <div className="p-3 border-t border-gray-100 bg-[#3B82F605] flex justify-center mt-auto">
-                  <button className="text-xs font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-4 py-2 rounded-md border border-[#3B82F620] hover:border-[#3B82F640] shadow-sm transition-all flex items-center gap-1.5 hover:shadow">
-                    <span>Ver todas las retroalimentaciones</span>
-                  </button>
+                <div className="p-3 border-t border-gray-100 bg-[#3B82F605] flex justify-center">
+                  {feedbackItems.length > itemsPerPage && (
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                        className="text-xs font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-3 py-1.5 rounded-md border border-[#3B82F620] hover:border-[#3B82F640] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ←
+                      </button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => handlePageClick(page)}
+                            className={`text-xs font-medium px-2 py-1.5 rounded-md border shadow-sm transition-all ${
+                              currentPage === page
+                                ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
+                                : 'text-[#3B82F6] hover:text-[#2563EB] bg-white border-[#3B82F620] hover:border-[#3B82F640]'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      <button 
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className="text-xs font-medium text-[#3B82F6] hover:text-[#2563EB] bg-white px-3 py-1.5 rounded-md border border-[#3B82F620] hover:border-[#3B82F640] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        →
+                      </button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>
@@ -446,19 +589,27 @@ export default function FeedbackPage() {
                 <div className="flex-grow flex items-center justify-center p-4 bg-[#10B98102]">
                   <div className="relative h-[250px] w-[250px]">
                     <svg width="100%" height="100%" viewBox="0 0 100 100" className="absolute inset-0">
-                      {/* Grid circles */}
-                      {[1, 2, 3, 4, 5].map((level) => (
-                        <circle 
-                          key={level}
-                          cx="50" 
-                          cy="50" 
-                          r={level * 8} 
-                          fill="none" 
-                          stroke={level === 5 ? '#e5e7eb' : `rgba(243, 244, 246, ${level * 0.15})`}
-                          strokeWidth={level === 5 ? 1.5 : 1} 
-                          strokeDasharray={level === 5 ? "" : "2,2"} 
-                        />
-                      ))}
+                      {/* Grid pentagons */}
+                      {[1, 2, 3, 4, 5].map((level) => {
+                        const pentagonPoints = Array.from({ length: 5 }, (_, i) => {
+                          const angle = (i / 5) * 2 * Math.PI - Math.PI / 2;
+                          const radius = level * 8;
+                          const x = 50 + radius * Math.cos(angle);
+                          const y = 50 + radius * Math.sin(angle);
+                          return `${x},${y}`;
+                        }).join(' ');
+                        
+                        return (
+                          <polygon
+                            key={level}
+                            points={pentagonPoints}
+                            fill="none" 
+                            stroke={level === 5 ? '#e5e7eb' : `rgba(243, 244, 246, ${level * 0.15})`}
+                            strokeWidth={level === 5 ? 1.5 : 1} 
+                            strokeDasharray={level === 5 ? "" : "2,2"} 
+                          />
+                        );
+                      })}
                       
                       {/* Axis lines */}
                       {skillRatings.map((_, i) => {
@@ -527,10 +678,15 @@ export default function FeedbackPage() {
                     {/* Skill labels */}
                     {skillRatings.map((skill, i) => {
                       const angle = (i / skillRatings.length) * 2 * Math.PI - Math.PI / 2;
-                      // Adjust radius for specific labels that need more space
-                      let radius = 52; // Default radius
-                      if (skill.name === 'Colaboración') radius = 57; // Further out for Colaboración
-                      else if (skill.name === 'General') radius = 55; // Medium distance for General
+                      // Adjust radius based on specific skills
+                      let radius = 48; // Default position
+                      
+                      // Specific adjustments for each skill
+                      if (skill.name === 'Comunicación') radius = 45; // Closer to pentagon
+                      else if (skill.name === 'Colaboración') radius = 50; // Slightly more space
+                      else if (skill.name === 'Cumplimiento') radius = 48; // Default
+                      else if (skill.name === 'Calidad') radius = 54; // Further out
+                      else if (skill.name === 'General') radius = 54; // Further out
                       
                       const x = 50 + radius * Math.cos(angle);
                       const y = 50 + radius * Math.sin(angle);
@@ -538,16 +694,13 @@ export default function FeedbackPage() {
                       return (
                         <div
                           key={i}
-                          className="absolute text-[9px] font-medium text-gray-700 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-85 px-2 py-0.5 rounded border border-gray-100 shadow-sm"
+                          className="absolute text-[9px] font-medium text-gray-700 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-90 px-2 py-0.5 rounded border border-gray-100 shadow-sm"
                           style={{
                             left: `${x}%`,
                             top: `${y}%`,
-                            maxWidth: '75px',
-                            minWidth: '45px',
+                            minWidth: skill.name === 'Comunicación' ? '70px' : '55px',
                             textAlign: 'center',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
+                            whiteSpace: 'nowrap'
                           }}
                         >
                           {skill.name}
@@ -572,12 +725,16 @@ export default function FeedbackPage() {
                       <span className="font-medium">{feedbackItems.length}</span> evaluaciones
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      <span className="bg-white text-[#10B981] text-xs px-2 py-0.5 rounded-full font-medium border border-[#10B98120]">
-                        Fortaleza: Calidad
-                      </span>
-                      <span className="bg-white text-[#F59E0B] text-xs px-2 py-0.5 rounded-full font-medium border border-[#F59E0B20]">
-                        Mejora: Cumplimiento
-                      </span>
+                      {strength && (
+                        <span className="bg-white text-[#10B981] text-xs px-2 py-0.5 rounded-full font-medium border border-[#10B98120]">
+                          Fortaleza: {strength.title}
+                        </span>
+                      )}
+                      {improvement && (
+                        <span className="bg-white text-[#F59E0B] text-xs px-2 py-0.5 rounded-full font-medium border border-[#F59E0B20]">
+                          Mejora: {improvement.title}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
