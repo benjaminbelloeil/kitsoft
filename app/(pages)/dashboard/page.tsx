@@ -110,6 +110,9 @@ const calculateWeeklyWorkload = (dashboardProjects: DashboardProject[]) => {
 };
 
 export default function DashboardPage() {
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  
   // Update greeting state to include icon and class for animation
   const [greetingState, setGreetingState] = useState({
     text: "Buenos días",
@@ -323,6 +326,43 @@ export default function DashboardPage() {
     }
   };
 
+  // Search filtering function
+  const shouldShowComponent = (componentName: string, searchContent: string[]) => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      componentName.toLowerCase().includes(query) ||
+      searchContent.some(content => content.toLowerCase().includes(query))
+    );
+  };
+
+  // Filter components based on search
+  const showProjects = shouldShowComponent("proyectos", [
+    "proyectos", "mis proyectos", "carga", "horas", "trabajo", "deadlines",
+    ...projects.map(p => p.name.toLowerCase())
+  ]);
+
+  const showTasks = shouldShowComponent("tareas", [
+    "tareas", "pendientes", "urgentes", "trabajo", "asignaciones", "to-do"
+  ]);
+
+  const showWorkSummary = shouldShowComponent("resumen", [
+    "resumen", "trabajo", "semanal", "carga", "horas", "rendimiento", "productividad"
+  ]);
+
+  const showPerformance = shouldShowComponent("rendimiento", [
+    "rendimiento", "performance", "métricas", "estadísticas", "kpis", "resultados"
+  ]);
+
+  const showTraining = shouldShowComponent("desarrollo", [
+    "desarrollo", "entrenamiento", "capacitación", "cursos", "aprendizaje", "formación"
+  ]);
+
+  const showNotes = shouldShowComponent("notas", [
+    "notas", "mis notas", "apuntes", "recordatorios", "documentos"
+  ]);
+
   if (loading) {
     return <DashboardSkeleton />;
   }
@@ -341,7 +381,11 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Header userData={userData} />
+          <Header 
+            userData={userData} 
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
         </motion.div>
         
         <motion.div
@@ -370,41 +414,56 @@ export default function DashboardPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.5 }}
-              whileHover={{ y: -2 }}
-            >
-              <ProjectsSection 
-                projects={priorityProjects}
-                formatDate={formatDate}
-              />
-            </motion.div>
+            <AnimatePresence mode="wait">
+              {showProjects && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ y: -2 }}
+                >
+                  <ProjectsSection 
+                    projects={priorityProjects}
+                    formatDate={formatDate}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
             
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.6 }}
-              whileHover={{ y: -2 }}
-            >
-              <TasksSection 
-                tasks={urgentTasks}
-                formatDate={formatDate}
-                getStatusColor={getStatusColor}
-                getStatusText={getStatusText}
-              />
-            </motion.div>
+            <AnimatePresence mode="wait">
+              {showTasks && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  whileHover={{ y: -2 }}
+                >
+                  <TasksSection 
+                    tasks={urgentTasks}
+                    formatDate={formatDate}
+                    getStatusColor={getStatusColor}
+                    getStatusText={getStatusText}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
             
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.7 }}
-              whileHover={{ y: -2 }}
-              className="flex-grow"
-            >
-              <WorkSummary workload={weeklyWorkload} projects={projects} />
-            </motion.div>
+            <AnimatePresence mode="wait">
+              {showWorkSummary && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                  whileHover={{ y: -2 }}
+                  className="flex-grow"
+                >
+                  <WorkSummary workload={weeklyWorkload} projects={projects} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
           
           {/* Right column - Skills, Timeline, Training */}
@@ -414,36 +473,51 @@ export default function DashboardPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.5 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <PerformanceCard />
-            </motion.div>
+            <AnimatePresence mode="wait">
+              {showPerformance && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <PerformanceCard />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.6 }}
-              whileHover={{ scale: 1.02 }}
-              className="flex-grow"
-            >
-              <TrainingCard />
-            </motion.div>
+            <AnimatePresence mode="wait">
+              {showTraining && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="flex-grow"
+                >
+                  <TrainingCard />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
 
         {/* Add Note Card - Bottom placement */}
-        <motion.div 
-          className="max-w-[1920px] mx-auto px-4 mt-6 mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        >
-          <AddNoteCard />
-        </motion.div>
+        <AnimatePresence mode="wait">
+          {showNotes && (
+            <motion.div 
+              className="max-w-[1920px] mx-auto px-4 mt-6 mb-6"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              <AddNoteCard />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </AnimatePresence>
   );
