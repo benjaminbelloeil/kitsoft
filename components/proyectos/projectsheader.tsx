@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getProjectsByStatus } from '@/app/lib/data';
 import { FiFolder, FiGrid, FiList } from 'react-icons/fi';
 
 interface ProjectsHeaderProps {
@@ -64,10 +63,9 @@ export default function ProjectsHeader({
       });
     } catch (error) {
       console.error('Error fetching active projects count:', error);
-      // Fallback to static data if API fails
-      const activeProjects = getProjectsByStatus('active');
+      // Set metrics to default values if API fails
       setMetrics({
-        totalProjects: activeProjects.length,
+        totalProjects: 0,
         nearEndDate: 0
       });
     }

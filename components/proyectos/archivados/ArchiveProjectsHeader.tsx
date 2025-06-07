@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getProjectsByStatus } from '@/app/lib/data';
 import { FiArchive, FiGrid, FiList } from 'react-icons/fi';
 
 interface ArchivedProjectsHeaderProps {
@@ -29,9 +28,8 @@ export default function ArchivedProjectsHeader({
         setArchivedCount(archivedProjects.length);
       } catch (error) {
         console.error('Error fetching archived projects count:', error);
-        // Fallback to static data if API fails
-        const archivedProjects = getProjectsByStatus('archived');
-        setArchivedCount(archivedProjects.length);
+        // Set count to 0 if API fails
+        setArchivedCount(0);
       }
     };
 

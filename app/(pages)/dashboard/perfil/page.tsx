@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { userData } from "@/app/lib/data"; // Keep this import for other sections
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { createClient } from '@/utils/supabase/client';
 import { saveUserProfile, getUserCompleteProfile } from '@/utils/database/client/profileSync';
@@ -25,11 +24,7 @@ export default function ProfilePage() {
     Bio: "",
     URL_Avatar: "",
     // Keep other dummy data for the rest of the components
-    skills: userData.skills ? userData.skills.map(skill => ({ 
-      Nombre: skill, 
-      Nivel: 3, 
-      Categoria: 'General' 
-    })) : [],
+    skills: [], // Will be populated from database
     experience: [] // Remove dummy experience data
   };
 

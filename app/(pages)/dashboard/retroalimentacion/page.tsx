@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from '@/utils/supabase/client';
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
 import { getUserFeedbackEnhanced, getFeedbackStats, type EnhancedFeedbackItem, type FeedbackStats } from '@/utils/database/client/feedbackSync';
-import { userData as staticUserData } from "@/app/lib/data";
 import { Star, Award, ThumbsUp, Calendar } from "lucide-react";
 import FeedbackSkeleton from "@/components/feedback/FeedbackSkeleton";
 import FeedbackHeader from "@/components/feedback/FeedbackHeader";
@@ -15,7 +14,10 @@ import CompetencyChart from "@/components/feedback/CompetencyChart";
 
 export default function FeedbackPage() {
   const [loading, setLoading] = useState(true);
-  const [, setUserData] = useState(staticUserData);
+  const [, setUserData] = useState({
+    name: "Usuario",
+    title: "Completar perfil"
+  });
   const [feedbackItems, setFeedbackItems] = useState<EnhancedFeedbackItem[]>([]);
   const [feedbackStats, setFeedbackStats] = useState<FeedbackStats[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -132,14 +134,12 @@ export default function FeedbackPage() {
           if (profileData) {
             // Update user data with fetched profile
             setUserData({
-              ...staticUserData, // Keep static data for other properties
               name: `${profileData.Nombre || ''} ${profileData.Apellido || ''}`.trim() || "Usuario",
               title: profileData.Titulo || "Completar perfil"
             });
           } else {
             // New user - set appropriate fallback values
             setUserData({
-              ...staticUserData, // Keep static data for other properties
               name: "Usuario",
               title: "Completar perfil"
             });

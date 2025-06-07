@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { userData as staticUserData } from "@/app/lib/data";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Sun, Moon, Sunrise } from "lucide-react";
 import { getUserCompleteProfile } from '@/utils/database/client/profileSync';
@@ -132,7 +131,8 @@ export default function DashboardPage() {
   
   // Store user data from the database
   const [userData, setUserData] = useState({
-    ...staticUserData,
+    name: "Usuario",
+    title: "Completar perfil",
     avatar: null as string | null
   });
 
@@ -283,7 +283,6 @@ export default function DashboardPage() {
             console.log('Profile data fetched:', profileData);
             // Update user data with fetched profile
             setUserData({
-              ...staticUserData, // Keep static data for other properties
               name: `${profileData.Nombre || ''} ${profileData.Apellido || ''}`.trim() || "Usuario",
               title: profileData.Titulo || "Completar perfil",
               avatar: profileData.URL_Avatar || null,
@@ -292,7 +291,6 @@ export default function DashboardPage() {
           } else {
             // New user - set appropriate fallback values
             setUserData({
-              ...staticUserData, // Keep static data for other properties
               name: "Usuario",
               title: "Completar perfil",
               avatar: null,
