@@ -23,10 +23,10 @@ export default function FeedbackPage() {
   const formattedStats = feedbackStats.map(stat => {
     let icon;
     switch(stat.title) {
-      case "Promedio General":
+      case "Comunicación":
         icon = <Star className="h-5 w-5 text-white" />;
         break;
-      case "Calidad de Código":
+      case "Calidad":
         icon = <Award className="h-5 w-5 text-white" />;
         break;
       case "Colaboración":
@@ -69,9 +69,9 @@ export default function FeedbackPage() {
   const skillRatings = [
     { name: "Calidad", value: 4.8 },
     { name: "Colaboración", value: 4.6 },
-    { name: "Comunicación", value: 4.5 },
     { name: "Cumplimiento", value: 4.2 },
-    { name: "Problemas", value: 4.7 }
+    { name: "Comunicación", value: 4.5 },
+    { name: "General", value: 4.7 }
   ];
 
   // Fetch user data when component mounts
@@ -527,19 +527,27 @@ export default function FeedbackPage() {
                     {/* Skill labels */}
                     {skillRatings.map((skill, i) => {
                       const angle = (i / skillRatings.length) * 2 * Math.PI - Math.PI / 2;
-                      const radius = 48;
+                      // Adjust radius for specific labels that need more space
+                      let radius = 52; // Default radius
+                      if (skill.name === 'Colaboración') radius = 57; // Further out for Colaboración
+                      else if (skill.name === 'General') radius = 55; // Medium distance for General
+                      
                       const x = 50 + radius * Math.cos(angle);
                       const y = 50 + radius * Math.sin(angle);
                       
                       return (
                         <div
                           key={i}
-                          className="absolute text-[9px] font-medium text-gray-700 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-85 px-1.5 py-0.5 rounded border border-gray-100 shadow-sm"
+                          className="absolute text-[9px] font-medium text-gray-700 transform -translate-x-1/2 -translate-y-1/2 bg-white bg-opacity-85 px-2 py-0.5 rounded border border-gray-100 shadow-sm"
                           style={{
                             left: `${x}%`,
                             top: `${y}%`,
-                            maxWidth: '60px',
-                            textAlign: 'center'
+                            maxWidth: '75px',
+                            minWidth: '45px',
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
                           }}
                         >
                           {skill.name}

@@ -493,13 +493,13 @@ export const feedbackData: FeedbackItem[] = [
 
 export const feedbackStats = [
   { 
-    title: "Promedio General", 
+    title: "Comunicación", 
     value: "4.5", 
     trend: "+0.3",
     color: "blue" 
   },
   { 
-    title: "Calidad de Código", 
+    title: "Calidad", 
     value: "4.8", 
     trend: "+0.2",
     color: "indigo" 
