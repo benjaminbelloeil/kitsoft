@@ -15,11 +15,9 @@ interface Note {
   content: string;
   category: 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea';
   priority: 'alta' | 'media' | 'baja';
-  tags: string[];
   createdAt: Date;
   updatedAt: Date;
   isPinned: boolean;
-  color: string;
 }
 
 interface NoteCardProps {
@@ -40,6 +38,7 @@ const categoryLabels = {
 export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: NoteCardProps) {
   const [showActions, setShowActions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editTitle, setEditTitle] = useState(note.title);
   const [editContent, setEditContent] = useState(note.content);
 
@@ -58,14 +57,21 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
     });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editTitle.trim() && editContent.trim()) {
-      onUpdate({
-        ...note,
-        title: editTitle.trim(),
-        content: editContent.trim()
-      });
-      setIsEditing(false);
+      setIsSaving(true);
+      try {
+        await onUpdate({
+          ...note,
+          title: editTitle.trim(),
+          content: editContent.trim()
+        });
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Error updating note:', error);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -84,11 +90,11 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
     <motion.div
       layout
       className="relative group"
-      whileHover={{ y: -1 }}
-      transition={{ duration: 0.15 }}
+      whileHover={{ y: -2, scale: 1.02 }}
+      transition={{ duration: 0.2 }}
     >
       <div 
-        className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors duration-200 overflow-hidden relative"
+        className="bg-white rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 overflow-hidden relative shadow-sm"
         onMouseEnter={() => setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
@@ -177,9 +183,20 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="px-3 py-1.5 text-xs bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+                  disabled={isSaving}
+                  className={`px-3 py-1.5 text-xs rounded-md transition-all duration-200 min-w-[70px] ${
+                    isSaving 
+                      ? 'bg-gray-600 cursor-not-allowed' 
+                      : 'bg-gray-900 hover:bg-gray-800'
+                  } text-white`}
                 >
-                  Guardar
+                  {isSaving ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    'Guardar'
+                  )}
                 </button>
               </div>
             </div>
@@ -187,45 +204,23 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
             // View mode
             <>
               <div className="mb-3">
-                <h3 className="font-medium text-gray-900 leading-tight mb-2">
+                <h3 className="font-semibold text-gray-900 leading-tight mb-2 text-base">
                   {note.title}
                 </h3>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>{categoryLabels[note.category]}</span>
-                  <span>•</span>
-                  <span className="capitalize">{note.priority}</span>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-gray-600 font-medium">{categoryLabels[note.category]}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="capitalize text-gray-600 font-medium">{note.priority}</span>
                 </div>
               </div>
 
               <div className="mb-4">
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {truncateContent(note.content)}
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{truncateContent(note.content)}
                 </p>
               </div>
 
-              {/* Tags */}
-              {note.tags.length > 0 && (
-                <div className="mb-3">
-                  <div className="flex flex-wrap gap-1">
-                    {note.tags.slice(0, 3).map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {note.tags.length > 3 && (
-                      <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded">
-                        +{note.tags.length - 3}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-
               {/* Footer */}
-              <div className="text-xs text-gray-400 pt-2 border-t border-gray-100">
+              <div className="text-xs text-gray-500 pt-2 border-t border-gray-200 font-medium">
                 {formatDate(note.updatedAt)}
               </div>
             </>

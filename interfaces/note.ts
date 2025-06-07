@@ -5,11 +5,9 @@ export interface Note {
   content: string;
   category: 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea';
   priority: 'alta' | 'media' | 'baja';
-  tags: string[];
   createdAt: Date;
   updatedAt: Date;
   isPinned: boolean;
-  color: string;
   userId: string; // Foreign key to the user who owns the note
 }
 
@@ -20,11 +18,9 @@ export interface NoteDB {
   content: string;
   category: 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea';
   priority: 'alta' | 'media' | 'baja';
-  tags: string[];
   created_at: string; // ISO string in database
   updated_at: string; // ISO string in database
   is_pinned: boolean;
-  color: string;
   id_usuario: string; // Foreign key to the user who owns the note
 }
 
@@ -34,9 +30,7 @@ export interface CreateNoteData {
   content: string;
   category: 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea';
   priority: 'alta' | 'media' | 'baja';
-  tags?: string[];
   isPinned?: boolean;
-  color?: string;
 }
 
 // For updating existing notes
@@ -45,9 +39,7 @@ export interface UpdateNoteData {
   content?: string;
   category?: 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea';
   priority?: 'alta' | 'media' | 'baja';
-  tags?: string[];
   isPinned?: boolean;
-  color?: string;
 }
 
 // Helper function to convert database note to frontend note
@@ -58,11 +50,9 @@ export function dbNoteToNote(dbNote: NoteDB): Note {
     content: dbNote.content,
     category: dbNote.category,
     priority: dbNote.priority,
-    tags: dbNote.tags,
     createdAt: new Date(dbNote.created_at),
     updatedAt: new Date(dbNote.updated_at),
     isPinned: dbNote.is_pinned,
-    color: dbNote.color,
     userId: dbNote.id_usuario,
   };
 }
@@ -75,11 +65,9 @@ export function noteToDbNote(note: Note): NoteDB {
     content: note.content,
     category: note.category,
     priority: note.priority,
-    tags: note.tags,
     created_at: note.createdAt.toISOString(),
     updated_at: note.updatedAt.toISOString(),
     is_pinned: note.isPinned,
-    color: note.color,
     id_usuario: note.userId,
   };
 }

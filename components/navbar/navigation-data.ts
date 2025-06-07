@@ -53,7 +53,7 @@ export const navLinks: NavItem[] = [
   },
   {
     name: "Notas",
-    icon: "calendar",
+    icon: "notes",
     href: "/dashboard/notas",
     hasDropdown: false
   },

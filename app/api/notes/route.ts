@@ -82,9 +82,7 @@ export async function POST(request: NextRequest) {
       content: noteData.content || '',
       category: noteData.category,
       priority: noteData.priority,
-      tags: noteData.tags || [],
       is_pinned: noteData.isPinned || false,
-      color: noteData.color || '#ffffff',
       id_usuario: user.id,
     };
 

@@ -139,10 +139,3 @@ export async function getNote(noteId: string): Promise<Note> {
 export async function toggleNotePinned(noteId: string, isPinned: boolean): Promise<Note> {
   return updateNote(noteId, { isPinned });
 }
-
-/**
- * Update note color
- */
-export async function updateNoteColor(noteId: string, color: string): Promise<Note> {
-  return updateNote(noteId, { color });
-}

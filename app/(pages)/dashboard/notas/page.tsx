@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import NotesHeader from "@/components/notas/NotesHeader";
+import NotesSkeleton from "@/components/notas/NotesSkeleton";
 import { Pin, Trash2, ChevronDown, ChevronRight, Bold, Italic, Underline, List, AlignLeft, ImageIcon, User, Briefcase, Rocket, Users, Lightbulb, FileText, FolderOpen, Calendar, Check } from "lucide-react";
 import { Note } from "@/interfaces/note";
 import { getUserNotes, createNote, updateNote, deleteNote } from "@/utils/database/client/notesSync";
@@ -32,6 +34,7 @@ export default function NotasPage() {
   const [newNoteCategory, setNewNoteCategory] = useState<'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea'>('personal');
   const [newNotePriority, setNewNotePriority] = useState<'alta' | 'media' | 'baja'>('media');
   const [newNotePinned, setNewNotePinned] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isPriorityDropdownOpen, setIsPriorityDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -90,8 +93,7 @@ export default function NotasPage() {
   const filteredNotes = notes.filter(note => {
     const matchesSearch = searchQuery === "" || 
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      note.content.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesCategory = selectedCategory === "todas" || note.category === selectedCategory;
     
@@ -125,6 +127,7 @@ export default function NotasPage() {
   const handleSaveNewNote = async () => {
     if (newNoteTitle.trim() || newNoteContent.trim()) {
       try {
+        setIsSaving(true);
         // Get current user
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
@@ -137,9 +140,7 @@ export default function NotasPage() {
           content: newNoteContent,
           category: newNoteCategory,
           priority: newNotePriority,
-          tags: [],
-          isPinned: newNotePinned,
-          color: "#F3F4F6"
+          isPinned: newNotePinned
         };
         
         const createdNote = await createNote(newNoteData);
@@ -151,6 +152,8 @@ export default function NotasPage() {
         }
       } catch (error) {
         console.error('Error creating note:', error);
+      } finally {
+        setIsSaving(false);
       }
     }
   };
@@ -220,31 +223,41 @@ export default function NotasPage() {
   // Functions to handle category management
   return (
     <div className="h-screen bg-gray-50 overflow-hidden">
-      {/* Restored Original Header */}
-      <NotesHeader
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        totalNotes={notes.length}
-        pinnedNotes={notes.filter(n => n.isPinned).length}
-      />
-
       {/* Loading State */}
       {loading ? (
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Cargando notas...</p>
-            </div>
-          </div>
-        </div>
+        <NotesSkeleton />
       ) : (
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full">
+        <>
+          {/* Header */}
+          <NotesHeader
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            totalNotes={notes.length}
+            pinnedNotes={notes.filter(n => n.isPinned).length}
+          />
+          
+          {/* Main Content */}
+        <motion.div 
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-210px)] pt-0 pb-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div 
+            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full"
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
             <div className="flex h-full">
             
             {/* Left Sidebar - Categories and Notes List */}
-            <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
+            <motion.div 
+              className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col"
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               
               {/* Apple Notes Style Categories - Scrollable */}
               <div className="p-4 border-b border-gray-200 flex-1 overflow-y-auto">
@@ -256,6 +269,7 @@ export default function NotasPage() {
                     Categorías
                   </h3>
                 </div>
+                <div className="border-b border-gray-200 mb-4"></div>
                 <div className="space-y-1">
                   {categoriesWithCounts.map((category) => {
                     const Icon = category.icon;
@@ -269,7 +283,7 @@ export default function NotasPage() {
                         <div 
                           className={`flex items-center justify-between px-3 py-2.5 rounded-md transition-colors cursor-pointer ${
                             isSelected 
-                              ? 'bg-purple-100 text-purple-700' 
+                              ? 'bg-gray-100 text-gray-700' 
                               : 'text-gray-700 hover:bg-gray-100'
                           }`}
                           onClick={() => {
@@ -288,14 +302,14 @@ export default function NotasPage() {
                                   )}
                                 </div>
                               )}
-                              <Icon className={`h-5 w-5 ${isSelected ? 'text-purple-600' : 'text-gray-500'}`} />
+                              <Icon className={`h-5 w-5 ${isSelected ? 'text-gray-600' : 'text-gray-500'}`} />
                               <span className="font-medium text-sm">{category.name}</span>
                             </div>
                           </div>
                           
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                             isSelected 
-                              ? 'bg-purple-200 text-purple-800' 
+                              ? 'bg-gray-200 text-gray-800' 
                               : 'bg-gray-200 text-gray-600'
                           }`}>
                             {category.count}
@@ -306,42 +320,45 @@ export default function NotasPage() {
                         {isExpanded && categoryNotes.length > 0 && (
                           <div className="ml-6 mt-1 space-y-1 mb-3">
                             {categoryNotes.map((note) => (
-                              <div
+                              <motion.div
                                 key={note.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2 }}
                                 onClick={() => handleSelectNote(note)}
-                                className={`p-2 rounded-md cursor-pointer transition-colors ${
+                                className={`p-3 rounded-lg cursor-pointer transition-all duration-200 border ${
                                   selectedNote?.id === note.id 
-                                    ? 'bg-purple-50 border-l-2 border-purple-500' 
-                                    : 'hover:bg-gray-100'
+                                    ? 'bg-gray-100 border-gray-400 shadow-sm' 
+                                    : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm'
                                 }`}
                               >
-                                <div className="flex items-start justify-between mb-1">
-                                  <h4 className="font-medium text-gray-800 text-xs line-clamp-1 flex-1">
+                                <div className="flex items-start justify-between mb-2">
+                                  <h4 className="font-semibold text-gray-900 text-sm line-clamp-1 flex-1">
                                     {note.title}
                                   </h4>
                                   {note.isPinned && (
-                                    <Pin className="h-3 w-3 text-purple-600 ml-1.5 flex-shrink-0" />
+                                    <Pin className="h-3.5 w-3.5 text-gray-600 ml-2 flex-shrink-0" />
                                   )}
                                 </div>
                                 
-                                <p className="text-[10px] text-gray-500 line-clamp-1 mb-1.5 leading-relaxed">
+                                <p className="text-xs text-gray-600 line-clamp-2 mb-2 leading-relaxed">
                                   {note.content}
                                 </p>
                                 
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-1.5">
-                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getPriorityColor(note.priority)}`}>
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getPriorityColor(note.priority)}`}>
                                       {note.priority}
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                                    <Calendar className="h-2.5 w-2.5" />
+                                  <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                                    <Calendar className="h-3 w-3" />
                                     <span>
                                       {new Date(note.createdAt).toLocaleDateString()}
                                     </span>
                                   </div>
                                 </div>
-                              </div>
+                              </motion.div>
                             ))}
                           </div>
                         )}
@@ -350,10 +367,15 @@ export default function NotasPage() {
                   })}
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Right Main Content - Note Viewer/Editor */}
-            <div className="flex-1 bg-white">
+            <motion.div 
+              className="flex-1 bg-white"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               {selectedNote ? (
                 /* Selected Note Viewer - Clean Style */
                 <div className="h-full flex flex-col">
@@ -423,20 +445,6 @@ export default function NotasPage() {
                         <ImageIcon className="h-4 w-4 text-gray-600" />
                       </button>
                     </div>
-
-                    {/* Tags */}
-                    {selectedNote.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {selectedNote.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
                   
                   {/* Note Title and Content Area */}
@@ -576,9 +584,20 @@ export default function NotasPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={handleSaveNewNote}
-                          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium shadow-sm"
+                          disabled={isSaving}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all duration-200 min-w-[80px] ${
+                            isSaving 
+                              ? 'bg-purple-400 cursor-not-allowed' 
+                              : 'bg-purple-600 hover:bg-purple-700'
+                          } text-white`}
                         >
-                          Guardar
+                          {isSaving ? (
+                            <div className="flex items-center justify-center">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          ) : (
+                            'Guardar'
+                          )}
                         </button>
                       </div>
                     </div>
@@ -637,10 +656,11 @@ export default function NotasPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
+        </>
       )}
 
       {/* Delete Category Confirmation Modal */}

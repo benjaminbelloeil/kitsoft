@@ -78,9 +78,7 @@ export async function PUT(
     if (updateData.content !== undefined) updateObj.content = updateData.content;
     if (updateData.category !== undefined) updateObj.category = updateData.category;
     if (updateData.priority !== undefined) updateObj.priority = updateData.priority;
-    if (updateData.tags !== undefined) updateObj.tags = updateData.tags;
     if (updateData.isPinned !== undefined) updateObj.is_pinned = updateData.isPinned;
-    if (updateData.color !== undefined) updateObj.color = updateData.color;
 
     // Update the note
     const { data: updatedNote, error: updateError } = await supabase

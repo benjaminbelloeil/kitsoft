@@ -19,12 +19,8 @@ export default function NotesHeader({
   return (
     <div className="max-w-[1400px] mx-auto py-6 px-4 sm:px-6 lg:px-8 mb-2">
       {/* Header card with white background and enhanced styling */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-[#A100FF05] -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-0 w-20 h-20 rounded-full bg-[#A100FF05] -ml-10 -mb-10"></div>
-        
-        <div className="relative z-10">
+      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+        <div>
           <div className="flex flex-col md:flex-row gap-6 justify-between">
             <div className="flex items-center">
               <div className="bg-gradient-to-br from-[#A100FF10] to-[#A100FF20] p-3 rounded-lg mr-4 shadow-sm border border-[#A100FF10]">
