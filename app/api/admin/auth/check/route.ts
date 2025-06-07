@@ -62,9 +62,7 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
-    
-    console.log('User level data:', levelDetails); // For debugging
-    
+        
     // Check if the level has admin privileges (level number 1)
     const isAdmin = levelDetails.numero === 1;
     

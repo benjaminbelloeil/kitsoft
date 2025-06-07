@@ -63,7 +63,7 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#A100FF] transition-colors" />
               <input
                 type="search"
-                placeholder="Buscar proyectos, tareas, notas..."
+                placeholder="Buscar tarjetas, proyectos, tareas, notas..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange?.(e.target.value)}
                 className="w-full py-2 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A100FF20] focus:border-[#A100FF80] transition-all duration-200 hover:bg-gray-100 focus:bg-white"
