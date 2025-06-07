@@ -90,13 +90,14 @@ export default function TrainingCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">      <div className="p-6 border-b border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900 flex items-center">
-          <Award className="w-5 h-5 mr-2 text-blue-500" />
-          Desarrollo Profesional
-        </h2>
-      </div>
-        <div className="p-6 flex flex-col">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col">
+        <div className="p-6 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center">
+            <Award className="w-5 h-5 mr-2 text-blue-500" />
+            Desarrollo Profesional
+          </h2>
+        </div>
+        <div className="p-6 flex flex-col flex-grow">
           <h3 className="text-sm font-medium text-gray-500 uppercase mb-4">Cargando...</h3>
           <div className="space-y-3 flex-grow">
             {[1, 2].map((i) => (
@@ -112,7 +113,7 @@ export default function TrainingCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col">
       <div className="p-6 border-b border-gray-100">
         <h2 className="text-xl font-bold text-gray-900 flex items-center">
           <Award className="w-5 h-5 mr-2 text-blue-500" />
@@ -120,8 +121,8 @@ export default function TrainingCard() {
         </h2>
       </div>
       
-      <div className="p-4">
-        <div className="space-y-3 max-h-[280px] overflow-y-auto">
+      <div className="p-4 flex-grow flex flex-col">
+        <div className="space-y-3 flex-grow overflow-y-auto">
           {trajectories.length === 0 && !loading ? (
             <div className="flex flex-col items-center justify-center py-8 px-4">
               <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3 border border-blue-100">

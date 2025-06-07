@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useSearchParams, useRouter } from "next/navigation";
 import NotesHeader from "@/components/notas/NotesHeader";
 import NotesSkeleton from "@/components/notas/NotesSkeleton";
 import { Pin, Trash2, ChevronDown, ChevronRight, User, Briefcase, Rocket, Users, Lightbulb, FileText, FolderOpen, Calendar, Check } from "lucide-react";
@@ -124,6 +125,8 @@ export default function NotasPage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const priorityDropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Load notes on component mount
   useEffect(() => {
@@ -149,6 +152,21 @@ export default function NotasPage() {
 
     loadNotes();
   }, [supabase.auth]);
+
+  // Handle URL parameters to auto-select note
+  useEffect(() => {
+    const noteId = searchParams.get('note');
+    if (noteId && notes.length > 0) {
+      const noteToSelect = notes.find(note => note.id === noteId);
+      if (noteToSelect) {
+        setSelectedNote(noteToSelect);
+        // Set the category to match the note's category or 'todas'
+        setSelectedCategory(noteToSelect.category);
+        // Expand the appropriate category
+        setExpandedCategories(new Set([noteToSelect.category]));
+      }
+    }
+  }, [searchParams, notes]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -204,6 +222,10 @@ export default function NotasPage() {
   const handleSelectCategory = (categoryId: 'todas' | 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea') => {
     setSelectedCategory(categoryId);
     setSelectedNote(null);
+    // Clear note parameter from URL when switching categories
+    const url = new URL(window.location.href);
+    url.searchParams.delete('note');
+    router.replace(url.pathname + url.search);
   };
 
   const handleSelectNote = (note: Note) => {
@@ -250,6 +272,10 @@ export default function NotasPage() {
       setNotes(prev => prev.filter(note => note.id !== noteId));
       if (selectedNote?.id === noteId) {
         setSelectedNote(null);
+        // Clear note parameter from URL when deleting the selected note
+        const url = new URL(window.location.href);
+        url.searchParams.delete('note');
+        router.replace(url.pathname + url.search);
       }
     } catch (error) {
       console.error('Error deleting note:', error);

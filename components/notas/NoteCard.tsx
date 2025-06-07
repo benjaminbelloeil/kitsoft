@@ -25,6 +25,7 @@ interface NoteCardProps {
   onUpdate: (note: Note) => void;
   onDelete: (noteId: string) => void;
   onTogglePin: (noteId: string) => void;
+  onSelect?: (note: Note) => void;
 }
 
 const categoryLabels = {
@@ -48,7 +49,7 @@ const getCategoryColors = (category: string) => {
   return colorMap[category] || '#9CA3AF'; // gray-400
 };
 
-export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: NoteCardProps) {
+export default function NoteCard({ note, onUpdate, onDelete, onTogglePin, onSelect }: NoteCardProps) {
   const [showActions, setShowActions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -92,6 +93,12 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
     return content.substring(0, maxLength) + '...';
   };
 
+  const handleCardClick = () => {
+    if (onSelect && !isEditing) {
+      onSelect(note);
+    }
+  };
+
   return (
     <motion.div
       layout
@@ -100,12 +107,13 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
       transition={{ duration: 0.2 }}
     >
       <div 
-        className="bg-white rounded-lg transition-all duration-200 overflow-hidden relative shadow-sm"
+        className="bg-white rounded-lg transition-all duration-200 overflow-hidden relative shadow-sm cursor-pointer hover:shadow-md"
         style={{ 
           border: `2px solid ${getCategoryColors(note.category)}`,
         }}
         onMouseEnter={() => setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
+        onClick={handleCardClick}
       >
         {/* Pin indicator */}
         {note.isPinned && (
@@ -125,6 +133,7 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
               <button
                 onClick={() => setShowActions(!showActions)}
                 className="p-1 rounded-md bg-white hover:bg-gray-50 transition-colors shadow-sm border border-gray-200"
+                onClickCapture={(e) => e.stopPropagation()}
               >
                 <MoreVertical className="w-3.5 h-3.5 text-gray-600" />
               </button>
@@ -136,6 +145,7 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
                     setShowActions(false);
                   }}
                   className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+                  onClickCapture={(e) => e.stopPropagation()}
                 >
                   <Pin className="w-3 h-3" />
                   {note.isPinned ? 'Desfijar' : 'Fijar'}
@@ -146,6 +156,7 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
                     setShowActions(false);
                   }}
                   className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+                  onClickCapture={(e) => e.stopPropagation()}
                 >
                   <Edit3 className="w-3 h-3" />
                   Editar
@@ -156,6 +167,7 @@ export default function NoteCard({ note, onUpdate, onDelete, onTogglePin }: Note
                     setShowActions(false);
                   }}
                   className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 text-gray-700 flex items-center gap-2"
+                  onClickCapture={(e) => e.stopPropagation()}
                 >
                   <Trash2 className="w-3 h-3" />
                   Eliminar

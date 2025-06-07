@@ -12,6 +12,7 @@ import { createClient } from '@/utils/supabase/client';
 // Import component sections
 import Header from "@/components/dashboard/Header";
 import GreetingCard from "@/components/dashboard/GreetingCard";
+import AddNoteCard from "@/components/dashboard/AddNoteCard";
 import ProjectsSection from "@/components/dashboard/ProjectsSection";
 import TasksSection from "@/components/dashboard/TasksSection";
 import WorkSummary from "@/components/dashboard/WorkSummary";
@@ -356,15 +357,15 @@ export default function DashboardPage() {
           />
         </motion.div>
 
-        <motion.div 
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1920px] mx-auto px-4 lg:items-stretch h-full"
-          initial={{ opacity: 0, y: 30 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1920px] mx-auto px-4"
         >
           {/* Left column - My Projects */}
           <motion.div 
-            className="lg:col-span-2 space-y-6 flex flex-col h-full"
+            className="lg:col-span-2 space-y-6 flex flex-col"
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -408,7 +409,7 @@ export default function DashboardPage() {
           
           {/* Right column - Skills, Timeline, Training */}
           <motion.div 
-            className="space-y-6 flex flex-col h-full"
+            className="space-y-6 flex flex-col"
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -432,6 +433,16 @@ export default function DashboardPage() {
               <TrainingCard />
             </motion.div>
           </motion.div>
+        </motion.div>
+
+        {/* Add Note Card - Bottom placement */}
+        <motion.div 
+          className="max-w-[1920px] mx-auto px-4 mt-6 mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        >
+          <AddNoteCard />
         </motion.div>
       </motion.div>
     </AnimatePresence>
