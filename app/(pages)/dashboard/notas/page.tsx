@@ -110,9 +110,8 @@ const getCategoryColors = (color: string) => {
 export default function NotasPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<'todas' | 'personal' | 'trabajo' | 'proyecto' | 'reunión' | 'idea'>('todas');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['todas']));
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [newNoteTitle, setNewNoteTitle] = useState("");
   const [newNoteContent, setNewNoteContent] = useState("");
@@ -191,15 +190,10 @@ export default function NotasPage() {
     count: category.id === 'todas' ? notes.length : notes.filter(note => note.category === category.id).length
   }));
 
-  // Filter notes based on search and category
+  // Filter notes based on category
   const filteredNotes = notes.filter(note => {
-    const matchesSearch = searchQuery === "" || 
-      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase());
-    
     const matchesCategory = selectedCategory === "todas" || note.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
+    return matchesCategory;
   }).sort((a, b) => {
     // Pinned notes first, then by update date
     if (a.isPinned && !b.isPinned) return -1;
@@ -342,8 +336,6 @@ export default function NotasPage() {
         <>
           {/* Header */}
           <NotesHeader
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
             totalNotes={notes.length}
             pinnedNotes={notes.filter(n => n.isPinned).length}
           />

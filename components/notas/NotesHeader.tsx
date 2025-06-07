@@ -1,18 +1,14 @@
 'use client';
 
-import { FiFileText, FiSearch, FiX } from "react-icons/fi";
+import { FiFileText } from "react-icons/fi";
 import { BookOpen, Pin } from "lucide-react";
 
 interface NotesHeaderProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   totalNotes: number;
   pinnedNotes: number;
 }
 
 export default function NotesHeader({
-  searchQuery,
-  setSearchQuery,
   totalNotes,
   pinnedNotes
 }: NotesHeaderProps) {
@@ -45,31 +41,6 @@ export default function NotesHeader({
                 <p className="text-gray-600 mt-2 max-w-2xl">
                   Organiza tus ideas, proyectos y recordatorios en un solo lugar. Crea, edita y gestiona tus notas de manera eficiente.
                 </p>
-              </div>
-            </div>
-            
-            {/* Enhanced Search bar */}
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Buscar en tus notas..."
-                  className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#A100FF40] focus:border-[#A100FF] transition-all"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <div className="absolute left-0 top-0 h-full flex items-center justify-center pl-3">
-                  <FiSearch className="text-gray-400 h-4 w-4" />
-                </div>
-                
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
-                  >
-                    <FiX className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
           </div>

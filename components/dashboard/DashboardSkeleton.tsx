@@ -22,38 +22,29 @@ export function DashboardSkeleton() {
         transition={{ duration: 0.5 }}
         className="sticky top-0 z-30 w-full mb-6"
       >
-        <div className="bg-white shadow-sm border-b border-gray-100">
+        <div className="bg-white shadow-md border-b border-gray-100">
           <div className="flex h-16 items-center px-4 md:px-6 max-w-[1920px] mx-auto">
-            {/* App logo */}
+            {/* App logo placeholder - empty to match actual header */}
             <div className="flex items-center mr-4">
+              <div className="hidden md:flex items-center">
+                {/* Empty space - no logo in actual header */}
+              </div>
+            </div>
+            
+            {/* Extended search bar to match actual max-w-2xl */}
+            <div className="flex-1 ml-auto md:mr-auto max-w-2xl relative">
               <motion.div 
-                className="h-7 w-28 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
+                className="h-10 w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
                 style={{ backgroundSize: '200% 100%' }}
                 animate={shimmer.animate}
                 transition={shimmer.transition}
               />
             </div>
             
-            {/* Search bar */}
-            <div className="flex-1 ml-auto md:mr-auto max-w-md">
-              <motion.div 
-                className="h-9 w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
-                style={{ backgroundSize: '200% 100%' }}
-                animate={shimmer.animate}
-                transition={shimmer.transition}
-              />
-            </div>
-            
-            {/* Control icons */}
+            {/* Control icons - only notification bell now */}
             <div className="flex items-center space-x-3">
               <motion.div 
-                className="h-9 w-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
-                style={{ backgroundSize: '200% 100%' }}
-                animate={shimmer.animate}
-                transition={shimmer.transition}
-              />
-              <motion.div 
-                className="h-9 w-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg"
+                className="h-10 w-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full"
                 style={{ backgroundSize: '200% 100%' }}
                 animate={shimmer.animate}
                 transition={shimmer.transition}
@@ -609,6 +600,65 @@ export function DashboardSkeleton() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </motion.div>
+      
+      {/* Add Note Card skeleton - Bottom placement */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.8 }}
+        className="max-w-[1920px] mx-auto px-4 md:px-6 mt-6 mb-6"
+      >
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center">
+              <motion.div 
+                className="h-5 w-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mr-2"
+                style={{ backgroundSize: '200% 100%' }}
+                animate={shimmer.animate}
+                transition={shimmer.transition}
+              />
+              <motion.div 
+                className="h-6 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded"
+                style={{ backgroundSize: '200% 100%' }}
+                animate={shimmer.animate}
+                transition={shimmer.transition}
+              />
+            </div>
+          </div>
+          
+          <div className="p-6">
+            {/* Empty state */}
+            <div className="text-center py-8">
+              <motion.div 
+                className="w-16 h-16 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full mx-auto mb-4"
+                style={{ backgroundSize: '200% 100%' }}
+                animate={shimmer.animate}
+                transition={shimmer.transition}
+              />
+              <motion.div 
+                className="h-6 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mx-auto mb-2"
+                style={{ backgroundSize: '200% 100%' }}
+                animate={shimmer.animate}
+                transition={shimmer.transition}
+              />
+              <motion.div 
+                className="h-4 w-64 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded mx-auto mb-6"
+                style={{ backgroundSize: '200% 100%' }}
+                animate={shimmer.animate}
+                transition={shimmer.transition}
+              />
+              
+              {/* Create note button */}
+              <motion.div 
+                className="h-10 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg mx-auto"
+                style={{ backgroundSize: '200% 100%' }}
+                animate={shimmer.animate}
+                transition={shimmer.transition}
+              />
+            </div>
+          </div>
         </div>
       </motion.div>
     </div>
