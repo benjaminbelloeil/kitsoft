@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
+import { createLevelChangeNotification } from '@/utils/notifications/notificationService';
 
 export async function POST(request: Request) {
   try {
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     // Get level details to ensure it exists
     const { data: levelData, error: levelCheckError } = await supabase
       .from('niveles')
-      .select('id_nivel, numero')
+      .select('id_nivel, numero, nombre')
       .eq('id_nivel', levelId)
       .single();
     
@@ -159,6 +160,22 @@ export async function POST(request: Request) {
     if (insertRoleError) {
       console.error('Warning: Failed to insert new user role:', insertRoleError);
       // Continue execution - don't fail the whole operation
+    }
+
+    // 🔔 CREATE NOTIFICATION for level change
+    try {
+      console.log('📧 Creating level change notification...');
+      
+      await createLevelChangeNotification(
+        userId,
+        levelData.nombre,
+        user.id // Current admin user making the change
+      );
+      
+      console.log(`✅ Level change notification sent to user ${userId}`);
+    } catch (notifError) {
+      console.error('❌ Failed to send level change notification:', notifError);
+      // Don't fail the level update for notification errors
     }
 
     return NextResponse.json({ 

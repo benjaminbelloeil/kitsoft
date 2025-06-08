@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { simular } from '@/utils/kit-agent/simulation';
 import { createClient } from '@/utils/supabase/server';
+import { createProjectAssignmentNotification } from '@/utils/notifications/notificationService';
 
 export interface AgentAssignmentResult {
   success: boolean;
@@ -100,6 +101,46 @@ export async function executeAgentAssignment(id_proyecto: string): Promise<Agent
         .update({ ocupado: true })
         .eq('id_proyecto', id_proyecto)
         .eq('id_rol', assignment.rol_id);
+    }
+
+    // 🔔 CREATE NOTIFICATIONS for new project assignments
+    if (newAssignments.length > 0) {
+      console.log('📧 Creating assignment notifications...');
+      
+      // Get project details for notifications
+      const { data: projectData } = await supabase
+        .from('proyectos')
+        .select('titulo')
+        .eq('id_proyecto', id_proyecto)
+        .single();
+
+      // Get role names for the assignments
+      const roleIds = [...new Set(newAssignments.map(a => a.rol_id))];
+      const { data: roleData } = await supabase
+        .from('roles')
+        .select('id_rol, nombre')
+        .in('id_rol', roleIds);
+
+      const roleMap = new Map(roleData?.map(r => [r.id_rol, r.nombre]) || []);
+
+      // Create notifications for each new assignment
+      for (const assignment of newAssignments) {
+        const roleName = roleMap.get(assignment.rol_id) || 'Miembro del equipo';
+        const projectTitle = projectData?.titulo || 'Proyecto';
+        
+        try {
+          await createProjectAssignmentNotification(
+            assignment.empleado_id,
+            projectTitle,
+            roleName,
+            'sistema' // Assigned by the automatic system
+          );
+          console.log(`✅ Notification sent to user ${assignment.empleado_id} for project assignment`);
+        } catch (notifError) {
+          console.error(`❌ Failed to send notification to user ${assignment.empleado_id}:`, notifError);
+          // Don't fail the entire process for notification errors
+        }
+      }
     }
 
     const totalAssignments = assignments.length;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 export interface Notification {
   id: string;
@@ -8,81 +8,122 @@ export interface Notification {
   message: string;
   date: Date;
   read: boolean;
-  type: 'project' | 'announcement' | 'reminder';
+  type: 'project' | 'announcement' | 'reminder' | 'workload_low' | 'workload_overload' | 'no_people_lead' | 'welcome';
 }
 
 interface NotificationContextProps {
   notifications: Notification[];
   unreadCount: number;
+  loading: boolean;
   setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  refreshNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextProps | undefined>(undefined);
 
-// Sample notifications data
-const initialNotifications = [
-  {
-    id: "n1",
-    title: "Nuevo proyecto asignado",
-    message: "Has sido asignado al proyecto Digital Transformation",
-    date: new Date(new Date().setHours(new Date().getHours() - 1)),
-    read: false,
-    type: 'project' as const,
-  },
-  {
-    id: "n2",
-    title: "Reunión de planificación",
-    message: "No olvides la reunión de Sprint Planning mañana a las 10:00",
-    date: new Date(new Date().setHours(new Date().getHours() - 3)),
-    read: false,
-    type: 'reminder' as const,
-  },
-  {
-    id: "n3",
-    title: "Actualización importante",
-    message: "Hay una nueva versión de la plataforma disponible",
-    date: new Date(new Date().setDate(new Date().getDate() - 1)),
-    read: true,
-    type: 'announcement' as const,
-  },
-  {
-    id: "n4",
-    title: "Feedback recibido",
-    message: "Has recibido feedback en el proyecto Nova",
-    date: new Date(new Date().setDate(new Date().getDate() - 2)),
-    read: true,
-    type: 'project' as const,
-  }
-];
-
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const unreadCount = notifications.filter(n => !n.read).length;
   
-  const markAsRead = (id: string) => {
-    setNotifications(prevNotifications => 
-      prevNotifications.map(notification => 
-        notification.id === id ? { ...notification, read: true } : notification
-      )
-    );
+  // Fetch notifications from the API
+  const refreshNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/notifications');
+      if (response.ok) {
+        const data = await response.json();
+        // Ensure dates are properly converted to Date objects
+        const processedData: Notification[] = data.map((notification: {
+          id: string;
+          title: string;
+          message: string;
+          date: string | Date;
+          read: boolean;
+          type: 'project' | 'announcement' | 'reminder' | 'workload_low' | 'workload_overload' | 'no_people_lead' | 'welcome';
+        }) => ({
+          ...notification,
+          date: new Date(notification.date)
+        }));
+        setNotifications(processedData);
+      } else {
+        console.error('Failed to fetch notifications');
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
   };
   
-  const markAllAsRead = () => {
-    setNotifications(prevNotifications => 
-      prevNotifications.map(notification => ({ ...notification, read: true }))
-    );
+  // Load notifications on mount
+  useEffect(() => {
+    refreshNotifications();
+  }, []);
+  
+  const markAsRead = async (id: string) => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          notificationId: id,
+          markAsRead: true,
+        }),
+      });
+      
+      if (response.ok) {
+        setNotifications(prevNotifications => 
+          prevNotifications.map(notification => 
+            notification.id === id ? { ...notification, read: true } : notification
+          )
+        );
+      } else {
+        console.error('Failed to mark notification as read');
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+  
+  const markAllAsRead = async () => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          markAllAsRead: true,
+        }),
+      });
+      
+      if (response.ok) {
+        setNotifications(prevNotifications => 
+          prevNotifications.map(notification => ({ ...notification, read: true }))
+        );
+      } else {
+        console.error('Failed to mark all notifications as read');
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
   };
   
   return (
     <NotificationContext.Provider value={{ 
       notifications, 
       unreadCount,
+      loading,
       setNotifications, 
       markAsRead, 
-      markAllAsRead 
+      markAllAsRead,
+      refreshNotifications
     }}>
       {children}
     </NotificationContext.Provider>

@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { createProjectAssignmentNotification } from '@/utils/notifications/notificationService';
 
 export async function PATCH(
   request: NextRequest,
@@ -100,6 +101,33 @@ export async function PATCH(
       return NextResponse.json({ 
         error: 'Failed to update user assignment' 
       }, { status: 500 });
+    }
+
+    // 🔔 CREATE NOTIFICATION for user reassignment
+    try {
+      console.log('📧 Creating user reassignment notification...');
+      
+      // Get project title and role name from the updated assignment
+      const { data: projectData } = await supabase
+        .from('proyectos')
+        .select('titulo')
+        .eq('id_proyecto', projectId)
+        .single();
+
+      const roleName = updatedAssignment.roles?.nombre || 'Miembro del equipo';
+      const projectTitle = projectData?.titulo || 'Proyecto';
+
+      await createProjectAssignmentNotification(
+        newUserId,
+        projectTitle,
+        roleName,
+        user.id // Project lead making the reassignment
+      );
+      
+      console.log(`✅ Reassignment notification sent to user ${newUserId}`);
+    } catch (notifError) {
+      console.error('❌ Failed to send reassignment notification:', notifError);
+      // Don't fail the reassignment for notification errors
     }
 
     return NextResponse.json({ 

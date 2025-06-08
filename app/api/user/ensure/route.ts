@@ -36,14 +36,13 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(true);  // User already exists
     }
-    
-    // If not, create the user
+     // If not, create the user
     const { error } = await supabase
       .from('usuarios')
       .insert({
         id_usuario: userId
       });
-    
+
     if (error) {
       console.error('Error creating user profile:', error);
       return NextResponse.json(
@@ -51,7 +50,7 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
     return NextResponse.json(true);
   } catch (error) {
     console.error('Unexpected error in ensure user API:', error);

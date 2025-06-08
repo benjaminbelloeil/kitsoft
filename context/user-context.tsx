@@ -60,7 +60,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       });
       
       if (!levelResponse.ok) {
-        console.error("Error fetching user level:", await levelResponse.text());
         setUserRole(null);
         setIsAdmin(false);
         setIsProjectLead(false);
@@ -73,7 +72,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         
         // Explicitly check if user is admin (nivel.numero === 1)
         if (levelData && levelData.numero === 1) {
-          console.log("User is ADMIN with level number:", levelData.numero);
           setIsAdmin(true);
           setIsProjectLead(false);
           setIsPeopleLead(false);
@@ -81,7 +79,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } 
         // Check if user is people lead (nivel.numero === 2)
         else if (levelData && levelData.numero === 2) {
-          console.log("User is PEOPLE LEAD with level number:", levelData.numero);
           setIsAdmin(false);
           setIsProjectLead(false);
           setIsPeopleLead(true);
@@ -89,7 +86,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } 
         // Check if user is project lead (nivel.numero === 3)
         else if (levelData && levelData.numero === 3) {
-          console.log("User is PROJECT LEAD with level number:", levelData.numero);
           setIsAdmin(false);
           setIsProjectLead(true);
           setIsPeopleLead(false);
@@ -97,14 +93,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } 
         // Check if user is project manager (nivel.numero === 4)
         else if (levelData && levelData.numero === 4) {
-          console.log("User is PROJECT MANAGER with level number:", levelData.numero);
           setIsAdmin(false);
           setIsProjectLead(false);
           setIsPeopleLead(false);
           setIsProjectManager(true);
         } 
         else {
-          console.log("User is regular user with level number:", levelData?.numero);
           setIsAdmin(false);
           setIsProjectLead(false);
           setIsPeopleLead(false);
