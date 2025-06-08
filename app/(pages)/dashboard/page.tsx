@@ -147,22 +147,13 @@ export default function DashboardPage() {
   const loading = !userDataLoaded || !projectsLoaded || !feedbackDataLoaded || !notesDataLoaded || !minLoadingTimeElapsed;
 
   // Debug loading states
-  useEffect(() => {
-    console.log('Dashboard loading states:', {
-      userDataLoaded,
-      projectsLoaded,
-      feedbackDataLoaded,
-      notesDataLoaded,
-      minLoadingTimeElapsed,
-      overallLoading: loading
-    });
-  }, [userDataLoaded, projectsLoaded, feedbackDataLoaded, notesDataLoaded, minLoadingTimeElapsed, loading]);
+  // Loading state tracking removed for security
 
   // Minimum loading time to prevent flickering
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinLoadingTimeElapsed(true);
-      console.log('Minimum loading time elapsed');
+      // Minimum loading time completed
     }, 1200); // Minimum 1200ms loading time to ensure all data loads
 
     return () => clearTimeout(timer);
@@ -189,7 +180,7 @@ export default function DashboardPage() {
         setWeeklyWorkload(calculateWeeklyWorkload([]));
       } finally {
         setProjectsLoaded(true);
-        console.log('Projects data loading completed');
+        // Projects data loading completed
       }
     };
 
@@ -207,13 +198,13 @@ export default function DashboardPage() {
           // Actually fetch the feedback stats to ensure data is loaded
           const stats = await getFeedbackStats(user.id);
           setFeedbackStats(stats); // Store the stats for PerformanceCard
-          console.log('Dashboard feedback data loaded:', stats.length, 'stats');
+          // Dashboard feedback data loaded
         }
       } catch (error) {
         console.error('Error fetching feedback data:', error);
       } finally {
         setFeedbackDataLoaded(true);
-        console.log('Feedback data loading completed');
+        // Feedback data loading completed
       }
     };
 
@@ -229,7 +220,7 @@ export default function DashboardPage() {
         // In practice, we could create a lightweight endpoint for this
         setTimeout(() => {
           setNotesDataLoaded(true);
-          console.log('Notes data loading completed');
+          // Notes data loading completed
         }, 200); // Small delay to simulate notes loading
       } catch (error) {
         console.error('Error fetching notes data:', error);
@@ -280,14 +271,14 @@ export default function DashboardPage() {
           const profileData = await getUserCompleteProfile(user.id);
           
           if (profileData) {
-            console.log('Profile data fetched:', profileData);
+            // Profile data fetched successfully
             // Update user data with fetched profile
             setUserData({
               name: `${profileData.Nombre || ''} ${profileData.Apellido || ''}`.trim() || "Usuario",
               title: profileData.Titulo || "Completar perfil",
               avatar: profileData.URL_Avatar || null,
             });
-            console.log('Updated userData with avatar:', profileData.URL_Avatar);
+            // Updated userData with avatar
           } else {
             // New user - set appropriate fallback values
             setUserData({
@@ -301,7 +292,7 @@ export default function DashboardPage() {
         console.error("Error fetching user data:", error);
       } finally {
         setUserDataLoaded(true);
-        console.log('User data loading completed');
+        // User data loading completed
       }
     }
     
