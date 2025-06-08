@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { createWelcomeNotification } from '@/utils/notifications/notificationService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,26 +49,6 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create user profile' },
         { status: 500 }
       );
-    }
-
-    // Trigger welcome notification for new user
-    try {
-      // Get user's name for the welcome message
-      const { data: userData, error: userDataError } = await supabase
-        .from('usuarios')
-        .select('nombre, apellido')
-        .eq('id_usuario', userId)
-        .single();
-
-      const userName = userData && !userDataError && userData.nombre 
-        ? `${userData.nombre} ${userData.apellido || ''}`.trim()
-        : 'Usuario';
-
-      await createWelcomeNotification(userId, userName);
-      console.log(`Welcome notification sent to new user: ${userId}`);
-    } catch (notificationError) {
-      // Log the error but don't fail the user creation
-      console.error('Failed to send welcome notification:', notificationError);
     }
 
     return NextResponse.json(true);

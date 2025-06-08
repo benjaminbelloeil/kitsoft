@@ -713,11 +713,11 @@ export async function checkWorkloadAndNotify(): Promise<{ success: boolean; erro
       console.error('Error fetching unassigned users:', unassignedError);
     } else if (unassignedUsers && unassignedUsers.length > 0) {
       for (const user of unassignedUsers) {
-        const userName = `${user.nombre} ${user.apellido || ''}`.trim();
-        const result = await createNoPeopleLeadNotification(user.id_usuario, userName);
+        const result = await createNoPeopleLeadNotification(user.id_usuario);
         
         if (result.success) {
           totalNotifications++;
+          const userName = `${user.nombre || 'Usuario'} ${user.apellido || ''}`.trim();
           console.log(`No People Lead notification sent to ${userName}`);
         }
       }
@@ -741,12 +741,33 @@ export async function checkWorkloadAndNotify(): Promise<{ success: boolean; erro
  */
 export async function createNoPeopleLeadNotification(
   userId: string,
-  userName: string
+  userName?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // If no userName provided or it's generic, try to get a better name
+    let displayName = userName;
+    
+    if (!displayName || displayName.trim().length === 0 || displayName === 'Usuario') {
+      const supabase = await createClient();
+      
+      const { data: userData, error: userDataError } = await supabase
+        .from('usuarios')
+        .select('nombre, apellido')
+        .eq('id_usuario', userId)
+        .single();
+
+      if (!userDataError && userData && userData.nombre) {
+        displayName = `${userData.nombre} ${userData.apellido || ''}`.trim();
+      } else {
+        displayName = undefined;
+      }
+    }
+
     const notificationData: NotificationData = {
       titulo: 'Asignación de People Lead pendiente',
-      descripcion: `Hola ${userName}, actualmente no tienes un People Lead asignado. Para recibir seguimiento de tu carga de trabajo y desarrollo profesional, por favor contacta a un administrador para que te asigne un People Lead. Puedes enviar un email solicitando esta asignación.`,
+      descripcion: displayName 
+        ? `Hola ${displayName}, actualmente no tienes un People Lead asignado. Para recibir seguimiento de tu carga de trabajo y desarrollo profesional, por favor contacta a un administrador para que te asigne un People Lead. Puedes enviar un email solicitando esta asignación.`
+        : `Actualmente no tienes un People Lead asignado. Para recibir seguimiento de tu carga de trabajo y desarrollo profesional, por favor contacta a un administrador para que te asigne un People Lead. También aprovecha para completar tu perfil con tu nombre y datos personales.`,
       tipo: 'no_people_lead',
       userIds: [userId]
     };
@@ -760,15 +781,39 @@ export async function createNoPeopleLeadNotification(
 
 /**
  * Creates welcome notification for new users
+ * Handles cases where userName might be empty or undefined for new users
  */
 export async function createWelcomeNotification(
   userId: string,
-  userName: string
+  userName?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // If no userName provided, try to get it from the database
+    let displayName = userName;
+    
+    if (!displayName || displayName.trim().length === 0 || displayName === 'Usuario') {
+      const supabase = await createClient();
+      
+      const { data: userData, error: userDataError } = await supabase
+        .from('usuarios')
+        .select('nombre, apellido')
+        .eq('id_usuario', userId)
+        .single();
+
+      if (!userDataError && userData && userData.nombre) {
+        displayName = `${userData.nombre} ${userData.apellido || ''}`.trim();
+      } else {
+        // Fallback to a generic greeting
+        displayName = undefined;
+      }
+    }
+
+    // Create personalized or generic welcome message
     const notificationData: NotificationData = {
       titulo: '¡Bienvenido a KitSoft!',
-      descripcion: `¡Hola ${userName}! Te damos la bienvenida a la plataforma KitSoft. Aquí podrás gestionar tus proyectos, recibir retroalimentación, monitorear tu carga de trabajo y hacer seguimiento a tu desarrollo profesional. Explora el dashboard para familiarizarte con todas las funcionalidades disponibles. ¡Esperamos que tengas una excelente experiencia!`,
+      descripcion: displayName 
+        ? `¡Hola ${displayName}! Te damos la bienvenida a la plataforma KitSoft. Aquí podrás gestionar tus proyectos, recibir retroalimentación, monitorear tu carga de trabajo y hacer seguimiento a tu desarrollo profesional. Explora el dashboard para familiarizarte con todas las funcionalidades disponibles. ¡Esperamos que tengas una excelente experiencia!`
+        : `¡Te damos la bienvenida a la plataforma KitSoft! Aquí podrás gestionar tus proyectos, recibir retroalimentación, monitorear tu carga de trabajo y hacer seguimiento a tu desarrollo profesional. No olvides completar tu perfil con tu nombre y datos personales. Explora el dashboard para familiarizarte con todas las funcionalidades disponibles. ¡Esperamos que tengas una excelente experiencia!`,
       tipo: 'welcome',
       userIds: [userId]
     };

@@ -68,6 +68,26 @@ export function useLoginForm() {
         // Refresh user role information
         await refreshUserRole();
         
+        // Check for first-time login and send welcome notification
+        try {
+          const welcomeCheckResponse = await fetch('/api/notifications/check-welcome', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (welcomeCheckResponse.ok) {
+            const welcomeResult = await welcomeCheckResponse.json();
+            if (welcomeResult.isFirstLogin) {
+              console.log('🎉 Welcome notification sent for first-time user');
+            }
+          }
+        } catch (welcomeError) {
+          // Don't fail login for welcome notification errors
+          console.error('Failed to check/send welcome notification:', welcomeError);
+        }
+        
         // Only start navigation animation after successful authentication
         startNavigation();
         

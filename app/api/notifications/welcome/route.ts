@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
 
     const { userId, userName } = await request.json();
 
-    if (!userId || !userName) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Missing required fields: userId and userName' },
+        { error: 'Missing required field: userId' },
         { status: 400 }
       );
     }
@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
     const result = await createWelcomeNotification(userId, userName);
     
     if (result.success) {
-      console.log(`✅ Welcome notification sent to ${userName}`);
+      const displayName = userName || 'new user';
+      console.log(`✅ Welcome notification sent to ${displayName}`);
       return NextResponse.json({
         success: true,
         message: 'Welcome notification sent successfully'
