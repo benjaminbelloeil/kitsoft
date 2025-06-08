@@ -73,7 +73,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         
         // Explicitly check if user is admin (nivel.numero === 1)
         if (levelData && levelData.numero === 1) {
-          console.log("User is ADMIN with level number:", levelData.numero);
           setIsAdmin(true);
           setIsProjectLead(false);
           setIsPeopleLead(false);
