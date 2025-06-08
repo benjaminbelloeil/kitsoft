@@ -8,7 +8,7 @@ export interface Notification {
   message: string;
   date: Date;
   read: boolean;
-  type: 'project' | 'announcement' | 'reminder';
+  type: 'project' | 'announcement' | 'reminder' | 'workload_low' | 'workload_overload' | 'no_people_lead' | 'welcome';
 }
 
 interface NotificationContextProps {
@@ -43,7 +43,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           message: string;
           date: string | Date;
           read: boolean;
-          type: 'project' | 'announcement' | 'reminder';
+          type: 'project' | 'announcement' | 'reminder' | 'workload_low' | 'workload_overload' | 'no_people_lead' | 'welcome';
         }) => ({
           ...notification,
           date: new Date(notification.date)

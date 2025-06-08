@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 export interface NotificationData {
   titulo: string;
   descripcion: string;
-  tipo: 'project' | 'announcement' | 'reminder';
+  tipo: 'project' | 'announcement' | 'reminder' | 'workload_low' | 'workload_overload' | 'no_people_lead' | 'welcome';
   userIds: string[]; // Array of user IDs to send notification to
 }
 
@@ -447,6 +447,325 @@ export async function getNotificationStats(
     };
   } catch (error) {
     console.error('Error getting notification stats:', error);
+    return { success: false, error: 'Unexpected error occurred' };
+  }
+}
+
+/**
+ * Interface for user workload data
+ */
+interface UserWorkloadData {
+  id_usuario: string;
+  nombre: string;
+  apellido: string;
+  workloadPercentage: number;
+  totalHoursPerWeek: number;
+  assignedHours: number;
+}
+
+/**
+ * Calculate workload percentage for a specific user
+ */
+async function calculateUserWorkload(userId: string): Promise<UserWorkloadData | null> {
+  try {
+    const supabase = await createClient();
+
+    // Get user information
+    const { data: userData, error: userError } = await supabase
+      .from('usuarios')
+      .select('nombre, apellido')
+      .eq('id_usuario', userId)
+      .single();
+
+    if (userError || !userData) {
+      console.error('Error fetching user data:', userError);
+      return null;
+    }
+
+    // Get user's active project assignments directly
+    const { data: userProjects, error: projectsError } = await supabase
+      .from('usuarios_proyectos')
+      .select(`
+        horas,
+        proyectos (
+          fecha_inicio,
+          fecha_fin,
+          activo
+        )
+      `)
+      .eq('id_usuario', userId);
+
+    if (projectsError) {
+      console.error('Error fetching user projects:', projectsError);
+      return null;
+    }
+
+    // Filter for active projects and calculate workload
+    let totalAssignedHours = 0;
+    
+    for (const projectAssignment of userProjects || []) {
+      const project = Array.isArray(projectAssignment.proyectos) 
+        ? projectAssignment.proyectos[0] 
+        : projectAssignment.proyectos;
+      
+      // Skip if project is not active or data is missing
+      if (!project || !project.activo || !projectAssignment.horas) continue;
+      
+      const startDate = new Date(project.fecha_inicio);
+      const endDate = project.fecha_fin ? new Date(project.fecha_fin) : new Date();
+      
+      // Calculate working days (Monday-Friday only)
+      let workingDays = 0;
+      const currentDate = new Date(startDate);
+      
+      while (currentDate <= endDate) {
+        const dayOfWeek = currentDate.getDay();
+        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+          workingDays++;
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      workingDays = Math.max(workingDays, 1);
+      const hoursPerDay = projectAssignment.horas / workingDays;
+      const hoursPerWeek = hoursPerDay * 5;
+      
+      totalAssignedHours += hoursPerWeek;
+    }
+
+    const totalHoursPerWeek = 40; // Standard work week
+    const workloadPercentage = Math.min(100, Math.round((totalAssignedHours / totalHoursPerWeek) * 100));
+
+    return {
+      id_usuario: userId,
+      nombre: userData.nombre,
+      apellido: userData.apellido,
+      workloadPercentage,
+      totalHoursPerWeek,
+      assignedHours: totalAssignedHours
+    };
+  } catch (error) {
+    console.error('Error calculating user workload:', error);
+    return null;
+  }
+}
+
+/**
+ * Get all team members for a People Lead
+ */
+async function getPeopleLeadTeamMembers(peopleLeadId: string): Promise<string[]> {
+  try {
+    const supabase = await createClient();
+
+    const { data: teamMembers, error } = await supabase
+      .from('usuarios')
+      .select('id_usuario')
+      .eq('id_peoplelead', peopleLeadId);
+
+    if (error) {
+      console.error('Error fetching team members:', error);
+      return [];
+    }
+
+    return teamMembers?.map(member => member.id_usuario) || [];
+  } catch (error) {
+    console.error('Error getting team members:', error);
+    return [];
+  }
+}
+
+/**
+ * Creates notification for People Lead when team member has low workload (below 50%)
+ */
+export async function createLowWorkloadNotification(
+  peopleLeadId: string,
+  teamMemberData: UserWorkloadData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const fullName = `${teamMemberData.nombre} ${teamMemberData.apellido || ''}`.trim();
+    
+    const notificationData: NotificationData = {
+      titulo: 'Empleado con baja carga de trabajo',
+      descripcion: `${fullName} tiene una cargabilidad del ${teamMemberData.workloadPercentage}% (${teamMemberData.assignedHours.toFixed(1)}h semanales de ${teamMemberData.totalHoursPerWeek}h). Considera asignar proyectos adicionales para optimizar su productividad.`,
+      tipo: 'workload_low',
+      userIds: [peopleLeadId]
+    };
+
+    return await createNotification(notificationData);
+  } catch (error) {
+    console.error('Error creating low workload notification:', error);
+    return { success: false, error: 'Unexpected error occurred' };
+  }
+}
+
+/**
+ * Creates notification for People Lead when team member has overload (above 80%)
+ */
+export async function createOverloadNotification(
+  peopleLeadId: string,
+  teamMemberData: UserWorkloadData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const fullName = `${teamMemberData.nombre} ${teamMemberData.apellido || ''}`.trim();
+    
+    const notificationData: NotificationData = {
+      titulo: 'Empleado sobrecargado',
+      descripcion: `${fullName} tiene una cargabilidad del ${teamMemberData.workloadPercentage}% (${teamMemberData.assignedHours.toFixed(1)}h semanales de ${teamMemberData.totalHoursPerWeek}h). Considera redistribuir la carga de trabajo para evitar burnout.`,
+      tipo: 'workload_overload',
+      userIds: [peopleLeadId]
+    };
+
+    return await createNotification(notificationData);
+  } catch (error) {
+    console.error('Error creating overload notification:', error);
+    return { success: false, error: 'Unexpected error occurred' };
+  }
+}
+
+/**
+ * Check workload for all users and send notifications to People Leads
+ * This function should be called periodically (e.g., daily or weekly)
+ */
+export async function checkWorkloadAndNotify(): Promise<{ success: boolean; error?: string; processed?: number; notifications?: number }> {
+  try {
+    const supabase = await createClient();
+    
+    // Get People Lead level ID first (numero = 2)
+    const { data: peopleLeadLevel, error: levelError } = await supabase
+      .from('niveles')
+      .select('id_nivel')
+      .eq('numero', 2)
+      .single();
+      
+    if (levelError || !peopleLeadLevel) {
+      console.error('Error finding People Lead level:', levelError);
+      return { success: false, error: 'Failed to find People Lead level' };
+    }
+
+    // Get users with People Lead level from usuarios_niveles
+    const { data: userNiveles, error: userNivelesError } = await supabase
+      .from('usuarios_niveles')
+      .select('id_usuario')
+      .eq('id_nivel_actual', peopleLeadLevel.id_nivel);
+        
+    if (userNivelesError) {
+      console.error('Error fetching People Lead users:', userNivelesError);
+      return { success: false, error: 'Failed to fetch People Leads' };
+    }
+
+    if (!userNiveles || userNiveles.length === 0) {
+      console.log('No People Leads found, skipping workload check');
+      return { success: true, processed: 0, notifications: 0 };
+    }
+
+    let totalProcessed = 0;
+    let totalNotifications = 0;
+
+    // Process each People Lead
+    for (const userNivel of userNiveles) {
+      const peopleLeadId = userNivel.id_usuario;
+      const teamMemberIds = await getPeopleLeadTeamMembers(peopleLeadId);
+      
+      // Process each team member
+      for (const teamMemberId of teamMemberIds) {
+        const workloadData = await calculateUserWorkload(teamMemberId);
+        
+        if (workloadData) {
+          totalProcessed++;
+          
+          // Check for low workload (below 50%)
+          if (workloadData.workloadPercentage < 50) {
+            const result = await createLowWorkloadNotification(peopleLeadId, workloadData);
+            if (result.success) {
+              totalNotifications++;
+              console.log(`Low workload notification sent for ${workloadData.nombre} ${workloadData.apellido} (${workloadData.workloadPercentage}%)`);
+            }
+          }
+          // Check for overload (above 80%)
+          else if (workloadData.workloadPercentage > 80) {
+            const result = await createOverloadNotification(peopleLeadId, workloadData);
+            if (result.success) {
+              totalNotifications++;
+              console.log(`Overload notification sent for ${workloadData.nombre} ${workloadData.apellido} (${workloadData.workloadPercentage}%)`);
+            }
+          }
+        }
+      }
+    }
+
+    // Check for users without People Lead assigned
+    const { data: unassignedUsers, error: unassignedError } = await supabase
+      .from('usuarios')
+      .select('id_usuario, nombre, apellido')
+      .is('id_peoplelead', null);
+
+    if (unassignedError) {
+      console.error('Error fetching unassigned users:', unassignedError);
+    } else if (unassignedUsers && unassignedUsers.length > 0) {
+      for (const user of unassignedUsers) {
+        const userName = `${user.nombre} ${user.apellido || ''}`.trim();
+        const result = await createNoPeopleLeadNotification(user.id_usuario, userName);
+        
+        if (result.success) {
+          totalNotifications++;
+          console.log(`No People Lead notification sent to ${userName}`);
+        }
+      }
+    }
+
+    console.log(`Workload check completed: ${totalProcessed} users processed, ${totalNotifications} notifications sent (including unassigned users)`);
+    
+    return {
+      success: true,
+      processed: totalProcessed,
+      notifications: totalNotifications
+    };
+  } catch (error) {
+    console.error('Error in workload check and notify:', error);
+    return { success: false, error: 'Unexpected error occurred' };
+  }
+}
+
+/**
+ * Creates notification for users who don't have a People Lead assigned
+ */
+export async function createNoPeopleLeadNotification(
+  userId: string,
+  userName: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const notificationData: NotificationData = {
+      titulo: 'Asignación de People Lead pendiente',
+      descripcion: `Hola ${userName}, actualmente no tienes un People Lead asignado. Para recibir seguimiento de tu carga de trabajo y desarrollo profesional, por favor contacta a un administrador para que te asigne un People Lead. Puedes enviar un email solicitando esta asignación.`,
+      tipo: 'no_people_lead',
+      userIds: [userId]
+    };
+
+    return await createNotification(notificationData);
+  } catch (error) {
+    console.error('Error creating no People Lead notification:', error);
+    return { success: false, error: 'Unexpected error occurred' };
+  }
+}
+
+/**
+ * Creates welcome notification for new users
+ */
+export async function createWelcomeNotification(
+  userId: string,
+  userName: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const notificationData: NotificationData = {
+      titulo: '¡Bienvenido a KitSoft!',
+      descripcion: `¡Hola ${userName}! Te damos la bienvenida a la plataforma KitSoft. Aquí podrás gestionar tus proyectos, recibir retroalimentación, monitorear tu carga de trabajo y hacer seguimiento a tu desarrollo profesional. Explora el dashboard para familiarizarte con todas las funcionalidades disponibles. ¡Esperamos que tengas una excelente experiencia!`,
+      tipo: 'welcome',
+      userIds: [userId]
+    };
+
+    return await createNotification(notificationData);
+  } catch (error) {
+    console.error('Error creating welcome notification:', error);
     return { success: false, error: 'Unexpected error occurred' };
   }
 }
