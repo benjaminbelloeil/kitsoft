@@ -9,6 +9,9 @@ import TabNavigation from "@/components/admin/TabNavigation";
 import AdminPageClient from "@/components/admin/AdminPageClient";
 import AdminHeader from "@/components/admin/AdminHeader";
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic';
+
 export default async function AdminPage() {
   // Server-side authorization check using the utility function
   const { user, isAdmin } = await checkCurrentUserIsAdmin();

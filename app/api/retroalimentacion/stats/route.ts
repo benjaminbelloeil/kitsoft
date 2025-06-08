@@ -87,9 +87,7 @@ export async function GET(request: NextRequest) {
 				const sortedFeedback = data.feedbackEntries.sort((a, b) => 
 					new Date(b.date).getTime() - new Date(a.date).getTime()
 				);
-				
-				console.log(`Category: ${category}`, sortedFeedback.map(f => ({ rating: f.rating, date: f.date })));
-				
+								
 				// Check if all feedback is from the same date
 				const uniqueDates = [...new Set(sortedFeedback.map(f => f.date))];
 				
@@ -127,7 +125,6 @@ export async function GET(request: NextRequest) {
 					trend = difference > 0 ? `+${difference.toFixed(1)}` : difference.toFixed(1);
 				}
 				
-				console.log(`Category: ${category}, Trend calculation result: ${trend}`);
 			}
 
 			stats.push({
