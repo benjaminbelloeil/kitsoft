@@ -9,7 +9,7 @@ import {
   X as CloseIcon
 } from "lucide-react";
 import { useNotifications } from '@/context/notification-context';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import PlaceholderAvatar from "@/components/ui/placeholder-avatar";
 
 interface HeaderProps {
@@ -22,6 +22,24 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
   // Access notifications from context
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to close notifications
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    }
+
+    if (showNotifications) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showNotifications]);
+
   // Handle notification bell click
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -49,7 +67,11 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
     const diffDays = Math.floor(diffHours / 24);
     if (diffDays < 7) return `Hace ${diffDays} día${diffDays !== 1 ? 's' : ''}`;
     
-    return dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    const diffWeeks = Math.floor(diffDays / 7);
+    if (diffWeeks < 4) return `Hace ${diffWeeks} semana${diffWeeks !== 1 ? 's' : ''}`;
+    
+    // For anything older than a month, show the actual date
+    return dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: diffDays > 365 ? 'numeric' : undefined });
   };
 
   return (
@@ -81,7 +103,7 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
           {/* Navigation controls with improved hover effects */}
           <div className="flex items-center space-x-3">
             {/* Enhanced Notification Bell */}
-            <div className="relative">
+            <div className="relative" ref={notificationRef}>
               <button 
                 onClick={toggleNotifications}
                 className="relative p-2 rounded-full bg-white shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-gray-600 hover:text-[#A100FF]"
@@ -99,7 +121,7 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
               
               {/* Notification Panel */}
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 max-h-[500px] flex flex-col rounded-lg shadow-lg bg-white border border-gray-100 z-50">
+                <div className="absolute right-0 mt-2 w-96 max-h-[500px] flex flex-col rounded-lg shadow-lg bg-white border border-gray-100 z-50">
                   <div className="p-3 border-b border-gray-100 flex justify-between items-center flex-shrink-0">
                     <h3 className="text-sm font-semibold">Notificaciones</h3>
                     <button 

@@ -44,12 +44,14 @@ export async function GET(request: NextRequest) {
       descripcion: string;
       tipo: string;
       fecha: string;
+      fecha_creacion: string;
       leido: boolean;
+      fecha_leido?: string;
     }) => ({
       id: notif.id_notificacion,
       title: notif.titulo || '',
       message: notif.descripcion || '',
-      date: new Date(notif.fecha || new Date()),
+      date: new Date(notif.fecha_creacion || notif.fecha || new Date()),
       read: notif.leido,
       type: (notif.tipo || 'announcement') as 'project' | 'announcement' | 'reminder'
     })) || [];
