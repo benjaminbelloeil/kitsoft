@@ -111,8 +111,8 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
                     </button>
                   </div>
                   
-                  {/* Scrollable notification area */}
-                  <div className="overflow-y-auto flex-1">
+                  {/* Scrollable notification area - add scroll after 3 notifications */}
+                  <div className={`${notifications.length > 3 ? 'overflow-y-auto max-h-[320px]' : ''} flex-1`}>
                     {notifications.length > 0 ? (
                       <div>
                         {notifications.map((notification) => (
@@ -124,10 +124,14 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
                               if (!notification.read) markAsRead(notification.id);
                             }}
                           >
-                            <div className="mt-1">
+                            <div className="flex-shrink-0 flex items-center h-5">
                               {notification.type === 'project' && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
                               {notification.type === 'announcement' && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
                               {notification.type === 'reminder' && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
+                              {notification.type === 'workload_low' && <div className="w-2 h-2 rounded-full bg-orange-500"></div>}
+                              {notification.type === 'workload_overload' && <div className="w-2 h-2 rounded-full bg-red-500"></div>}
+                              {notification.type === 'no_people_lead' && <div className="w-2 h-2 rounded-full bg-purple-500"></div>}
+                              {notification.type === 'welcome' && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
                             </div>
                             <div className="flex-1">
                               <div className="flex justify-between">
