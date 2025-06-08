@@ -36,7 +36,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const response = await fetch('/api/notifications');
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data);
+        // Ensure dates are properly converted to Date objects
+        const processedData: Notification[] = data.map((notification: {
+          id: string;
+          title: string;
+          message: string;
+          date: string | Date;
+          read: boolean;
+          type: 'project' | 'announcement' | 'reminder';
+        }) => ({
+          ...notification,
+          date: new Date(notification.date)
+        }));
+        setNotifications(processedData);
       } else {
         console.error('Failed to fetch notifications');
       }

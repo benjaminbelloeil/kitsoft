@@ -28,52 +28,40 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's notifications with read status
+    // Get user's notifications using the RPC function
     const { data: notifications, error } = await supabase
-      .from('usuarios_notificaciones')
-      .select(`
-        id,
-        leido,
-        fecha_creacion,
-        notificaciones(
-          id,
-          titulo,
-          descripcion,
-          tipo,
-          fecha
-        )
-      `)
-      .eq('id_usuario', user.id)
-      .order('fecha_creacion', { ascending: false });
+      .rpc('get_user_notifications', { user_id: user.id });
 
     if (error) {
-      console.error('Error fetching notifications:', error);
-      return NextResponse.json({ error: 'Error fetching notifications' }, { status: 500 });
+      console.error('Error fetching notifications with RPC:', error);
+      return NextResponse.json({ error: 'Error fetching notifications', debug: error.message }, { status: 500 });
     }
 
-    // Transform to match UI format
-    const formattedNotifications = notifications?.map(userNotif => {
-      // Handle case where notificaciones might be an array (relationship issue)
-      const notification = Array.isArray(userNotif.notificaciones) 
-        ? userNotif.notificaciones[0] 
-        : userNotif.notificaciones;
-      
-      if (!notification) return null;
-      
-      return {
-        id: userNotif.id,
-        title: notification.titulo,
-        message: notification.descripcion,
-        date: new Date(notification.fecha),
-        read: userNotif.leido,
-        type: notification.tipo as 'project' | 'announcement' | 'reminder'
-      };
-    }).filter(Boolean) || [];
+    // Format the notifications from RPC
+    const formattedNotifications = notifications?.map((notif: {
+      id_notificacion: string;
+      titulo: string;
+      descripcion: string;
+      tipo: string;
+      fecha: string;
+      leido: boolean;
+    }) => ({
+      id: notif.id_notificacion,
+      title: notif.titulo || '',
+      message: notif.descripcion || '',
+      date: new Date(notif.fecha || new Date()),
+      read: notif.leido,
+      type: (notif.tipo || 'announcement') as 'project' | 'announcement' | 'reminder'
+    })) || [];
 
     return NextResponse.json(formattedNotifications);
+    
   } catch (error) {
     console.error('Unexpected error in notifications GET:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      debug: error instanceof Error ? error.message : String(error) 
+    }, { status: 500 });
   }
 }
 
@@ -107,7 +95,7 @@ export async function PATCH(request: NextRequest) {
       const { error } = await supabase
         .from('usuarios_notificaciones')
         .update({ leido: false })
-        .eq('id', notificationId)
+        .eq('id_notificacion', notificationId)
         .eq('id_usuario', user.id);
 
       if (error) {

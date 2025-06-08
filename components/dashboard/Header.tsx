@@ -28,9 +28,16 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
   };
 
   // Format notification time
-  const formatNotificationTime = (date: Date) => {
+  const formatNotificationTime = (date: Date | string) => {
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // Check if dateObj is valid
+    if (isNaN(dateObj.getTime())) {
+      return 'Fecha inválida';
+    }
+    
+    const diffMs = now.getTime() - dateObj.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
     
     if (diffMins < 1) return 'Ahora';
@@ -42,7 +49,7 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
     const diffDays = Math.floor(diffHours / 24);
     if (diffDays < 7) return `Hace ${diffDays} día${diffDays !== 1 ? 's' : ''}`;
     
-    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    return dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
   };
 
   return (

@@ -21,7 +21,7 @@ export async function createNotification(notificationData: NotificationData): Pr
     const { error: notificationError } = await supabase
       .from('notificaciones')
       .insert({
-        id: notificationId,
+        id_notificacion: notificationId,
         titulo: notificationData.titulo,
         descripcion: notificationData.descripcion,
         tipo: notificationData.tipo,
@@ -35,11 +35,9 @@ export async function createNotification(notificationData: NotificationData): Pr
 
     // Insert into usuarios_notificaciones for each user
     const userNotifications = notificationData.userIds.map(userId => ({
-      id: randomUUID(),
       id_usuario: userId,
       id_notificacion: notificationId,
-      leido: false,
-      fecha_creacion: timestamp
+      leido: false
     }));
 
     const { error: userNotificationError } = await supabase
@@ -291,15 +289,15 @@ export async function checkProjectDeadlines(): Promise<{ success: boolean; notif
  */
 export async function markNotificationAsRead(
   userId: string,
-  userNotificationId: string
+  notificationId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createClient();
 
     const { error } = await supabase
       .from('usuarios_notificaciones')
-      .update({ leido: true })
-      .eq('id', userNotificationId)
+      .update({ leido: true, fecha_leido: new Date().toISOString() })
+      .eq('id_notificacion', notificationId)
       .eq('id_usuario', userId);
 
     if (error) {
