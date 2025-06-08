@@ -2,6 +2,7 @@
 import { FeedbackDataType } from "@/utils/database/client/feedbackSync";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { createFeedbackReceivedNotification } from "@/utils/notifications/notificationService";
 
 export async function GET(request: NextRequest) {
 	try {
@@ -119,6 +120,32 @@ export async function POST(request: NextRequest) {
 					// Don't return error here, just log it
 				}
 			}
+		}
+
+		// 🔔 CREATE NOTIFICATION for feedback received
+		try {
+			console.log('📧 Creating feedback notification...');
+			
+			// Get project title for the notification
+			const { data: projectData } = await supabase
+				.from('proyectos')
+				.select('titulo')
+				.eq('id_proyecto', reqData.id_proyecto)
+				.single();
+
+			const projectTitle = projectData?.titulo || 'Proyecto';
+
+			await createFeedbackReceivedNotification(
+				reqData.id_usuario,
+				reqData.id_autor,
+				projectTitle,
+				reqData.valoracion
+			);
+			
+			console.log(`✅ Feedback notification sent to user ${reqData.id_usuario}`);
+		} catch (notifError) {
+			console.error('❌ Failed to send feedback notification:', notifError);
+			// Don't fail the feedback creation for notification errors
 		}
 
 		return NextResponse.json({
