@@ -1,5 +1,4 @@
 import { createClient } from '@/utils/supabase/server';
-import { randomUUID } from 'crypto';
 
 export interface NotificationData {
   titulo: string;
@@ -13,9 +12,20 @@ export interface NotificationData {
  */
 export async function createNotification(notificationData: NotificationData): Promise<{ success: boolean; error?: string }> {
   try {
+    // Input validation
+    if (!notificationData.titulo || notificationData.titulo.length > 255) {
+      return { success: false, error: 'Invalid title' };
+    }
+    if (!notificationData.descripcion || notificationData.descripcion.length > 1000) {
+      return { success: false, error: 'Invalid description' };
+    }
+    if (!Array.isArray(notificationData.userIds) || notificationData.userIds.length === 0) {
+      return { success: false, error: 'Invalid user IDs' };
+    }
+
     const supabase = await createClient();
     const timestamp = new Date().toISOString();
-    const notificationId = randomUUID();
+    const notificationId = crypto.randomUUID();
 
     // Insert into notificaciones table
     const { error: notificationError } = await supabase
