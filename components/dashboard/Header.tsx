@@ -134,7 +134,7 @@ export default function Header({ userData, searchQuery = "", onSearchChange }: H
                   </div>
                   
                   {/* Scrollable notification area - add scroll after 3 notifications */}
-                  <div className={`${notifications.length > 3 ? 'overflow-y-auto max-h-[320px]' : ''} flex-1`}>
+                  <div className={`${notifications.length > 3 ? 'overflow-y-auto max-h-[320px] notification-scrollbar' : ''} flex-1`}>
                     {notifications.length > 0 ? (
                       <div>
                         {notifications.map((notification) => (

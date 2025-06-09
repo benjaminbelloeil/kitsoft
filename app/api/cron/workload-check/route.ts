@@ -8,20 +8,17 @@ import { checkWorkloadAndNotify } from '@/utils/notifications/notificationServic
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify cron secret to prevent unauthorized access
+    // Check if this is a Vercel cron job or manual call with secret
     const authHeader = request.headers.get('authorization');
+    const vercelCronHeader = request.headers.get('vercel-cron');
     const expectedSecret = process.env.CRON_SECRET;
 
-    if (!expectedSecret) {
-      console.error('CRON_SECRET environment variable not set');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
-    }
+    // Allow Vercel cron jobs (they include a special header)
+    const isVercelCron = vercelCronHeader === '1';
+    const hasValidSecret = expectedSecret && authHeader === `Bearer ${expectedSecret}`;
 
-    if (!authHeader || authHeader !== `Bearer ${expectedSecret}`) {
-      console.error('Invalid or missing authorization header for cron job');
+    if (!isVercelCron && !hasValidSecret) {
+      console.error('Invalid authorization for cron job');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
