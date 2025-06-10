@@ -44,9 +44,8 @@ export async function POST(request: NextRequest) {
 				id_certificado: certificateData.id_certificado,
 				id_usuario: certificateData.id_usuario,
 				fecha_inicio: certificateData.fecha_inicio,
-				fecha_fin: null,
-				// TODO: Replace 'null' with url to File
-				url_archivo: null 
+				fecha_fin: certificateData.fecha_fin,
+				url_archivo: certificateData.url_archivo
 			})
 			.select();
 

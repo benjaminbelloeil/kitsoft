@@ -122,9 +122,9 @@ export default function TrainingCard() {
       </div>
       
       <div className="p-4 flex-grow flex flex-col">
-        <div className="space-y-3 flex-grow overflow-y-auto">
+        <div className="space-y-3 flex-grow overflow-y-auto flex flex-col">
           {trajectories.length === 0 && !loading ? (
-            <div className="flex flex-col items-center justify-center py-8 px-4">
+            <div className="flex flex-col items-center justify-center py-8 px-4 flex-grow">
               <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3 border border-blue-100">
                 <Award className="w-6 h-6 text-blue-500" />
               </div>

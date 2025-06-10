@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { motion } from "framer-motion";
-import { FiAward, FiExternalLink, FiCalendar, FiCheckCircle } from "react-icons/fi";
+import { FiAward, FiExternalLink, FiCalendar, FiCheckCircle, FiDownload } from "react-icons/fi";
 
 interface Certificate {
   titulo: string;
@@ -38,6 +38,39 @@ const isExpiringSoon = (expirationDate?: string): boolean => {
   const today = new Date();
   const thirtyDaysFromNow = new Date(today.getTime() + (30 * 24 * 60 * 60 * 1000));
   return expDate > today && expDate <= thirtyDaysFromNow;
+};
+
+const handleDownload = async (url: string, title: string) => {
+  if (!url) return;
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch file');
+    
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    
+    // Use certificate title as filename
+    const cleanTitle = title.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+    const filename = `${cleanTitle}.pdf`;
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    // Fallback to opening in new tab if download fails
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 };
 
 export default function ReadOnlyCertificatesSection({ certificates, loading = false }: ReadOnlyCertificatesSectionProps) {
@@ -225,16 +258,28 @@ export default function ReadOnlyCertificatesSection({ certificates, loading = fa
                 </div>
                 <div className="flex space-x-1 flex-shrink-0">
                   {cert.url && (
-                    <motion.button
-                      onClick={() => window.open(cert.url, '_blank', 'noopener,noreferrer')}
-                      className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
-                      title="Ver certificado"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      transition={{ duration: 0.1 }}
-                    >
-                      <FiExternalLink size={14} />
-                    </motion.button>
+                    <>
+                      <motion.button
+                        onClick={() => handleDownload(cert.url!, cert.titulo)}
+                        className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
+                        title="Descargar certificado"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ duration: 0.1 }}
+                      >
+                        <FiDownload size={14} />
+                      </motion.button>
+                      <motion.button
+                        onClick={() => window.open(cert.url, '_blank', 'noopener,noreferrer')}
+                        className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
+                        title="Ver certificado"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ duration: 0.1 }}
+                      >
+                        <FiExternalLink size={14} />
+                      </motion.button>
+                    </>
                   )}
                 </div>
               </motion.div>

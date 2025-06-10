@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const updateUserCurriculum = async (
   userId: string,
   file?: File,
@@ -122,13 +123,16 @@ const getUserCurriculum = async (userId: string): Promise<File | null> => {
       return null;
     }
 
-    const parts = data.url.split('/').pop()?.split('-') ?? [];
-    const filename = parts.slice(5).join('-') || 'curriculum.pdf';
+    // Extract filename and remove the UUID-timestamp prefix
+    const fullFilename = decodeURIComponent(data.url.split('/').pop() || 'curriculum.pdf');
+    // Pattern to match userId-timestamp-actualFilename
+    const parts = fullFilename.match(/^[a-f0-9-]+-\d+-(.+)$/);
+    const cleanFilename = parts && parts[1] ? parts[1] : 'Curriculum.pdf';
 
     const response = await fetch(data.url);
     const blob = await response.blob();
 
-    return new File([blob], filename, { type: blob.type });
+    return new File([blob], cleanFilename, { type: blob.type });
   } catch (err) {
     console.error('Error inesperado en getUserCurriculum:', err);
     return null;

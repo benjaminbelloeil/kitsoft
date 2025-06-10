@@ -97,13 +97,17 @@ export default function WorkSummary({ workload, projects = [] }: WorkSummaryProp
                     />
                   )}
                 </div>
-                <div className="text-xs font-medium text-gray-700 py-1 border-l border-r border-b border-gray-200 rounded-b-sm bg-gray-50 text-center">{day.hours}h</div>
+                <div className="text-xs font-medium text-black py-1 border-l border-r border-b border-gray-200 rounded-b-sm bg-gray-50 text-center">{day.hours}h</div>
               </div>
             );            })}
         </div>
         
-        <div className="mt-auto bg-indigo-50 rounded-lg p-2 border border-indigo-100">
-          <div className="flex flex-col md:flex-row md:items-center justify-between">
+        <div className="mt-auto bg-white/80 backdrop-blur-xl rounded-xl p-3 border border-gray-200/60 shadow-lg shadow-black/5 relative overflow-hidden">
+          {/* Glossy overlay effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent pointer-events-none"></div>
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+          
+          <div className="relative flex flex-col md:flex-row md:items-center justify-between">
             <div>
               <h4 className="font-medium text-gray-900 text-sm">Reporte Semanal</h4>
               <p className="text-xs text-gray-600 mt-0.5">
@@ -126,7 +130,7 @@ export default function WorkSummary({ workload, projects = [] }: WorkSummaryProp
                 
                 return (
                   <>
-                    <div className="text-base font-bold text-indigo-700">{Math.round(totalHours * 10) / 10} horas</div>
+                    <div className="text-base font-bold text-black">{Math.round(totalHours * 10) / 10} horas</div>
                     <div className="text-xs text-gray-600">
                       de 40 horas totales ({utilizationPercentage}%)
                     </div>

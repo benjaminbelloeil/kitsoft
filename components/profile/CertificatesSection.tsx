@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // components/profile/certificados/CertificatesSection.tsx
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -72,19 +71,30 @@ export default function CertificatesSection({ userID, loading = false, className
 
 		setIsSubmitting(true);
 		try {
-			const { url } = await uploadCertificadoFile(userID, newCertificate.file);
+			const uploadResult = await uploadCertificadoFile(userID, newCertificate.file);
+			
+			if (!uploadResult.success || !uploadResult.url) {
+				console.error('Failed to upload certificate:', uploadResult.error);
+				return;
+			}
+
 			const nuevoRegistro: usuario_certificado = {
 				id_certificado: selectedCert.id_certificado,
 				id_usuario: userID,
-				url_archivo: url,
+				url_archivo: uploadResult.url,
 				fecha_inicio: newCertificate.obtainedDate,
-				fecha_fin: null,
+				fecha_fin: newCertificate.expirationDate || null,
 			};
 
-			await addUsuarioCertificado(nuevoRegistro);
-			resetForm();
+			const addResult = await addUsuarioCertificado(nuevoRegistro);
+			
+			if (addResult.success) {
+				resetForm();
+			} else {
+				console.error('Failed to add certificate:', addResult.error);
+			}
 		} catch (error) {
-			// Handle error silently
+			console.error('Error in certificate submission:', error);
 		}
 		finally {
 			setIsSubmitting(false);

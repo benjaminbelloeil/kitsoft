@@ -9,6 +9,37 @@ export default function CertificateCard({ cert, onRemove }: {cert: CertificateVi
     return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  const handleDownload = async () => {
+    if (!cert.url_archivo) return;
+    
+    try {
+      const response = await fetch(cert.url_archivo);
+      if (!response.ok) throw new Error('Failed to fetch file');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Use certificate course name as filename
+      const cleanCourseName = cert.certificados.curso.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+      const filename = `${cleanCourseName}.pdf`;
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      // Fallback to opening in new tab if download fails
+      window.open(cert.url_archivo, '_blank');
+    }
+  };
+
   return (
     <motion.div 
       className="p-3 border border-gray-200 rounded-lg flex justify-between items-center hover:border-[#A100FF30] bg-white shadow-sm"
@@ -34,10 +65,15 @@ export default function CertificateCard({ cert, onRemove }: {cert: CertificateVi
       </div>
       <div className="flex space-x-1 flex-shrink-0">
         <motion.button
-          className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
-          title="Descargar"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          onClick={handleDownload}
+          disabled={!cert.url_archivo}
+          className={`p-1.5 rounded ${cert.url_archivo 
+            ? 'text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 cursor-pointer' 
+            : 'text-gray-300 cursor-not-allowed'
+          }`}
+          title={cert.url_archivo ? "Descargar" : "Archivo no disponible"}
+          whileHover={{ scale: cert.url_archivo ? 1.1 : 1 }}
+          whileTap={{ scale: cert.url_archivo ? 0.95 : 1 }}
           transition={{ duration: 0.1 }}
         >
           <FiDownload size={14} />

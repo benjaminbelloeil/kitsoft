@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserProfile } from "@/interfaces/user"
-import { FiX, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
-import PlaceholderAvatar from "@/components/ui/placeholder-avatar";
+import { Project } from "@/interfaces/cargabilidad";
+import { FiX } from "react-icons/fi";
 import ReadOnlyResumeSection from "./profile/ReadOnlyResumeSection";
 import ReadOnlyExperienceSection from "./profile/ReadOnlyExperienceSection";
 import ReadOnlySkillsSection from "./profile/ReadOnlySkillsSection";
 import ReadOnlyCertificatesSection from "./profile/ReadOnlyCertificatesSection";
-import Image from 'next/image'; 
+import FlippableProfileCard from "./profile/FlippableProfileCard"; 
 
 
 interface ProfileModalProps {
@@ -25,6 +25,7 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
   const [experience, setExperience] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [resume, setResume] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [profileDataLoaded, setProfileDataLoaded] = useState<{ [key: string]: boolean }>({});
@@ -40,16 +41,28 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
   const loadProfileData = () => {
     if (!userId) return;
     
-    if (!profileDataLoaded[userId]) {
-      fetchCompleteProfile();
-    } else {
-      // Load from cache if available
-      loadCachedProfileData();
+    // Check if we already have data loaded for this user
+    if (profileDataLoaded[userId] && profile) {
+      // Data is already loaded, just set loading to false
+      setLoading(false);
+      return;
     }
+    
+    // Try to load from cache first, then fetch if needed
+    loadCachedProfileData();
+  };
+
+  const handleClose = () => {
+    setLoading(false);
+    setError(null);
+    onClose();
   };
 
   const handleModalOpen = () => {
     if (userId) {
+      // Set loading immediately to show skeletons
+      setLoading(true);
+      setError(null);
       loadProfileData();
     }
   };
@@ -78,6 +91,12 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
           setExperience(parsedData.experience ?? []);
           setCertificates(parsedData.certificates ?? []);
           setResume(parsedData.resume ?? null);
+          setProjects(parsedData.projects ?? []);
+          setProjects(parsedData.projects ?? []);
+          // Add a small delay to show skeleton even with cached data for better UX
+          setTimeout(() => {
+            setLoading(false);
+          }, 300);
           return;
         }
       }
@@ -90,7 +109,7 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
     }
   };
 
-  const saveProfileDataToCache = (profileData: any, skillsData: any[], experienceData: any[], certificatesData: any[], resumeData: string | null) => {
+  const saveProfileDataToCache = (profileData: any, skillsData: any[], experienceData: any[], certificatesData: any[], resumeData: string | null, projectsData: any[]) => {
     if (!userId) return;
     
     try {
@@ -100,7 +119,8 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
         skills: skillsData,
         experience: experienceData,
         certificates: certificatesData,
-        resume: resumeData
+        resume: resumeData,
+        projects: projectsData
       };
       
       localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
@@ -115,10 +135,18 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
   const fetchCompleteProfile = async () => {
     if (!userId) return;
     
-    setLoading(true);
+    // Prevent multiple concurrent requests for the same user
+    if (profileDataLoaded[userId]) {
+      setLoading(false);
+      return;
+    }
+    
     setError(null);
     
     try {
+      // Mark as loading to prevent duplicate requests
+      setProfileDataLoaded(prev => ({ ...prev, [userId]: true }));
+      
       // Fetch profile data
       const profileResponse = await fetch(`/api/profile/get?userId=${userId}`);
       if (!profileResponse.ok) throw new Error('Failed to fetch profile');
@@ -129,6 +157,7 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
       let experienceData: any[] = [];
       let certificatesData: any[] = [];
       let resumeData: string | null = null;
+      let projectsData: any[] = [];
 
       // Fetch skills using people-lead endpoint
       try {
@@ -179,12 +208,43 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
           setResume(null);
         }
 
+        // Fetch projects for cargabilidad using user proyectos endpoint
+        try {
+          const projectsResponse = await fetch(`/api/user/proyectos?status=active&userId=${userId}`);
+          if (projectsResponse.ok) {
+            const projectsResponseData = await projectsResponse.json();
+            // Transform projects data to match cargabilidad interface
+            projectsData = projectsResponseData.map((project: any) => ({
+              id_proyecto: project.id_proyecto,
+              titulo: project.titulo,
+              name: project.titulo,
+              load: Math.round((project.user_hours / project.horas_totales) * 100) || 0,
+              deadline: project.fecha_fin || undefined,
+              hoursPerWeek: Math.round((project.user_hours || 0) / 
+                (project.fecha_fin 
+                  ? Math.max(1, Math.ceil((new Date(project.fecha_fin).getTime() - new Date(project.fecha_inicio).getTime()) / (1000 * 60 * 60 * 24 * 7)))
+                  : 1)),
+              color: project.color || null,
+              user_hours: project.user_hours || 0,
+              horas_totales: project.horas_totales || 0,
+              fecha_inicio: project.fecha_inicio,
+              fecha_fin: project.fecha_fin
+            }));
+            setProjects(projectsData);
+          }
+        } catch (err) {
+          console.warn('Projects not available:', err);
+          setProjects([]);
+        }
+
       // Save to cache
-      saveProfileDataToCache(profileData, skillsData, experienceData, certificatesData, resumeData);
+      saveProfileDataToCache(profileData, skillsData, experienceData, certificatesData, resumeData, projectsData);
 
     } catch (error) {
       console.error('Error fetching profile:', error);
       setError('Error al cargar el perfil');
+      // Reset the loading state for this user on error
+      setProfileDataLoaded(prev => ({ ...prev, [userId]: false }));
     } finally {
       setLoading(false);
     }
@@ -255,7 +315,7 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
       >
         <motion.div
           className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-          onClick={onClose}
+          onClick={handleClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -277,7 +337,7 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Perfil Completo</h2>
               <motion.button
-                onClick={onClose}
+                onClick={handleClose}
                 className="p-2 hover:bg-white/20 rounded-full transition-colors"
                 whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.2)" }}
                 whileTap={{ scale: 0.9 }}
@@ -289,18 +349,6 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
 
           {/* Content with animations */}
           <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-            {loading && (
-              <motion.div 
-                className="flex items-center justify-center py-12"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div className="w-8 h-8 border-2 border-[#A100FF] border-t-transparent rounded-full animate-spin"></div>
-                <span className="ml-3 text-gray-600">Cargando perfil...</span>
-              </motion.div>
-            )}
-            
             {error && (
               <motion.div 
                 className="text-center py-12"
@@ -320,148 +368,77 @@ export default function ProfileModal({ isOpen, onClose, userId }: Readonly<Profi
               </motion.div>
             )}
             
-            {profile && (
+            {/* Always render the content grid - components handle their own loading states */}
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+              variants={contentVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {/* Left Column - Flippable Profile Card and Resume */}
               <motion.div 
-                className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-                variants={contentVariants}
-                initial="hidden"
-                animate="visible"
+                className="lg:col-span-1 space-y-4"
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
               >
-                {/* Left Column - Profile Header with animations */}
-                <motion.div 
-                  className="lg:col-span-1"
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <motion.div 
-                    className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 sticky top-0"
-                    whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="text-center">
-                      <div className="relative w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-[#A100FF20] mb-4">
-                        {profile.URL_Avatar ? (
-                          <Image
-                            src={profile.URL_Avatar}
-                            alt={`${profile.Nombre} ${profile.Apellido}`}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <PlaceholderAvatar size={96} />
-                        )}
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">
-                        {profile.Nombre} {profile.Apellido}
-                      </h3>
-                      {profile.Titulo && (
-                        <p className="text-[#A100FF] font-medium mb-4">{profile.Titulo}</p>
-                      )}
-                    </div>
-
-                    {/* Contact Info */}
-                    <div className="space-y-3">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <FiMail className="w-4 h-4 mr-3 text-gray-400" />
-                        <span className="truncate">{profile.correo?.Correo ?? 'No especificado'}</span>
-                      </div>
-                      
-                      <div className="flex items-center text-sm text-gray-600">
-                        <FiPhone className="w-4 h-4 mr-3 text-gray-400" />
-                        <span>
-                          {profile.telefono?.Codigo_Pais && profile.telefono?.Numero
-                            ? `${profile.telefono.Codigo_Pais} ${profile.telefono.Numero}`
-                            : 'No especificado'
-                          }
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center text-sm text-gray-600">
-                        <FiMapPin className="w-4 h-4 mr-3 text-gray-400" />
-                        <span className="truncate">
-                          {profile.direccion && (profile.direccion.Ciudad || profile.direccion.Estado || profile.direccion.Pais)
-                            ? [profile.direccion.Ciudad, profile.direccion.Estado, profile.direccion.Pais]
-                                .filter(Boolean)
-                                .join(', ')
-                            : 'No especificado'
-                          }
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Bio */}
-                    {profile.Bio && (
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <h4 className="font-medium text-gray-900 mb-2">Biografía</h4>
-                        <p className="text-sm text-gray-600 leading-relaxed">{profile.Bio}</p>
-                      </div>
-                    )}
-
-                    {/* Employment Date */}
-                    {profile.Fecha_Inicio_Empleo && (
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <h4 className="font-medium text-gray-900 mb-2">Fecha de Inicio</h4>
-                        <p className="text-sm text-[#A100FF]">
-                          {new Date(profile.Fecha_Inicio_Empleo).toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                    )}
-                  </motion.div>
-                </motion.div>
-
-                {/* Right Column - Detailed Info with animations */}
-                <motion.div 
-                  className="lg:col-span-2 space-y-6"
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                >
+                {/* Sticky container for flippable card and resume */}
+                <div className="sticky top-0 space-y-4">
+                  <FlippableProfileCard 
+                    profile={profile}
+                    projects={projects}
+                    loading={loading}
+                  />
+                  
                   {/* Resume Section */}
                   <ReadOnlyResumeSection 
                     resumeUrl={resume}
                     loading={loading}
                   />
-
-                  {/* Experience Section */}
-                  <ReadOnlyExperienceSection 
-                    experiences={experience.map(exp => ({
-                      company: exp.empresa ?? exp.compañia ?? '',
-                      position: exp.cargo ?? exp.puesto ?? exp.posicion ?? '',
-                      period: `${exp.fecha_inicio ? new Date(exp.fecha_inicio).toLocaleDateString('es-ES') : ''} - ${exp.fecha_fin ? new Date(exp.fecha_fin).toLocaleDateString('es-ES') : 'Presente'}`,
-                      description: exp.descripcion ?? ''
-                    }))}
-                    loading={loading}
-                  />
-
-                  {/* Skills Section */}
-                  <ReadOnlySkillsSection 
-                    skills={skills.map(skill => ({
-                      id: skill.id_habilidad?.toString() ?? generateSecureId(),
-                      name: skill.titulo ?? skill.name ?? '',
-                      level: skill.nivel_experiencia ?? 1
-                    }))}
-                    loading={loading}
-                  />
-
-                  {/* Certificates Section */}
-                  <ReadOnlyCertificatesSection 
-                    certificates={certificates.map(cert => ({
-                      titulo: cert.titulo ?? cert.nombre ?? '',
-                      institucion: cert.institucion ?? cert.organismo ?? '',
-                      fecha_obtencion: cert.fecha_obtencion ?? cert.fecha_emision ?? '',
-                      fecha_expiracion: cert.fecha_expiracion ?? undefined,
-                      url: cert.url ?? cert.URL_Certificado ?? undefined
-                    }))}
-                    loading={loading}
-                  />
-                </motion.div>
+                </div>
               </motion.div>
-            )}
+
+              {/* Right Column - Detailed Info with animations */}
+              <motion.div 
+                className="lg:col-span-2 space-y-6"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                {/* Experience Section */}
+                <ReadOnlyExperienceSection 
+                  experiences={experience.map(exp => ({
+                    company: exp.empresa ?? exp.compañia ?? '',
+                    position: exp.cargo ?? exp.puesto ?? exp.posicion ?? '',
+                    period: `${exp.fecha_inicio ? new Date(exp.fecha_inicio).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''} - ${exp.fecha_fin ? new Date(exp.fecha_fin).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Presente'}`,
+                    description: exp.descripcion ?? ''
+                  }))}
+                  loading={loading}
+                />
+
+                {/* Skills Section */}
+                <ReadOnlySkillsSection 
+                  skills={skills.map(skill => ({
+                    id: skill.id_habilidad?.toString() ?? generateSecureId(),
+                    name: skill.titulo ?? skill.name ?? '',
+                    level: skill.nivel_experiencia ?? 1
+                  }))}
+                  loading={loading}
+                />
+
+                {/* Certificates Section */}
+                <ReadOnlyCertificatesSection 
+                  certificates={certificates.map(cert => ({
+                    titulo: cert.titulo ?? cert.nombre ?? '',
+                    institucion: cert.institucion ?? cert.organismo ?? '',
+                    fecha_obtencion: cert.fecha_obtencion ?? cert.fecha_emision ?? '',
+                    fecha_expiracion: cert.fecha_expiracion ?? undefined,
+                    url: cert.url ?? cert.URL_Certificado ?? undefined
+                  }))}
+                  loading={loading}
+                />
+              </motion.div>
+            </motion.div>
           </div>
         </motion.div>
       </motion.div>

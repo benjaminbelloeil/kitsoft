@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FiFileText, FiExternalLink } from "react-icons/fi";
+import { FiFileText, FiExternalLink, FiDownload } from "react-icons/fi";
 
 interface ReadOnlyResumeSectionProps {
   resumeUrl: string | null;
@@ -48,6 +48,39 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
     window.open(resumeUrl, '_blank', 'noopener,noreferrer');
   };
 
+  const handleDownloadResume = async () => {
+    if (!resumeUrl) return;
+    
+    try {
+      const response = await fetch(resumeUrl);
+      if (!response.ok) throw new Error('Failed to fetch file');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Extract clean filename from URL
+      const fullFilename = decodeURIComponent(resumeUrl.split('/').pop() || 'Curriculum.pdf');
+      // Pattern to match userId-timestamp-actualFilename
+      const parts = fullFilename.match(/^[a-f0-9-]+-\d+-(.+)$/);
+      const filename = parts && parts[1] ? parts[1] : 'Curriculum.pdf';
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      // Fallback to opening in new tab if download fails
+      window.open(resumeUrl, '_blank');
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
       <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
@@ -75,11 +108,11 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
             <p className="font-medium text-sm text-gray-800 break-all">
               {resumeUrl ? (
                 (() => {
-                  // Extract the filename from URL
+                  // Extract the filename from URL and remove technical parts
                   const fullFilename = decodeURIComponent(resumeUrl.split('/').pop() || 'Currículum');
-                  // Pattern to match UUID-timestamp-actualFilename
+                  // Pattern to match userId-timestamp-actualFilename
                   const parts = fullFilename.match(/^[a-f0-9-]+-\d+-(.+)$/);
-                  return parts && parts[1] ? parts[1] : fullFilename;
+                  return parts && parts[1] ? parts[1] : 'Currículum.pdf';
                 })()
               ) : 'Currículum'}
             </p>
@@ -87,6 +120,16 @@ export default function ReadOnlyResumeSection({ resumeUrl, loading = false }: Re
           </div>
         </div>
         <div className="flex space-x-1 flex-shrink-0">
+          <motion.button
+            onClick={handleDownloadResume}
+            className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"
+            title="Descargar Currículum"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.1 }}
+          >
+            <FiDownload size={14} />
+          </motion.button>
           <motion.button
             onClick={handleViewResume}
             className="p-1.5 text-gray-500 hover:text-[#A100FF] hover:bg-gray-50 rounded"

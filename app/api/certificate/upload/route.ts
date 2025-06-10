@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     
     // Create a safe filename
     const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-    const path = `Certificates/${userId}-${Date.now()}-${safeName}`;
+    const path = `Certificados/${userId}-${Date.now()}-${safeName}`;
     
     // Convert File to ArrayBuffer for upload
     const arrayBuffer = await file.arrayBuffer();

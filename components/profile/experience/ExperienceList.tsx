@@ -23,7 +23,7 @@ interface ExperienceListProps {
   isAddingExperience: boolean;
 }
 
-// Format date for display (e.g. "marzo de 2021")
+// Format date for display (e.g. "10/03/2021")
 const formatDateDisplay = (dateString: string): string => {
   if (!dateString) return '';
   
@@ -36,7 +36,8 @@ const formatDateDisplay = (dateString: string): string => {
     }
     
     return date.toLocaleDateString('es-ES', { 
-      month: 'long', 
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric' 
     });
   } catch (error) {
