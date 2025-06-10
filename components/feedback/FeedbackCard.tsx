@@ -94,7 +94,7 @@ export default function FeedbackCard({ item, formatDate }: FeedbackCardProps) {
         </div>
       </div>
       
-      <div className="flex flex-wrap gap-1 mb-2 flex-shrink-0">
+      <div className="flex flex-wrap gap-1 mb-2 flex-shrink-0 mx-1">
         <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-[#6366F110] text-[#6366F1] border border-[#6366F120] shadow-sm whitespace-nowrap overflow-hidden max-w-full text-ellipsis">
           {item.category}
         </span>
