@@ -52,10 +52,6 @@ export default function ProjectManagementPage() {
     horas_totales: 0,
     activo: true,
   });
-  
-  if (!isProjectManager) {
-    return <UnauthorizedState />;
-  }  
 
   // Load projects and clients on component mount
   useEffect(() => {
@@ -148,6 +144,11 @@ export default function ProjectManagementPage() {
     };
   }, [selectedProject]);
   
+  // Add authorization check here, after all hooks
+  if (!isProjectManager) {
+    return <UnauthorizedState />;
+  }
+
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
