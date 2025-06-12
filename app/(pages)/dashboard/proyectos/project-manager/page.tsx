@@ -3,6 +3,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '@/context/user-context';
+import UnauthorizedState from '@/components/auth/UnauhtorizedState';
 import ProjectManagerHeader from '@/components/proyectos//project-manager/ProjectManagerHeader';
 import ProjectManagerSkeleton from '@/components/proyectos//project-manager/ProjectManagerSkeleton';
 import ProjectForm from '@/components/proyectos//project-manager/ProjectForm';
@@ -20,9 +22,11 @@ import {
   fetchProjectRoles,
   updateProjectRoles
 } from '@/utils/database/client/projectManagerSync';
+import { isProjectManager } from '@/app/lib/auth';
 
 export default function ProjectManagementPage() {
   // State management
+  const { isProjectManager } = useUser();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -49,6 +53,10 @@ export default function ProjectManagementPage() {
     activo: true,
   });
   
+  if (!isProjectManager) {
+    return <UnauthorizedState />;
+  }  
+
   // Load projects and clients on component mount
   useEffect(() => {
     const fetchData = async () => {
