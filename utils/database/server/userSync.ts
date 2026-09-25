@@ -3,12 +3,39 @@
 import { createClient as createServerClient } from '@/utils/supabase/server';
 import { adminClient } from '@/utils/supabase/server-admin';
 import { Usuario } from '@/interfaces/user';
+import { isDemoMode, DEMO_ROLES } from '@/lib/demo/config';
+import { DEMO_PEOPLE } from '@/lib/demo/data/people';
+
+function demoUsersWithRoles(): any[] {
+  return DEMO_PEOPLE.map((p) => {
+    const role = DEMO_ROLES[p.nivel];
+    return {
+      id_usuario: p.id_usuario,
+      nombre: p.nombre,
+      apellido: p.apellido,
+      titulo: p.titulo,
+      email: p.email,
+      url_avatar: p.url_avatar,
+      registered: true,
+      hasLoggedIn: true,
+      lastLogin: p.ultimo_acceso,
+      ID_PeopleLead: p.id_peoplelead,
+      id_peoplelead: p.id_peoplelead,
+      activo: p.activo,
+      role: { id_nivel: role.id_nivel, numero: role.numero, titulo: role.titulo },
+    };
+  });
+}
 
 /**
  * Server-side function to get all users
  * Use this only in server components or API routes
  */
 export async function getAllUsers(): Promise<Usuario[]> {
+  if (isDemoMode()) {
+    return demoUsersWithRoles() as unknown as Usuario[];
+  }
+
   const supabase = await createServerClient();
   const { data, error } = await supabase
     .from('usuarios')
@@ -29,6 +56,10 @@ export async function getAllUsers(): Promise<Usuario[]> {
  */
 export async function getAllUsersWithRolesAndAuth(): Promise<any[]> {
   try {
+    if (isDemoMode()) {
+      return demoUsersWithRoles();
+    }
+
     const supabase = await createServerClient();
     
     // Get all users from the usuarios table

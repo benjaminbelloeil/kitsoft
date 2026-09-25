@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { 
-  Mail, 
-  Lock, 
+import {
+  Mail,
+  Lock,
   ArrowRight,
-  AlertCircle
+  AlertCircle,
+  FlaskConical
 } from "lucide-react";
 import { useLoginForm } from "@/components/auth/auth-utils";
+import { DEMO_SESSION_COOKIE, isDemoMode } from "@/lib/demo/config";
 
 // Define Accenture colors
 const ACCENTURE_PURPLE = "#A100FF";
@@ -16,6 +19,13 @@ const ACCENTURE_PURPLE_DARK = "#7F00FF";
 
 export default function LoginForm() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const router = useRouter();
+  const demoMode = isDemoMode();
+
+  const enterDemo = () => {
+    document.cookie = `${DEMO_SESSION_COOKIE}=1; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+    router.push("/dashboard");
+  };
   const { 
     email, 
     setEmail, 
@@ -188,6 +198,41 @@ export default function LoginForm() {
           )}
         </motion.button>
         
+        {demoMode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="space-y-3"
+          >
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-white px-3 text-xs uppercase tracking-wide text-gray-400">o</span>
+              </div>
+            </div>
+
+            <motion.button
+              type="button"
+              onClick={enterDemo}
+              className="w-full flex justify-center items-center gap-2 py-3.5 px-4 rounded-lg border-2 font-medium transition-colors"
+              style={{ borderColor: ACCENTURE_PURPLE, color: ACCENTURE_PURPLE }}
+              whileHover={{ scale: 1.02, backgroundColor: "rgba(161, 0, 255, 0.05)" }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <FlaskConical className="h-5 w-5" />
+              Entrar en modo demostración
+            </motion.button>
+
+            <p className="text-center text-sm text-gray-500 leading-relaxed">
+              Acceso sin contraseña con datos de ejemplo. Podrá cambiar entre los
+              distintos roles desde el panel.
+            </p>
+          </motion.div>
+        )}
+
         <motion.div
           className="text-left text-gray-600 text-sm mt-6"
           initial={{ opacity: 0 }}

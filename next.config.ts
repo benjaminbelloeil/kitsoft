@@ -10,18 +10,17 @@ const nextConfig: NextConfig = {
     return config;
   },
   images: {
-    domains: ['logos-world.net', 'rbgerynpltfzvbkgenva.supabase.co'],
+    // Demo avatars and client marks are local SVGs under /public/demo.
+    // Only first-party files are served, so SVG optimization is safe here.
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'logos-world.net',
         port: '',
         pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'rbgerynpltfzvbkgenva.supabase.co',
-        pathname: '/storage/v1/object/public/**',
       },
     ],
   },

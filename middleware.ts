@@ -1,7 +1,31 @@
 import { createServerClient, CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isDemoMode } from '@/lib/demo/config'
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  if (isDemoMode()) {
+    // Serve every API call from the in-memory demo dataset. The catch-all at
+    // /api/demo/[...path] must pass through untouched or the rewrite would loop.
+    if (pathname.startsWith('/api/')) {
+      if (pathname.startsWith('/api/demo/')) {
+        return NextResponse.next()
+      }
+      const rewriteUrl = request.nextUrl.clone()
+      rewriteUrl.pathname = `/api/demo${pathname.slice('/api'.length)}`
+      return NextResponse.rewrite(rewriteUrl)
+    }
+
+    // No Supabase project to authenticate against, so skip the auth gate entirely.
+    return NextResponse.next()
+  }
+
+  // Auth checks never ran on API routes before demo mode widened the matcher.
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
+
   const response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -125,12 +149,14 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     *
+     * API routes are matched so demo mode can rewrite them to the mock handler;
+     * outside demo mode the middleware returns early for them.
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.svg$).*)',
   ],
 }

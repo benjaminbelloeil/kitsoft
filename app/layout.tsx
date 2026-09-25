@@ -6,6 +6,7 @@ import { UserProvider } from "@/context/user-context";
 import { Metadata } from "next";
 import { PageTransition } from "@/components/ui/page-transition";
 import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
+import DemoRoleSwitcher from "@/components/demo/DemoRoleSwitcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
             <AuthErrorBoundary>
               <PageTransition />
               {children}
+              <DemoRoleSwitcher />
             </AuthErrorBoundary>
           </UserProvider>
         </NavigationProvider>

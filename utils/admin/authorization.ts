@@ -1,6 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import {
+  DEMO_ROLE_COOKIE,
+  DEMO_USER_EMAIL,
+  DEMO_USER_ID,
+  isDemoMode,
+  resolveDemoRole,
+} from '@/lib/demo/config';
+
+async function demoAdminState() {
+  const cookieStore = await cookies();
+  const role = resolveDemoRole(cookieStore.get(DEMO_ROLE_COOKIE)?.value);
+  return {
+    user: { id: DEMO_USER_ID, email: DEMO_USER_EMAIL },
+    isAdmin: role.numero === 1,
+  };
+}
 
 /**
  * Server-side utility to check if a user has admin privileges
@@ -8,6 +24,10 @@ import { cookies } from 'next/headers';
  */
 export async function checkIsAdmin(userId: string): Promise<boolean> {
   try {
+    if (isDemoMode()) {
+      return (await demoAdminState()).isAdmin;
+    }
+
     // Get the base URL for API calls
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kitsoft.vercel.app';
     
@@ -42,6 +62,10 @@ export async function checkIsAdmin(userId: string): Promise<boolean> {
  */
 export async function checkCurrentUserIsAdmin(): Promise<{ user: any; isAdmin: boolean }> {
   try {
+    if (isDemoMode()) {
+      return await demoAdminState();
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     

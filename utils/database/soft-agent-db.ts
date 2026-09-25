@@ -2,12 +2,29 @@
 // Database functions for SOFT agent certificate path optimization
 // This matches exactly the Python implementation structure
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Built on first use: an empty URL makes createClient throw at import time,
+// which breaks `next build` for every route that reaches this module.
+let cachedClient: SupabaseClient | null = null;
+
+function getClient(): SupabaseClient {
+  if (!cachedClient) {
+    cachedClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://unconfigured.invalid',
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'unconfigured'
+    );
+  }
+  return cachedClient;
+}
+
+const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, property) {
+    const client = getClient() as unknown as Record<string | symbol, unknown>;
+    const value = client[property];
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
 
 /**
  * Get all available paths from the database

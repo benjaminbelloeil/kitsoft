@@ -1,12 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-// Create a Supabase client with admin privileges for server-side operations
-// This should only be used in server-side contexts
-export const adminClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+// Built on first use rather than at import time: an empty URL makes createClient
+// throw, which would break `next build` while collecting page data for any route
+// that imports this module.
+let cachedAdminClient: SupabaseClient | null = null;
+
+function getAdminClient(): SupabaseClient {
+  if (!cachedAdminClient) {
+    cachedAdminClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://unconfigured.invalid',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || 'unconfigured'
+    );
+  }
+  return cachedAdminClient;
+}
+
+// Supabase client with admin privileges, for server-side contexts only.
+export const adminClient = new Proxy({} as SupabaseClient, {
+  get(_target, property) {
+    const client = getAdminClient() as unknown as Record<string | symbol, unknown>;
+    const value = client[property];
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
 
 /**
  * Deletes a user from the Supabase authentication system

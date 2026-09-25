@@ -6,11 +6,24 @@ import { FiEdit2 } from "react-icons/fi";
 import { UserProfile, UserProfileUpdate } from '@/interfaces/user';
 import { getAuthUserEmail } from '@/utils/database/client/userSync';
 import PlaceholderAvatar from "@/components/ui/placeholder-avatar";
-import ProfileEditForm from './header/ProfileEditForm';
+import dynamic from 'next/dynamic';
 import ProfileDisplay from './header/ProfileDisplay';
 import { updateUserAvatar } from '@/utils/database/client/avatarSync';
 import { SkeletonProfileHeader } from './SkeletonProfile';
 import { motion, AnimatePresence } from "framer-motion";
+
+// Pulls in the country/state/city dataset (~17 MB in node_modules), so it is
+// loaded when the user opens the edit form rather than with the profile page.
+const ProfileEditForm = dynamic(() => import('./header/ProfileEditForm'), {
+  ssr: false,
+  loading: () => (
+    <div className="animate-pulse space-y-4 py-4">
+      <div className="h-10 bg-gray-200 rounded w-1/2" />
+      <div className="h-10 bg-gray-200 rounded w-2/3" />
+      <div className="h-10 bg-gray-200 rounded w-1/3" />
+    </div>
+  ),
+});
 
 interface ProfileHeaderProps {
   userData: UserProfile;
